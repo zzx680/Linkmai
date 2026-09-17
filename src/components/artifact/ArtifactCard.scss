@@ -1,0 +1,77 @@
+.artifact-card {
+  display: flex;
+  align-items: center;
+  padding: 18px;
+  background: #fbfaf5;
+  border: 1px solid #e4ded2;
+  border-radius: 16px;
+}
+
+.artifact-card--compact {
+  padding: 13px 15px;
+}
+
+.artifact-card__icon {
+  display: flex;
+  width: 44px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #c74f35;
+  background: #f4e4da;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.artifact-card__body {
+  min-width: 0;
+  margin-left: 14px;
+}
+
+.artifact-card__label,
+.artifact-card__name,
+.artifact-card__meta {
+  display: block;
+}
+
+.artifact-card__label {
+  color: #c74f35;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.artifact-card__name {
+  overflow: hidden;
+  margin-top: 5px;
+  color: #30352f;
+  font-size: 23px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artifact-card__meta {
+  margin-top: 6px;
+  color: #8a9087;
+  font-size: 18px;
+}
+
+.artifact-card__status {
+  margin-left: auto;
+  padding-left: 12px;
+  font-size: 28px;
+}
+
+.artifact-card__status--ready {
+  color: #4f8068;
+}
+
+.artifact-card__status--processing {
+  color: #c74f35;
+}
+
+.artifact-card__status--failed {
+  color: #b3483b;
+}

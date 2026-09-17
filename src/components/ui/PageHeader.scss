@@ -1,0 +1,38 @@
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 46px 40px 26px;
+}
+
+.page-header__kicker {
+  display: block;
+  color: #c74f35;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+}
+
+.page-header__title {
+  display: block;
+  margin-top: 12px;
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 48px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.page-header__action {
+  display: flex;
+  align-items: center;
+  padding: 10px 0 5px 18px;
+  color: #c74f35;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.page-header__arrow {
+  margin-left: 8px;
+  font-size: 26px;
+}

@@ -1,0 +1,46 @@
+// Apple-style Design System
+
+// Colors - Warm & Earthy
+$bg-primary: #F7F4EF;
+$bg-surface: #FBF9F5;
+$bg-white: #FFFFFF;
+$border-color: #E7E1D7;
+$text-primary: #1F2421;
+$text-secondary: #5C635D;
+$accent-primary: #C4612F;
+$accent-hover: #A94E22;
+$accent-tint: #F2E3D6;
+
+// Border Radius - Rounded (Apple-style)
+$radius-xs: 8px;
+$radius-sm: 12px;
+$radius-md: 16px;
+$radius-lg: 20px;
+$radius-xl: 24px;
+$radius-pill: 999px;
+
+// Spacing
+$space-xs: 8px;
+$space-sm: 12px;
+$space-md: 16px;
+$space-lg: 24px;
+$space-xl: 32px;
+$space-2xl: 48px;
+
+// Typography
+$font-xs: 24px;
+$font-sm: 26px;
+$font-md: 28px;
+$font-lg: 32px;
+$font-xl: 36px;
+$font-2xl: 48px;
+
+// Shadows - Soft
+$shadow-sm: 0 2px 8px rgba(31, 36, 33, 0.04);
+$shadow-md: 0 4px 16px rgba(31, 36, 33, 0.08);
+$shadow-lg: 0 8px 24px rgba(31, 36, 33, 0.12);
+
+// Animation
+$transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);

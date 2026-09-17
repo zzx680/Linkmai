@@ -1,0 +1,161 @@
+.agent-page {
+  height: 100vh;
+  overflow: hidden;
+  background: #f7f3ea;
+}
+
+.agent-page__topbar {
+  position: fixed;
+  z-index: 12;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  height: 78px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 28px;
+  background: rgba(249, 246, 239, 0.96);
+  border-bottom: 1px solid rgba(222, 215, 204, 0.9);
+  backdrop-filter: blur(18px);
+}
+
+.agent-page__topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.agent-page__logo-mark {
+  display: flex;
+  width: 39px;
+  height: 39px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: #fffaf2;
+  background: #20251f;
+  border-radius: 12px 4px 12px 12px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.agent-page__title,
+.agent-page__subtitle {
+  display: block;
+}
+
+.agent-page__title {
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.agent-page__subtitle {
+  margin-top: 2px;
+  color: #939990;
+  font-size: 16px;
+}
+
+.agent-page__topbar-action {
+  padding: 8px 11px;
+  color: #c74f35;
+  border: 1px solid #dca08e;
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.agent-page__messages {
+  position: absolute;
+  top: 78px;
+  right: 0;
+  bottom: 200px;
+  left: 0;
+}
+
+.agent-page__message-list {
+  padding: 23px 28px 15px;
+}
+
+.agent-page__date-line {
+  color: #a0a59d;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.agent-message {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 22px;
+}
+
+.agent-message--user {
+  justify-content: flex-end;
+}
+
+.agent-message__avatar {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-right: 10px;
+  color: #fffaf2;
+  background: #c74f35;
+  border-radius: 10px 3px 10px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.agent-message__content {
+  max-width: calc(100% - 44px);
+}
+
+.agent-message--user .agent-message__content {
+  max-width: 82%;
+  padding: 12px 16px;
+  color: #fffaf2;
+  background: #20251f;
+  border-radius: 17px 17px 5px 17px;
+}
+
+.agent-message__text {
+  display: block;
+  color: #30352f;
+  font-size: 22px;
+  line-height: 1.62;
+  white-space: pre-wrap;
+}
+
+.agent-message--user .agent-message__text {
+  color: #fffaf2;
+}
+
+.agent-message--user .artifact-card {
+  background: #2b312a;
+  border-color: #40483e;
+}
+
+.agent-message--user .artifact-card__name {
+  color: #fffaf2;
+}
+
+.agent-message--user .artifact-card__meta {
+  color: #aeb8ac;
+}
+
+.agent-page__bottom-space {
+  height: 22px;
+}
+
+.agent-page__composer-wrap {
+  position: fixed;
+  z-index: 13;
+  right: 0;
+  bottom: 84px;
+  left: 0;
+}

@@ -1,0 +1,257 @@
+.case-page {
+  padding-bottom: 125px;
+}
+
+.case-page__content {
+  min-height: calc(100vh - 125px);
+}
+
+.case-page__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.case-page__brand {
+  color: #20251f;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+.case-page__edition {
+  color: #9a9f96;
+  font-size: 17px;
+}
+
+.case-page__welcome {
+  margin-top: 90px;
+}
+
+.case-page__hello,
+.case-page__welcome-title,
+.case-page__welcome-copy {
+  display: block;
+}
+
+.case-page__hello {
+  color: #c74f35;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 43px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.case-page__welcome-title {
+  margin-top: 13px;
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 47px;
+  font-weight: 600;
+  letter-spacing: -1px;
+  line-height: 1.15;
+}
+
+.case-page__welcome-copy {
+  max-width: 520px;
+  margin-top: 16px;
+  color: #777d74;
+  font-size: 22px;
+  line-height: 1.6;
+}
+
+.case-page__empty {
+  position: relative;
+  min-height: 310px;
+  margin-top: 56px;
+  padding: 25px 24px 22px;
+  background: #fffdf8;
+  border: 1px solid #e0d9ce;
+  border-radius: 20px;
+  box-shadow: 0 17px 38px rgba(74, 59, 42, 0.07);
+}
+
+.case-page__empty-orbit {
+  position: relative;
+  display: flex;
+  width: 88px;
+  height: 88px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d8cfc1;
+  border-radius: 50%;
+}
+
+.case-page__empty-orbit::before,
+.case-page__empty-orbit::after {
+  position: absolute;
+  border: 1px solid #e6c2b3;
+  border-radius: 50%;
+  content: '';
+}
+
+.case-page__empty-orbit::before {
+  top: 11px;
+  right: -10px;
+  width: 10px;
+  height: 10px;
+  background: #c74f35;
+}
+
+.case-page__empty-orbit::after {
+  top: -15px;
+  left: 22px;
+  width: 50px;
+  height: 50px;
+}
+
+.case-page__empty-dot {
+  width: 15px;
+  height: 15px;
+  background: #c74f35;
+  border-radius: 50%;
+  box-shadow: 0 0 0 9px rgba(199, 79, 53, 0.1);
+}
+
+.case-page__empty-index {
+  position: absolute;
+  right: -2px;
+  bottom: -5px;
+  color: #9ca198;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.case-page__empty-copy {
+  margin-top: 27px;
+}
+
+.case-page__empty-title,
+.case-page__empty-description {
+  display: block;
+}
+
+.case-page__empty-title {
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.case-page__empty-description {
+  max-width: 580px;
+  margin-top: 9px;
+  color: #838a81;
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.case-page__start {
+  display: flex;
+  width: 100%;
+  height: 55px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  color: #fffaf2;
+  background: #c74f35;
+  border-radius: 11px;
+  font-size: 22px;
+  font-weight: 700;
+  gap: 10px;
+}
+
+.case-page__start:active {
+  background: #a9422d;
+}
+
+.case-page__start-arrow {
+  font-size: 26px;
+}
+
+.case-page__privacy {
+  display: block;
+  margin-top: 13px;
+  color: #a2a79f;
+  font-size: 16px;
+  text-align: center;
+}
+
+.case-page__with-case {
+  margin-top: 55px;
+}
+
+.case-page__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.case-page__section-label {
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 27px;
+  font-weight: 600;
+}
+
+.case-page__section-note {
+  color: #a0a59d;
+  font-size: 17px;
+  letter-spacing: 1px;
+}
+
+.case-page__secondary-actions {
+  display: flex;
+  margin-top: 15px;
+  gap: 10px;
+}
+
+.case-page__secondary-action {
+  display: flex;
+  min-height: 47px;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  padding: 0 13px;
+  color: #646c63;
+  background: rgba(255, 253, 248, 0.55);
+  border: 1px solid #dfd8cc;
+  border-radius: 11px;
+  font-size: 18px;
+}
+
+.case-page__secondary-action:active {
+  color: #c74f35;
+  border-color: #d9a08e;
+}
+
+.case-page__principles {
+  display: flex;
+  margin-top: 58px;
+  padding-top: 17px;
+  border-top: 1px solid #ddd7cb;
+}
+
+.case-page__principle {
+  display: flex;
+  align-items: center;
+  width: 33.333%;
+  gap: 8px;
+}
+
+.case-page__principle + .case-page__principle {
+  padding-left: 12px;
+  border-left: 1px solid #ddd7cb;
+}
+
+.case-page__principle-index {
+  color: #c74f35;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.case-page__principle-text {
+  color: #8e948b;
+  font-size: 16px;
+}

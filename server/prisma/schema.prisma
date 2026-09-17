@@ -1,0 +1,148 @@
+// Prisma Schema for Linkmai MVP
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id        String   @id @default(uuid())
+  openid    String   @unique
+  phone     String?  @unique
+  nickname  String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cases         Case[]
+  conversations Conversation[]
+
+  @@map("users")
+}
+
+// 案件表（每个用户只有一个 active case）
+model Case {
+  id            String   @id @default(uuid())
+  userId        String
+  title         String
+  accidentType  String
+  accidentDate  DateTime?
+  status        String   @default("collecting") // collecting, processing, ready, needs_review
+  statusLabel   String   @default("材料收集中")
+  materialCount Int      @default(0)
+  liability     String?
+  compensation  String?
+  hasReport     Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artifacts     Artifact[]
+  conversations Conversation[]
+  reports       Report[]
+
+  @@unique([userId, isActive])
+  @@index([userId, isActive])
+  @@map("cases")
+}
+
+// 材料/附件表
+model Artifact {
+  id           String   @id @default(uuid())
+  caseId       String
+  name         String
+  type         String   // document, image, audio, video
+  ossUrl       String
+  ossKey       String
+  fileSize     Int
+  mimeType     String?
+  status       String   @default("uploaded") // uploaded, processing, ready, failed
+  processingError String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  case   Case             @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  fields ExtractedField[]
+
+  @@index([caseId])
+  @@map("artifacts")
+}
+
+// 提取字段表
+model ExtractedField {
+  id           String   @id @default(uuid())
+  artifactId   String
+  label        String
+  value        String
+  revisedValue String?
+  source       String
+  confidence   String   @default("medium") // high, medium, low
+  isConfirmed  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  artifact Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+
+  @@index([artifactId])
+  @@map("extracted_fields")
+}
+
+// 对话表
+model Conversation {
+  id        String   @id @default(uuid())
+  userId    String
+  caseId    String?
+  status    String   @default("active") // active, archived
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  case     Case?     @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@index([userId])
+  @@index([caseId])
+  @@map("conversations")
+}
+
+// 消息表
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  role           String   // user, assistant, system
+  kind           String   // text, artifact, fields, quick-replies, loading, report
+  text           String?  @db.Text
+  metadata       Json?    // 存储 artifact, fields, options 等结构化数据
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+// 报告表
+model Report {
+  id                String   @id @default(uuid())
+  caseId            String
+  liability         Json     // 定责结论
+  compensation      Json     // 赔偿项目
+  missingMaterials  Json     // 缺失材料
+  nextSteps         Json     // 下一步建议
+  needsReview       Boolean  @default(false)
+  modelVersion      String?
+  ruleVersion       String?
+  inputSnapshot     Json?    // 生成报告时的输入快照
+  createdAt         DateTime @default(now())
+
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@map("reports")
+}

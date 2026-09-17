@@ -1,0 +1,255 @@
+.report-page {
+  min-height: 100vh;
+  padding-bottom: 125px;
+}
+
+.report-page__content {
+  padding: 0 40px 45px;
+}
+
+.report-page__meta-label {
+  display: block;
+  color: #c74f35;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.report-page__case-title {
+  display: block;
+  margin-top: 12px;
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 34px;
+  font-weight: 600;
+}
+
+.report-page__date {
+  display: block;
+  margin-top: 8px;
+  color: #92988f;
+  font-size: 18px;
+}
+
+.report-page__notice {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 25px;
+  padding: 13px 15px;
+  color: #777d74;
+  background: #f2eee5;
+  border-radius: 10px;
+  font-size: 17px;
+  line-height: 1.55;
+  gap: 10px;
+}
+
+.report-page__notice-mark {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #fffaf2;
+  background: #8d958b;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.report-page__section {
+  margin-top: 35px;
+  padding-top: 19px;
+  border-top: 1px solid #dcd5c9;
+}
+
+.report-page__section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 13px;
+}
+
+.report-page__section-index {
+  color: #c74f35;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.report-page__section-title {
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 29px;
+  font-weight: 600;
+}
+
+.report-page__lead {
+  display: block;
+  margin-top: 17px;
+  color: #30352f;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.report-page__basis,
+.report-page__uncertainty {
+  margin-top: 18px;
+  padding: 14px 15px;
+  border-radius: 10px;
+}
+
+.report-page__basis {
+  background: #edf4ec;
+}
+
+.report-page__uncertainty {
+  background: #f7eae2;
+}
+
+.report-page__basis-label,
+.report-page__basis-value,
+.report-page__uncertainty-label,
+.report-page__uncertainty-value {
+  display: block;
+}
+
+.report-page__basis-label,
+.report-page__uncertainty-label {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.report-page__basis-label { color: #4f8068; }
+.report-page__uncertainty-label { color: #b25e48; }
+
+.report-page__basis-value,
+.report-page__uncertainty-value {
+  margin-top: 6px;
+  color: #596158;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.report-page__amount {
+  display: block;
+  margin-top: 18px;
+  color: #c74f35;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 45px;
+  font-weight: 600;
+}
+
+.report-page__amount-note {
+  display: block;
+  margin-top: 4px;
+  color: #92988f;
+  font-size: 17px;
+}
+
+.report-page__items {
+  margin-top: 22px;
+  border-top: 1px solid #e2dcd1;
+}
+
+.report-page__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #e2dcd1;
+}
+
+.report-page__item-label,
+.report-page__item-note,
+.report-page__item-amount {
+  display: block;
+}
+
+.report-page__item-label {
+  color: #3f473e;
+  font-size: 21px;
+}
+
+.report-page__item-note {
+  margin-top: 4px;
+  color: #959b92;
+  font-size: 16px;
+}
+
+.report-page__item-amount {
+  color: #30352f;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.report-page__step {
+  display: flex;
+  align-items: baseline;
+  margin-top: 17px;
+  gap: 13px;
+}
+
+.report-page__step-index {
+  color: #c74f35;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.report-page__step-text {
+  color: #4b544a;
+  font-size: 21px;
+  line-height: 1.45;
+}
+
+.report-page__missing {
+  margin-top: 26px;
+  padding: 17px;
+  background: #fffdf8;
+  border: 1px dashed #d6cfc3;
+  border-radius: 12px;
+}
+
+.report-page__missing-label,
+.report-page__missing-item {
+  display: block;
+}
+
+.report-page__missing-label {
+  color: #777d74;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.report-page__missing-item {
+  margin-top: 9px;
+  color: #8c928a;
+  font-size: 18px;
+}
+
+.report-page__actions {
+  margin-top: 31px;
+}
+
+.report-page__action {
+  display: flex;
+  min-height: 53px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  font-size: 20px;
+  font-weight: 700;
+  gap: 10px;
+}
+
+.report-page__action--primary {
+  color: #fffaf2;
+  background: #c74f35;
+}
+
+.report-page__action--secondary {
+  margin-top: 10px;
+  color: #626a61;
+  background: #efebe2;
+}

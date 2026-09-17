@@ -1,0 +1,38 @@
+.quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.quick-reply {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  padding: 0 13px;
+  color: #3d473d;
+  background: #fffdf8;
+  border: 1px solid #d9d4c9;
+  border-radius: 11px;
+  font-size: 19px;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.quick-reply:active {
+  color: #c74f35;
+  background: #f8e9df;
+  border-color: #d99b88;
+  transform: translateY(1px);
+}
+
+.quick-reply.is-disabled {
+  color: #aeb2aa;
+  background: #f2f0eb;
+  border-color: #e3dfd7;
+}
+
+.quick-reply__arrow {
+  margin-left: 8px;
+  color: #a7aca4;
+  font-size: 21px;
+}

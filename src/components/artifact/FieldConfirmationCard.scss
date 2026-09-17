@@ -1,0 +1,99 @@
+.field-card {
+  margin-top: 14px;
+  padding: 22px;
+  background: #fffdf8;
+  border: 1px solid #ddd6c9;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(71, 57, 41, 0.06);
+}
+
+.field-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.field-card__eyebrow {
+  display: block;
+  color: #c74f35;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.field-card__title {
+  display: block;
+  margin-top: 7px;
+  color: #20251f;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 29px;
+  font-weight: 600;
+}
+
+.field-card__confidence {
+  padding: 6px 10px;
+  color: #4f8068;
+  background: #edf4ec;
+  border-radius: 8px;
+  font-size: 17px;
+}
+
+.field-card__list {
+  margin-top: 20px;
+  border-top: 1px solid #e7e0d4;
+}
+
+.field-card__row {
+  display: flex;
+  padding: 13px 0;
+  border-bottom: 1px solid #e7e0d4;
+}
+
+.field-card__label {
+  width: 30%;
+  flex: 0 0 auto;
+  color: #868d84;
+  font-size: 21px;
+}
+
+.field-card__value {
+  color: #30352f;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.field-card__hint {
+  display: block;
+  margin-top: 14px;
+  color: #8a9087;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.field-card__actions {
+  display: flex;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.field-card__button {
+  display: flex;
+  height: 47px;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  gap: 9px;
+}
+
+.field-card__button--ghost {
+  color: #596158;
+  background: #f3f0e8;
+}
+
+.field-card__button--solid {
+  color: #fffaf2;
+  background: #c74f35;
+}

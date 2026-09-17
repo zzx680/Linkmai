@@ -1,0 +1,216 @@
+@use '../../styles/variables.scss' as *;
+
+.profile-page {
+  min-height: 100vh;
+  background: $bg-primary;
+}
+
+.header-section {
+  background: $bg-white;
+  padding: $space-xl $space-lg;
+  margin-bottom: $space-lg;
+
+  .user-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $space-xl;
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: $space-md;
+
+      .avatar-wrapper {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(196, 97, 47, 0.1), rgba(196, 97, 47, 0.05));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .avatar {
+          font-size: 36px;
+        }
+      }
+
+      .user-details {
+        .nickname {
+          display: block;
+          font-size: $font-lg;
+          font-weight: 600;
+          color: $text-primary;
+          margin-bottom: 4rpx;
+        }
+
+        .phone {
+          display: block;
+          font-size: $font-sm;
+          color: $text-secondary;
+        }
+      }
+    }
+
+    .edit-btn {
+      background: $bg-primary;
+      border-radius: 6px;
+      padding: $space-xs $space-md;
+      border: 1px solid rgba(231, 225, 215, 0.8);
+      transition: all $transition-fast;
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      .edit-text {
+        font-size: $font-sm;
+        color: $text-primary;
+      }
+    }
+  }
+
+  .stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding-top: $space-lg;
+    border-top: 1px solid rgba(231, 225, 215, 0.6);
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4rpx;
+
+      .stat-value {
+        font-size: $font-xl;
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .stat-label {
+        font-size: $font-xs;
+        color: $text-secondary;
+      }
+    }
+  }
+}
+
+.menu-sections {
+  padding: 0 $space-lg;
+
+  .menu-section {
+    margin-bottom: $space-lg;
+
+    .section-title {
+      display: block;
+      font-size: $font-xs;
+      font-weight: 600;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: $space-sm;
+      padding-left: $space-xs;
+    }
+
+    .menu-group {
+      background: $bg-white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
+      border: 1px solid rgba(231, 225, 215, 0.6);
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $space-lg;
+        transition: all $transition-fast;
+        border-bottom: 1px solid rgba(231, 225, 215, 0.4);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:active {
+          background: rgba(247, 244, 239, 0.5);
+        }
+
+        .menu-left {
+          display: flex;
+          align-items: center;
+          gap: $space-md;
+
+          .menu-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+          }
+
+          .menu-label {
+            font-size: $font-md;
+            color: $text-primary;
+          }
+        }
+
+        .menu-right {
+          display: flex;
+          align-items: center;
+          gap: $space-sm;
+
+          .menu-value {
+            font-size: $font-sm;
+            color: $text-secondary;
+          }
+
+          .menu-arrow {
+            font-size: 24px;
+            color: $text-secondary;
+            opacity: 0.5;
+          }
+        }
+      }
+    }
+  }
+}
+
+.logout-section {
+  padding: 0 $space-lg;
+  margin-top: $space-xl;
+
+  .logout-btn {
+    background: $bg-white;
+    border-radius: 8px;
+    padding: $space-lg;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
+    border: 1px solid rgba(231, 225, 215, 0.6);
+    transition: all $transition-fast;
+
+    &:active {
+      background: rgba(247, 244, 239, 0.5);
+    }
+
+    .logout-text {
+      font-size: $font-md;
+      color: #ef4444;
+      font-weight: 500;
+    }
+  }
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: $space-xl $space-lg;
+  margin-top: $space-xl;
+
+  .footer-text {
+    font-size: $font-xs;
+    color: $text-secondary;
+    opacity: 0.6;
+  }
+}

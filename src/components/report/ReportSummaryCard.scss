@@ -1,0 +1,125 @@
+.report-summary-card {
+  margin-top: 14px;
+  padding: 23px;
+  background: #20251f;
+  border-radius: 18px;
+  box-shadow: 0 18px 34px rgba(32, 37, 31, 0.14);
+}
+
+.report-summary-card__topline,
+.report-summary-card__amount-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.report-summary-card__eyebrow {
+  color: #e8a28b;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.report-summary-card__stamp {
+  padding: 5px 8px;
+  color: #dce9d6;
+  background: rgba(157, 191, 154, 0.15);
+  border: 1px solid rgba(157, 191, 154, 0.25);
+  border-radius: 6px;
+  font-size: 17px;
+}
+
+.report-summary-card__title {
+  display: block;
+  margin-top: 15px;
+  color: #fffaf2;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.report-summary-card__liability {
+  margin-top: 22px;
+  padding: 17px 0;
+  border-top: 1px solid rgba(255, 250, 242, 0.15);
+  border-bottom: 1px solid rgba(255, 250, 242, 0.15);
+}
+
+.report-summary-card__label {
+  display: block;
+  color: #9ba59a;
+  font-size: 18px;
+}
+
+.report-summary-card__conclusion {
+  display: block;
+  margin-top: 8px;
+  color: #fffaf2;
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.report-summary-card__basis {
+  display: block;
+  margin-top: 8px;
+  color: #b5beb2;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.report-summary-card__amount-row {
+  margin-top: 19px;
+  align-items: flex-end;
+}
+
+.report-summary-card__amount {
+  display: block;
+  margin-top: 5px;
+  color: #f1b19a;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 34px;
+  font-weight: 600;
+}
+
+.report-summary-card__confidence {
+  color: #b9cdb5;
+  font-size: 17px;
+}
+
+.report-summary-card__actions {
+  display: flex;
+  margin-top: 21px;
+  gap: 10px;
+}
+
+.report-summary-card__button {
+  display: flex;
+  height: 49px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.report-summary-card__button--primary {
+  flex: 1;
+  color: #20251f;
+  background: #fffaf2;
+}
+
+.report-summary-card__button--secondary {
+  padding: 0 16px;
+  color: #fffaf2;
+  border: 1px solid rgba(255, 250, 242, 0.28);
+}
+
+.report-summary-card__disclaimer {
+  display: block;
+  margin-top: 16px;
+  color: #929d91;
+  font-size: 16px;
+  line-height: 1.5;
+}

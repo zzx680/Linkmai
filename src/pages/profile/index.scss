@@ -1,0 +1,137 @@
+.profile-page {
+  min-height: 100vh;
+  padding-bottom: 125px;
+}
+
+.profile-page__content {
+  padding: 0 40px 52px;
+}
+
+.profile-page__identity {
+  display: flex;
+  align-items: center;
+  padding: 20px 0 25px;
+  border-top: 1px solid #ded7cb;
+  border-bottom: 1px solid #ded7cb;
+}
+
+.profile-page__avatar {
+  display: flex;
+  width: 58px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: #fffaf2;
+  background: #20251f;
+  border-radius: 18px 5px 18px 18px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.profile-page__identity-title,
+.profile-page__identity-meta {
+  display: block;
+}
+
+.profile-page__identity-title {
+  color: #30352f;
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.profile-page__identity-meta {
+  margin-top: 5px;
+  color: #92988f;
+  font-size: 17px;
+}
+
+.profile-page__identity-arrow {
+  margin-left: auto;
+  color: #c74f35;
+  font-size: 25px;
+}
+
+.profile-page__privacy-card {
+  margin-top: 24px;
+  padding: 19px;
+  background: #edf4ec;
+  border-radius: 14px;
+}
+
+.profile-page__privacy-label,
+.profile-page__privacy-title,
+.profile-page__privacy-copy {
+  display: block;
+}
+
+.profile-page__privacy-label {
+  color: #4f8068;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.profile-page__privacy-title {
+  margin-top: 8px;
+  color: #344a3b;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.profile-page__privacy-copy {
+  margin-top: 7px;
+  color: #69806d;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.profile-page__section {
+  margin-top: 32px;
+}
+
+.profile-page__section-title {
+  color: #8a9188;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.profile-page__menu {
+  margin-top: 10px;
+  border-top: 1px solid #dfd8cd;
+}
+
+.profile-page__menu-item {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #dfd8cd;
+}
+
+.profile-page__menu-label {
+  color: #3e463d;
+  font-size: 21px;
+}
+
+.profile-page__menu-value {
+  display: flex;
+  align-items: center;
+  color: #969c93;
+  font-size: 17px;
+  gap: 10px;
+}
+
+.profile-page__danger {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 34px;
+  color: #b3483b;
+  border: 1px solid #dfb6ab;
+  border-radius: 11px;
+  font-size: 19px;
+}
