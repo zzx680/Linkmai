@@ -1,6 +1,6 @@
+import 'dotenv/config'
 import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import { db } from './db'
 import { authMiddleware } from './middleware/auth'
 import authRouter from './routes/auth'
@@ -12,8 +12,7 @@ import { getPresignUrl, confirmUpload } from './controllers/file.controller'
 import agentRoutes from './routes/agent'
 import { materialsRouter } from './routes/materials'
 
-// 加载环境变量
-dotenv.config()
+// 环境变量由入口导入 dotenv/config
 
 const app = express()
 const PORT = process.env.PORT || 8000
@@ -40,20 +39,12 @@ declare global {
   }
 }
 
-function mockAuth(req: Request, res: Response, next: NextFunction) {
-  // TODO: 实现真实的微信登录认证
-  req.user = {
-    id: 'mock-user-id',
-    openid: 'mock-openid',
-  }
-  req.userId = 'mock-user-id'
-  next()
-}
-
 // 路由
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
+app.get('/api/health', async (req, res) => {
+  const databaseOk = await db.ping()
+  res.status(databaseOk ? 200 : 503).json({
+    status: databaseOk ? 'ok' : 'error',
+    database: databaseOk ? 'ok' : 'unavailable',
     timestamp: new Date().toISOString(),
   })
 })
@@ -66,12 +57,10 @@ app.use('/api/cases', authMiddleware, casesRouter)
 app.use('/api/conversations', authMiddleware, conversationsRouter)
 app.use('/api/reports', authMiddleware, reportRoutes)
 app.use('/api/materials', authMiddleware, materialsRouter)
-
-// 旧路由保留（兼容）
-app.post('/api/files/presign', mockAuth, getPresignUrl)
-app.post('/api/files/confirm', mockAuth, confirmUpload)
-app.use('/api/upload', mockAuth, uploadRoutes)
-app.use('/api/agent', mockAuth, agentRoutes)
+app.post('/api/files/presign', authMiddleware, getPresignUrl)
+app.post('/api/files/confirm', authMiddleware, confirmUpload)
+app.use('/api/upload', authMiddleware, uploadRoutes)
+app.use('/api/agent', authMiddleware, agentRoutes)
 
 // 错误处理
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -92,23 +81,17 @@ app.use((req, res) => {
 
 // 启动服务
 async function start() {
-  // 测试数据库连接
-  try {
-    await db.ping()
-    console.log('✅ 数据库连接成功')
-  } catch (err) {
-    console.error('❌ 数据库连接失败:', err)
-    if (process.env.USE_POSTGRES === 'true') {
-      console.error('请确保 PostgreSQL 已启动并配置正确')
-      process.exit(1)
-    }
+  const databaseOk = await db.ping()
+  if (!databaseOk) {
+    throw new Error('数据库连接失败')
   }
 
+  console.log('✅ 数据库连接成功')
   app.listen(PORT, () => {
     console.log(`✅ 灵迈后端服务启动成功`)
     console.log(`📡 监听端口: ${PORT}`)
     console.log(`🌍 环境: ${process.env.NODE_ENV}`)
-    console.log(`💾 数据库: ${process.env.USE_POSTGRES === 'true' ? 'PostgreSQL' : '内存'}`)
+    console.log(`💾 数据库: ${process.env.DB_TYPE || 'memory'}`)
     console.log(`🪣 OSS Bucket: ${process.env.ALIYUN_OSS_BUCKET || '未配置'}`)
   })
 }

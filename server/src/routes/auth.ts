@@ -2,6 +2,7 @@ import express from 'express'
 import { db } from '../db'
 import jwt from 'jsonwebtoken'
 import { config } from '../config'
+import { authMiddleware } from '../middleware/auth'
 
 const router = express.Router()
 
@@ -51,7 +52,7 @@ router.post('/wechat/login', async (req, res) => {
 })
 
 // 绑定手机号
-router.post('/bind-phone', async (req, res) => {
+router.post('/bind-phone', authMiddleware, async (req, res) => {
   try {
     const { phone } = req.body
     const userId = req.userId

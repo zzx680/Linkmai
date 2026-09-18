@@ -91,6 +91,7 @@ const cases = new Map<string, Case>()
 const conversations = new Map<string, Conversation>()
 const messages = new Map<string, Message>()
 const artifacts = new Map<string, Artifact>()
+const reports = new Map<string, { id: string; caseId: string; content: any; createdAt: Date }>()
 
 // 索引
 const usersByOpenid = new Map<string, string>() // openid -> userId
@@ -129,6 +130,11 @@ export const memoryDB = {
   async findActiveCase(userId: string): Promise<Case | null> {
     const caseId = activeCasesByUser.get(userId)
     return caseId ? cases.get(caseId) || null : null
+  },
+
+  async findCaseById(userId: string, caseId: string): Promise<Case | null> {
+    const caseData = cases.get(caseId)
+    return caseData && caseData.userId === userId ? caseData : null
   },
 
   async createCase(userId: string, title: string): Promise<Case> {
@@ -258,6 +264,27 @@ export const memoryDB = {
     }
     artifacts.set(id, newArtifact)
     return newArtifact
+  },
+
+  // Reports
+  async createReport(
+    caseId: string,
+    content: any,
+    options?: { modelVersion?: string; ruleVersion?: string; inputSnapshot?: any }
+  ) {
+    const report = {
+      id: `report_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      caseId,
+      content,
+      ...options,
+      createdAt: new Date(),
+    }
+    reports.set(caseId, report)
+    return report
+  },
+
+  async getReportByCase(caseId: string) {
+    return reports.get(caseId) || null
   },
 
   // Health check
