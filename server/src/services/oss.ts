@@ -17,6 +17,7 @@ function getClient(): OSS {
 
 export interface UploadResult {
   url: string
+  key: string
   name: string
   size: number
 }
@@ -52,6 +53,7 @@ export async function uploadFile(
 
   return {
     url: result.url,
+    key: objectName,
     name: objectName,
     size: buffer.length,
   }

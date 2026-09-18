@@ -1,5 +1,5 @@
 import express from 'express'
-import { memoryDB } from '../db/memory'
+import { db } from '../db'
 import jwt from 'jsonwebtoken'
 import { config } from '../config'
 
@@ -19,10 +19,10 @@ router.post('/wechat/login', async (req, res) => {
     const openid = `mock_${code}`
 
     // 查找或创建用户
-    let user = await memoryDB.findUserByOpenid(openid)
+    let user = await db.findUserByOpenid(openid)
 
     if (!user) {
-      user = await memoryDB.createUser(openid)
+      user = await db.createUser(openid)
     }
 
     // 生成 JWT
@@ -60,7 +60,7 @@ router.post('/bind-phone', async (req, res) => {
       return res.status(400).json({ success: false, error: '缺少手机号' })
     }
 
-    await memoryDB.updateUser(userId, { phone })
+    await db.updateUser(userId, { phone })
 
     res.json({ success: true, data: { phone } })
   } catch (err) {

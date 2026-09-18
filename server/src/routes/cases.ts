@@ -1,5 +1,5 @@
 import express from 'express'
-import { memoryDB } from '../db/memory'
+import { db } from '../db'
 
 const router = express.Router()
 
@@ -12,7 +12,7 @@ router.get('/current', async (req, res) => {
       return res.status(401).json({ success: false, error: '未认证' })
     }
 
-    const currentCase = await memoryDB.findActiveCase(userId)
+    const currentCase = await db.findActiveCase(userId)
 
     res.json({ success: true, data: currentCase })
   } catch (err) {
@@ -30,7 +30,7 @@ router.post('/current', async (req, res) => {
       return res.status(401).json({ success: false, error: '未认证' })
     }
 
-    const newCase = await memoryDB.createCase(userId, '新的事故分析')
+    const newCase = await db.createCase(userId, '新的事故分析')
 
     res.json({ success: true, data: newCase })
   } catch (err) {
@@ -57,7 +57,7 @@ router.patch('/current', async (req, res) => {
     if (compensation !== undefined) updates.compensation = compensation
     if (hasReport !== undefined) updates.hasReport = hasReport
 
-    const updatedCase = await memoryDB.updateCase(userId, updates)
+    const updatedCase = await db.updateCase(userId, updates)
 
     if (!updatedCase) {
       return res.status(404).json({ success: false, error: '未找到活跃案件' })
@@ -79,7 +79,7 @@ router.delete('/current', async (req, res) => {
       return res.status(401).json({ success: false, error: '未认证' })
     }
 
-    await memoryDB.deleteActiveCase(userId)
+    await db.deleteActiveCase(userId)
 
     res.json({ success: true })
   } catch (err) {

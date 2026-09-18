@@ -54,6 +54,14 @@ export async function recognizeGeneral(imageUrl: string): Promise<OcrResult> {
   }
 }
 
+// OCR 服务导出
+export const ocrService = {
+  recognizeText: recognizeGeneral,
+  recognizePoliceReport,
+  recognizeIdCard,
+  recognizeBusinessLicense,
+}
+
 /**
  * 交警认定书识别（使用通用 OCR + 结构化提取）
  */
