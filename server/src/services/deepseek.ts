@@ -163,3 +163,30 @@ export async function analyzeWithDeepSeek(prompt: string): Promise<string> {
   const response = await callDeepSeek(messages, { temperature: 0.3 })
   return response.choices[0].message.content
 }
+
+/**
+ * 便捷函数：文本 prompt（可附带图片）
+ */
+export async function analyzeText(prompt: string, imageUrls: string[] = []): Promise<string> {
+  if (imageUrls.length === 0) {
+    return analyzeWithDeepSeek(prompt)
+  }
+
+  const content: DeepSeekContent[] = [
+    { type: 'text', text: prompt },
+    ...imageUrls.map((url) => ({
+      type: 'image_url' as const,
+      image_url: { url },
+    })),
+  ]
+
+  const messages: DeepSeekMessage[] = [
+    {
+      role: 'user',
+      content,
+    },
+  ]
+
+  const response = await callDeepSeek(messages, { temperature: 0.3 })
+  return response.choices[0].message.content
+}

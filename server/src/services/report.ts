@@ -1,9 +1,9 @@
 import { analyzeWithDeepSeek } from './deepseek'
-import { Fact } from './agent'
+import { CollectedFact } from './agent'
 
 export interface ReportData {
   caseId: string
-  facts: Fact[]
+  facts: CollectedFact[]
   analysis: string
   liability: string
   compensation: string
@@ -14,7 +14,7 @@ export interface ReportData {
 /**
  * 生成事故分析报告
  */
-export async function generateReport(facts: Fact[]): Promise<ReportData> {
+export async function generateReport(facts: CollectedFact[]): Promise<ReportData> {
   try {
     // 构建 Prompt
     const factsText = facts

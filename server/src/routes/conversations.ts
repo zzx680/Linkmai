@@ -1,5 +1,5 @@
 import express from 'express'
-import { memoryDB } from '../db/memory'
+import { db } from '../db'
 
 const router = express.Router()
 
@@ -13,11 +13,11 @@ router.post('/current', async (req, res) => {
     }
 
     // 获取当前活跃案件
-    const currentCase = await memoryDB.findActiveCase(userId)
+    const currentCase = await db.findActiveCase(userId)
     const caseId = currentCase?.id
 
     // 查找或创建对话
-    const conversation = await memoryDB.findOrCreateConversation(userId, caseId)
+    const conversation = await db.findOrCreateConversation(userId, caseId)
 
     res.json({ success: true, data: conversation })
   } catch (err) {
@@ -26,7 +26,7 @@ router.post('/current', async (req, res) => {
   }
 })
 
-// 发送消息（带 Agent 处理）
+// 发送消息（带 Agent 状态管理）
 router.post('/current/messages', async (req, res) => {
   try {
     const userId = req.userId
@@ -37,10 +37,15 @@ router.post('/current/messages', async (req, res) => {
     }
 
     // 获取或创建对话
-    const conversation = await memoryDB.findOrCreateConversation(userId)
+    const conversation = await db.findOrCreateConversation(userId)
+    const agentState = conversation.agentState || {
+      stage: 'collecting',
+      collectedFacts: [],
+      nextQuestion: '您好！我是灵迈事故理赔助手。请问您遇到了什么类型的事故？',
+    }
 
     // 保存用户消息
-    await memoryDB.createMessage(
+    await db.createMessage(
       conversation.id,
       'user',
       'text',
@@ -48,57 +53,71 @@ router.post('/current/messages', async (req, res) => {
       images ? { images, materialType } : undefined
     )
 
-    let assistantText = ''
-    let quickReplies: any[] = []
+    let materials: Array<{ type: string; url: string; extractedData?: any }> = []
 
     // 如果用户上传了图片材料
     if (images && images.length > 0) {
       try {
-        const { processMaterial } = await import('../services/agent')
+        const { processMaterial } = await import('../services/material')
 
-        // 处理第一张图片（暂时只处理单张）
-        const result = await processMaterial(materialType || 'police-report', images[0])
+        // 处理材料并提取数据
+        for (const imageUrl of images) {
+          const result = await processMaterial(materialType || 'police-report', imageUrl)
 
-        // 构造确认消息
-        const fieldsSummary = result.fields
-          .map((f) => `• ${f.label}: ${f.value}`)
-          .join('\n')
+          // 将字段转换为结构化数据
+          const extractedData: any = {}
+          result.fields.forEach((f: any) => {
+            extractedData[f.key] = f.value
+          })
 
-        assistantText = `我已识别出以下信息：\n\n${fieldsSummary}\n\n请确认这些信息是否正确？`
+          materials.push({
+            type: materialType || 'image',
+            url: imageUrl,
+            extractedData,
+          })
+        }
 
-        quickReplies = [
-          { label: '✅ 信息正确', value: 'confirm:correct' },
-          { label: '✏️ 需要修改', value: 'confirm:edit' },
-        ]
-
-        // 保存识别结果到案件
-        const currentCase = await memoryDB.findActiveCase(userId)
+        // 更新案件材料计数
+        const currentCase = await db.findActiveCase(userId)
         if (currentCase) {
-          await memoryDB.updateCase(userId, {
-            materialCount: (currentCase.materialCount || 0) + 1,
+          await db.updateCase(userId, {
+            materialCount: (currentCase.materialCount || 0) + images.length,
           })
         }
       } catch (err: any) {
         console.error('材料处理失败:', err)
-        assistantText = '抱歉，材料识别遇到问题，请稍后重试或手动输入信息。'
       }
-    } else if (text) {
-      // 纯文本消息处理
-      if (text.includes('全责') || text.includes('责任')) {
-        assistantText = '收到责任信息。是否还有人员受伤？'
-        quickReplies = [
-          { label: '没有受伤', value: 'casualties:无' },
-          { label: '有人受伤', value: 'casualties:有' },
-        ]
-      } else {
-        assistantText = '收到您的消息，请继续上传相关材料。'
+    }
+
+    // 使用 Agent 状态管理更新对话
+    const { processUserMessage } = await import('../services/agent')
+    const newState = await processUserMessage(agentState, text || '', materials)
+
+    // 保存更新后的状态
+    await db.updateConversationState(conversation.id, newState)
+
+    // 构造回复消息
+    let assistantText = newState.nextQuestion || '好的，我已记录。'
+    const quickReplies = newState.quickReplies || []
+
+    // 如果有待确认的信息，展示确认消息
+    if (materials.length > 0) {
+      const unconfirmedFacts = newState.collectedFacts.filter(f => !f.confirmed)
+      if (unconfirmedFacts.length > 0) {
+        const fieldsSummary = unconfirmedFacts
+          .map((f) => `• ${f.label}: ${f.value}`)
+          .join('\n')
+
+        assistantText = `我已识别出以下信息：\n\n${fieldsSummary}\n\n请确认这些信息是否正确？`
+        quickReplies.push(
+          { label: '✅ 信息正确', value: 'confirm:correct', action: 'confirm' },
+          { label: '✏️ 需要修改', value: 'confirm:edit', action: 'edit' }
+        )
       }
-    } else {
-      assistantText = '您好，请上传事故相关材料，我会帮您分析。'
     }
 
     // 保存 Agent 回复
-    await memoryDB.createMessage(
+    await db.createMessage(
       conversation.id,
       'assistant',
       'text',
@@ -111,6 +130,10 @@ router.post('/current/messages', async (req, res) => {
       data: {
         message: assistantText,
         quickReplies,
+        agentState: {
+          stage: newState.stage,
+          collectedFactsCount: newState.collectedFacts.length,
+        },
       },
     })
   } catch (err) {
@@ -129,10 +152,10 @@ router.get('/current/messages', async (req, res) => {
     }
 
     // 获取或创建对话
-    const conversation = await memoryDB.findOrCreateConversation(userId)
+    const conversation = await db.findOrCreateConversation(userId)
 
     // 获取消息
-    const messages = await memoryDB.getMessages(conversation.id)
+    const messages = await db.getMessages(conversation.id)
 
     res.json({ success: true, data: messages })
   } catch (err) {

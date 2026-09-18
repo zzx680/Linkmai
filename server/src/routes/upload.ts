@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import multer from 'multer'
 import { uploadFile } from '../services/oss'
+import { db } from '../db'
 
 const router = Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -31,6 +32,24 @@ router.post('/image', upload.single('file'), async (req: Request, res: Response)
       req.file.originalname,
       'accident-photos'
     )
+
+    // 保存到数据库（需要关联到案件）
+    const userId = (req as any).userId
+    if (userId) {
+      const currentCase = await db.findActiveCase(userId)
+      if (currentCase) {
+        await db.createArtifact({
+          caseId: currentCase.id,
+          name: req.file.originalname,
+          type: 'image',
+          ossUrl: result.url,
+          ossKey: result.key,
+          fileSize: req.file.size,
+          mimeType: req.file.mimetype,
+          status: 'uploaded',
+        })
+      }
+    }
 
     res.json({
       success: true,
@@ -68,6 +87,24 @@ router.post('/video', upload.single('file'), async (req: Request, res: Response)
       req.file.originalname,
       'accident-videos'
     )
+
+    // 保存到数据库（需要关联到案件）
+    const userId = (req as any).userId
+    if (userId) {
+      const currentCase = await db.findActiveCase(userId)
+      if (currentCase) {
+        await db.createArtifact({
+          caseId: currentCase.id,
+          name: req.file.originalname,
+          type: 'video',
+          ossUrl: result.url,
+          ossKey: result.key,
+          fileSize: req.file.size,
+          mimeType: req.file.mimetype,
+          status: 'uploaded',
+        })
+      }
+    }
 
     res.json({
       success: true,

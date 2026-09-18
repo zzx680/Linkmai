@@ -9,6 +9,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "db:init": "tsx src/scripts/init-db.ts",
+    "db:test": "node scripts/test-db.js",
+    "db:setup": "./scripts/setup-db.sh",
     "lint": "eslint src --ext .ts",
     "test": "jest"
   },

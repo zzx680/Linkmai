@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { testConnection } from './db'
+import { db } from './db'
 import { authMiddleware } from './middleware/auth'
 import authRouter from './routes/auth'
 import casesRouter from './routes/cases'
@@ -10,6 +10,7 @@ import uploadRoutes from './routes/upload'
 import reportRoutes from './routes/reports'
 import { getPresignUrl, confirmUpload } from './controllers/file.controller'
 import agentRoutes from './routes/agent'
+import { materialsRouter } from './routes/materials'
 
 // 加载环境变量
 dotenv.config()
@@ -64,6 +65,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/cases', authMiddleware, casesRouter)
 app.use('/api/conversations', authMiddleware, conversationsRouter)
 app.use('/api/reports', authMiddleware, reportRoutes)
+app.use('/api/materials', authMiddleware, materialsRouter)
 
 // 旧路由保留（兼容）
 app.post('/api/files/presign', mockAuth, getPresignUrl)
@@ -91,12 +93,22 @@ app.use((req, res) => {
 // 启动服务
 async function start() {
   // 测试数据库连接
-  await testConnection()
+  try {
+    await db.ping()
+    console.log('✅ 数据库连接成功')
+  } catch (err) {
+    console.error('❌ 数据库连接失败:', err)
+    if (process.env.USE_POSTGRES === 'true') {
+      console.error('请确保 PostgreSQL 已启动并配置正确')
+      process.exit(1)
+    }
+  }
 
   app.listen(PORT, () => {
     console.log(`✅ 灵迈后端服务启动成功`)
     console.log(`📡 监听端口: ${PORT}`)
     console.log(`🌍 环境: ${process.env.NODE_ENV}`)
+    console.log(`💾 数据库: ${process.env.USE_POSTGRES === 'true' ? 'PostgreSQL' : '内存'}`)
     console.log(`🪣 OSS Bucket: ${process.env.ALIYUN_OSS_BUCKET || '未配置'}`)
   })
 }

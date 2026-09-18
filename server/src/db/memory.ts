@@ -1,6 +1,6 @@
 // 内存存储（MVP 临时方案，生产环境需替换为真实数据库）
 
-interface User {
+export interface User {
   id: string
   openid: string
   phone?: string
@@ -10,7 +10,7 @@ interface User {
   updatedAt: Date
 }
 
-interface Case {
+export interface Case {
   id: string
   userId: string
   title: string
@@ -27,16 +27,41 @@ interface Case {
   updatedAt: Date
 }
 
-interface Conversation {
+export interface Conversation {
   id: string
   userId: string
   caseId?: string
   status: string
+  agentState?: AgentState // Agent 状态追踪
   createdAt: Date
   updatedAt: Date
 }
 
-interface Message {
+export interface AgentState {
+  stage: 'collecting' | 'confirming' | 'analyzing' | 'ready'
+  collectedFacts: CollectedFact[]
+  pendingConfirmation?: CollectedFact[]
+  nextQuestion?: string
+  quickReplies?: QuickReply[]
+}
+
+export interface CollectedFact {
+  key: string
+  label: string
+  value: string
+  source: string
+  confidence: 'high' | 'medium' | 'low'
+  confirmed: boolean
+  materialId?: string
+}
+
+export interface QuickReply {
+  label: string
+  value: string
+  action?: string
+}
+
+export interface Message {
   id: string
   conversationId: string
   role: string
@@ -46,7 +71,7 @@ interface Message {
   createdAt: Date
 }
 
-interface Artifact {
+export interface Artifact {
   id: string
   caseId: string
   name: string
@@ -167,11 +192,29 @@ export const memoryDB = {
       userId,
       caseId,
       status: 'active',
+      agentState: {
+        stage: 'collecting',
+        collectedFacts: [],
+        nextQuestion: '您好！我是灵迈事故理赔助手。请问您遇到了什么类型的事故？',
+        quickReplies: [
+          { label: '交通事故', value: 'traffic_accident' },
+          { label: '工伤事故', value: 'work_injury' },
+          { label: '意外伤害', value: 'personal_injury' },
+        ],
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     conversations.set(id, conversation)
     conversationsByUser.set(userId, [...userConvIds, id])
+    return conversation
+  },
+
+  async updateConversationState(conversationId: string, agentState: AgentState): Promise<Conversation | null> {
+    const conversation = conversations.get(conversationId)
+    if (!conversation) return null
+    conversation.agentState = agentState
+    conversation.updatedAt = new Date()
     return conversation
   },
 
@@ -215,5 +258,10 @@ export const memoryDB = {
     }
     artifacts.set(id, newArtifact)
     return newArtifact
+  },
+
+  // Health check
+  async ping(): Promise<boolean> {
+    return true
   },
 }
