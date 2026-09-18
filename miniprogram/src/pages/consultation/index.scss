@@ -2,189 +2,231 @@
 
 .consultation-page {
   min-height: 100vh;
-  background: $bg-primary;
-  padding: $space-lg $space-lg $space-xl;
+  background: $color-canvas;
+  padding-bottom: calc($space-2xl + env(safe-area-inset-bottom));
 }
 
-.header {
+// ==========================================
+// 页头
+// ==========================================
+.page-header {
+  background: $color-surface;
+  padding: $space-2xl $space-lg $space-xl;
+  border-bottom: 1px solid $color-border;
   margin-bottom: $space-lg;
 
-  .title {
-    font-size: $font-2xl;
-    font-weight: 600;
-    color: $text-primary;
-    margin-bottom: $space-xs;
+  .page-title {
+    font-size: $font-3xl;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    display: block;
+    margin-bottom: $space-sm;
   }
 
-  .subtitle {
-    font-size: $font-sm;
-    color: $text-secondary;
+  .page-subtitle {
+    font-size: $font-md;
+    color: $color-text-secondary;
+    display: block;
   }
 }
 
+// ==========================================
+// 信息横幅
+// ==========================================
 .info-banner {
-  background: linear-gradient(135deg, rgba(196, 97, 47, 0.08), rgba(196, 97, 47, 0.04));
-  border-radius: 8px;
-  padding: $space-lg;
-  margin-bottom: $space-xl;
-  border: 1px solid rgba(196, 97, 47, 0.15);
+  margin: $space-lg $space-lg $space-xl;
+  background: linear-gradient(135deg, $color-brand-pale, $color-surface);
+  border: 1px solid $color-brand-light;
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  display: flex;
+  align-items: center;
+  gap: $space-lg;
 
-  .banner-content {
+  .banner-icon-wrapper {
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: $radius-md;
+    background: linear-gradient(135deg, $color-brand-light, $color-brand-pale);
     display: flex;
-    gap: $space-md;
     align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 
     .banner-icon {
-      font-size: 32px;
-      flex-shrink: 0;
+      font-size: 56rpx;
+    }
+  }
+
+  .banner-content {
+    flex: 1;
+
+    .banner-title {
+      font-size: $font-xl;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      display: block;
+      margin-bottom: $space-xs;
     }
 
-    .banner-text {
-      flex: 1;
-
-      .banner-title {
-        display: block;
-        font-size: $font-md;
-        font-weight: 600;
-        color: $text-primary;
-        margin-bottom: 4rpx;
-      }
-
-      .banner-desc {
-        display: block;
-        font-size: $font-sm;
-        color: $text-secondary;
-        line-height: 1.4;
-      }
+    .banner-desc {
+      font-size: $font-md;
+      color: $color-text-secondary;
+      display: block;
     }
   }
 }
 
-.section-title {
+// ==========================================
+// 区块标题
+// ==========================================
+.section-header {
+  padding: 0 $space-lg;
+  margin-bottom: $space-lg;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: $space-md;
+  justify-content: space-between;
 
-  .section-text {
-    font-size: $font-lg;
-    font-weight: 600;
-    color: $text-primary;
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+  }
+
+  .section-title {
+    font-size: $font-xl;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
   }
 
   .online-indicator {
     display: flex;
     align-items: center;
-    gap: 6rpx;
+    gap: $space-xs;
+    padding: 6rpx $space-md;
+    background: $color-success-light;
+    border-radius: $radius-pill;
 
     .online-dot {
-      width: 8px;
-      height: 8px;
+      width: 12rpx;
+      height: 12rpx;
       border-radius: 50%;
-      background: #22c55e;
+      background: $color-success;
       animation: pulse 2s infinite;
     }
 
     .online-text {
-      font-size: $font-xs;
-      color: $text-secondary;
+      font-size: $font-sm;
+      font-weight: $font-weight-medium;
+      color: $color-success;
     }
   }
 }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.4; }
 }
 
+// ==========================================
+// 律师列表
+// ==========================================
 .lawyers-list {
+  padding: 0 $space-lg;
   display: flex;
   flex-direction: column;
   gap: $space-md;
-  margin-bottom: $space-xl;
+  margin-bottom: $space-2xl;
 }
 
 .lawyer-card {
-  background: $bg-white;
-  border-radius: 8px;
-  padding: $space-lg;
-  box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
-  border: 1px solid rgba(231, 225, 215, 0.6);
-  transition: all $transition-fast;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  box-shadow: $shadow-sm;
+  transition: all $transition-base;
 
   &:active {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(31, 36, 33, 0.12);
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+    border-color: $color-brand-light;
   }
 
   .lawyer-header {
     display: flex;
-    gap: $space-md;
-    margin-bottom: $space-md;
+    gap: $space-lg;
+    margin-bottom: $space-lg;
 
     .avatar-wrapper {
-      position: relative;
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(196, 97, 47, 0.1), rgba(196, 97, 47, 0.05));
+      width: 96rpx;
+      height: 96rpx;
+      border-radius: $radius-md;
+      background: linear-gradient(135deg, $color-brand-light, $color-brand-pale);
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
       flex-shrink: 0;
 
       .avatar {
-        font-size: 32px;
+        font-size: 56rpx;
       }
 
       .status-dot {
         position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 12px;
-        height: 12px;
+        bottom: -4rpx;
+        right: -4rpx;
+        width: 24rpx;
+        height: 24rpx;
         border-radius: 50%;
-        background: #22c55e;
-        border: 2px solid white;
+        background: $color-success;
+        border: 4rpx solid $color-surface;
+        box-shadow: $shadow-sm;
       }
     }
 
     .lawyer-info {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: $space-xs;
 
       .name-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 4rpx;
 
         .lawyer-name {
-          font-size: $font-lg;
-          font-weight: 600;
-          color: $text-primary;
+          font-size: $font-xl;
+          font-weight: $font-weight-semibold;
+          color: $color-text-primary;
         }
 
         .rating {
           display: flex;
           align-items: center;
           gap: 4rpx;
+          background: $color-warning-light;
+          padding: 4rpx $space-sm;
+          border-radius: $radius-sm;
 
           .star {
-            font-size: 14px;
+            font-size: 24rpx;
           }
 
           .rating-text {
             font-size: $font-sm;
-            font-weight: 500;
-            color: $text-primary;
+            font-weight: $font-weight-semibold;
+            color: $color-warning;
           }
         }
       }
 
       .lawyer-title {
-        font-size: $font-sm;
-        color: $text-secondary;
-        margin-bottom: 6rpx;
+        font-size: $font-md;
+        color: $color-text-secondary;
+        font-weight: $font-weight-medium;
       }
 
       .stats {
@@ -193,34 +235,48 @@
         gap: $space-xs;
 
         .stat-item {
-          font-size: $font-xs;
-          color: $text-secondary;
+          font-size: $font-sm;
+          color: $color-text-muted;
         }
 
         .stat-divider {
-          font-size: $font-xs;
-          color: $text-secondary;
-          opacity: 0.5;
+          font-size: $font-sm;
+          color: $color-text-muted;
         }
       }
+    }
+  }
+
+  .lawyer-bio {
+    background: $color-surface-secondary;
+    border-radius: $radius-sm;
+    padding: $space-md $space-lg;
+    margin-bottom: $space-lg;
+
+    .bio-text {
+      font-size: $font-sm;
+      color: $color-text-secondary;
+      line-height: $line-height-relaxed;
     }
   }
 
   .specialties {
     display: flex;
     flex-wrap: wrap;
-    gap: $space-xs;
-    margin-bottom: $space-md;
+    gap: $space-sm;
+    margin-bottom: $space-lg;
+  }
 
-    .specialty-tag {
-      background: rgba(196, 97, 47, 0.08);
-      border-radius: 4px;
-      padding: 4rpx $space-sm;
+  .specialty-tag {
+    background: $color-brand-pale;
+    border: 1px solid $color-brand-light;
+    border-radius: $radius-pill;
+    padding: 6rpx $space-md;
 
-      .tag-text {
-        font-size: $font-xs;
-        color: $accent-primary;
-      }
+    .tag-text {
+      font-size: $font-sm;
+      color: $color-brand;
+      font-weight: $font-weight-medium;
     }
   }
 
@@ -228,75 +284,191 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: $space-md;
-    border-top: 1px solid rgba(231, 225, 215, 0.6);
+    padding-top: $space-lg;
+    border-top: 1px solid $color-border-pale;
 
-    .price {
-      font-size: $font-lg;
-      font-weight: 600;
-      color: $accent-primary;
+    .price-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: $space-xs;
+
+      .price-label {
+        font-size: $font-sm;
+        color: $color-text-muted;
+      }
+
+      .price {
+        font-size: $font-2xl;
+        font-weight: $font-weight-bold;
+        color: $color-brand;
+      }
+
+      .price-unit {
+        font-size: $font-sm;
+        color: $color-text-muted;
+      }
     }
 
     .consult-btn {
-      background: $accent-primary;
-      border-radius: 6px;
-      padding: $space-xs $space-lg;
+      padding: $space-md $space-2xl;
+      border-radius: $radius-pill;
       transition: all $transition-fast;
 
-      &:active {
-        transform: scale(0.95);
+      &.online {
+        background: $color-brand;
+
+        .btn-text {
+          color: $color-text-inverse;
+        }
+
+        &:active {
+          background: $color-brand-hover;
+          transform: scale(0.98);
+        }
+      }
+
+      &.offline {
+        background: $color-surface-secondary;
+        border: 1px solid $color-border;
+
+        .btn-text {
+          color: $color-text-secondary;
+        }
+
+        &:active {
+          background: $color-surface-hover;
+        }
       }
 
       .btn-text {
-        font-size: $font-sm;
-        font-weight: 500;
-        color: white;
+        font-size: $font-md;
+        font-weight: $font-weight-semibold;
       }
     }
   }
 }
 
-.service-cards {
-  .cards-title {
-    display: block;
+// ==========================================
+// 咨询场景
+// ==========================================
+.scenarios-section {
+  padding: 0 $space-lg;
+  margin-bottom: $space-2xl;
+
+  .section-header {
+    padding: 0;
+  }
+}
+
+.scenarios-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-md;
+  margin-top: $space-lg;
+}
+
+.scenario-card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: $space-xl;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $space-sm;
+  transition: all $transition-base;
+
+  &:active {
+    transform: translateY(-4px);
+    box-shadow: $shadow-md;
+  }
+
+  .scenario-icon {
+    font-size: 56rpx;
+    margin-bottom: $space-xs;
+  }
+
+  .scenario-title {
+    font-size: $font-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .scenario-desc {
+    font-size: $font-sm;
+    color: $color-text-secondary;
+    line-height: $line-height-normal;
+  }
+
+  &.blue {
+    border-color: rgba(78, 106, 122, 0.3);
+    &:active {
+      border-color: $color-info;
+      background: $color-info-light;
+    }
+  }
+
+  &.orange {
+    border-color: rgba(196, 97, 47, 0.3);
+    &:active {
+      border-color: $color-brand;
+      background: $color-brand-pale;
+    }
+  }
+
+  &.green {
+    border-color: rgba(47, 125, 88, 0.3);
+    &:active {
+      border-color: $color-success;
+      background: $color-success-light;
+    }
+  }
+
+  &.red {
+    border-color: rgba(182, 72, 67, 0.3);
+    &:active {
+      border-color: $color-danger;
+      background: $color-danger-light;
+    }
+  }
+}
+
+// ==========================================
+// 服务说明
+// ==========================================
+.service-info {
+  padding: 0 $space-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: $space-md;
+  padding: $space-lg;
+  background: $color-surface-secondary;
+  border-radius: $radius-md;
+
+  .info-icon {
+    width: 40rpx;
+    height: 40rpx;
+    border-radius: 50%;
+    background: $color-success-light;
+    color: $color-success;
+    font-size: $font-lg;
+    font-weight: $font-weight-bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .info-text {
     font-size: $font-md;
-    font-weight: 600;
-    color: $text-primary;
-    margin-bottom: $space-md;
-  }
-
-  .cards-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: $space-md;
-  }
-
-  .service-card {
-    background: $bg-white;
-    border-radius: 8px;
-    padding: $space-lg;
-    box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
-    border: 1px solid rgba(231, 225, 215, 0.6);
-
-    .card-icon {
-      display: block;
-      font-size: 32px;
-      margin-bottom: $space-sm;
-    }
-
-    .card-title {
-      display: block;
-      font-size: $font-md;
-      font-weight: 600;
-      color: $text-primary;
-      margin-bottom: 4px;
-    }
-
-    .card-desc {
-      display: block;
-      font-size: $font-xs;
-      color: $text-secondary;
-      line-height: 1.4;
-    }
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
   }
 }

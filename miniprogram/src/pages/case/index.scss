@@ -2,180 +2,342 @@
 
 .case-page {
   min-height: 100vh;
-  background: $bg-primary;
-  padding: $space-lg $space-lg $space-xl;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $space-xl;
-
-  .title {
-    font-size: $font-2xl;
-    font-weight: 600;
-    color: $text-primary;
-  }
-
-  .new-case-btn {
-    background: $accent-primary;
-    color: white;
-    padding: $space-xs $space-lg;
-    border-radius: 6px;
-    transition: all $transition-fast;
-
-    &:active {
-      transform: scale(0.95);
-      opacity: 0.9;
-    }
-
-    .btn-text {
-      font-size: $font-sm;
-      font-weight: 500;
-      color: white;
-    }
-  }
-}
-
-.empty-state {
+  background: $color-canvas;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: $space-2xl 0;
-  margin-top: 100rpx;
+}
 
-  .empty-icon {
-    font-size: 80px;
-    margin-bottom: $space-lg;
-    opacity: 0.3;
+// ==========================================
+// 页头
+// ==========================================
+.page-header {
+  background: $color-surface;
+  padding: $space-xl $space-lg $space-lg;
+  border-bottom: 1px solid $color-border;
+  margin-bottom: $space-lg;
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-xl;
+
+    .page-title {
+      font-size: $font-3xl;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+    }
+
+    .new-case-btn {
+      background: $color-brand;
+      color: $color-text-inverse;
+      padding: $space-sm $space-lg;
+      border-radius: $radius-pill;
+      display: flex;
+      align-items: center;
+      gap: 6rpx;
+      transition: all $transition-fast;
+      box-shadow: $shadow-sm;
+
+      &:active {
+        transform: translateY(-2px);
+        box-shadow: $shadow-md;
+        background: $color-brand-hover;
+      }
+
+      .btn-icon {
+        font-size: 32rpx;
+        font-weight: $font-weight-normal;
+      }
+
+      .btn-text {
+        font-size: $font-md;
+        font-weight: $font-weight-semibold;
+        color: $color-text-inverse;
+      }
+    }
   }
 
-  .empty-title {
-    font-size: $font-lg;
-    font-weight: 500;
-    color: $text-primary;
-    margin-bottom: $space-xs;
+  // 搜索栏
+  .search-bar {
+    background: $color-surface-secondary;
+    border-radius: $radius-pill;
+    padding: 0 $space-lg;
+    height: 80rpx;
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    margin-bottom: $space-xl;
+    border: 1px solid transparent;
+    transition: all $transition-fast;
+
+    &:focus-within {
+      background: $color-surface;
+      border-color: $color-brand;
+      box-shadow: 0 0 0 4px $color-brand-pale;
+    }
+
+    .search-icon {
+      font-size: 32rpx;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      font-size: $font-md;
+      color: $color-text-primary;
+      background: transparent;
+      border: none;
+    }
+
+    .search-placeholder {
+      color: $color-text-muted;
+    }
+
+    .clear-btn {
+      width: 48rpx;
+      height: 48rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(31, 36, 33, 0.06);
+      flex-shrink: 0;
+      transition: all $transition-fast;
+
+      &:active {
+        transform: scale(0.9);
+        background: rgba(31, 36, 33, 0.1);
+      }
+
+      .clear-icon {
+        font-size: 32rpx;
+        color: $color-text-muted;
+      }
+    }
   }
 
-  .empty-subtitle {
-    font-size: $font-sm;
-    color: $text-secondary;
+  // 统计卡片
+  .stats-row {
+    display: flex;
+    gap: $space-md;
+    margin-bottom: $space-xl;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: $color-surface-secondary;
+    border-radius: $radius-md;
+    padding: $space-lg;
+    text-align: center;
+
+    .stat-value {
+      font-size: $font-3xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      display: block;
+      margin-bottom: $space-xs;
+
+      &.highlight {
+        color: $color-status-analyzing;
+      }
+
+      &.success {
+        color: $color-success;
+      }
+    }
+
+    .stat-label {
+      font-size: $font-sm;
+      color: $color-text-secondary;
+      display: block;
+    }
+  }
+
+  // 筛选标签
+  .filter-tabs {
+    display: flex;
+    gap: $space-xs;
+  }
+
+  .filter-tab {
+    flex: 1;
+    padding: $space-md;
+    text-align: center;
+    position: relative;
+    transition: all $transition-fast;
+
+    .tab-text {
+      font-size: $font-md;
+      font-weight: $font-weight-medium;
+      color: $color-text-muted;
+      transition: all $transition-fast;
+    }
+
+    &.active {
+      .tab-text {
+        color: $color-text-primary;
+        font-weight: $font-weight-semibold;
+      }
+    }
+
+    .tab-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60rpx;
+      height: 6rpx;
+      background: $color-brand;
+      border-radius: $radius-pill;
+    }
+
+    &:active {
+      .tab-text {
+        color: $color-text-primary;
+      }
+    }
   }
 }
 
+// ==========================================
+// 案件列表
+// ==========================================
 .cases-list {
+  flex: 1;
+  padding: 0 $space-lg $space-xl;
   display: flex;
   flex-direction: column;
   gap: $space-md;
 }
 
 .case-card {
-  background: $bg-white;
-  border-radius: 8px;
-  padding: $space-lg;
-  box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
-  border: 1px solid rgba(231, 225, 215, 0.6);
-  transition: all $transition-fast;
+  background: $color-surface;
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  box-shadow: $shadow-sm;
+  border: 1px solid $color-border;
+  transition: all $transition-base;
 
   &:active {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(31, 36, 33, 0.12);
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+    border-color: $color-brand-light;
   }
 
   .case-header {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: $space-md;
-    margin-bottom: $space-md;
+    margin-bottom: $space-lg;
 
-    .case-icon-wrapper {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(196, 97, 47, 0.1), rgba(196, 97, 47, 0.05));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      .case-icon {
-        font-size: 24px;
-      }
+    .case-main {
+      flex: 1;
+      min-width: 0;
     }
 
-    .case-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4rpx;
+    .case-title {
+      font-size: $font-xl;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      line-height: $line-height-tight;
+      display: block;
+      margin-bottom: $space-sm;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-      .case-title {
-        font-size: $font-md;
-        font-weight: 500;
-        color: $text-primary;
-        line-height: 1.4;
+    .case-meta {
+      display: flex;
+      align-items: center;
+      gap: $space-xs;
+
+      .meta-text {
+        font-size: $font-sm;
+        color: $color-text-secondary;
       }
 
-      .case-date {
-        font-size: $font-xs;
-        color: $text-secondary;
+      .meta-divider {
+        font-size: $font-sm;
+        color: $color-text-muted;
       }
     }
 
     .status-badge {
-      padding: 4rpx $space-sm;
-      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6rpx;
+      padding: 8rpx $space-md;
+      border-radius: $radius-pill;
       font-size: $font-xs;
+      font-weight: $font-weight-medium;
+      flex-shrink: 0;
 
-      &.completed {
-        background: rgba(34, 197, 94, 0.1);
+      .status-dot {
+        width: 12rpx;
+        height: 12rpx;
+        border-radius: 50%;
+      }
 
-        .status-text {
-          color: #16a34a;
-        }
+      &.draft {
+        background: $color-status-draft-bg;
+        .status-text { color: $color-status-draft; }
+        .status-dot { background: $color-status-draft; }
       }
 
       &.analyzing {
-        background: rgba(251, 191, 36, 0.1);
+        background: $color-status-analyzing-bg;
+        .status-text { color: $color-status-analyzing; }
+        .status-dot { background: $color-status-analyzing; animation: pulse 2s infinite; }
+      }
 
-        .status-text {
-          color: #d97706;
-        }
+      &.completed {
+        background: $color-status-completed-bg;
+        .status-text { color: $color-status-completed; }
+        .status-dot { background: $color-status-completed; }
+      }
+
+      &.archived {
+        background: $color-status-pending-bg;
+        .status-text { color: $color-status-pending; }
+        .status-dot { background: $color-status-pending; }
       }
     }
   }
 
   .case-divider {
     height: 1px;
-    background: rgba(231, 225, 215, 0.6);
-    margin: $space-md 0;
+    background: $color-border-pale;
+    margin: $space-lg 0;
   }
 
   .case-details {
-    display: flex;
-    gap: $space-xl;
-    margin-bottom: $space-md;
+    .detail-row {
+      display: flex;
+      gap: $space-2xl;
+    }
 
     .detail-item {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 4rpx;
+      gap: $space-xs;
 
       .detail-label {
-        font-size: $font-xs;
-        color: $text-secondary;
+        font-size: $font-sm;
+        color: $color-text-secondary;
+        font-weight: $font-weight-medium;
       }
 
       .detail-value {
-        font-size: $font-md;
-        font-weight: 500;
-        color: $text-primary;
+        font-size: $font-lg;
+        font-weight: $font-weight-semibold;
+        color: $color-text-primary;
 
         &.highlight {
-          color: $accent-primary;
+          color: $color-brand;
         }
       }
     }
@@ -183,27 +345,91 @@
 
   .case-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: $space-lg;
+    padding-top: $space-lg;
+    border-top: 1px solid $color-border-pale;
+
+    .update-time {
+      font-size: $font-xs;
+      color: $color-text-muted;
+    }
 
     .view-detail {
       font-size: $font-sm;
-      color: $text-secondary;
+      color: $color-text-secondary;
+      font-weight: $font-weight-medium;
       transition: all $transition-fast;
     }
   }
 
   &:active .view-detail {
-    color: $accent-primary;
+    color: $color-brand;
     transform: translateX(4px);
   }
 }
 
-.footer-tip {
-  margin-top: $space-xl;
-  text-align: center;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
 
-  .tip-text {
-    font-size: $font-xs;
-    color: $text-secondary;
+// ==========================================
+// 空状态
+// ==========================================
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $space-3xl $space-xl;
+  min-height: 600rpx;
+
+  .empty-icon {
+    font-size: 120rpx;
+    margin-bottom: $space-xl;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-size: $font-xl;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $space-sm;
+  }
+
+  .empty-subtitle {
+    font-size: $font-md;
+    color: $color-text-secondary;
+    text-align: center;
+  }
+}
+
+// ==========================================
+// 页脚
+// ==========================================
+.footer-section {
+  padding: $space-xl $space-lg;
+  padding-bottom: calc($space-xl + env(safe-area-inset-bottom));
+
+  .footer-tip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-sm;
+    padding: $space-md;
+    background: $color-surface-secondary;
+    border-radius: $radius-md;
+
+    .tip-icon {
+      font-size: 28rpx;
+    }
+
+    .tip-text {
+      font-size: $font-sm;
+      color: $color-text-secondary;
+    }
   }
 }

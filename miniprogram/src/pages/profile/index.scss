@@ -2,215 +2,280 @@
 
 .profile-page {
   min-height: 100vh;
-  background: $bg-primary;
+  background: $color-canvas;
+  padding-bottom: calc($space-2xl + env(safe-area-inset-bottom));
 }
 
-.header-section {
-  background: $bg-white;
-  padding: $space-xl $space-lg;
+// ==========================================
+// 用户区块
+// ==========================================
+.user-section {
+  background: linear-gradient(180deg, $color-brand 0%, $color-brand-hover 100%);
+  padding: $space-2xl $space-lg $space-xl;
   margin-bottom: $space-lg;
 
   .user-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: $radius-lg;
+    padding: $space-xl;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: $space-xl;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 
     .user-info {
       display: flex;
       align-items: center;
-      gap: $space-md;
+      gap: $space-lg;
+      flex: 1;
 
       .avatar-wrapper {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, rgba(196, 97, 47, 0.1), rgba(196, 97, 47, 0.05));
+        width: 112rpx;
+        height: 112rpx;
+        border-radius: $radius-md;
+        background: $color-surface;
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: $shadow-md;
+        flex-shrink: 0;
 
         .avatar {
-          font-size: 36px;
+          font-size: 64rpx;
         }
       }
 
       .user-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: $space-xs;
+
         .nickname {
-          display: block;
-          font-size: $font-lg;
-          font-weight: 600;
-          color: $text-primary;
-          margin-bottom: 4rpx;
+          font-size: $font-2xl;
+          font-weight: $font-weight-semibold;
+          color: $color-text-inverse;
         }
 
         .phone {
-          display: block;
-          font-size: $font-sm;
-          color: $text-secondary;
+          font-size: $font-md;
+          color: rgba(255, 255, 255, 0.8);
         }
       }
     }
 
     .edit-btn {
-      background: $bg-primary;
-      border-radius: 6px;
-      padding: $space-xs $space-md;
-      border: 1px solid rgba(231, 225, 215, 0.8);
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: $radius-pill;
+      padding: $space-sm $space-lg;
       transition: all $transition-fast;
 
       &:active {
+        background: rgba(255, 255, 255, 0.3);
         transform: scale(0.95);
       }
 
       .edit-text {
-        font-size: $font-sm;
-        color: $text-primary;
+        font-size: $font-md;
+        font-weight: $font-weight-medium;
+        color: $color-text-inverse;
       }
     }
   }
 
-  .stats-row {
+  // 数据统计
+  .stats-container {
     display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding-top: $space-lg;
-    border-top: 1px solid rgba(231, 225, 215, 0.6);
-
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4rpx;
-
-      .stat-value {
-        font-size: $font-xl;
-        font-weight: 600;
-        color: $text-primary;
-      }
-
-      .stat-label {
-        font-size: $font-xs;
-        color: $text-secondary;
-      }
-    }
+    gap: $space-md;
   }
-}
 
-.menu-sections {
-  padding: 0 $space-lg;
-
-  .menu-section {
-    margin-bottom: $space-lg;
-
-    .section-title {
-      display: block;
-      font-size: $font-xs;
-      font-weight: 600;
-      color: $text-secondary;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: $space-sm;
-      padding-left: $space-xs;
-    }
-
-    .menu-group {
-      background: $bg-white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
-      border: 1px solid rgba(231, 225, 215, 0.6);
-
-      .menu-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: $space-lg;
-        transition: all $transition-fast;
-        border-bottom: 1px solid rgba(231, 225, 215, 0.4);
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        &:active {
-          background: rgba(247, 244, 239, 0.5);
-        }
-
-        .menu-left {
-          display: flex;
-          align-items: center;
-          gap: $space-md;
-
-          .menu-icon {
-            font-size: 20px;
-            width: 24px;
-            text-align: center;
-          }
-
-          .menu-label {
-            font-size: $font-md;
-            color: $text-primary;
-          }
-        }
-
-        .menu-right {
-          display: flex;
-          align-items: center;
-          gap: $space-sm;
-
-          .menu-value {
-            font-size: $font-sm;
-            color: $text-secondary;
-          }
-
-          .menu-arrow {
-            font-size: 24px;
-            color: $text-secondary;
-            opacity: 0.5;
-          }
-        }
-      }
-    }
-  }
-}
-
-.logout-section {
-  padding: 0 $space-lg;
-  margin-top: $space-xl;
-
-  .logout-btn {
-    background: $bg-white;
-    border-radius: 8px;
-    padding: $space-lg;
+  .stat-item {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: $radius-md;
+    padding: $space-xl;
     text-align: center;
-    box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
-    border: 1px solid rgba(231, 225, 215, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
     transition: all $transition-fast;
 
     &:active {
-      background: rgba(247, 244, 239, 0.5);
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-4px);
     }
 
-    .logout-text {
-      font-size: $font-md;
-      color: #ef4444;
-      font-weight: 500;
+    .stat-value {
+      font-size: $font-3xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-inverse;
+
+      &.highlight {
+        color: #FEF3C7;
+      }
+
+      &.success {
+        color: #D1FAE5;
+      }
+    }
+
+    .stat-label {
+      font-size: $font-sm;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: $font-weight-medium;
     }
   }
 }
 
+// ==========================================
+// 菜单容器
+// ==========================================
+.menu-container {
+  padding: 0 $space-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $space-xl;
+}
+
+.menu-section {
+  .section-title {
+    font-size: $font-sm;
+    color: $color-text-muted;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 1rpx;
+    display: block;
+    margin-bottom: $space-md;
+    padding: 0 $space-xs;
+  }
+}
+
+.menu-group {
+  background: $color-surface;
+  border-radius: $radius-lg;
+  border: 1px solid $color-border;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $space-xl $space-lg;
+  transition: all $transition-fast;
+  position: relative;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: $space-lg;
+    right: $space-lg;
+    height: 1px;
+    background: $color-border-pale;
+  }
+
+  &:active {
+    background: $color-surface-hover;
+  }
+
+  .menu-left {
+    display: flex;
+    align-items: center;
+    gap: $space-lg;
+    flex: 1;
+
+    .menu-icon-wrapper {
+      width: 72rpx;
+      height: 72rpx;
+      border-radius: $radius-md;
+      background: $color-surface-secondary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .menu-icon {
+        font-size: 40rpx;
+      }
+    }
+
+    .menu-label {
+      font-size: $font-lg;
+      color: $color-text-primary;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .menu-right {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+
+    .menu-value {
+      font-size: $font-md;
+      color: $color-text-secondary;
+    }
+
+    .menu-arrow {
+      font-size: 48rpx;
+      color: $color-text-muted;
+      font-weight: $font-weight-normal;
+      line-height: 1;
+    }
+  }
+}
+
+// ==========================================
+// 退出登录
+// ==========================================
+.logout-section {
+  padding: $space-2xl $space-lg;
+}
+
+.logout-btn {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  text-align: center;
+  transition: all $transition-fast;
+
+  &:active {
+    background: $color-danger-light;
+    border-color: $color-danger;
+
+    .logout-text {
+      color: $color-danger;
+    }
+  }
+
+  .logout-text {
+    font-size: $font-lg;
+    color: $color-text-secondary;
+    font-weight: $font-weight-semibold;
+    transition: color $transition-fast;
+  }
+}
+
+// ==========================================
+// 页脚信息
+// ==========================================
 .footer-info {
+  padding: 0 $space-lg;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rpx;
-  padding: $space-xl $space-lg;
-  margin-top: $space-xl;
+  gap: $space-xs;
 
   .footer-text {
     font-size: $font-xs;
-    color: $text-secondary;
-    opacity: 0.6;
+    color: $color-text-muted;
+    text-align: center;
   }
 }
