@@ -1,5 +1,5 @@
 {
-  "miniprogramRoot": "dist/weapp/",
+  "miniprogramRoot": "miniprogram/dist/",
   "projectname": "linkmai",
   "description": "linkmai traffic accident self-service assistant",
   "appid": "wx38fafb051a96a529",

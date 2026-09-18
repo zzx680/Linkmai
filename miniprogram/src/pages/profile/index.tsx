@@ -2,16 +2,42 @@ import { View, Text, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
+interface StatItem {
+  label: string
+  value: string
+  key: string
+  color?: 'default' | 'highlight' | 'success'
+}
+
+interface MenuItem {
+  icon: string
+  label: string
+  key: string
+  value?: string
+  arrow?: boolean
+  color?: string
+}
+
+interface MenuSection {
+  title?: string
+  items: MenuItem[]
+}
+
 export default function Profile() {
   const handleLogin = () => {
     Taro.showToast({ title: '登录功能开发中', icon: 'none' })
   }
 
   const handleMenuClick = (key: string) => {
-    Taro.showToast({ title: `${key}功能开发中`, icon: 'none' })
+    if (key === '我的案例') {
+      Taro.switchTab({ url: '/pages/case/index' })
+    } else if (key === '咨询记录') {
+      Taro.switchTab({ url: '/pages/consultation/index' })
+    } else {
+      Taro.showToast({ title: `${key}功能开发中`, icon: 'none' })
+    }
   }
 
-  // Mock 用户数据
   const user = {
     avatar: '👤',
     nickname: '用户_8520',
@@ -19,15 +45,14 @@ export default function Profile() {
     isLoggedIn: true
   }
 
-  const statsData = [
-    { label: '已处理', value: '3', key: 'completed' },
-    { label: '处理中', value: '1', key: 'processing' },
-    { label: '咨询次数', value: '2', key: 'consultations' }
+  const statsData: StatItem[] = [
+    { label: '案件数', value: '4', key: 'total', color: 'default' },
+    { label: '进行中', value: '1', key: 'processing', color: 'highlight' },
+    { label: '已完成', value: '3', key: 'completed', color: 'success' }
   ]
 
-  const menuSections = [
+  const menuSections: MenuSection[] = [
     {
-      title: '',
       items: [
         { icon: '📋', label: '我的案例', key: 'cases', arrow: true },
         { icon: '💬', label: '咨询记录', key: 'consultations', arrow: true }
@@ -53,7 +78,8 @@ export default function Profile() {
 
   return (
     <View className="profile-page">
-      <View className="header-section">
+      {/* 用户卡片 */}
+      <View className="user-section">
         <View className="user-card">
           <View className="user-info">
             <View className="avatar-wrapper">
@@ -69,17 +95,23 @@ export default function Profile() {
           </View>
         </View>
 
-        <View className="stats-row">
+        {/* 数据统计 */}
+        <View className="stats-container">
           {statsData.map(stat => (
-            <View key={stat.key} className="stat-item" onClick={() => handleMenuClick(stat.label)}>
-              <Text className="stat-value">{stat.value}</Text>
+            <View
+              key={stat.key}
+              className="stat-item"
+              onClick={() => handleMenuClick(stat.label)}
+            >
+              <Text className={`stat-value ${stat.color}`}>{stat.value}</Text>
               <Text className="stat-label">{stat.label}</Text>
             </View>
           ))}
         </View>
       </View>
 
-      <View className="menu-sections">
+      {/* 菜单列表 */}
+      <View className="menu-container">
         {menuSections.map((section, sectionIndex) => (
           <View key={sectionIndex} className="menu-section">
             {section.title && <Text className="section-title">{section.title}</Text>}
@@ -91,7 +123,9 @@ export default function Profile() {
                   onClick={() => handleMenuClick(item.label)}
                 >
                   <View className="menu-left">
-                    <Text className="menu-icon">{item.icon}</Text>
+                    <View className="menu-icon-wrapper">
+                      <Text className="menu-icon">{item.icon}</Text>
+                    </View>
                     <Text className="menu-label">{item.label}</Text>
                   </View>
                   <View className="menu-right">
@@ -105,12 +139,14 @@ export default function Profile() {
         ))}
       </View>
 
+      {/* 退出登录 */}
       <View className="logout-section">
         <View className="logout-btn" onClick={() => handleMenuClick('退出登录')}>
           <Text className="logout-text">退出登录</Text>
         </View>
       </View>
 
+      {/* 页脚信息 */}
       <View className="footer-info">
         <Text className="footer-text">青岛灵迈科技有限公司</Text>
         <Text className="footer-text">support@lingmai.com</Text>
