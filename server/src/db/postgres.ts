@@ -1,11 +1,13 @@
-import { Pool, PoolClient } from 'pg'
+import { Pool } from 'pg'
+import { config } from '../config'
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'linkmai',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '',
+  host: config.database.host,
+  port: config.database.port,
+  database: config.database.name,
+  user: config.database.user,
+  password: config.database.password,
+  ssl: config.database.ssl ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -72,6 +74,32 @@ export const db = {
     if (!result.rows[0]) return null
 
     // 转换字段名为 camelCase
+    const row = result.rows[0]
+    return {
+      id: row.id,
+      userId: row.user_id,
+      title: row.title,
+      accidentType: row.accident_type,
+      accidentDate: row.accident_date,
+      status: row.status,
+      statusLabel: row.status_label,
+      materialCount: row.material_count,
+      liability: row.liability,
+      compensation: row.compensation,
+      hasReport: row.has_report,
+      isActive: row.is_active,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }
+  },
+
+  async findCaseById(userId: string, caseId: string) {
+    const result = await pool.query(
+      'SELECT * FROM cases WHERE id = $1 AND user_id = $2 LIMIT 1',
+      [caseId, userId]
+    )
+    if (!result.rows[0]) return null
+
     const row = result.rows[0]
     return {
       id: row.id,

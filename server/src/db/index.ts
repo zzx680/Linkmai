@@ -1,10 +1,13 @@
 // 数据库抽象层：统一内存数据库和 PostgreSQL 接口
+import { config } from '../config'
 import { memoryDB } from './memory'
 import { db as postgresDB } from './postgres'
 
-const USE_POSTGRES = process.env.USE_POSTGRES === 'true'
+if (config.database.type !== 'memory' && config.database.type !== 'postgres') {
+  throw new Error(`不支持的数据库类型: ${config.database.type}`)
+}
 
-export const db = USE_POSTGRES ? postgresDB : memoryDB
+export const db = config.database.type === 'postgres' ? postgresDB : memoryDB
 
 // 导出类型定义供其他模块使用
 export interface User {

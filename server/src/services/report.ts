@@ -14,7 +14,10 @@ export interface ReportData {
 /**
  * 生成事故分析报告
  */
-export async function generateReport(facts: CollectedFact[]): Promise<ReportData> {
+export async function generateReport(
+  facts: CollectedFact[],
+  caseId = ''
+): Promise<ReportData> {
   try {
     // 构建 Prompt
     const factsText = facts
