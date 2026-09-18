@@ -13,6 +13,7 @@ export default defineAppConfig({
     backgroundColor: '#F7F4EF'
   },
   tabBar: {
+    custom: true,
     color: '#8E8E93',
     selectedColor: '#C4612F',
     backgroundColor: '#FFFFFF',
@@ -20,27 +21,19 @@ export default defineAppConfig({
     list: [
       {
         pagePath: 'pages/case/index',
-        text: '案件',
-        iconPath: 'assets/icons/case.png',
-        selectedIconPath: 'assets/icons/case-active.png'
+        text: '案件'
       },
       {
         pagePath: 'pages/agent/index',
-        text: 'Agent',
-        iconPath: 'assets/icons/agent.png',
-        selectedIconPath: 'assets/icons/agent-active.png'
+        text: 'Agent'
       },
       {
         pagePath: 'pages/consultation/index',
-        text: '咨询',
-        iconPath: 'assets/icons/consultation.png',
-        selectedIconPath: 'assets/icons/consultation-active.png'
+        text: '咨询'
       },
       {
         pagePath: 'pages/profile/index',
-        text: '我的',
-        iconPath: 'assets/icons/profile.png',
-        selectedIconPath: 'assets/icons/profile-active.png'
+        text: '我的'
       }
     ]
   },
