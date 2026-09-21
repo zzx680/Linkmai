@@ -1,0 +1,107 @@
+@use '../../styles/variables.scss' as *;
+
+.ui-skeleton {
+  background: linear-gradient(90deg,
+    rgba(231, 225, 215, 0.3) 0%,
+    rgba(231, 225, 215, 0.5) 50%,
+    rgba(231, 225, 215, 0.3) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: $radius-sm;
+  overflow: hidden;
+}
+
+.ui-skeleton-animated {
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Types
+.ui-skeleton-text {
+  height: 28px;
+  margin-bottom: $space-xs;
+}
+
+.ui-skeleton-title {
+  height: 40px;
+  margin-bottom: $space-sm;
+  border-radius: $radius-md;
+}
+
+.ui-skeleton-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.ui-skeleton-image {
+  width: 100%;
+  height: 200px;
+  border-radius: $radius-lg;
+}
+
+.ui-skeleton-card {
+  width: 100%;
+  height: 160px;
+  border-radius: $radius-xl;
+}
+
+// Composed layouts
+.ui-skeleton-card-wrapper {
+  padding: $space-lg;
+  background: $bg-white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+}
+
+.ui-skeleton-case-wrapper {
+  padding: $space-lg;
+  background: $bg-white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  margin-bottom: $space-md;
+}
+
+.ui-skeleton-case-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $space-md;
+  gap: $space-md;
+}
+
+.ui-skeleton-case-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $space-lg;
+  padding-top: $space-md;
+  border-top: 1px solid $border-color;
+}
+
+.ui-skeleton-profile-wrapper {
+  background: $bg-white;
+  border-radius: $radius-xl;
+  padding: $space-xl;
+  box-shadow: $shadow-md;
+}
+
+.ui-skeleton-profile-header {
+  display: flex;
+  align-items: center;
+  gap: $space-lg;
+}
+
+.ui-skeleton-profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+}

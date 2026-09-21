@@ -3,7 +3,10 @@ export default defineAppConfig({
     'pages/case/index',
     'pages/agent/index',
     'pages/consultation/index',
-    'pages/profile/index'
+    'pages/profile/index',
+    'pages/case-detail/index',
+    'pages/materials/index',
+    'pages/report/index'
   ],
   window: {
     backgroundTextStyle: 'dark',

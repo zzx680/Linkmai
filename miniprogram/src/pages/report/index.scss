@@ -1,0 +1,378 @@
+@use '../../styles/design-tokens.scss' as *;
+@use '../../styles/mixins.scss' as *;
+
+.report-page {
+  @include page-container;
+  padding-bottom: $space-8;
+}
+
+.report-scroll {
+  height: 100vh;
+}
+
+.page-header {
+  @include flex-between;
+  margin-bottom: $space-6;
+
+  .eyebrow {
+    display: block;
+    color: $color-brand-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 2rpx;
+    margin-bottom: $space-2;
+  }
+
+  .page-title {
+    display: block;
+    @include page-title;
+    margin-bottom: $space-2;
+  }
+
+  .page-description {
+    display: block;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
+  }
+
+  .report-status {
+    @include badge($color-success-bg, $color-success);
+    flex-shrink: 0;
+  }
+}
+
+.preflight-card,
+.generating-state,
+.content-card,
+.recommendation-card,
+.source-card {
+  @include card($shadow-sm);
+}
+
+.preflight-card {
+  padding: $space-8 $space-6;
+  margin-bottom: $space-5;
+
+  .preflight-icon {
+    width: 80rpx;
+    height: 80rpx;
+    @include flex-center;
+    margin-bottom: $space-4;
+    border-radius: 50%;
+    background: $color-brand-light;
+    color: $color-brand-primary;
+    font-size: 42rpx;
+  }
+
+  .preflight-title {
+    display: block;
+    color: $color-text-primary;
+    font-family: $font-family-heading;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $space-2;
+  }
+
+  .preflight-description {
+    display: block;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
+    margin-bottom: $space-6;
+  }
+}
+
+.preflight-list {
+  padding: $space-2 0;
+  border-top: 2rpx solid $color-border-light;
+  border-bottom: 2rpx solid $color-border-light;
+  margin-bottom: $space-6;
+
+  .preflight-row {
+    @include flex-between;
+    padding: $space-3 0;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+
+    .row-value {
+      color: $color-text-primary;
+      font-weight: $font-weight-semibold;
+
+      &.ready { color: $color-success; }
+      &.warning { color: $color-warning; }
+    }
+  }
+}
+
+.error-text {
+  display: block;
+  color: $color-error;
+  font-size: $font-size-sm;
+  margin: -$space-3 0 $space-4;
+}
+
+.generate-button {
+  @include button-primary;
+  width: 100%;
+
+  &.disabled {
+    background: $color-text-tertiary;
+  }
+}
+
+.report-note,
+.scope-banner {
+  display: flex;
+  gap: $space-3;
+  padding: $space-4;
+  border-radius: $radius-lg;
+  color: $color-text-secondary;
+  font-size: $font-size-xs;
+  line-height: $line-height-relaxed;
+}
+
+.report-note {
+  background: $color-bg-subtle;
+
+  .note-icon {
+    width: 32rpx;
+    height: 32rpx;
+    @include flex-center;
+    border: 2rpx solid $color-text-tertiary;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+
+.generating-state {
+  padding: $space-12 $space-6;
+  margin-top: $space-12;
+  text-align: center;
+
+  .generating-mark {
+    color: $color-brand-primary;
+    font-size: 100rpx;
+    animation: reportPulse 1.8s ease-in-out infinite;
+    margin-bottom: $space-5;
+  }
+
+  .generating-title {
+    display: block;
+    color: $color-text-primary;
+    font-family: $font-family-heading;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $space-3;
+  }
+
+  .generating-description {
+    display: block;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
+    margin-bottom: $space-8;
+  }
+}
+
+@keyframes reportPulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.generation-steps {
+  text-align: left;
+  padding: $space-4;
+  background: $color-bg-subtle;
+  border-radius: $radius-lg;
+
+  .generation-step {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 0;
+    color: $color-text-tertiary;
+    font-size: $font-size-sm;
+
+    .step-dot {
+      width: 18rpx;
+      height: 18rpx;
+      border-radius: 50%;
+      background: $color-border-medium;
+    }
+
+    &.active {
+      color: $color-text-primary;
+      .step-dot { background: $color-brand-primary; }
+    }
+  }
+}
+
+.scope-banner {
+  background: $color-info-bg;
+  margin-bottom: $space-8;
+
+  .scope-icon {
+    color: $color-info;
+    font-size: $font-size-lg;
+  }
+
+  .scope-title,
+  .scope-text {
+    display: block;
+  }
+
+  .scope-title {
+    color: $color-info;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $space-1;
+  }
+}
+
+.report-section {
+  margin-bottom: $space-8;
+
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    gap: $space-3;
+    margin-bottom: $space-3;
+
+    .section-index {
+      color: $color-brand-primary;
+      font-family: $font-family-mono;
+      font-size: $font-size-sm;
+    }
+
+    .section-title {
+      color: $color-text-primary;
+      font-family: $font-family-heading;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+.content-card {
+  padding: $space-5;
+
+  .body-paragraph,
+  .muted-text {
+    display: block;
+    color: $color-text-secondary;
+    font-size: $font-size-base;
+    line-height: $line-height-relaxed;
+    margin-bottom: $space-3;
+
+    &:last-child { margin-bottom: 0; }
+  }
+
+  .muted-text { color: $color-text-tertiary; }
+
+  .card-caption {
+    display: block;
+    color: $color-text-tertiary;
+    font-size: $font-size-xs;
+    margin-bottom: $space-3;
+    text-transform: uppercase;
+    letter-spacing: 1rpx;
+  }
+}
+
+.liability-card {
+  display: flex;
+  gap: $space-4;
+  border-left: 6rpx solid $color-brand-primary;
+
+  .liability-mark {
+    font-size: 48rpx;
+    flex-shrink: 0;
+  }
+
+  .liability-copy { flex: 1; }
+}
+
+.compensation-card {
+  background: linear-gradient(135deg, $color-bg-elevated 0%, $color-brand-light 100%);
+}
+
+.recommendation-card {
+  padding: $space-3 $space-5;
+
+  .recommendation-row {
+    display: flex;
+    gap: $space-4;
+    padding: $space-4 0;
+    border-bottom: 1rpx solid $color-border-light;
+
+    &:last-child { border-bottom: none; }
+
+    .recommendation-number {
+      color: $color-brand-primary;
+      font-family: $font-family-mono;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+    }
+
+    .recommendation-text {
+      flex: 1;
+      color: $color-text-secondary;
+      font-size: $font-size-base;
+      line-height: $line-height-relaxed;
+    }
+  }
+}
+
+.source-card {
+  padding: $space-5;
+  margin-bottom: $space-5;
+  background: $color-text-primary;
+  color: $color-text-inverse;
+
+  .source-title,
+  .source-text {
+    display: block;
+  }
+
+  .source-title {
+    font-family: $font-family-heading;
+    font-size: $font-size-md;
+    margin-bottom: $space-2;
+  }
+
+  .source-text {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
+    margin-bottom: $space-5;
+  }
+
+  .source-actions {
+    display: flex;
+    gap: $space-5;
+    color: $color-brand-light;
+    font-size: $font-size-sm;
+  }
+}
+
+.export-actions {
+  display: flex;
+  gap: $space-3;
+  padding-bottom: $space-8;
+
+  .export-button {
+    @include button-base;
+    flex: 1;
+
+    &.secondary {
+      color: $color-text-primary;
+      background: $color-bg-elevated;
+      border: 2rpx solid $color-border-medium;
+    }
+
+    &.primary {
+      color: $color-text-inverse;
+      background: $color-brand-primary;
+    }
+  }
+}

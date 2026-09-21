@@ -1,6 +1,7 @@
 import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
+import { SkeletonCaseCard } from '../../components'
 import './index.scss'
 
 // Mock 数据
@@ -39,9 +40,17 @@ const mockCases = [
 
 export default function Case() {
   const [cases, setCases] = useState(mockCases)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // 模拟加载数据
+    setTimeout(() => {
+      setLoading(false)
+    }, 1000)
+  }, [])
 
   const handleCaseClick = (caseId: string) => {
-    Taro.showToast({ title: '案例详情开发中', icon: 'none' })
+    Taro.navigateTo({ url: `/pages/case-detail/index?id=${caseId}` })
   }
 
   const handleNewCase = () => {
@@ -57,7 +66,13 @@ export default function Case() {
         </View>
       </View>
 
-      {cases.length === 0 ? (
+      {loading ? (
+        <View className="cases-list">
+          <SkeletonCaseCard />
+          <SkeletonCaseCard />
+          <SkeletonCaseCard />
+        </View>
+      ) : cases.length === 0 ? (
         <View className="empty-state">
           <Text className="empty-icon">📋</Text>
           <Text className="empty-title">还没有案例</Text>

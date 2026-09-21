@@ -1,5 +1,6 @@
-import { View, Text, Button } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import { Avatar, Card, Badge } from '../../components'
 import './index.scss'
 
 export default function Profile() {
@@ -54,20 +55,19 @@ export default function Profile() {
   return (
     <View className="profile-page">
       <View className="header-section">
-        <View className="user-card">
+        <Card className="user-card" padding="large" shadow="medium">
           <View className="user-info">
-            <View className="avatar-wrapper">
-              <Text className="avatar">{user.avatar}</Text>
-            </View>
+            <Avatar name={user.nickname} size={120} />
             <View className="user-details">
               <Text className="nickname">{user.nickname}</Text>
               <Text className="phone">{user.phone}</Text>
+              <Badge variant="success" size="small">已认证</Badge>
             </View>
           </View>
           <View className="edit-btn" onClick={() => handleMenuClick('编辑资料')}>
-            <Text className="edit-text">编辑</Text>
+            <Text className="edit-text">编辑资料</Text>
           </View>
-        </View>
+        </Card>
 
         <View className="stats-row">
           {statsData.map(stat => (
@@ -83,24 +83,28 @@ export default function Profile() {
         {menuSections.map((section, sectionIndex) => (
           <View key={sectionIndex} className="menu-section">
             {section.title && <Text className="section-title">{section.title}</Text>}
-            <View className="menu-group">
-              {section.items.map(item => (
-                <View
-                  key={item.key}
-                  className="menu-item"
-                  onClick={() => handleMenuClick(item.label)}
-                >
-                  <View className="menu-left">
-                    <Text className="menu-icon">{item.icon}</Text>
-                    <Text className="menu-label">{item.label}</Text>
+            <Card className="menu-group" padding="none" shadow="small">
+              {section.items.map((item, index) => (
+                <View key={item.key}>
+                  <View
+                    className="menu-item"
+                    onClick={() => handleMenuClick(item.label)}
+                  >
+                    <View className="menu-left">
+                      <View className="menu-icon-wrapper">
+                        <Text className="menu-icon">{item.icon}</Text>
+                      </View>
+                      <Text className="menu-label">{item.label}</Text>
+                    </View>
+                    <View className="menu-right">
+                      {item.value && <Text className="menu-value">{item.value}</Text>}
+                      {item.arrow && <Text className="menu-arrow">›</Text>}
+                    </View>
                   </View>
-                  <View className="menu-right">
-                    {item.value && <Text className="menu-value">{item.value}</Text>}
-                    {item.arrow && <Text className="menu-arrow">›</Text>}
-                  </View>
+                  {index < section.items.length - 1 && <View className="menu-divider" />}
                 </View>
               ))}
-            </View>
+            </Card>
           </View>
         ))}
       </View>

@@ -4,12 +4,23 @@ import Taro from '@tarojs/taro'
 import { useAgentStore } from '../../store/agent'
 import { sendMessage, createConversation } from '../../utils/agent'
 import { chooseImage, uploadToOSS } from '../../utils/upload'
+import { Loading } from '../../components'
 import './index.scss'
+
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  images?: string[]
+  timestamp: number
+  error?: boolean
+}
 
 export default function Agent() {
   const { conversationId, messages, isLoading, setConversationId, addMessage, setLoading } = useAgentStore()
   const [inputText, setInputText] = useState('')
   const [uploadingImages, setUploadingImages] = useState<string[]>([])
+  const [imagePreviewVisible, setImagePreviewVisible] = useState(false)
   const scrollViewRef = useRef(null)
 
   useEffect(() => {
@@ -51,6 +62,9 @@ export default function Agent() {
     setUploadingImages([])
     setLoading(true)
 
+    // Auto scroll after message sent
+    setTimeout(() => scrollToBottom(), 100)
+
     try {
       const response = await sendMessage(conversationId, inputText, uploadingImages)
 
@@ -60,10 +74,65 @@ export default function Agent() {
         content: response.message,
         timestamp: Date.now()
       })
+
+      setTimeout(() => scrollToBottom(), 100)
     } catch (err) {
       Taro.showToast({ title: '发送失败', icon: 'none' })
+
+      // Add retry button to failed message
+      addMessage({
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '消息发送失败，请重试',
+        timestamp: Date.now(),
+        error: true
+      } as any)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const scrollToBottom = () => {
+    if (messages.length > 0) {
+      const lastMsgId = `msg-${messages.length - 1}`
+      Taro.createSelectorQuery()
+        .select(`#${lastMsgId}`)
+        .boundingClientRect()
+        .exec(() => {
+          // Scroll triggered
+        })
+    }
+  }
+
+  const handleImagePreview = (currentUrl: string, allUrls: string[]) => {
+    Taro.previewImage({
+      current: currentUrl,
+      urls: allUrls
+    })
+  }
+
+  const handleRetry = async (messageId: string) => {
+    // Find the failed message and retry
+    const failedMessage = messages.find(m => m.id === messageId)
+    if (failedMessage && failedMessage.role === 'user') {
+      setLoading(true)
+      try {
+        const response = await sendMessage(
+          conversationId!,
+          failedMessage.content,
+          failedMessage.images || []
+        )
+        addMessage({
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: response.message,
+          timestamp: Date.now()
+        })
+      } catch (err) {
+        Taro.showToast({ title: '重试失败', icon: 'none' })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -102,14 +171,33 @@ export default function Agent() {
               {msg.images && msg.images.length > 0 && (
                 <View className="message-images">
                   {msg.images.map((img, i) => (
-                    <Image key={i} src={img} className="message-image" mode="aspectFill" />
+                    <Image
+                      key={i}
+                      src={img}
+                      className="message-image"
+                      mode="aspectFill"
+                      onClick={() => handleImagePreview(img, msg.images!)}
+                    />
                   ))}
                 </View>
               )}
               <Text className="message-text">{msg.content}</Text>
+              {(msg as any).error && (
+                <View className="retry-button" onClick={() => handleRetry(msg.id)}>
+                  <Text className="retry-text">重试</Text>
+                </View>
+              )}
             </View>
           </View>
         ))}
+
+        {isLoading && (
+          <View className="message assistant">
+            <View className="message-bubble typing">
+              <Loading size="small" />
+            </View>
+          </View>
+        )}
 
         {messages.length === 1 && (
           <View className="quick-options">

@@ -1,5 +1,7 @@
 import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import { useState, useEffect } from 'react'
+import { Card, Badge, Avatar, SkeletonCard } from '../../components'
 import './index.scss'
 
 // Mock 律师数据
@@ -43,6 +45,16 @@ const mockLawyers = [
 ]
 
 export default function Consultation() {
+  const [loading, setLoading] = useState(true)
+  const [lawyers, setLawyers] = useState(mockLawyers)
+
+  useEffect(() => {
+    // 模拟加载数据
+    setTimeout(() => {
+      setLoading(false)
+    }, 800)
+  }, [])
+
   const handleLawyerClick = (lawyerId: string) => {
     Taro.showToast({ title: '咨询功能开发中', icon: 'none' })
   }
@@ -54,7 +66,7 @@ export default function Consultation() {
         <Text className="subtitle">专业交通事故律师为您服务</Text>
       </View>
 
-      <View className="info-banner">
+      <Card className="info-banner" padding="medium" shadow="small">
         <View className="banner-content">
           <Text className="banner-icon">⚖️</Text>
           <View className="banner-text">
@@ -62,26 +74,35 @@ export default function Consultation() {
             <Text className="banner-desc">复杂案件可转接合作律所专业处理</Text>
           </View>
         </View>
-      </View>
+      </Card>
 
       <View className="section-title">
         <Text className="section-text">在线律师</Text>
         <View className="online-indicator">
           <View className="online-dot" />
-          <Text className="online-text">3位在线</Text>
+          <Text className="online-text">{lawyers.filter(l => l.status === 'online').length}位在线</Text>
         </View>
       </View>
 
-      <View className="lawyers-list">
-        {mockLawyers.map(lawyer => (
-          <View
+      {loading ? (
+        <View className="lawyers-list">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </View>
+      ) : (
+        <View className="lawyers-list">
+          {lawyers.map(lawyer => (
+          <Card
             key={lawyer.id}
             className="lawyer-card"
+            padding="large"
+            shadow="medium"
             onClick={() => handleLawyerClick(lawyer.id)}
           >
             <View className="lawyer-header">
               <View className="avatar-wrapper">
-                <Text className="avatar">{lawyer.avatar}</Text>
+                <Avatar name={lawyer.name} size={88} />
                 {lawyer.status === 'online' && <View className="status-dot" />}
               </View>
               <View className="lawyer-info">
@@ -103,9 +124,9 @@ export default function Consultation() {
 
             <View className="specialties">
               {lawyer.specialties.map((tag, index) => (
-                <View key={index} className="specialty-tag">
-                  <Text className="tag-text">{tag}</Text>
-                </View>
+                <Badge key={index} variant="primary" size="small" className="specialty-tag">
+                  {tag}
+                </Badge>
               ))}
             </View>
 
@@ -117,9 +138,10 @@ export default function Consultation() {
                 </Text>
               </View>
             </View>
-          </View>
-        ))}
-      </View>
+          </Card>
+          ))}
+        </View>
+      )}
 
       <View className="service-cards">
         <Text className="cards-title">常见咨询场景</Text>

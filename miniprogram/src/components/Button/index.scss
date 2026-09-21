@@ -1,0 +1,114 @@
+@use '../../styles/variables.scss' as *;
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-xs;
+  border-radius: $radius-pill;
+  font-weight: 500;
+  transition: all $transition-fast;
+  position: relative;
+  overflow: hidden;
+
+  &:active:not(.ui-button-disabled):not(.ui-button-loading) {
+    transform: scale(0.98);
+  }
+}
+
+// Sizes
+.ui-button-small {
+  height: 56px;
+  padding: 0 $space-lg;
+  font-size: $font-sm;
+}
+
+.ui-button-medium {
+  height: 72px;
+  padding: 0 $space-xl;
+  font-size: $font-md;
+}
+
+.ui-button-large {
+  height: 88px;
+  padding: 0 $space-2xl;
+  font-size: $font-lg;
+}
+
+// Variants
+.ui-button-primary {
+  background: $accent-primary;
+  color: $bg-white;
+  box-shadow: $shadow-sm;
+
+  &:active:not(.ui-button-disabled):not(.ui-button-loading) {
+    background: $accent-hover;
+    box-shadow: $shadow-md;
+  }
+}
+
+.ui-button-secondary {
+  background: $bg-surface;
+  color: $accent-primary;
+  border: 2px solid $border-color;
+
+  &:active:not(.ui-button-disabled):not(.ui-button-loading) {
+    background: $accent-tint;
+    border-color: $accent-primary;
+  }
+}
+
+.ui-button-text {
+  background: transparent;
+  color: $accent-primary;
+
+  &:active:not(.ui-button-disabled):not(.ui-button-loading) {
+    background: rgba(196, 97, 47, 0.08);
+  }
+}
+
+.ui-button-danger {
+  background: #ff3b30;
+  color: $bg-white;
+  box-shadow: $shadow-sm;
+
+  &:active:not(.ui-button-disabled):not(.ui-button-loading) {
+    background: #e63329;
+    box-shadow: $shadow-md;
+  }
+}
+
+// States
+.ui-button-block {
+  width: 100%;
+  display: flex;
+}
+
+.ui-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-button-loading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.ui-button-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: 1.2em;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ui-button-text {
+  flex: 1;
+}

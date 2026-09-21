@@ -1,0 +1,208 @@
+@use './design-tokens.scss' as *;
+
+// ============================================
+// 通用 Mixins
+// ============================================
+
+// 文本截断
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 卡片样式
+@mixin card($shadow: $shadow-sm) {
+  background: $color-bg-elevated;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+}
+
+// 页面容器
+@mixin page-container {
+  min-height: 100vh;
+  background: $color-bg-base;
+  padding: $space-4;
+}
+
+// 页面标题
+@mixin page-title {
+  font-family: $font-family-heading;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  margin-bottom: $space-6;
+}
+
+// 模块标题
+@mixin section-title {
+  font-family: $font-family-heading;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  margin-bottom: $space-4;
+}
+
+// 标签样式
+@mixin badge($bg-color, $text-color) {
+  display: inline-flex;
+  align-items: center;
+  padding: $space-1 $space-3;
+  background: $bg-color;
+  color: $text-color;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-full;
+}
+
+// 按钮基础样式
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-3 $space-6;
+  border-radius: $radius-lg;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+  border: none;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background: $color-brand-primary;
+  color: $color-text-inverse;
+
+  &:hover {
+    background: $color-brand-hover;
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background: $color-bg-elevated;
+  color: $color-text-primary;
+  border: 2rpx solid $color-border-medium;
+
+  &:hover {
+    border-color: $color-brand-primary;
+    color: $color-brand-primary;
+  }
+}
+
+// 输入框样式
+@mixin input-base {
+  width: 100%;
+  padding: $space-4;
+  background: $color-bg-elevated;
+  border: 2rpx solid $color-border-light;
+  border-radius: $radius-md;
+  font-size: $font-size-base;
+  color: $color-text-primary;
+  transition: border-color $transition-base;
+
+  &:focus {
+    border-color: $color-brand-primary;
+    outline: none;
+  }
+
+  &::placeholder {
+    color: $color-text-placeholder;
+  }
+}
+
+// 分割线
+@mixin divider {
+  height: 2rpx;
+  background: $color-border-light;
+  border: none;
+  margin: $space-4 0;
+}
+
+// Skeleton 加载效果
+@mixin skeleton {
+  background: linear-gradient(
+    90deg,
+    $color-border-light 25%,
+    lighten($color-border-light, 5%) 50%,
+    $color-border-light 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// 状态徽章
+@mixin status-badge($status) {
+  @if $status == 'collecting' {
+    @include badge($color-warning-bg, $color-status-collecting);
+  } @else if $status == 'confirming' {
+    @include badge(#FFF4E6, $color-status-confirming);
+  } @else if $status == 'analyzing' {
+    @include badge($color-info-bg, $color-status-analyzing);
+  } @else if $status == 'ready' {
+    @include badge($color-success-bg, $color-status-ready);
+  } @else if $status == 'archived' {
+    @include badge(#F5F5F5, $color-status-archived);
+  }
+}
+
+// 悬浮动画
+@mixin hover-lift {
+  transition: all $transition-base;
+
+  &:active {
+    transform: translateY(2rpx);
+  }
+}
+
+// 渐入动画
+@mixin fade-in($delay: 0s) {
+  animation: fadeIn $transition-slow ease-out $delay both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

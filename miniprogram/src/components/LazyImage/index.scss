@@ -1,0 +1,31 @@
+@use '../../styles/variables.scss' as *;
+
+.lazy-image {
+  display: block;
+  transition: opacity 0.3s ease-in-out;
+
+  &.loading {
+    opacity: 0.6;
+    background: linear-gradient(90deg,
+      rgba(231, 225, 215, 0.3) 25%,
+      rgba(231, 225, 215, 0.5) 50%,
+      rgba(231, 225, 215, 0.3) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  &.error {
+    opacity: 0.3;
+    filter: grayscale(100%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

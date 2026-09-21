@@ -1,0 +1,438 @@
+@use '../../styles/design-tokens.scss' as *;
+@use '../../styles/mixins.scss' as *;
+
+.materials-page {
+  @include page-container;
+  padding-bottom: $space-8;
+}
+
+.page-header {
+  @include flex-between;
+  margin-bottom: $space-6;
+
+  .eyebrow {
+    display: block;
+    color: $color-brand-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 1rpx;
+    margin-bottom: $space-2;
+    text-transform: uppercase;
+  }
+
+  .page-title {
+    display: block;
+    @include page-title;
+    margin-bottom: $space-2;
+  }
+
+  .page-description {
+    display: block;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
+    max-width: 580rpx;
+  }
+
+  .count-badge {
+    @include badge($color-brand-light, $color-brand-primary);
+    flex-shrink: 0;
+  }
+}
+
+.notice-card {
+  display: flex;
+  gap: $space-3;
+  padding: $space-4;
+  margin-bottom: $space-8;
+  background: $color-success-bg;
+  border-radius: $radius-lg;
+
+  .notice-icon {
+    width: 40rpx;
+    height: 40rpx;
+    @include flex-center;
+    border-radius: 50%;
+    color: $color-text-inverse;
+    background: $color-success;
+    font-size: $font-size-sm;
+    flex-shrink: 0;
+  }
+
+  .notice-content {
+    flex: 1;
+
+    .notice-title {
+      display: block;
+      color: $color-success;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      margin-bottom: $space-1;
+    }
+
+    .notice-text {
+      display: block;
+      color: $color-text-secondary;
+      font-size: $font-size-xs;
+      line-height: $line-height-relaxed;
+    }
+  }
+}
+
+.section-heading {
+  @include flex-between;
+  align-items: flex-end;
+  margin-bottom: $space-3;
+
+  .section-title {
+    @include section-title;
+    margin-bottom: 0;
+  }
+
+  .section-caption {
+    color: $color-text-tertiary;
+    font-size: $font-size-xs;
+  }
+}
+
+.type-scroller {
+  width: 100%;
+  margin-bottom: $space-4;
+}
+
+.type-list {
+  display: flex;
+  gap: $space-3;
+  padding-bottom: $space-2;
+}
+
+.type-card {
+  width: 180rpx;
+  min-height: 168rpx;
+  padding: $space-3;
+  background: $color-bg-elevated;
+  border: 2rpx solid $color-border-light;
+  border-radius: $radius-lg;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &.selected {
+    border-color: $color-brand-primary;
+    background: $color-brand-light;
+    box-shadow: 0 0 0 4rpx rgba($color-brand-primary, 0.08);
+  }
+
+  .type-icon,
+  .type-label,
+  .type-description {
+    display: block;
+  }
+
+  .type-icon {
+    font-size: 40rpx;
+    margin-bottom: $space-2;
+  }
+
+  .type-label {
+    color: $color-text-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $space-1;
+  }
+
+  .type-description {
+    color: $color-text-tertiary;
+    font-size: 20rpx;
+    line-height: $line-height-normal;
+  }
+}
+
+.upload-panel {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  padding: $space-5;
+  margin-bottom: $space-8;
+  background: $color-text-primary;
+  border-radius: $radius-lg;
+  color: $color-text-inverse;
+  transition: transform $transition-fast;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .upload-icon {
+    width: 72rpx;
+    height: 72rpx;
+    @include flex-center;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: $radius-md;
+    font-size: 48rpx;
+    font-weight: 300;
+  }
+
+  .upload-copy {
+    flex: 1;
+
+    .upload-title,
+    .upload-subtitle {
+      display: block;
+    }
+
+    .upload-title {
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      margin-bottom: $space-1;
+    }
+
+    .upload-subtitle {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: $font-size-xs;
+    }
+  }
+
+  .upload-arrow {
+    color: $color-brand-light;
+    font-size: $font-size-xl;
+  }
+}
+
+.upload-progress {
+  padding: $space-4;
+  margin-top: -$space-6;
+  margin-bottom: $space-6;
+  background: $color-bg-elevated;
+  border-radius: $radius-md;
+  box-shadow: $shadow-xs;
+
+  .progress-line {
+    @include flex-between;
+    color: $color-text-secondary;
+    font-size: $font-size-xs;
+    margin-bottom: $space-2;
+  }
+
+  .progress-track {
+    height: 8rpx;
+    background: $color-border-light;
+    border-radius: $radius-full;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: $color-brand-primary;
+      border-radius: inherit;
+      transition: width $transition-base;
+    }
+  }
+}
+
+.materials-heading {
+  margin-top: $space-2;
+}
+
+.empty-card {
+  @include card;
+  padding: $space-10 $space-6;
+  text-align: center;
+
+  .empty-icon {
+    display: block;
+    font-size: 96rpx;
+    opacity: 0.65;
+    margin-bottom: $space-4;
+  }
+
+  .empty-title,
+  .empty-text {
+    display: block;
+  }
+
+  .empty-title {
+    color: $color-text-primary;
+    font-family: $font-family-heading;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $space-2;
+  }
+
+  .empty-text {
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
+  }
+}
+
+.materials-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.material-card {
+  @include card($shadow-sm);
+  overflow: hidden;
+
+  .material-summary {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3;
+  }
+
+  .material-thumbnail {
+    width: 104rpx;
+    height: 104rpx;
+    border-radius: $radius-md;
+    background: $color-bg-subtle;
+    flex-shrink: 0;
+  }
+
+  .material-info {
+    flex: 1;
+    min-width: 0;
+
+    .material-title-row {
+      display: flex;
+      align-items: center;
+      gap: $space-2;
+      margin-bottom: $space-2;
+    }
+
+    .material-icon {
+      font-size: $font-size-md;
+    }
+
+    .material-title {
+      color: $color-text-primary;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+    }
+
+    .material-meta {
+      display: block;
+      color: $color-text-tertiary;
+      font-size: $font-size-xs;
+      @include text-truncate;
+    }
+  }
+
+  .material-status {
+    @include badge(#FFF4E6, $color-status-confirming);
+    flex-shrink: 0;
+
+    &.confirmed {
+      @include badge($color-success-bg, $color-success);
+    }
+  }
+}
+
+.material-detail {
+  padding: $space-4;
+  border-top: 2rpx solid $color-border-light;
+  background: $color-bg-subtle;
+
+  .detail-heading {
+    @include flex-between;
+    margin-bottom: $space-3;
+    color: $color-text-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+
+    .detail-hint {
+      color: $color-text-tertiary;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-normal;
+    }
+  }
+
+  .no-fields {
+    display: block;
+    padding: $space-4 0;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 0;
+    border-bottom: 1rpx solid $color-border-light;
+
+    .field-copy {
+      flex: 1;
+      min-width: 0;
+
+      .field-label,
+      .field-input {
+        display: block;
+      }
+
+      .field-label {
+        color: $color-text-tertiary;
+        font-size: $font-size-xs;
+        margin-bottom: $space-1;
+      }
+
+      .field-input {
+        width: 100%;
+        min-height: 56rpx;
+        padding: 0 $space-2;
+        color: $color-text-primary;
+        background: $color-bg-elevated;
+        border: 2rpx solid $color-border-light;
+        border-radius: $radius-sm;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+
+        &.low-confidence {
+          color: $color-warning;
+          border-color: rgba($color-warning, 0.45);
+          background: $color-warning-bg;
+        }
+      }
+    }
+
+    .confidence {
+      @include badge($color-info-bg, $color-info);
+      flex-shrink: 0;
+
+      &.low {
+        @include badge($color-warning-bg, $color-warning);
+      }
+
+      &.high {
+        @include badge($color-success-bg, $color-success);
+      }
+    }
+  }
+
+  .detail-actions {
+    display: flex;
+    gap: $space-3;
+    margin-top: $space-4;
+
+    .text-action,
+    .confirm-action {
+      flex: 1;
+      padding: $space-3;
+      border-radius: $radius-md;
+      text-align: center;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+    }
+
+    .text-action {
+      color: $color-text-secondary;
+      background: $color-bg-elevated;
+      border: 2rpx solid $color-border-light;
+    }
+
+    .confirm-action {
+      color: $color-text-inverse;
+      background: $color-brand-primary;
+    }
+  }
+}
