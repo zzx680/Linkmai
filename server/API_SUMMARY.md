@@ -27,15 +27,19 @@
 - `POST /api/upload/image` - 上传图片到 OSS
 - `POST /api/upload/video` - 上传视频到 OSS
 
-### 5. 报告生成 `/api/reports`
-- `POST /api/reports/generate` - 生成事故分析报告
-- `GET /api/reports/current/text` - 获取报告文本
+### 5. 报告与付费解锁 `/api/reports`, `/api/cases`, `/api/payment-orders`
+- `GET /api/cases/current/entitlement` - 获取当前案件权益状态与可用功能
+- `POST /api/cases/:caseId/payment-orders` - 创建或幂等重试案件支付订单，可传 `Idempotency-Key`
+- `GET /api/payment-orders/:orderId` - 查询当前用户的订单状态
+- `POST /api/payments/wechat/notify` - 微信支付 v3 异步回调（服务端验签后更新权益）
+- `GET /api/reports/:caseId` - 读取完整报告；未解锁时返回 `402 PAYMENT_REQUIRED`
+- 报告导出入口在权益校验后返回未实现状态
 
-**报告内容包括**：
-- 事故经过分析
-- 责任认定
-- 赔偿建议
-- 处理建议
+支付金额由服务端的 `PAYMENT_AMOUNT_CENTS` 与 `PAYMENT_CURRENCY` 决定。开发环境默认 `PAYMENT_PROVIDER=mock`，仅创建待支付订单，不会伪造支付成功；生产环境必须配置 PostgreSQL 和微信支付 v3 参数，并设置 `PAYMENT_PROVIDER=wechat`。
+
+### 6. 报告生成 `/api/reports`
+- `POST /api/reports/generate` - 生成案件报告
+
 
 ## 已集成的服务
 

@@ -28,4 +28,20 @@ export const config = {
     apiKey: process.env.DEEPSEEK_API_KEY || '',
     apiUrl: process.env.DEEPSEEK_API_URL || process.env.DEEPSEEK_API_BASE || 'https://api.deepseek.com/v1',
   },
+  payment: {
+    amountCents: parseInt(process.env.PAYMENT_AMOUNT_CENTS || '4990', 10),
+    currency: process.env.PAYMENT_CURRENCY || 'CNY',
+    orderExpiresMinutes: parseInt(process.env.PAYMENT_ORDER_EXPIRES_MINUTES || '15', 10),
+    provider: process.env.PAYMENT_PROVIDER || 'mock',
+    wechat: {
+      appId: process.env.WECHAT_APP_ID || '',
+      mchId: process.env.WECHAT_MCH_ID || '',
+      serialNo: process.env.WECHAT_MCH_SERIAL_NO || '',
+      privateKey: process.env.WECHAT_MCH_PRIVATE_KEY || '',
+      apiV3Key: process.env.WECHAT_API_V3_KEY || '',
+      platformPublicKey: process.env.WECHAT_PLATFORM_PUBLIC_KEY || '',
+      platformSerialNo: process.env.WECHAT_PLATFORM_SERIAL_NO || '',
+      notifyUrl: process.env.WECHAT_PAY_NOTIFY_URL || '',
+    },
+  },
 }

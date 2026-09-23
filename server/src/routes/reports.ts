@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { db } from '../db'
 import { generateReport } from '../services/report'
 import { CollectedFact } from '../services/agent'
+import { requirePaidEntitlement } from '../services/payment'
 
 const router = Router()
 
@@ -73,6 +74,22 @@ router.get('/:caseId', async (req, res) => {
       return res.status(404).json({ success: false, error: '报告尚未生成' })
     }
 
+    try {
+      await requirePaidEntitlement(userId, caseId)
+    } catch (paymentError) {
+      if ((paymentError as Error).message === 'PAYMENT_REQUIRED') {
+        const entitlement = (paymentError as Error & { entitlement?: { amountCents: number; currency: string } }).entitlement!
+        return res.status(402).json({
+          error: 'PAYMENT_REQUIRED',
+          message: '请先解锁本案件的完整处理方案',
+          caseId,
+          amountCents: entitlement.amountCents,
+          currency: entitlement.currency,
+        })
+      }
+      throw paymentError
+    }
+
     res.json({ success: true, data: report })
   } catch (err: any) {
     console.error('报告查询失败:', err)
@@ -103,6 +120,16 @@ router.post('/:caseId/export', async (req, res) => {
   const caseData = await db.findCaseById(userId, caseId)
   if (!caseData) {
     return res.status(404).json({ success: false, error: '未找到案件' })
+  }
+
+  try {
+    await requirePaidEntitlement(userId, caseId)
+  } catch (paymentError) {
+    if ((paymentError as Error).message === 'PAYMENT_REQUIRED') {
+      const entitlement = (paymentError as Error & { entitlement?: { amountCents: number; currency: string } }).entitlement!
+      return res.status(402).json({ error: 'PAYMENT_REQUIRED', message: '请先解锁本案件的完整处理方案', caseId, amountCents: entitlement.amountCents, currency: entitlement.currency })
+    }
+    throw paymentError
   }
 
   return res.status(501).json({
