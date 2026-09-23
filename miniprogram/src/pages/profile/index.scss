@@ -138,20 +138,6 @@
   flex: 1;
 }
 
-.menu-icon-wrapper {
-  width: 60px;
-  height: 60px;
-  border-radius: $radius-sm;
-  background: linear-gradient(135deg, rgba(196, 97, 47, 0.08), rgba(196, 97, 47, 0.04));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.menu-icon {
-  font-size: 32px;
-}
-
 .menu-label {
   font-size: $font-md;
   color: $text-primary;
@@ -167,13 +153,6 @@
 .menu-value {
   font-size: $font-sm;
   color: $text-secondary;
-}
-
-.menu-arrow {
-  font-size: 40px;
-  color: $text-secondary;
-  opacity: 0.5;
-  margin-left: $space-xs;
 }
 
 .menu-divider {

@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import 'remixicon/fonts/remixicon.css'
 import './app.scss'
 
 class App extends Component {

@@ -4,7 +4,7 @@ import Taro from '@tarojs/taro'
 import { useAgentStore } from '../../store/agent'
 import { sendMessage, createConversation } from '../../utils/agent'
 import { chooseImage, uploadToOSS } from '../../utils/upload'
-import { Loading } from '../../components'
+import { Loading, Icon } from '../../components'
 import './index.scss'
 
 interface Message {
@@ -254,7 +254,7 @@ export default function Agent() {
 
       <View className="input-bar">
         <View className="attach-button" onClick={handleChooseImage}>
-          <Text className="icon">📎</Text>
+          <Icon name="attachment-line" size={20} color="#8E8E93" />
         </View>
         <View className="input-wrapper">
           <Input
@@ -267,7 +267,7 @@ export default function Agent() {
           />
         </View>
         <View className="send-button" onClick={handleSend}>
-          <Text className="icon">➤</Text>
+          <Icon name="send-plane-fill" size={20} color="#FFFFFF" />
         </View>
       </View>
 

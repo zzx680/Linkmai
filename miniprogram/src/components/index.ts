@@ -6,6 +6,7 @@ import Skeleton, { SkeletonCard, SkeletonCaseCard, SkeletonProfile } from './Ske
 import Loading from './Loading'
 import LazyImage from './LazyImage'
 import Empty from './Empty'
+import Icon from './Icon'
 
 export {
   Button,
@@ -18,5 +19,6 @@ export {
   SkeletonProfile,
   Loading,
   LazyImage,
-  Empty
+  Empty,
+  Icon
 }

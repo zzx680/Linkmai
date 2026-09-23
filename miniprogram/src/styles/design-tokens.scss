@@ -1,6 +1,6 @@
 // ============================================
-// 灵迈设计系统 - Editorial + Legal Clarity
-// 参考: Notion 的内容优先 + Harvey 的专业表达
+// 灵迈设计系统 - Professional Business Style
+// 参考: 商务蓝配色 - 专业、可信、现代
 // ============================================
 
 // --------------------------------------------
@@ -33,49 +33,49 @@ $line-height-normal: 1.5;
 $line-height-relaxed: 1.75;
 
 // --------------------------------------------
-// Colors - Warm Professional Palette
+// Colors - Professional Blue Palette
 // --------------------------------------------
 
-// Neutral - 温暖灰阶
-$color-bg-base: #F7F4EF;          // 主背景 - 暖米色
+// Neutral - 冷色灰阶
+$color-bg-base: #F5F7FA;          // 主背景 - 浅灰蓝
 $color-bg-elevated: #FFFFFF;      // 卡片背景 - 纯白
-$color-bg-subtle: #FBF9F5;        // 次要背景
+$color-bg-subtle: #FAFBFC;        // 次要背景
 $color-bg-overlay: rgba(0, 0, 0, 0.4); // 遮罩
 
 // Text - 文本层级
-$color-text-primary: #1F2421;     // 主文本 - 深灰绿
-$color-text-secondary: #5C635D;   // 次要文本
-$color-text-tertiary: #8E9389;    // 三级文本
-$color-text-placeholder: #B8BDB5; // 占位符
+$color-text-primary: #353F4C;     // 主文本 - 深灰
+$color-text-secondary: #6B7280;   // 次要文本
+$color-text-tertiary: #9CA3AF;    // 三级文本
+$color-text-placeholder: #D1D5DB; // 占位符
 $color-text-inverse: #FFFFFF;     // 反色文本
 
 // Border - 边框
-$color-border-light: #E7E1D7;     // 轻边框
-$color-border-medium: #D4CEC1;    // 中等边框
-$color-border-strong: #C4BFB3;    // 强边框
+$color-border-light: #E5E7EB;     // 轻边框
+$color-border-medium: #D1D5DB;    // 中等边框
+$color-border-strong: #9CA3AF;    // 强边框
 
-// Brand - 品牌色（暖橙）
-$color-brand-primary: #C4612F;    // 主品牌色
-$color-brand-hover: #A94E22;      // hover 状态
-$color-brand-light: #F2E3D6;      // 浅色背景
-$color-brand-dark: #8B3D1A;       // 深色变体
+// Brand - 品牌色（商务蓝）
+$color-brand-primary: #1E43A8;    // 主品牌色 - 深海蓝
+$color-brand-hover: #153589;      // hover 状态
+$color-brand-light: #DEE6FC;      // 浅色背景 - 浅蓝灰
+$color-brand-dark: #0F2654;       // 深色变体
 
 // Semantic - 语义色
-$color-success: #2D6A4F;          // 成功 - 深绿
-$color-success-bg: #D8F3DC;       // 成功背景
-$color-warning: #E76F51;          // 警告 - 暖橙红
-$color-warning-bg: #FFE8DE;       // 警告背景
-$color-error: #D62828;            // 错误 - 红色
-$color-error-bg: #FFE5E5;         // 错误背景
-$color-info: #4A7C9E;             // 信息 - 蓝灰
-$color-info-bg: #E1F0F7;          // 信息背景
+$color-success: #059669;          // 成功 - 绿色
+$color-success-bg: #D1FAE5;       // 成功背景
+$color-warning: #F59E0B;          // 警告 - 琥珀色
+$color-warning-bg: #FEF3C7;       // 警告背景
+$color-error: #DC2626;            // 错误 - 红色
+$color-error-bg: #FEE2E2;         // 错误背景
+$color-info: #1E43A8;             // 信息 - 使用品牌蓝
+$color-info-bg: #DEE6FC;          // 信息背景
 
 // Status - 业务状态色
-$color-status-collecting: #E76F51; // 收集中 - 暖橙
-$color-status-confirming: #F4A259; // 确认中 - 琥珀
-$color-status-analyzing: #4A7C9E;  // 分析中 - 蓝灰
-$color-status-ready: #2D6A4F;      // 就绪 - 深绿
-$color-status-archived: #8E9389;   // 已归档 - 灰色
+$color-status-collecting: #F59E0B; // 收集中 - 琥珀
+$color-status-confirming: #3B82F6; // 确认中 - 蓝色
+$color-status-analyzing: #1E43A8;  // 分析中 - 深海蓝
+$color-status-ready: #059669;      // 就绪 - 绿色
+$color-status-archived: #6B7280;   // 已归档 - 灰色
 
 // --------------------------------------------
 // Spacing - 8px 基准系统

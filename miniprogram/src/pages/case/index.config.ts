@@ -1,5 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '案件'
+  navigationBarTitleText: '灵迈'
 })
 
 function definePageConfig(config) {

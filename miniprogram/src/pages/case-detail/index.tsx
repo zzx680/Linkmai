@@ -1,7 +1,7 @@
 import { View, Text, Image, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState } from 'react'
-import { Card, Badge, Button } from '../../components'
+import { Card, Badge, Button, Icon } from '../../components'
 import './index.scss'
 
 interface CaseDetail {
@@ -88,8 +88,8 @@ export default function CaseDetail() {
     Taro.showToast({ title: '报告导出功能开发中', icon: 'none' })
   }
 
-  const handleContactLawyer = () => {
-    Taro.switchTab({ url: '/pages/consultation/index' })
+  const handleContinueCase = () => {
+    Taro.switchTab({ url: '/pages/agent/index' })
   }
 
   return (
@@ -186,7 +186,10 @@ export default function CaseDetail() {
         {activeTab === 'materials' && (
           <View className="materials-tab">
             <Card className="material-section">
-              <Text className="section-title">📋 交警认定书</Text>
+              <View className="section-title">
+                <Icon name="file-list-3-line" size={20} color="#1E43A8" />
+                <Text className="section-title-text">交警认定书</Text>
+              </View>
               <View className="material-grid">
                 {caseDetail.materials.policeReport.map((url, i) => (
                   <Image
@@ -201,7 +204,10 @@ export default function CaseDetail() {
             </Card>
 
             <Card className="material-section">
-              <Text className="section-title">🏥 医疗材料</Text>
+              <View className="section-title">
+                <Icon name="hospital-line" size={20} color="#1E43A8" />
+                <Text className="section-title-text">医疗材料</Text>
+              </View>
               <View className="material-grid">
                 {caseDetail.materials.medical.map((url, i) => (
                   <Image
@@ -216,7 +222,10 @@ export default function CaseDetail() {
             </Card>
 
             <Card className="material-section">
-              <Text className="section-title">🚗 车损材料</Text>
+              <View className="section-title">
+                <Icon name="car-line" size={20} color="#1E43A8" />
+                <Text className="section-title-text">车损材料</Text>
+              </View>
               <View className="material-grid">
                 {caseDetail.materials.vehicleDamage.map((url, i) => (
                   <Image
@@ -231,7 +240,10 @@ export default function CaseDetail() {
             </Card>
 
             <Card className="material-section">
-              <Text className="section-title">📸 现场照片</Text>
+              <View className="section-title">
+                <Icon name="camera-line" size={20} color="#1E43A8" />
+                <Text className="section-title-text">现场照片</Text>
+              </View>
               <View className="material-grid">
                 {caseDetail.materials.scene.map((url, i) => (
                   <Image
@@ -289,8 +301,8 @@ export default function CaseDetail() {
         <Button variant="secondary" size="medium" onClick={handleExportReport}>
           导出报告
         </Button>
-        <Button variant="primary" size="medium" onClick={handleContactLawyer}>
-          联系律师
+        <Button variant="primary" size="medium" onClick={handleContinueCase}>
+          继续处理案件
         </Button>
       </View>
     </View>

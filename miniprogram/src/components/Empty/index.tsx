@@ -1,5 +1,6 @@
 import { View, Text } from '@tarojs/components'
 import { FC, ReactNode } from 'react'
+import Icon from '../Icon'
 import './index.scss'
 
 interface EmptyProps {
@@ -11,7 +12,7 @@ interface EmptyProps {
 }
 
 const Empty: FC<EmptyProps> = ({
-  icon = '📋',
+  icon = 'file-list-line',
   title,
   description,
   action,
@@ -19,7 +20,7 @@ const Empty: FC<EmptyProps> = ({
 }) => {
   return (
     <View className={`lm-empty ${className}`}>
-      <Text className="empty-icon">{icon}</Text>
+      <Icon name={icon} size={64} color="#8E8E93" />
       <Text className="empty-title">{title}</Text>
       {description && <Text className="empty-description">{description}</Text>}
       {action && <View className="empty-action">{action}</View>}

@@ -2,208 +2,248 @@
 
 .case-page {
   min-height: 100vh;
+  box-sizing: border-box;
   background: $bg-primary;
-  padding: $space-lg $space-lg $space-xl;
+  padding: 56rpx $space-lg 160rpx;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $space-xl;
-
-  .title {
-    font-size: $font-2xl;
-    font-weight: 600;
-    color: $text-primary;
-  }
-
-  .new-case-btn {
-    background: $accent-primary;
-    color: white;
-    padding: $space-xs $space-lg;
-    border-radius: 6px;
-    transition: all $transition-fast;
-
-    &:active {
-      transform: scale(0.95);
-      opacity: 0.9;
-    }
-
-    .btn-text {
-      font-size: $font-sm;
-      font-weight: 500;
-      color: white;
-    }
-  }
-}
-
-.empty-state {
+.welcome-block {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: $space-2xl 0;
-  margin-top: 100rpx;
+  margin: 16rpx 4rpx 48rpx;
 
-  .empty-icon {
-    font-size: 80px;
-    margin-bottom: $space-lg;
-    opacity: 0.3;
-  }
-
-  .empty-title {
-    font-size: $font-lg;
-    font-weight: 500;
-    color: $text-primary;
-    margin-bottom: $space-xs;
-  }
-
-  .empty-subtitle {
-    font-size: $font-sm;
+  .welcome-eyebrow {
+    margin-bottom: 10rpx;
     color: $text-secondary;
+    font-size: $font-md;
+    letter-spacing: 1rpx;
   }
-}
 
-.cases-list {
-  display: flex;
-  flex-direction: column;
-  gap: $space-md;
+  .welcome-title {
+    color: $text-primary;
+    font-size: 52rpx;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .welcome-description {
+    margin-top: 18rpx;
+    color: $text-secondary;
+    font-size: $font-sm;
+    line-height: 1.5;
+  }
 }
 
 .case-card {
+  box-sizing: border-box;
+  padding: 32rpx;
   background: $bg-white;
-  border-radius: 8px;
-  padding: $space-lg;
-  box-shadow: 0 1px 3px rgba(31, 36, 33, 0.06);
-  border: 1px solid rgba(231, 225, 215, 0.6);
-  transition: all $transition-fast;
+  border: 1rpx solid rgba(30, 67, 168, 0.08);
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+}
 
-  &:active {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(31, 36, 33, 0.12);
-  }
+.empty-case-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 390rpx;
+  justify-content: center;
+}
 
-  .case-header {
-    display: flex;
-    align-items: center;
-    gap: $space-md;
-    margin-bottom: $space-md;
+.case-card-header {
+  display: flex;
+  align-items: flex-start;
+}
 
-    .case-icon-wrapper {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(196, 97, 47, 0.1), rgba(196, 97, 47, 0.05));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+.case-card-icon,
+.next-step-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 64rpx;
+  height: 64rpx;
+  margin-right: 20rpx;
+  background: $accent-tint;
+  border-radius: $radius-sm;
+}
 
-      .case-icon {
-        font-size: 24px;
-      }
-    }
+.case-card-heading {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
 
-    .case-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4rpx;
+.case-card-kicker,
+.next-step-label {
+  color: $text-secondary;
+  font-size: $font-xs;
+}
 
-      .case-title {
-        font-size: $font-md;
-        font-weight: 500;
-        color: $text-primary;
-        line-height: 1.4;
-      }
+.case-card-title {
+  margin-top: 6rpx;
+  overflow: hidden;
+  color: $text-primary;
+  font-size: $font-lg;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-      .case-date {
-        font-size: $font-xs;
-        color: $text-secondary;
-      }
-    }
+.case-card-meta,
+.case-card-description {
+  margin-top: 10rpx;
+  color: $text-secondary;
+  font-size: $font-xs;
+  line-height: 1.5;
+}
 
-    .status-badge {
-      padding: 4rpx $space-sm;
-      border-radius: 4px;
-      font-size: $font-xs;
+.case-card-copy {
+  display: flex;
+  flex-direction: column;
+  margin: 22rpx 0 34rpx;
+}
 
-      &.completed {
-        background: rgba(34, 197, 94, 0.1);
+.progress-track {
+  height: 10rpx;
+  margin: 34rpx 0 28rpx;
+  overflow: hidden;
+  background: #edf0f5;
+  border-radius: $radius-pill;
+}
 
-        .status-text {
-          color: #16a34a;
-        }
-      }
+.progress-value {
+  height: 100%;
+  background: $accent-primary;
+  border-radius: $radius-pill;
+  transition: width $transition-normal;
+}
 
-      &.analyzing {
-        background: rgba(251, 191, 36, 0.1);
+.case-summary {
+  display: flex;
+  padding: 24rpx 0;
+  border-top: 1rpx solid $border-color;
+  border-bottom: 1rpx solid $border-color;
+}
 
-        .status-text {
-          color: #d97706;
-        }
-      }
-    }
-  }
+.summary-item {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 
-  .case-divider {
-    height: 1px;
-    background: rgba(231, 225, 215, 0.6);
-    margin: $space-md 0;
-  }
-
-  .case-details {
-    display: flex;
-    gap: $space-xl;
-    margin-bottom: $space-md;
-
-    .detail-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4rpx;
-
-      .detail-label {
-        font-size: $font-xs;
-        color: $text-secondary;
-      }
-
-      .detail-value {
-        font-size: $font-md;
-        font-weight: 500;
-        color: $text-primary;
-
-        &.highlight {
-          color: $accent-primary;
-        }
-      }
-    }
-  }
-
-  .case-footer {
-    display: flex;
-    justify-content: flex-end;
-
-    .view-detail {
-      font-size: $font-sm;
-      color: $text-secondary;
-      transition: all $transition-fast;
-    }
-  }
-
-  &:active .view-detail {
-    color: $accent-primary;
-    transform: translateX(4px);
+  & + .summary-item {
+    padding-left: 24rpx;
+    border-left: 1rpx solid $border-color;
   }
 }
 
-.footer-tip {
-  margin-top: $space-xl;
-  text-align: center;
+.summary-label {
+  color: $text-secondary;
+  font-size: $font-xs;
+}
 
-  .tip-text {
-    font-size: $font-xs;
-    color: $text-secondary;
+.summary-value {
+  margin-top: 8rpx;
+  color: $text-primary;
+  font-size: $font-md;
+  font-weight: 600;
+}
+
+.payment-note,
+.unlocked-note {
+  display: flex;
+  align-items: center;
+  margin-top: 24rpx;
+  color: $text-secondary;
+  font-size: $font-xs;
+  line-height: 1.45;
+
+  .icon-component {
+    flex-shrink: 0;
+    margin-right: 10rpx;
+  }
+}
+
+.unlocked-note {
+  color: $accent-primary;
+}
+
+.primary-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  margin-top: 28rpx;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+  background: $accent-primary;
+  border-radius: $radius-sm;
+  color: #fff;
+  font-size: $font-md;
+  font-weight: 600;
+  transition: opacity $transition-fast, transform $transition-fast;
+
+  .icon-component {
+    margin-left: 12rpx;
+  }
+
+  &:active {
+    opacity: 0.88;
+    transform: scale(0.985);
+  }
+}
+
+.next-step-card {
+  display: flex;
+  align-items: center;
+  margin-top: 24rpx;
+  padding: 24rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid $border-color;
+  border-radius: $radius-md;
+}
+
+.next-step-icon {
+  width: 52rpx;
+  height: 52rpx;
+  margin-right: 16rpx;
+  border-radius: $radius-xs;
+}
+
+.next-step-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.next-step-title {
+  margin-top: 6rpx;
+  color: $text-primary;
+  font-size: $font-sm;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.loading-page {
+  .skeleton-welcome {
+    margin-bottom: 48rpx;
+  }
+}
+
+.skeleton-line {
+  height: 30rpx;
+  background: #e8ebf0;
+  border-radius: $radius-xs;
+
+  &.short {
+    width: 180rpx;
+    margin-bottom: 20rpx;
+  }
+
+  &.long {
+    width: 440rpx;
+    height: 58rpx;
   }
 }

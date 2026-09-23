@@ -1,6 +1,6 @@
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { Avatar, Card, Badge } from '../../components'
+import { Avatar, Card, Badge, Icon } from '../../components'
 import './index.scss'
 
 export default function Profile() {
@@ -14,7 +14,7 @@ export default function Profile() {
 
   // Mock 用户数据
   const user = {
-    avatar: '👤',
+    avatar: 'user-line',
     nickname: '用户_8520',
     phone: '138****8520',
     isLoggedIn: true
@@ -23,31 +23,30 @@ export default function Profile() {
   const statsData = [
     { label: '已处理', value: '3', key: 'completed' },
     { label: '处理中', value: '1', key: 'processing' },
-    { label: '咨询次数', value: '2', key: 'consultations' }
+    { label: '已整理材料', value: '6', key: 'materials' }
   ]
 
   const menuSections = [
     {
       title: '',
       items: [
-        { icon: '📋', label: '我的案例', key: 'cases', arrow: true },
-        { icon: '💬', label: '咨询记录', key: 'consultations', arrow: true }
+        { icon: 'file-list-3-line', label: '我的案例', key: 'cases', arrow: true }
       ]
     },
     {
       title: '服务',
       items: [
-        { icon: '⚖️', label: '法律知识库', key: 'knowledge', arrow: true },
-        { icon: '📞', label: '联系客服', key: 'contact', arrow: true }
+        { icon: 'scales-3-line', label: '法律知识库', key: 'knowledge', arrow: true },
+        { icon: 'customer-service-line', label: '联系客服', key: 'contact', arrow: true }
       ]
     },
     {
       title: '设置',
       items: [
-        { icon: '🔔', label: '消息通知', key: 'notifications', value: '开启', arrow: true },
-        { icon: '🔒', label: '隐私设置', key: 'privacy', arrow: true },
-        { icon: '📖', label: '用户协议', key: 'terms', arrow: true },
-        { icon: 'ℹ️', label: '关于灵迈', key: 'about', value: 'v1.0.0', arrow: true }
+        { icon: 'notification-3-line', label: '消息通知', key: 'notifications', value: '开启', arrow: true },
+        { icon: 'lock-line', label: '隐私设置', key: 'privacy', arrow: true },
+        { icon: 'file-text-line', label: '用户协议', key: 'terms', arrow: true },
+        { icon: 'information-line', label: '关于灵迈', key: 'about', value: 'v1.0.0', arrow: true }
       ]
     }
   ]
@@ -91,14 +90,12 @@ export default function Profile() {
                     onClick={() => handleMenuClick(item.label)}
                   >
                     <View className="menu-left">
-                      <View className="menu-icon-wrapper">
-                        <Text className="menu-icon">{item.icon}</Text>
-                      </View>
+                      <Icon name={item.icon} size={20} color="#6B7280" />
                       <Text className="menu-label">{item.label}</Text>
                     </View>
                     <View className="menu-right">
                       {item.value && <Text className="menu-value">{item.value}</Text>}
-                      {item.arrow && <Text className="menu-arrow">›</Text>}
+                      {item.arrow && <Icon name="arrow-right-s-line" size={20} color="#9CA3AF" />}
                     </View>
                   </View>
                   {index < section.items.length - 1 && <View className="menu-divider" />}

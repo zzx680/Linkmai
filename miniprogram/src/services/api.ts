@@ -78,6 +78,20 @@ export function logout() {
   clearToken()
 }
 
+export interface CaseEntitlement {
+  status: 'unpaid' | 'pending' | 'paid' | 'refunded'
+  amountCents: number
+  currency: string
+  paidAt?: string | null
+  features?: {
+    fullReport: boolean
+    compensationEstimate: boolean
+    actionPlan: boolean
+    documentGeneration: boolean
+    rerunAfterMaterialUpdate: boolean
+  }
+}
+
 export interface Case {
   id: string
   userId: string
@@ -93,6 +107,34 @@ export interface Case {
   isActive: boolean
   createdAt: string
   updatedAt: string
+  entitlement?: CaseEntitlement
+  nextAction?: 'create_case' | 'continue_materials' | 'confirm_materials' | 'unlock_full_plan' | 'view_report' | 'continue_case'
+}
+
+export interface PaymentOrder {
+  orderId: string
+  orderNo?: string
+  caseId: string
+  status: 'created' | 'pending' | 'paid' | 'failed' | 'closed' | 'refunded'
+  amountCents?: number
+  currency?: string
+  paidAt?: string | null
+  entitlement?: CaseEntitlement
+}
+
+export interface PaymentOrderResponse {
+  alreadyPaid: boolean
+  orderId?: string
+  orderNo?: string
+  payment?: {
+    timeStamp: string
+    nonceStr: string
+    package: string
+    signType: 'RSA' | 'MD5'
+    paySign: string
+  }
+  expiresAt?: string
+  entitlement?: CaseEntitlement
 }
 
 export async function getCurrentCase(): Promise<Case | null> {
@@ -105,6 +147,23 @@ export async function createCase(): Promise<Case> {
 
 export async function updateCase(updates: Partial<Case>): Promise<Case> {
   return request<Case>({ url: '/cases/current', method: 'PUT', data: updates })
+}
+
+export async function getCurrentCaseEntitlement(): Promise<CaseEntitlement & { caseId: string }> {
+  return request<CaseEntitlement & { caseId: string }>({ url: '/cases/current/entitlement' })
+}
+
+export async function createPaymentOrder(caseId: string, idempotencyKey: string): Promise<PaymentOrderResponse> {
+  return request<PaymentOrderResponse>({
+    url: `/cases/${caseId}/payment-orders`,
+    method: 'POST',
+    data: { currency: 'CNY' },
+    headers: { 'Idempotency-Key': idempotencyKey }
+  })
+}
+
+export async function getPaymentOrder(orderId: string): Promise<PaymentOrder> {
+  return request<PaymentOrder>({ url: `/payment-orders/${orderId}` })
 }
 
 export interface QuickReply {

@@ -246,11 +246,16 @@
 }
 
 .section-title {
-  font-size: $font-md;
-  font-weight: 600;
-  color: $text-primary;
+  display: flex;
+  align-items: center;
+  gap: $space-xs;
   margin-bottom: $space-md;
-  display: block;
+
+  .section-title-text {
+    font-size: $font-md;
+    font-weight: 600;
+    color: $text-primary;
+  }
 }
 
 .material-grid {
