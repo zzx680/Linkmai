@@ -1,5 +1,7 @@
 // 内存存储（MVP 临时方案，生产环境需替换为真实数据库）
 
+import { config } from '../config'
+
 export interface User {
   id: string
   openid: string
@@ -85,6 +87,35 @@ export interface Artifact {
   updatedAt: Date
 }
 
+export interface PaymentOrder {
+  id: string
+  orderNo: string
+  caseId: string
+  userId: string
+  amountCents: number
+  currency: string
+  status: 'created' | 'pending' | 'paid' | 'failed' | 'closed' | 'refunded'
+  wechatTransactionId?: string | null
+  prepayId?: string | null
+  idempotencyKey?: string | null
+  createdAt: Date
+  paidAt?: Date | null
+  updatedAt: Date
+  expiresAt: Date
+}
+
+export interface CaseEntitlement {
+  id: string
+  caseId: string
+  userId: string
+  status: 'unpaid' | 'pending' | 'paid' | 'refunded'
+  amountCents: number
+  currency: string
+  paidAt?: Date | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 // 内存存储
 const users = new Map<string, User>()
 const cases = new Map<string, Case>()
@@ -92,6 +123,11 @@ const conversations = new Map<string, Conversation>()
 const messages = new Map<string, Message>()
 const artifacts = new Map<string, Artifact>()
 const reports = new Map<string, { id: string; caseId: string; content: any; createdAt: Date }>()
+const entitlements = new Map<string, CaseEntitlement>()
+const paymentOrders = new Map<string, PaymentOrder>()
+const paymentOrderByNo = new Map<string, string>()
+const paymentOrderByIdempotency = new Map<string, string>()
+const paymentOrderByTransaction = new Map<string, string>()
 
 // 索引
 const usersByOpenid = new Map<string, string>() // openid -> userId
@@ -145,6 +181,12 @@ export const memoryDB = {
       if (existingCase) {
         existingCase.isActive = false
         existingCase.updatedAt = new Date()
+      }
+      for (const [id, order] of paymentOrders) {
+        if (order.caseId === existingCaseId && ['created', 'pending'].includes(order.status)) {
+          order.status = 'closed'
+          order.updatedAt = new Date()
+        }
       }
     }
 
@@ -285,6 +327,170 @@ export const memoryDB = {
 
   async getReportByCase(caseId: string) {
     return reports.get(caseId) || null
+  },
+
+  // Entitlements and payment orders
+  async getCaseEntitlement(userId: string, caseId: string): Promise<CaseEntitlement | null> {
+    const caseData = cases.get(caseId)
+    if (!caseData || caseData.userId !== userId) return null
+    return entitlements.get(caseId) || null
+  },
+
+  async getOrCreateCaseEntitlement(userId: string, caseId: string): Promise<CaseEntitlement> {
+    const caseData = cases.get(caseId)
+    if (!caseData || caseData.userId !== userId) throw new Error('CASE_NOT_FOUND')
+    const existing = entitlements.get(caseId)
+    if (existing) return existing
+    const now = new Date()
+    const entitlement: CaseEntitlement = {
+      id: `entitlement_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      caseId,
+      userId,
+      status: 'unpaid',
+      amountCents: config.payment.amountCents,
+      currency: config.payment.currency,
+      paidAt: null,
+      createdAt: now,
+      updatedAt: now,
+    }
+    entitlements.set(caseId, entitlement)
+    return entitlement
+  },
+
+  async findPaymentOrderById(userId: string, orderId: string): Promise<PaymentOrder | null> {
+    const order = paymentOrders.get(orderId)
+    return order && order.userId === userId ? order : null
+  },
+
+  async findPaymentOrderByOrderNo(orderNo: string): Promise<PaymentOrder | null> {
+    const orderId = paymentOrderByNo.get(orderNo)
+    return orderId ? paymentOrders.get(orderId) || null : null
+  },
+
+  async setPaymentOrderPrepay(orderId: string, prepayId: string): Promise<PaymentOrder> {
+    const order = paymentOrders.get(orderId)
+    if (!order) throw new Error('ORDER_NOT_FOUND')
+    order.prepayId = prepayId
+    order.status = 'pending'
+    order.updatedAt = new Date()
+    return order
+  },
+
+  async findPaymentOrderByIdempotency(userId: string, caseId: string, key: string): Promise<PaymentOrder | null> {
+    const orderId = paymentOrderByIdempotency.get(`${userId}:${caseId}:${key}`)
+    return orderId ? paymentOrders.get(orderId) || null : null
+  },
+
+  async findActivePaymentOrder(userId: string, caseId: string): Promise<PaymentOrder | null> {
+    const now = Date.now()
+    const order = [...paymentOrders.values()].find((item) =>
+      item.userId === userId && item.caseId === caseId &&
+      (item.status === 'created' || item.status === 'pending') && item.expiresAt.getTime() > now
+    )
+    return order || null
+  },
+
+  async createPaymentOrder(input: {
+    caseId: string
+    userId: string
+    amountCents: number
+    currency: string
+    idempotencyKey?: string
+    prepayId?: string | null
+  }): Promise<PaymentOrder> {
+    const caseData = cases.get(input.caseId)
+    if (!caseData || caseData.userId !== input.userId) throw new Error('CASE_NOT_FOUND')
+    const existing = input.idempotencyKey
+      ? await this.findPaymentOrderByIdempotency(input.userId, input.caseId, input.idempotencyKey)
+      : null
+    if (existing) return existing
+    const now = new Date()
+    const id = `order_${Date.now()}_${Math.random().toString(36).slice(2)}`
+    const order: PaymentOrder = {
+      id,
+      orderNo: `LM${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      caseId: input.caseId,
+      userId: input.userId,
+      amountCents: input.amountCents,
+      currency: input.currency,
+      status: input.prepayId ? 'pending' : 'created',
+      prepayId: input.prepayId || null,
+      wechatTransactionId: null,
+      idempotencyKey: input.idempotencyKey || null,
+      createdAt: now,
+      paidAt: null,
+      updatedAt: now,
+      expiresAt: new Date(now.getTime() + config.payment.orderExpiresMinutes * 60 * 1000),
+    }
+    paymentOrders.set(id, order)
+    paymentOrderByNo.set(order.orderNo, id)
+    if (input.idempotencyKey) paymentOrderByIdempotency.set(`${input.userId}:${input.caseId}:${input.idempotencyKey}`, id)
+    const entitlement = entitlements.get(input.caseId)
+    if (entitlement) {
+      if (entitlement.status !== 'paid') {
+        entitlement.status = 'pending'
+        entitlement.amountCents = input.amountCents
+        entitlement.currency = input.currency
+        entitlement.updatedAt = new Date()
+      }
+    } else {
+      const now = new Date()
+      entitlements.set(input.caseId, {
+        id: `entitlement_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+        caseId: input.caseId,
+        userId: input.userId,
+        status: 'pending',
+        amountCents: input.amountCents,
+        currency: input.currency,
+        paidAt: null,
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+    return order
+  },
+
+  async completePaymentOrder(input: {
+    orderNo: string
+    userId: string
+    amountCents: number
+    currency: string
+    wechatTransactionId: string
+  }): Promise<PaymentOrder> {
+    const orderId = paymentOrderByNo.get(input.orderNo)
+    const order = orderId ? paymentOrders.get(orderId) : null
+    if (!order || order.userId !== input.userId) throw new Error('ORDER_NOT_FOUND')
+    if (order.amountCents !== input.amountCents || order.currency !== input.currency) throw new Error('PAYMENT_AMOUNT_MISMATCH')
+    const transactionOrderId = paymentOrderByTransaction.get(input.wechatTransactionId)
+    if (transactionOrderId && transactionOrderId !== order.id) throw new Error('TRANSACTION_ALREADY_USED')
+    if (order.status === 'paid') {
+      if (order.wechatTransactionId !== input.wechatTransactionId) throw new Error('TRANSACTION_MISMATCH')
+      return order
+    }
+    if (order.status === 'refunded' || order.status === 'failed') throw new Error('ORDER_NOT_PAYABLE')
+    order.status = 'paid'
+    order.wechatTransactionId = input.wechatTransactionId
+    order.paidAt = new Date()
+    order.updatedAt = new Date()
+    paymentOrderByTransaction.set(input.wechatTransactionId, order.id)
+    const entitlement = entitlements.get(order.caseId) || await this.getOrCreateCaseEntitlement(order.userId, order.caseId)
+    entitlement.status = 'paid'
+    entitlement.paidAt = order.paidAt
+    entitlement.updatedAt = new Date()
+    return order
+  },
+
+  async refundPaymentOrder(orderId: string): Promise<PaymentOrder | null> {
+    const order = paymentOrders.get(orderId)
+    if (!order) return null
+    order.status = 'refunded'
+    order.updatedAt = new Date()
+    const entitlement = entitlements.get(order.caseId)
+    if (entitlement) {
+      entitlement.status = 'refunded'
+      entitlement.updatedAt = new Date()
+    }
+    return order
   },
 
   // Health check

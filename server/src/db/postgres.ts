@@ -1,4 +1,4 @@
-import { Pool } from 'pg'
+import { Pool, PoolClient } from 'pg'
 import { config } from '../config'
 
 const pool = new Pool({
@@ -16,6 +16,41 @@ const pool = new Pool({
 // 生成唯一 ID
 function generateId(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}`
+}
+
+function toPaymentOrder(row: any) {
+  if (!row) return null
+  return {
+    id: row.id,
+    orderNo: row.order_no,
+    caseId: row.case_id,
+    userId: row.user_id,
+    amountCents: row.amount_cents,
+    currency: row.currency,
+    status: row.status,
+    wechatTransactionId: row.wechat_transaction_id,
+    prepayId: row.prepay_id,
+    idempotencyKey: row.idempotency_key,
+    createdAt: row.created_at,
+    paidAt: row.paid_at,
+    updatedAt: row.updated_at,
+    expiresAt: row.expires_at,
+  }
+}
+
+function toEntitlement(row: any) {
+  if (!row) return null
+  return {
+    id: row.id,
+    caseId: row.case_id,
+    userId: row.user_id,
+    status: row.status,
+    amountCents: row.amount_cents,
+    currency: row.currency,
+    paidAt: row.paid_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
 }
 
 // 用户操作
@@ -419,6 +454,205 @@ export const db = {
       [caseId]
     )
     return result.rows[0] || null
+  },
+
+  // Entitlements and payment orders
+  async getCaseEntitlement(userId: string, caseId: string) {
+    const result = await pool.query(
+      'SELECT * FROM case_entitlements WHERE case_id = $1 AND user_id = $2 LIMIT 1',
+      [caseId, userId]
+    )
+    return toEntitlement(result.rows[0])
+  },
+
+  async getOrCreateCaseEntitlement(userId: string, caseId: string) {
+    const caseResult = await pool.query('SELECT id FROM cases WHERE id = $1 AND user_id = $2', [caseId, userId])
+    if (!caseResult.rows[0]) throw new Error('CASE_NOT_FOUND')
+    const id = generateId('entitlement')
+    const result = await pool.query(
+      `INSERT INTO case_entitlements (id, case_id, user_id, status, amount_cents, currency, created_at, updated_at)
+       VALUES ($1, $2, $3, 'unpaid', $4, $5, NOW(), NOW())
+       ON CONFLICT (case_id) DO UPDATE SET case_id = EXCLUDED.case_id
+       RETURNING *`,
+      [id, caseId, userId, config.payment.amountCents, config.payment.currency]
+    )
+    const row = result.rows[0]
+    if (row.user_id !== userId) throw new Error('CASE_NOT_FOUND')
+    return toEntitlement(row)
+  },
+
+  async findPaymentOrderById(userId: string, orderId: string) {
+    const result = await pool.query('SELECT * FROM payment_orders WHERE id = $1 AND user_id = $2', [orderId, userId])
+    return toPaymentOrder(result.rows[0])
+  },
+
+  async findPaymentOrderByOrderNo(orderNo: string) {
+    const result = await pool.query('SELECT * FROM payment_orders WHERE order_no = $1', [orderNo])
+    return toPaymentOrder(result.rows[0])
+  },
+
+  async setPaymentOrderPrepay(orderId: string, prepayId: string) {
+    const result = await pool.query(
+      `UPDATE payment_orders SET prepay_id = $1, status = 'pending', updated_at = NOW()
+       WHERE id = $2 AND status IN ('created', 'pending') RETURNING *`,
+      [prepayId, orderId]
+    )
+    const order = toPaymentOrder(result.rows[0])
+    if (!order) throw new Error('ORDER_NOT_FOUND')
+    return order
+  },
+
+  async findPaymentOrderByIdempotency(userId: string, caseId: string, key: string) {
+    const result = await pool.query(
+      'SELECT * FROM payment_orders WHERE user_id = $1 AND case_id = $2 AND idempotency_key = $3',
+      [userId, caseId, key]
+    )
+    return toPaymentOrder(result.rows[0])
+  },
+
+  async findActivePaymentOrder(userId: string, caseId: string) {
+    const result = await pool.query(
+      `SELECT * FROM payment_orders
+       WHERE user_id = $1 AND case_id = $2 AND status IN ('created', 'pending') AND expires_at > NOW()
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, caseId]
+    )
+    return toPaymentOrder(result.rows[0])
+  },
+
+  async createPaymentOrder(input: {
+    caseId: string
+    userId: string
+    amountCents: number
+    currency: string
+    idempotencyKey?: string
+    prepayId?: string | null
+  }) {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      await client.query('SELECT id FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE', [input.caseId, input.userId])
+      const existingEntitlement = await client.query(
+        'SELECT status FROM case_entitlements WHERE case_id = $1 AND user_id = $2 FOR UPDATE',
+        [input.caseId, input.userId]
+      )
+      if (existingEntitlement.rows[0]?.status === 'paid') throw new Error('ALREADY_PAID')
+      if (input.idempotencyKey) {
+        const existing = await client.query(
+          'SELECT * FROM payment_orders WHERE user_id = $1 AND case_id = $2 AND idempotency_key = $3',
+          [input.userId, input.caseId, input.idempotencyKey]
+        )
+        if (existing.rows[0]) {
+          await client.query('COMMIT')
+          return toPaymentOrder(existing.rows[0])
+        }
+      }
+      const active = await client.query(
+        `SELECT * FROM payment_orders WHERE user_id = $1 AND case_id = $2
+         AND status IN ('created', 'pending') AND expires_at > NOW()
+         ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
+        [input.userId, input.caseId]
+      )
+      if (active.rows[0]) {
+        await client.query('COMMIT')
+        return toPaymentOrder(active.rows[0])
+      }
+      const expired = await client.query(
+        `UPDATE payment_orders SET status = 'closed', updated_at = NOW()
+         WHERE user_id = $1 AND case_id = $2 AND status IN ('created', 'pending') AND expires_at <= NOW()`,
+        [input.userId, input.caseId]
+      )
+      void expired
+      const nowId = generateId('order')
+      const orderNo = `LM${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
+      const result = await client.query(
+        `INSERT INTO payment_orders (id, order_no, case_id, user_id, amount_cents, currency, status, prepay_id, idempotency_key, created_at, updated_at, expires_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW(), NOW() + ($10 * INTERVAL '1 minute'))
+         RETURNING *`,
+        [nowId, orderNo, input.caseId, input.userId, input.amountCents, input.currency, input.prepayId ? 'pending' : 'created', input.prepayId || null, input.idempotencyKey || null, config.payment.orderExpiresMinutes]
+      )
+      await client.query(
+        `INSERT INTO case_entitlements (id, case_id, user_id, status, amount_cents, currency, created_at, updated_at)
+         VALUES ($1, $2, $3, 'pending', $4, $5, NOW(), NOW())
+         ON CONFLICT (case_id) DO UPDATE SET status = CASE WHEN case_entitlements.status = 'paid' THEN 'paid' ELSE 'pending' END,
+           updated_at = NOW()`,
+        [generateId('entitlement'), input.caseId, input.userId, input.amountCents, input.currency]
+      )
+      await client.query('COMMIT')
+      return toPaymentOrder(result.rows[0])
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    } finally {
+      client.release()
+    }
+  },
+
+  async completePaymentOrder(input: {
+    orderNo: string
+    userId: string
+    amountCents: number
+    currency: string
+    wechatTransactionId: string
+  }) {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const result = await client.query('SELECT * FROM payment_orders WHERE order_no = $1 FOR UPDATE', [input.orderNo])
+      const order = toPaymentOrder(result.rows[0])
+      if (!order || order.userId !== input.userId) throw new Error('ORDER_NOT_FOUND')
+      if (order.amountCents !== input.amountCents || order.currency !== input.currency) throw new Error('PAYMENT_AMOUNT_MISMATCH')
+      if (order.status === 'paid') {
+        if (order.wechatTransactionId !== input.wechatTransactionId) throw new Error('TRANSACTION_MISMATCH')
+        await client.query('COMMIT')
+        return order
+      }
+      if (order.status === 'refunded' || order.status === 'failed') throw new Error('ORDER_NOT_PAYABLE')
+      const duplicate = await client.query(
+        'SELECT id FROM payment_orders WHERE wechat_transaction_id = $1 AND id <> $2',
+        [input.wechatTransactionId, order.id]
+      )
+      if (duplicate.rows[0]) throw new Error('TRANSACTION_ALREADY_USED')
+      const paidAt = new Date()
+      await client.query(
+        `UPDATE payment_orders SET status = 'paid', wechat_transaction_id = $1, paid_at = $2, updated_at = NOW() WHERE id = $3`,
+        [input.wechatTransactionId, paidAt, order.id]
+      )
+      await client.query(
+        `INSERT INTO case_entitlements (id, case_id, user_id, status, amount_cents, currency, paid_at, created_at, updated_at)
+         VALUES ($1, $2, $3, 'paid', $4, $5, $6, NOW(), NOW())
+         ON CONFLICT (case_id) DO UPDATE SET status = 'paid', paid_at = EXCLUDED.paid_at, updated_at = NOW()
+         WHERE case_entitlements.user_id = EXCLUDED.user_id`,
+        [generateId('entitlement'), order.caseId, order.userId, order.amountCents, order.currency, paidAt]
+      )
+      await client.query('COMMIT')
+      return { ...order, status: 'paid', wechatTransactionId: input.wechatTransactionId, paidAt, updatedAt: paidAt }
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    } finally {
+      client.release()
+    }
+  },
+
+  async refundPaymentOrder(orderId: string) {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const result = await client.query('UPDATE payment_orders SET status = \'refunded\', updated_at = NOW() WHERE id = $1 RETURNING *', [orderId])
+      if (!result.rows[0]) {
+        await client.query('COMMIT')
+        return null
+      }
+      await client.query("UPDATE case_entitlements SET status = 'refunded', updated_at = NOW() WHERE case_id = $1", [result.rows[0].case_id])
+      await client.query('COMMIT')
+      return toPaymentOrder(result.rows[0])
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    } finally {
+      client.release()
+    }
   },
 
   // Health check

@@ -70,3 +70,35 @@ export interface Artifact {
   created_at: Date
   updated_at: Date
 }
+
+export type EntitlementStatus = 'unpaid' | 'pending' | 'paid' | 'refunded'
+export type PaymentOrderStatus = 'created' | 'pending' | 'paid' | 'failed' | 'closed' | 'refunded'
+
+export interface CaseEntitlement {
+  id: string
+  caseId: string
+  userId: string
+  status: EntitlementStatus
+  amountCents: number
+  currency: string
+  paidAt?: Date | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PaymentOrder {
+  id: string
+  orderNo: string
+  caseId: string
+  userId: string
+  amountCents: number
+  currency: string
+  status: PaymentOrderStatus
+  wechatTransactionId?: string | null
+  prepayId?: string | null
+  idempotencyKey?: string | null
+  createdAt: Date
+  paidAt?: Date | null
+  updatedAt: Date
+  expiresAt: Date
+}

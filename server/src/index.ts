@@ -11,6 +11,7 @@ import reportRoutes from './routes/reports'
 import { getPresignUrl, confirmUpload } from './controllers/file.controller'
 import agentRoutes from './routes/agent'
 import { materialsRouter } from './routes/materials'
+import paymentOrderRoutes, { casePaymentRouter, paymentNotificationHandler } from './routes/payments'
 
 // 环境变量由入口导入 dotenv/config
 
@@ -22,6 +23,9 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN || 'https://servicewechat.com',
   credentials: true,
 }))
+
+// Public, signature-verified payment callback must receive the untouched body.
+app.post('/api/payments/wechat/notify', express.raw({ type: 'application/json' }), paymentNotificationHandler)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -53,7 +57,9 @@ app.get('/api/health', async (req, res) => {
 app.use('/api/auth', authRouter)
 
 // 需要认证的路由
+app.use('/api/cases', authMiddleware, casePaymentRouter)
 app.use('/api/cases', authMiddleware, casesRouter)
+app.use('/api/payment-orders', authMiddleware, paymentOrderRoutes)
 app.use('/api/conversations', authMiddleware, conversationsRouter)
 app.use('/api/reports', authMiddleware, reportRoutes)
 app.use('/api/materials', authMiddleware, materialsRouter)

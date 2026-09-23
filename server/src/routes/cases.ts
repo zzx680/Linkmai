@@ -1,7 +1,26 @@
 import express from 'express'
 import { db } from '../db'
+import { config } from '../config'
 
 const router = express.Router()
+
+async function withEntitlement(caseData: any, userId: string) {
+  if (!caseData) return null
+  const entitlement = await db.getCaseEntitlement(userId, caseData.id)
+  const paid = entitlement?.status === 'paid'
+  return {
+    ...caseData,
+    materialCount: caseData.materialCount ?? caseData.material_count ?? 0,
+    hasReport: caseData.hasReport ?? caseData.has_report ?? false,
+    entitlement: {
+      status: entitlement?.status || 'unpaid',
+      amountCents: entitlement?.amountCents || config.payment.amountCents,
+      currency: entitlement?.currency || config.payment.currency,
+      paidAt: entitlement?.paidAt || null,
+    },
+    nextAction: paid ? ((caseData.hasReport ?? caseData.has_report) ? 'view_report' : 'continue_case') : 'unlock_full_plan',
+  }
+}
 
 // 获取当前案件
 router.get('/current', async (req, res) => {
@@ -14,7 +33,7 @@ router.get('/current', async (req, res) => {
 
     const currentCase = await db.findActiveCase(userId)
 
-    res.json({ success: true, data: currentCase })
+    res.json({ success: true, data: currentCase ? await withEntitlement(currentCase, userId) : null })
   } catch (err) {
     console.error('获取案件错误:', err)
     res.status(500).json({ success: false, error: '获取案件失败' })
@@ -32,7 +51,7 @@ router.post('/current', async (req, res) => {
 
     const newCase = await db.createCase(userId, '新的事故分析')
 
-    res.json({ success: true, data: newCase })
+    res.json({ success: true, data: await withEntitlement(newCase, userId) })
   } catch (err) {
     console.error('创建案件错误:', err)
     res.status(500).json({ success: false, error: '创建案件失败' })

@@ -21,6 +21,8 @@ model User {
 
   cases         Case[]
   conversations Conversation[]
+  entitlements  CaseEntitlement[]
+  paymentOrders PaymentOrder[]
 
   @@map("users")
 }
@@ -46,6 +48,8 @@ model Case {
   artifacts     Artifact[]
   conversations Conversation[]
   reports       Report[]
+  entitlement   CaseEntitlement?
+  paymentOrders PaymentOrder[]
 
   @@unique([userId, isActive])
   @@index([userId, isActive])
@@ -131,18 +135,59 @@ model Message {
 model Report {
   id                String   @id @default(uuid())
   caseId            String
-  liability         Json     // 定责结论
-  compensation      Json     // 赔偿项目
-  missingMaterials  Json     // 缺失材料
-  nextSteps         Json     // 下一步建议
+  liability         Json
+  compensation      Json
+  missingMaterials  Json
+  nextSteps         Json
   needsReview       Boolean  @default(false)
   modelVersion      String?
   ruleVersion       String?
-  inputSnapshot     Json?    // 生成报告时的输入快照
+  inputSnapshot     Json?
   createdAt         DateTime @default(now())
 
   case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   @@index([caseId])
   @@map("reports")
+}
+model CaseEntitlement {
+  id           String   @id @default(uuid())
+  caseId       String   @unique
+  userId       String
+  status       String   @default("unpaid")
+  amountCents  Int
+  currency     String   @default("CNY")
+  paidAt       DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("case_entitlements")
+}
+
+model PaymentOrder {
+  id                   String   @id @default(uuid())
+  orderNo              String   @unique
+  caseId               String
+  userId               String
+  amountCents          Int
+  currency             String   @default("CNY")
+  status               String   @default("created")
+  wechatTransactionId  String?  @unique
+  prepayId             String?
+  idempotencyKey       String?
+  createdAt            DateTime @default(now())
+  paidAt               DateTime?
+  updatedAt            DateTime @updatedAt
+  expiresAt            DateTime
+
+  case                 Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, caseId, idempotencyKey])
+  @@index([caseId, status, expiresAt])
+  @@map("payment_orders")
 }
