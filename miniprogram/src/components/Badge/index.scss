@@ -1,0 +1,59 @@
+@use '../../styles/variables.scss' as *;
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-pill;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+// Sizes
+.ui-badge-small {
+  height: 40px;
+  padding: 0 $space-sm;
+  font-size: $font-xs;
+}
+
+.ui-badge-medium {
+  height: 48px;
+  padding: 0 $space-md;
+  font-size: $font-sm;
+}
+
+.ui-badge-large {
+  height: 56px;
+  padding: 0 $space-lg;
+  font-size: $font-md;
+}
+
+// Variants
+.ui-badge-default {
+  background: $bg-surface;
+  color: $text-secondary;
+}
+
+.ui-badge-primary {
+  background: rgba(196, 97, 47, 0.1);
+  color: $accent-primary;
+}
+
+.ui-badge-success {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34c759;
+}
+
+.ui-badge-warning {
+  background: rgba(255, 149, 0, 0.1);
+  color: #ff9500;
+}
+
+.ui-badge-danger {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+}
+
+.ui-badge-text {
+  line-height: 1;
+}

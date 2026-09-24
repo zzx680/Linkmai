@@ -31,8 +31,6 @@ export default function Profile() {
   const handleMenuClick = (key: string) => {
     if (key === '我的案例') {
       Taro.switchTab({ url: '/pages/case/index' })
-    } else if (key === '咨询记录') {
-      Taro.switchTab({ url: '/pages/consultation/index' })
     } else {
       Taro.showToast({ title: `${key}功能开发中`, icon: 'none' })
     }
@@ -54,8 +52,7 @@ export default function Profile() {
   const menuSections: MenuSection[] = [
     {
       items: [
-        { icon: '📋', label: '我的案例', key: 'cases', arrow: true },
-        { icon: '💬', label: '咨询记录', key: 'consultations', arrow: true }
+        { icon: '📋', label: '我的案例', key: 'cases', arrow: true }
       ]
     },
     {

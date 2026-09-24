@@ -1,0 +1,56 @@
+@use '../../styles/variables.scss' as *;
+
+.ui-card {
+  background: $bg-white;
+  border-radius: $radius-xl;
+  transition: all $transition-fast;
+}
+
+// Padding
+.ui-card-padding-none {
+  padding: 0;
+}
+
+.ui-card-padding-small {
+  padding: $space-md;
+}
+
+.ui-card-padding-medium {
+  padding: $space-lg;
+}
+
+.ui-card-padding-large {
+  padding: $space-xl;
+}
+
+// Shadow
+.ui-card-shadow-none {
+  box-shadow: none;
+}
+
+.ui-card-shadow-small {
+  box-shadow: $shadow-sm;
+}
+
+.ui-card-shadow-medium {
+  box-shadow: $shadow-md;
+}
+
+.ui-card-shadow-large {
+  box-shadow: $shadow-lg;
+}
+
+// Border
+.ui-card-border {
+  border: 1px solid rgba(231, 225, 215, 0.5);
+}
+
+// Clickable
+.ui-card-clickable {
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: $shadow-md;
+  }
+}

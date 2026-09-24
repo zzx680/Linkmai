@@ -21,7 +21,7 @@ export default class CustomTabBar extends Component<{}, TabBarState> {
     items: [
       {
         pagePath: '/pages/case/index',
-        text: '案件',
+        text: '首页',
         icon: '/assets/icons/case.png',
         activeIcon: '/assets/icons/case-active.png'
       },
@@ -30,12 +30,6 @@ export default class CustomTabBar extends Component<{}, TabBarState> {
         text: 'Agent',
         icon: '/assets/icons/agent.png',
         activeIcon: '/assets/icons/agent-active.png'
-      },
-      {
-        pagePath: '/pages/consultation/index',
-        text: '咨询',
-        icon: '/assets/icons/consultation.png',
-        activeIcon: '/assets/icons/consultation-active.png'
       },
       {
         pagePath: '/pages/profile/index',

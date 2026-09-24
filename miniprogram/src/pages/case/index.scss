@@ -2,434 +2,248 @@
 
 .case-page {
   min-height: 100vh;
-  background: $color-canvas;
-  display: flex;
-  flex-direction: column;
+  box-sizing: border-box;
+  background: $bg-primary;
+  padding: 56rpx $space-lg 160rpx;
 }
 
-// ==========================================
-// 页头
-// ==========================================
-.page-header {
-  background: $color-surface;
-  padding: $space-xl $space-lg $space-lg;
-  border-bottom: 1px solid $color-border;
-  margin-bottom: $space-lg;
-
-  .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $space-xl;
-
-    .page-title {
-      font-size: $font-3xl;
-      font-weight: $font-weight-semibold;
-      color: $color-text-primary;
-    }
-
-    .new-case-btn {
-      background: $color-brand;
-      color: $color-text-inverse;
-      padding: $space-sm $space-lg;
-      border-radius: $radius-pill;
-      display: flex;
-      align-items: center;
-      gap: 6rpx;
-      transition: all $transition-fast;
-      box-shadow: $shadow-sm;
-
-      &:active {
-        transform: translateY(-2px);
-        box-shadow: $shadow-md;
-        background: $color-brand-hover;
-      }
-
-      .btn-icon {
-        font-size: 32rpx;
-        font-weight: $font-weight-normal;
-      }
-
-      .btn-text {
-        font-size: $font-md;
-        font-weight: $font-weight-semibold;
-        color: $color-text-inverse;
-      }
-    }
-  }
-
-  // 搜索栏
-  .search-bar {
-    background: $color-surface-secondary;
-    border-radius: $radius-pill;
-    padding: 0 $space-lg;
-    height: 80rpx;
-    display: flex;
-    align-items: center;
-    gap: $space-sm;
-    margin-bottom: $space-xl;
-    border: 1px solid transparent;
-    transition: all $transition-fast;
-
-    &:focus-within {
-      background: $color-surface;
-      border-color: $color-brand;
-      box-shadow: 0 0 0 4px $color-brand-pale;
-    }
-
-    .search-icon {
-      font-size: 32rpx;
-      flex-shrink: 0;
-    }
-
-    .search-input {
-      flex: 1;
-      font-size: $font-md;
-      color: $color-text-primary;
-      background: transparent;
-      border: none;
-    }
-
-    .search-placeholder {
-      color: $color-text-muted;
-    }
-
-    .clear-btn {
-      width: 48rpx;
-      height: 48rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: rgba(31, 36, 33, 0.06);
-      flex-shrink: 0;
-      transition: all $transition-fast;
-
-      &:active {
-        transform: scale(0.9);
-        background: rgba(31, 36, 33, 0.1);
-      }
-
-      .clear-icon {
-        font-size: 32rpx;
-        color: $color-text-muted;
-      }
-    }
-  }
-
-  // 统计卡片
-  .stats-row {
-    display: flex;
-    gap: $space-md;
-    margin-bottom: $space-xl;
-  }
-
-  .stat-card {
-    flex: 1;
-    background: $color-surface-secondary;
-    border-radius: $radius-md;
-    padding: $space-lg;
-    text-align: center;
-
-    .stat-value {
-      font-size: $font-3xl;
-      font-weight: $font-weight-bold;
-      color: $color-text-primary;
-      display: block;
-      margin-bottom: $space-xs;
-
-      &.highlight {
-        color: $color-status-analyzing;
-      }
-
-      &.success {
-        color: $color-success;
-      }
-    }
-
-    .stat-label {
-      font-size: $font-sm;
-      color: $color-text-secondary;
-      display: block;
-    }
-  }
-
-  // 筛选标签
-  .filter-tabs {
-    display: flex;
-    gap: $space-xs;
-  }
-
-  .filter-tab {
-    flex: 1;
-    padding: $space-md;
-    text-align: center;
-    position: relative;
-    transition: all $transition-fast;
-
-    .tab-text {
-      font-size: $font-md;
-      font-weight: $font-weight-medium;
-      color: $color-text-muted;
-      transition: all $transition-fast;
-    }
-
-    &.active {
-      .tab-text {
-        color: $color-text-primary;
-        font-weight: $font-weight-semibold;
-      }
-    }
-
-    .tab-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60rpx;
-      height: 6rpx;
-      background: $color-brand;
-      border-radius: $radius-pill;
-    }
-
-    &:active {
-      .tab-text {
-        color: $color-text-primary;
-      }
-    }
-  }
-}
-
-// ==========================================
-// 案件列表
-// ==========================================
-.cases-list {
-  flex: 1;
-  padding: 0 $space-lg $space-xl;
+.welcome-block {
   display: flex;
   flex-direction: column;
-  gap: $space-md;
+  margin: 16rpx 4rpx 48rpx;
+
+  .welcome-eyebrow {
+    margin-bottom: 10rpx;
+    color: $text-secondary;
+    font-size: $font-md;
+    letter-spacing: 1rpx;
+  }
+
+  .welcome-title {
+    color: $text-primary;
+    font-size: 52rpx;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .welcome-description {
+    margin-top: 18rpx;
+    color: $text-secondary;
+    font-size: $font-sm;
+    line-height: 1.5;
+  }
 }
 
 .case-card {
-  background: $color-surface;
+  box-sizing: border-box;
+  padding: 32rpx;
+  background: $bg-white;
+  border: 1rpx solid rgba(30, 67, 168, 0.08);
   border-radius: $radius-lg;
-  padding: $space-xl;
-  box-shadow: $shadow-sm;
-  border: 1px solid $color-border;
-  transition: all $transition-base;
-
-  &:active {
-    transform: translateY(-4px);
-    box-shadow: $shadow-lg;
-    border-color: $color-brand-light;
-  }
-
-  .case-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: $space-md;
-    margin-bottom: $space-lg;
-
-    .case-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .case-title {
-      font-size: $font-xl;
-      font-weight: $font-weight-semibold;
-      color: $color-text-primary;
-      line-height: $line-height-tight;
-      display: block;
-      margin-bottom: $space-sm;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .case-meta {
-      display: flex;
-      align-items: center;
-      gap: $space-xs;
-
-      .meta-text {
-        font-size: $font-sm;
-        color: $color-text-secondary;
-      }
-
-      .meta-divider {
-        font-size: $font-sm;
-        color: $color-text-muted;
-      }
-    }
-
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 6rpx;
-      padding: 8rpx $space-md;
-      border-radius: $radius-pill;
-      font-size: $font-xs;
-      font-weight: $font-weight-medium;
-      flex-shrink: 0;
-
-      .status-dot {
-        width: 12rpx;
-        height: 12rpx;
-        border-radius: 50%;
-      }
-
-      &.draft {
-        background: $color-status-draft-bg;
-        .status-text { color: $color-status-draft; }
-        .status-dot { background: $color-status-draft; }
-      }
-
-      &.analyzing {
-        background: $color-status-analyzing-bg;
-        .status-text { color: $color-status-analyzing; }
-        .status-dot { background: $color-status-analyzing; animation: pulse 2s infinite; }
-      }
-
-      &.completed {
-        background: $color-status-completed-bg;
-        .status-text { color: $color-status-completed; }
-        .status-dot { background: $color-status-completed; }
-      }
-
-      &.archived {
-        background: $color-status-pending-bg;
-        .status-text { color: $color-status-pending; }
-        .status-dot { background: $color-status-pending; }
-      }
-    }
-  }
-
-  .case-divider {
-    height: 1px;
-    background: $color-border-pale;
-    margin: $space-lg 0;
-  }
-
-  .case-details {
-    .detail-row {
-      display: flex;
-      gap: $space-2xl;
-    }
-
-    .detail-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: $space-xs;
-
-      .detail-label {
-        font-size: $font-sm;
-        color: $color-text-secondary;
-        font-weight: $font-weight-medium;
-      }
-
-      .detail-value {
-        font-size: $font-lg;
-        font-weight: $font-weight-semibold;
-        color: $color-text-primary;
-
-        &.highlight {
-          color: $color-brand;
-        }
-      }
-    }
-  }
-
-  .case-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: $space-lg;
-    padding-top: $space-lg;
-    border-top: 1px solid $color-border-pale;
-
-    .update-time {
-      font-size: $font-xs;
-      color: $color-text-muted;
-    }
-
-    .view-detail {
-      font-size: $font-sm;
-      color: $color-text-secondary;
-      font-weight: $font-weight-medium;
-      transition: all $transition-fast;
-    }
-  }
-
-  &:active .view-detail {
-    color: $color-brand;
-    transform: translateX(4px);
-  }
+  box-shadow: $shadow-md;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-// ==========================================
-// 空状态
-// ==========================================
-.empty-state {
-  flex: 1;
+.empty-case-card {
   display: flex;
   flex-direction: column;
+  min-height: 390rpx;
+  justify-content: center;
+}
+
+.case-card-header {
+  display: flex;
+  align-items: flex-start;
+}
+
+.case-card-icon,
+.next-step-icon {
+  display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  padding: $space-3xl $space-xl;
-  min-height: 600rpx;
+  width: 64rpx;
+  height: 64rpx;
+  margin-right: 20rpx;
+  background: $accent-tint;
+  border-radius: $radius-sm;
+}
 
-  .empty-icon {
-    font-size: 120rpx;
-    margin-bottom: $space-xl;
-    opacity: 0.3;
-  }
+.case-card-heading {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
 
-  .empty-title {
-    font-size: $font-xl;
-    font-weight: $font-weight-semibold;
-    color: $color-text-primary;
-    margin-bottom: $space-sm;
-  }
+.case-card-kicker,
+.next-step-label {
+  color: $text-secondary;
+  font-size: $font-xs;
+}
 
-  .empty-subtitle {
-    font-size: $font-md;
-    color: $color-text-secondary;
-    text-align: center;
+.case-card-title {
+  margin-top: 6rpx;
+  overflow: hidden;
+  color: $text-primary;
+  font-size: $font-lg;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.case-card-meta,
+.case-card-description {
+  margin-top: 10rpx;
+  color: $text-secondary;
+  font-size: $font-xs;
+  line-height: 1.5;
+}
+
+.case-card-copy {
+  display: flex;
+  flex-direction: column;
+  margin: 22rpx 0 34rpx;
+}
+
+.progress-track {
+  height: 10rpx;
+  margin: 34rpx 0 28rpx;
+  overflow: hidden;
+  background: #edf0f5;
+  border-radius: $radius-pill;
+}
+
+.progress-value {
+  height: 100%;
+  background: $accent-primary;
+  border-radius: $radius-pill;
+  transition: width $transition-normal;
+}
+
+.case-summary {
+  display: flex;
+  padding: 24rpx 0;
+  border-top: 1rpx solid $border-color;
+  border-bottom: 1rpx solid $border-color;
+}
+
+.summary-item {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  & + .summary-item {
+    padding-left: 24rpx;
+    border-left: 1rpx solid $border-color;
   }
 }
 
-// ==========================================
-// 页脚
-// ==========================================
-.footer-section {
-  padding: $space-xl $space-lg;
-  padding-bottom: calc($space-xl + env(safe-area-inset-bottom));
+.summary-label {
+  color: $text-secondary;
+  font-size: $font-xs;
+}
 
-  .footer-tip {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: $space-sm;
-    padding: $space-md;
-    background: $color-surface-secondary;
-    border-radius: $radius-md;
+.summary-value {
+  margin-top: 8rpx;
+  color: $text-primary;
+  font-size: $font-md;
+  font-weight: 600;
+}
 
-    .tip-icon {
-      font-size: 28rpx;
-    }
+.payment-note,
+.unlocked-note {
+  display: flex;
+  align-items: center;
+  margin-top: 24rpx;
+  color: $text-secondary;
+  font-size: $font-xs;
+  line-height: 1.45;
 
-    .tip-text {
-      font-size: $font-sm;
-      color: $color-text-secondary;
-    }
+  .icon-component {
+    flex-shrink: 0;
+    margin-right: 10rpx;
+  }
+}
+
+.unlocked-note {
+  color: $accent-primary;
+}
+
+.primary-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  margin-top: 28rpx;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+  background: $accent-primary;
+  border-radius: $radius-sm;
+  color: #fff;
+  font-size: $font-md;
+  font-weight: 600;
+  transition: opacity $transition-fast, transform $transition-fast;
+
+  .icon-component {
+    margin-left: 12rpx;
+  }
+
+  &:active {
+    opacity: 0.88;
+    transform: scale(0.985);
+  }
+}
+
+.next-step-card {
+  display: flex;
+  align-items: center;
+  margin-top: 24rpx;
+  padding: 24rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid $border-color;
+  border-radius: $radius-md;
+}
+
+.next-step-icon {
+  width: 52rpx;
+  height: 52rpx;
+  margin-right: 16rpx;
+  border-radius: $radius-xs;
+}
+
+.next-step-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.next-step-title {
+  margin-top: 6rpx;
+  color: $text-primary;
+  font-size: $font-sm;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.loading-page {
+  .skeleton-welcome {
+    margin-bottom: 48rpx;
+  }
+}
+
+.skeleton-line {
+  height: 30rpx;
+  background: #e8ebf0;
+  border-radius: $radius-xs;
+
+  &.short {
+    width: 180rpx;
+    margin-bottom: 20rpx;
+  }
+
+  &.long {
+    width: 440rpx;
+    height: 58rpx;
   }
 }

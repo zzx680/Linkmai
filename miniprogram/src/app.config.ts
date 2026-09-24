@@ -2,8 +2,10 @@ export default defineAppConfig({
   pages: [
     'pages/case/index',
     'pages/agent/index',
-    'pages/consultation/index',
-    'pages/profile/index'
+    'pages/profile/index',
+    'pages/case-detail/index',
+    'pages/materials/index',
+    'pages/report/index'
   ],
   window: {
     backgroundTextStyle: 'dark',
@@ -15,25 +17,27 @@ export default defineAppConfig({
   tabBar: {
     custom: true,
     color: '#8E8E93',
-    selectedColor: '#C4612F',
+    selectedColor: '#1E43A8',
     backgroundColor: '#FFFFFF',
     borderStyle: 'white',
     list: [
       {
         pagePath: 'pages/case/index',
-        text: '案件'
+        text: '首页',
+        iconPath: 'assets/icons/case.png',
+        selectedIconPath: 'assets/icons/case-active.png'
       },
       {
         pagePath: 'pages/agent/index',
-        text: 'Agent'
-      },
-      {
-        pagePath: 'pages/consultation/index',
-        text: '咨询'
+        text: 'Agent',
+        iconPath: 'assets/icons/agent.png',
+        selectedIconPath: 'assets/icons/agent-active.png'
       },
       {
         pagePath: 'pages/profile/index',
-        text: '我的'
+        text: '我的',
+        iconPath: 'assets/icons/profile.png',
+        selectedIconPath: 'assets/icons/profile-active.png'
       }
     ]
   },
