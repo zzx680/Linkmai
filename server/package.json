@@ -12,7 +12,7 @@
     "db:test": "node scripts/test-db.js",
     "db:setup": "./scripts/setup-db.sh",
     "lint": "eslint src --ext .ts",
-    "test": "jest"
+    "test": "tsx --test scripts/*.test.ts"
   },
   "dependencies": {
     "@alicloud/ocr20191230": "^4.0.2",

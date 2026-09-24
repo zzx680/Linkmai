@@ -1,0 +1,87 @@
+@import '../styles/variables.scss';
+
+.tab-shell {
+  position: fixed;
+  z-index: 99;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 17px 9px;
+  padding-bottom: calc(9px + constant(safe-area-inset-bottom));
+  padding-bottom: calc(9px + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.tab-pill {
+  height: 56px;
+  padding: 6px;
+  border: 0.5px solid rgba(231, 225, 215, 0.5);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 2px 12px rgba(31, 36, 33, 0.08),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  pointer-events: auto;
+}
+
+.tab-item {
+  position: relative;
+  flex: 1;
+  height: 44px;
+  border-radius: 22px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: normal;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition:
+    transform 120ms var(--transition-ease),
+    background-color 120ms var(--transition-ease),
+    color 120ms var(--transition-ease);
+  cursor: pointer;
+}
+
+.tab-item-active {
+  color: var(--color-primary);
+  background: var(--color-surface-primary-subtle);
+  box-shadow: 0 2px 8px rgba(196, 97, 47, 0.12);
+}
+
+.tab-active-bloom {
+  position: absolute;
+  inset: 4px 6px;
+  border-radius: 18px;
+  background: rgba(196, 97, 47, 0.08);
+  pointer-events: none;
+}
+
+.tab-icon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.tab-label {
+  position: relative;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tab-item-pressed {
+  transform: scale(0.96);
+  background-color: rgba(92, 99, 93, 0.08);
+}
+
+.tab-item-active.tab-item-pressed {
+  background-color: #f0dfd2;
+}

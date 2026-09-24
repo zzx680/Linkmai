@@ -2,203 +2,280 @@
 
 .profile-page {
   min-height: 100vh;
-  background: $bg-primary;
-  padding-bottom: 120px;
+  background: $color-canvas;
+  padding-bottom: calc($space-2xl + env(safe-area-inset-bottom));
 }
 
-.header-section {
-  padding: $space-lg;
-  padding-top: $space-xl;
-}
-
-.user-card {
+// ==========================================
+// 用户区块
+// ==========================================
+.user-section {
+  background: linear-gradient(180deg, $color-brand 0%, $color-brand-hover 100%);
+  padding: $space-2xl $space-lg $space-xl;
   margin-bottom: $space-lg;
-}
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: $space-lg;
-  margin-bottom: $space-lg;
-}
+  .user-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: $radius-lg;
+    padding: $space-xl;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-xl;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 
-.user-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $space-xs;
-}
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: $space-lg;
+      flex: 1;
 
-.nickname {
-  font-size: $font-xl;
-  font-weight: 600;
-  color: $text-primary;
-}
+      .avatar-wrapper {
+        width: 112rpx;
+        height: 112rpx;
+        border-radius: $radius-md;
+        background: $color-surface;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: $shadow-md;
+        flex-shrink: 0;
 
-.phone {
-  font-size: $font-sm;
-  color: $text-secondary;
-  margin-bottom: $space-xs;
-}
+        .avatar {
+          font-size: 64rpx;
+        }
+      }
 
-.edit-btn {
-  width: 100%;
-  height: 72px;
-  background: $bg-surface;
-  border-radius: $radius-pill;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all $transition-fast;
+      .user-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: $space-xs;
 
-  &:active {
-    background: $accent-tint;
-    transform: scale(0.98);
+        .nickname {
+          font-size: $font-2xl;
+          font-weight: $font-weight-semibold;
+          color: $color-text-inverse;
+        }
+
+        .phone {
+          font-size: $font-md;
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+    }
+
+    .edit-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: $radius-pill;
+      padding: $space-sm $space-lg;
+      transition: all $transition-fast;
+
+      &:active {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(0.95);
+      }
+
+      .edit-text {
+        font-size: $font-md;
+        font-weight: $font-weight-medium;
+        color: $color-text-inverse;
+      }
+    }
+  }
+
+  // 数据统计
+  .stats-container {
+    display: flex;
+    gap: $space-md;
+  }
+
+  .stat-item {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: $radius-md;
+    padding: $space-xl;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    transition: all $transition-fast;
+
+    &:active {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-4px);
+    }
+
+    .stat-value {
+      font-size: $font-3xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-inverse;
+
+      &.highlight {
+        color: #FEF3C7;
+      }
+
+      &.success {
+        color: #D1FAE5;
+      }
+    }
+
+    .stat-label {
+      font-size: $font-sm;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: $font-weight-medium;
+    }
   }
 }
 
-.edit-text {
-  font-size: $font-md;
-  font-weight: 500;
-  color: $accent-primary;
-}
-
-.stats-row {
-  display: flex;
-  gap: $space-md;
-}
-
-.stat-item {
-  flex: 1;
-  background: $bg-white;
-  border-radius: $radius-lg;
-  padding: $space-lg;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: $space-xs;
-  box-shadow: $shadow-sm;
-  border: 1px solid rgba(231, 225, 215, 0.5);
-  transition: all $transition-fast;
-
-  &:active {
-    transform: translateY(-2px);
-    box-shadow: $shadow-md;
-  }
-}
-
-.stat-value {
-  font-size: $font-2xl;
-  font-weight: 600;
-  color: $accent-primary;
-}
-
-.stat-label {
-  font-size: $font-xs;
-  color: $text-secondary;
-}
-
-.menu-sections {
+// ==========================================
+// 菜单容器
+// ==========================================
+.menu-container {
   padding: 0 $space-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $space-xl;
 }
 
 .menu-section {
-  margin-bottom: $space-lg;
-}
-
-.section-title {
-  font-size: $font-sm;
-  color: $text-secondary;
-  font-weight: 500;
-  margin-bottom: $space-sm;
-  margin-left: $space-sm;
+  .section-title {
+    font-size: $font-sm;
+    color: $color-text-muted;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 1rpx;
+    display: block;
+    margin-bottom: $space-md;
+    padding: 0 $space-xs;
+  }
 }
 
 .menu-group {
+  background: $color-surface;
+  border-radius: $radius-lg;
+  border: 1px solid $color-border;
   overflow: hidden;
 }
 
 .menu-item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: $space-lg $space-lg;
+  align-items: center;
+  padding: $space-xl $space-lg;
   transition: all $transition-fast;
   position: relative;
 
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: $space-lg;
+    right: $space-lg;
+    height: 1px;
+    background: $color-border-pale;
+  }
+
   &:active {
-    background: rgba(247, 244, 239, 0.5);
+    background: $color-surface-hover;
+  }
+
+  .menu-left {
+    display: flex;
+    align-items: center;
+    gap: $space-lg;
+    flex: 1;
+
+    .menu-icon-wrapper {
+      width: 72rpx;
+      height: 72rpx;
+      border-radius: $radius-md;
+      background: $color-surface-secondary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .menu-icon {
+        font-size: 40rpx;
+      }
+    }
+
+    .menu-label {
+      font-size: $font-lg;
+      color: $color-text-primary;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .menu-right {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+
+    .menu-value {
+      font-size: $font-md;
+      color: $color-text-secondary;
+    }
+
+    .menu-arrow {
+      font-size: 48rpx;
+      color: $color-text-muted;
+      font-weight: $font-weight-normal;
+      line-height: 1;
+    }
   }
 }
 
-.menu-left {
-  display: flex;
-  align-items: center;
-  gap: $space-md;
-  flex: 1;
-}
-
-.menu-label {
-  font-size: $font-md;
-  color: $text-primary;
-  font-weight: 500;
-}
-
-.menu-right {
-  display: flex;
-  align-items: center;
-  gap: $space-xs;
-}
-
-.menu-value {
-  font-size: $font-sm;
-  color: $text-secondary;
-}
-
-.menu-divider {
-  height: 1px;
-  background: $border-color;
-  margin: 0 $space-lg;
-}
-
+// ==========================================
+// 退出登录
+// ==========================================
 .logout-section {
-  padding: 0 $space-lg;
-  margin-top: $space-xl;
+  padding: $space-2xl $space-lg;
 }
 
 .logout-btn {
-  height: 88px;
-  background: $bg-white;
-  border-radius: $radius-xl;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: $shadow-sm;
-  border: 1px solid rgba(231, 225, 215, 0.5);
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  text-align: center;
   transition: all $transition-fast;
 
   &:active {
-    background: rgba(255, 59, 48, 0.05);
-    border-color: rgba(255, 59, 48, 0.2);
+    background: $color-danger-light;
+    border-color: $color-danger;
+
+    .logout-text {
+      color: $color-danger;
+    }
+  }
+
+  .logout-text {
+    font-size: $font-lg;
+    color: $color-text-secondary;
+    font-weight: $font-weight-semibold;
+    transition: color $transition-fast;
   }
 }
 
-.logout-text {
-  font-size: $font-md;
-  font-weight: 500;
-  color: #ff3b30;
-}
-
+// ==========================================
+// 页脚信息
+// ==========================================
 .footer-info {
+  padding: 0 $space-lg;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: $space-xs;
-  padding: $space-xl $space-lg;
-}
 
-.footer-text {
-  font-size: $font-xs;
-  color: $text-secondary;
-  opacity: 0.6;
+  .footer-text {
+    font-size: $font-xs;
+    color: $color-text-muted;
+    text-align: center;
+  }
 }

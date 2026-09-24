@@ -5,10 +5,10 @@ import { config } from '../config'
 // 创建 OCR 客户端
 function createClient(): Ocr20191230 {
   const cfg = new $OpenApi.Config({
-    accessKeyId: config.oss.accessKeyId,
-    accessKeySecret: config.oss.accessKeySecret,
+    accessKeyId: config.ocr.accessKeyId,
+    accessKeySecret: config.ocr.accessKeySecret,
   })
-  cfg.endpoint = 'ocr.cn-shanghai.aliyuncs.com'
+  cfg.endpoint = config.ocr.endpoint
   return new Ocr20191230(cfg)
 }
 
@@ -96,11 +96,12 @@ export async function recognizePoliceReport(imageUrl: string): Promise<OcrResult
 export async function recognizeIdCard(imageUrl: string): Promise<OcrResult> {
   try {
     const client = createClient()
-    const request = new $Ocr20191230.RecognizeBankCardRequest({
+    const request = new $Ocr20191230.RecognizeIdentityCardRequest({
       imageURL: imageUrl,
+      side: 'face',
     })
 
-    const response = await client.recognizeBankCard(request)
+    const response = await client.recognizeIdentityCard(request)
 
     if (response.statusCode !== 200 || !response.body || !response.body.data) {
       return {
@@ -110,12 +111,17 @@ export async function recognizeIdCard(imageUrl: string): Promise<OcrResult> {
     }
 
     const data = response.body.data
+    const front = data.frontResult
 
     return {
       success: true,
       fields: {
-        bankName: data.bankName || '',
-        cardNumber: data.cardNumber || '',
+        name: front?.name || '',
+        gender: front?.gender || '',
+        nationality: front?.nationality || '',
+        birthDate: front?.birthDate || '',
+        address: front?.address || '',
+        idNumber: front?.IDNumber || '',
       },
     }
   } catch (err: any) {

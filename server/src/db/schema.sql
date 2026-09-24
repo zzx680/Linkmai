@@ -108,6 +108,42 @@ CREATE TABLE IF NOT EXISTS reports (
 
 CREATE INDEX idx_reports_case_id ON reports(case_id);
 
+-- 案件级一次性付费权益
+CREATE TABLE IF NOT EXISTS case_entitlements (
+  id VARCHAR(64) PRIMARY KEY,
+  case_id VARCHAR(64) UNIQUE NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+  user_id VARCHAR(64) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status VARCHAR(20) NOT NULL DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'pending', 'paid', 'refunded')),
+  amount_cents INTEGER NOT NULL,
+  currency VARCHAR(3) NOT NULL DEFAULT 'CNY',
+  paid_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_case_entitlements_user_id ON case_entitlements(user_id);
+
+-- 案件支付订单
+CREATE TABLE IF NOT EXISTS payment_orders (
+  id VARCHAR(64) PRIMARY KEY,
+  order_no VARCHAR(64) UNIQUE NOT NULL,
+  case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+  user_id VARCHAR(64) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount_cents INTEGER NOT NULL,
+  currency VARCHAR(3) NOT NULL DEFAULT 'CNY',
+  status VARCHAR(20) NOT NULL DEFAULT 'created' CHECK (status IN ('created', 'pending', 'paid', 'failed', 'closed', 'refunded')),
+  wechat_transaction_id VARCHAR(128) UNIQUE,
+  prepay_id VARCHAR(128),
+  idempotency_key VARCHAR(128),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  paid_at TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMP NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_payment_orders_idempotency ON payment_orders(user_id, case_id, idempotency_key) WHERE idempotency_key IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_payment_orders_case_status ON payment_orders(case_id, status, expires_at);
+
 -- 咨询记录表
 CREATE TABLE IF NOT EXISTS consultations (
   id VARCHAR(64) PRIMARY KEY,

@@ -1,46 +1,138 @@
-// Business Professional Design System
+// ==========================================
+// 灵迈设计系统 - 专业案件工作台
+// ==========================================
 
-// Colors - Cool & Professional
-$bg-primary: #F5F7FA;
-$bg-surface: #FAFBFC;
-$bg-white: #FFFFFF;
-$border-color: #E5E7EB;
-$text-primary: #353F4C;
-$text-secondary: #6B7280;
-$accent-primary: #1E43A8;
-$accent-hover: #153589;
-$accent-tint: #DEE6FC;
+// ------------------------------------------
+// 颜色系统 - Colors
+// ------------------------------------------
 
-// Border Radius - Rounded (Apple-style)
-$radius-xs: 8px;
-$radius-sm: 12px;
-$radius-md: 16px;
-$radius-lg: 20px;
-$radius-xl: 24px;
-$radius-pill: 999px;
+// Canvas & Surface
+$color-canvas: #F7F4EF;
+$color-surface: #FFFFFF;
+$color-surface-secondary: #FBF9F5;
+$color-surface-hover: #F2EFE9;
 
-// Spacing
-$space-xs: 8px;
-$space-sm: 12px;
-$space-md: 16px;
-$space-lg: 24px;
-$space-xl: 32px;
-$space-2xl: 48px;
+// Text Hierarchy
+$color-text-primary: #1F2421;
+$color-text-secondary: #6F746F;
+$color-text-muted: #9A9D98;
+$color-text-inverse: #FFFFFF;
 
-// Typography
-$font-xs: 24px;
-$font-sm: 26px;
-$font-md: 28px;
-$font-lg: 32px;
-$font-xl: 36px;
-$font-2xl: 48px;
+// Brand & Accent
+$color-brand: #C4612F;
+$color-brand-hover: #A94F25;
+$color-brand-light: #F2E3D6;
+$color-brand-pale: #FBF6F1;
 
-// Shadows - Soft
-$shadow-sm: 0 2px 8px rgba(31, 36, 33, 0.04);
-$shadow-md: 0 4px 16px rgba(31, 36, 33, 0.08);
+// Semantic Colors
+$color-success: #2F7D58;
+$color-success-light: #E8F5EE;
+$color-warning: #B36B20;
+$color-warning-light: #FDF4E8;
+$color-danger: #B64843;
+$color-danger-light: #FCEEED;
+$color-info: #4E6A7A;
+$color-info-light: #EBF1F5;
+
+// Borders
+$color-border: #E7E1D7;
+$color-border-strong: #D8D0C4;
+$color-border-pale: #F0EDE5;
+
+// Status Colors
+$color-status-analyzing: #D97706;
+$color-status-analyzing-bg: #FEF3C7;
+$color-status-completed: #16A34A;
+$color-status-completed-bg: #DCFCE7;
+$color-status-pending: #6B7280;
+$color-status-pending-bg: #F3F4F6;
+$color-status-draft: #9A9D98;
+$color-status-draft-bg: #F5F5F4;
+
+// ------------------------------------------
+// 别名 (向后兼容)
+// ------------------------------------------
+$bg-primary: $color-canvas;
+$bg-white: $color-surface;
+$bg-surface: $color-surface-secondary;
+$text-primary: $color-text-primary;
+$text-secondary: $color-text-secondary;
+$accent-primary: $color-brand;
+$accent-hover: $color-brand-hover;
+$accent-tint: $color-brand-light;
+$border-color: $color-border;
+
+// ------------------------------------------
+// 间距系统 - Spacing
+// ------------------------------------------
+$space-xs: 8rpx;
+$space-sm: 12rpx;
+$space-md: 16rpx;
+$space-lg: 24rpx;
+$space-xl: 32rpx;
+$space-2xl: 48rpx;
+$space-3xl: 64rpx;
+
+// ------------------------------------------
+// 圆角 - Border Radius
+// ------------------------------------------
+$radius-xs: 4rpx;
+$radius-sm: 8rpx;
+$radius-md: 12rpx;
+$radius-lg: 16rpx;
+$radius-xl: 24rpx;
+$radius-pill: 999rpx;
+
+// ------------------------------------------
+// 字体 - Typography
+// ------------------------------------------
+$font-xs: 24rpx;
+$font-sm: 28rpx;
+$font-md: 32rpx;
+$font-lg: 36rpx;
+$font-xl: 40rpx;
+$font-2xl: 48rpx;
+$font-3xl: 56rpx;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ------------------------------------------
+// 阴影 - Shadows
+// ------------------------------------------
+$shadow-xs: 0 1px 2px rgba(31, 36, 33, 0.04);
+$shadow-sm: 0 1px 3px rgba(31, 36, 33, 0.06);
+$shadow-md: 0 4px 12px rgba(31, 36, 33, 0.08);
 $shadow-lg: 0 8px 24px rgba(31, 36, 33, 0.12);
+$shadow-xl: 0 16px 48px rgba(31, 36, 33, 0.16);
 
-// Animation
-$transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-$transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-$transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+// ------------------------------------------
+// 过渡动画 - Transitions
+// ------------------------------------------
+$transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal: $transition-base;
+$transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// ------------------------------------------
+// Z-index 层级
+// ------------------------------------------
+$z-base: 1;
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-overlay: 500;
+$z-modal: 1000;
+$z-toast: 2000;
+
+// ------------------------------------------
+// 断点 - Breakpoints (微信小程序不常用)
+// ------------------------------------------
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
