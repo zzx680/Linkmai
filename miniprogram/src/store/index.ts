@@ -25,11 +25,11 @@ interface AppState {
   loadMessages: () => Promise<void>
   sendMessage: (content: string, images?: string[], materialType?: api.MaterialType) => Promise<void>
   setAiTyping: (typing: boolean) => void
-  uploadImage: (filePath: string) => Promise<string>
-  processMaterial: (type: api.MaterialType, imageUrl: string) => Promise<api.Material>
+  uploadImage: (filePath: string) => Promise<api.UploadedImage>
+  processMaterial: (type: api.MaterialType, artifactId: string) => Promise<api.Material>
   setUploadProgress: (fileId: string, progress: number) => void
   addMaterial: (material: api.Material) => void
-  confirmMaterial: (materialId: string, fields: api.MaterialField[]) => void
+  confirmMaterial: (materialId: string, fields: api.MaterialField[]) => Promise<void>
   generateReport: () => Promise<void>
   loadReport: (caseId: string) => Promise<void>
   reset: () => void
@@ -73,23 +73,55 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   checkLoginStatus: async () => {
+    const restoreSession = async () => {
+      const loginResult = await Taro.login()
+      if (!loginResult.code) return false
+      await get().login(loginResult.code)
+      return true
+    }
+
     const token = api.getToken()
-    if (!token) {
-      set({ isLoggedIn: false })
+    try {
+      if (token) {
+        try {
+          const user = await api.getSession()
+          set({ token, isLoggedIn: true, user })
+        } catch {
+          api.clearToken()
+          if (!await restoreSession()) {
+            set({ isLoggedIn: false })
+            return false
+          }
+        }
+      } else if (!await restoreSession()) {
+        set({ isLoggedIn: false })
+        return false
+      }
+
+      await get().loadCurrentCase()
+      await get().loadMessages()
+      return true
+    } catch (error) {
+      console.error('Login restore error:', error)
+      api.clearToken()
+      set({ user: null, token: null, isLoggedIn: false })
       return false
     }
-    set({ token, isLoggedIn: true })
-    await get().loadCurrentCase()
-    return true
   },
 
   loadCurrentCase: async () => {
-    set({ isLoadingCase: true })
+    set({ isLoadingCase: true, currentReport: null, materials: [], messages: [] })
     try {
       const currentCase = await api.getCurrentCase()
       set({ currentCase, isLoadingCase: false })
+      if (currentCase) {
+        const materials = await api.getMaterials(currentCase.id)
+        set({ materials })
+      } else {
+        set({ materials: [] })
+      }
     } catch (error) {
-      set({ currentCase: null, isLoadingCase: false })
+      set({ currentCase: null, materials: [], isLoadingCase: false })
       console.error('Load case error:', error)
     }
   },
@@ -170,7 +202,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           return { uploadingFiles }
         })
       }, 200)
-      return result.url
+      return result
     } catch (error) {
       set(state => {
         const uploadingFiles = new Map(state.uploadingFiles)
@@ -181,19 +213,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  processMaterial: async (type, imageUrl) => {
-    const result = await api.processMaterial(type, imageUrl)
-    const material: api.Material = {
-      id: `material-${Date.now()}`,
-      caseId: get().currentCase?.id,
-      type: result.type,
-      imageUrl,
-      fields: result.fields || [],
-      rawText: result.rawText,
-      status: 'processed',
-      confirmed: false,
-      createdAt: new Date().toISOString()
-    }
+  processMaterial: async (type, artifactId) => {
+    const material = await api.processMaterial(type, artifactId, get().currentCase?.id)
     get().addMaterial(material)
     return material
   },
@@ -210,26 +231,22 @@ export const useAppStore = create<AppState>((set, get) => ({
     set(state => ({ materials: [...state.materials, material] }))
   },
 
-  confirmMaterial: (materialId, fields) => {
-    const material = get().materials.find(m => m.id === materialId)
-    if (!material || !get().currentCase) return
+  confirmMaterial: async (materialId, fields) => {
+    const material = get().materials.find(item => item.id === materialId)
+    const currentCase = get().currentCase
+    if (!material || !currentCase) return
 
-    set(state => ({
-      materials: state.materials.map(m =>
-        m.id === materialId ? { ...m, fields, confirmed: true } : m
-      )
-    }))
-
-    // 持久化到后端
-    api.confirmMaterial(
-      get().currentCase!.id,
-      material.type,
-      material.imageUrl,
+    const result = await api.confirmMaterial(
+      currentCase.id,
+      material.id,
       fields,
       material.rawText
-    ).catch(err => {
-      console.error('Failed to persist material confirmation:', err)
-    })
+    )
+    const confirmedMaterial = result.material || { ...material, fields, confirmed: result.confirmed }
+    set(state => ({
+      materials: state.materials.map(item => item.id === materialId ? confirmedMaterial : item)
+    }))
+    await get().loadCurrentCase()
   },
 
   generateReport: async () => {
@@ -265,9 +282,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   loadReport: async (caseId) => {
-    const result = await api.getReport(caseId)
-    if (result?.analysis || result?.report) {
-      set({ currentReport: result.report || result })
+    const report = await api.getReport(caseId)
+    if (report?.caseId === caseId) {
+      set({ currentReport: report })
     }
   },
 

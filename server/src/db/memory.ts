@@ -83,6 +83,14 @@ export interface Artifact {
   fileSize: number
   mimeType?: string
   status: string
+  metadata?: {
+    fields?: Array<{ key: string; label: string; value: string; confidence?: string }>
+    rawText?: string
+    confirmed?: boolean
+    confirmedAt?: string
+    error?: string
+    failedAt?: string
+  }
   createdAt: Date
   updatedAt: Date
 }
@@ -155,6 +163,10 @@ export const memoryDB = {
     return userId ? users.get(userId) || null : null
   },
 
+  async findUserById(userId: string): Promise<User | null> {
+    return users.get(userId) || null
+  },
+
   async updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
     const user = users.get(userId)
     if (!user) return null
@@ -208,13 +220,14 @@ export const memoryDB = {
     return newCase
   },
 
-  async updateCase(userId: string, updates: Partial<Case>): Promise<Case | null> {
-    const caseId = activeCasesByUser.get(userId)
-    if (!caseId) return null
-    const caseData = cases.get(caseId)
-    if (!caseData) return null
-    Object.assign(caseData, updates, { updatedAt: new Date() })
-    return caseData
+  async updateCase(userId: string, updates: Partial<Case>, caseId?: string): Promise<Case | null> {
+    const targetCaseId = caseId || activeCasesByUser.get(userId)
+    if (!targetCaseId) return null
+    const caseData = cases.get(targetCaseId)
+    if (!caseData || caseData.userId !== userId) return null
+    const updatedCase = { ...caseData, ...updates, updatedAt: new Date() }
+    cases.set(targetCaseId, updatedCase)
+    return updatedCase
   },
 
   async deleteActiveCase(userId: string): Promise<boolean> {
@@ -230,7 +243,9 @@ export const memoryDB = {
     const userConvIds = conversationsByUser.get(userId) || []
     const activeConv = userConvIds
       .map((id) => conversations.get(id))
-      .find((c) => c && c.status === 'active')
+      .find((conversation) =>
+        conversation?.status === 'active' && conversation.caseId === caseId
+      )
 
     if (activeConv) return activeConv
 
@@ -306,6 +321,56 @@ export const memoryDB = {
     }
     artifacts.set(id, newArtifact)
     return newArtifact
+  },
+
+  async getArtifactsByCase(caseId: string): Promise<Artifact[]> {
+    return [...artifacts.values()]
+      .filter(artifact => artifact.caseId === caseId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+  },
+
+  async findArtifactById(caseId: string, artifactId: string): Promise<Artifact | null> {
+    const artifact = artifacts.get(artifactId)
+    return artifact?.caseId === caseId ? artifact : null
+  },
+
+  async findArtifactByUrl(caseId: string, imageUrl: string): Promise<Artifact | null> {
+    return [...artifacts.values()].find(artifact =>
+      artifact.caseId === caseId && artifact.ossUrl === imageUrl
+    ) || null
+  },
+
+  async updateArtifact(
+    caseId: string,
+    artifactId: string,
+    updates: Partial<Pick<Artifact, 'type' | 'status' | 'metadata'>>
+  ): Promise<Artifact | null> {
+    const artifact = artifacts.get(artifactId)
+    if (!artifact || artifact.caseId !== caseId) return null
+    const updatedArtifact = { ...artifact, ...updates, updatedAt: new Date() }
+    artifacts.set(artifactId, updatedArtifact)
+    return updatedArtifact
+  },
+
+  async confirmArtifact(userId: string, caseId: string, artifactId: string, fields: NonNullable<Artifact['metadata']>['fields'], rawText?: string) {
+    const caseData = cases.get(caseId)
+    const artifact = artifacts.get(artifactId)
+    if (!caseData || caseData.userId !== userId || !artifact || artifact.caseId !== caseId || artifact.status !== 'processed') return null
+    const metadata = { ...artifact.metadata, fields, rawText: rawText ?? artifact.metadata?.rawText, confirmed: true, confirmedAt: new Date().toISOString() }
+    const changed = !artifact.metadata?.confirmed || JSON.stringify(artifact.metadata?.fields) !== JSON.stringify(fields)
+    const updated = { ...artifact, metadata, updatedAt: new Date() }
+    artifacts.set(artifactId, updated)
+    if (changed) {
+      cases.set(caseId, {
+        ...caseData,
+        materialCount: caseData.materialCount + (artifact.metadata?.confirmed ? 0 : 1),
+        hasReport: false,
+        status: 'collecting',
+        statusLabel: '材料已更新，需重新分析',
+        updatedAt: new Date(),
+      })
+    }
+    return updated
   },
 
   // Reports

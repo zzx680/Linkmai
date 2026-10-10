@@ -236,7 +236,7 @@ DB_TYPE=postgres npm run dev
    DB_TYPE=postgres
    POSTGRES_HOST=localhost
    POSTGRES_USER=linkmai
-   POSTGRES_PASSWORD=linkmai123
+   POSTGRES_PASSWORD=<set-a-strong-password>
    POSTGRES_DB=linkmai
    
    # 初始化表结构

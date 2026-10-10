@@ -1,407 +1,249 @@
-# 灵迈后端部署指南
+# Staging 部署指南
 
-## 服务器要求
+## 架构
 
-**最低配置（测试阶段）**
-- CPU: 2核
-- 内存: 2GB
-- 存储: 20GB
-- 带宽: 1Mbps
+- 阿里云轻量应用服务器：Ubuntu 22.04，2 核 / 2 GiB / 40 GiB
+- 服务器进程：Nginx + PM2 + 单实例 Node.js
+- 数据库：独立 RDS PostgreSQL，不在轻量服务器安装 PostgreSQL
+- 文件与识别：阿里云 OSS / OCR
+- 客户端：微信小程序开发版，API 指向 staging HTTPS 域名
+- 支付：微信支付 API v3，异步通知指向 staging API
 
-**推荐配置（生产环境）**
-- CPU: 2核
-- 内存: 4GB
-- 存储: 40GB
-- 带宽: 3Mbps
+2 核 2 GiB 足以承载 staging 和少量测试用户。正式生产建议至少 2 核 4 GiB。轻量服务器上不要同时运行 PostgreSQL、Redis 或模型服务。
 
-## 部署步骤
+## 部署前门禁
 
-### 1. 服务器准备
+1. 确认实例已续费，不会在测试周期内到期。
+2. 在轻量应用服务器控制台开启与 RDS 所在 VPC 的内网互通。
+3. RDS 白名单只允许轻量服务器互通后的私网地址或网段。
+4. 为 staging 创建独立数据库和最小权限用户，不与 production 共库。
+5. 准备 staging API 子域名，例如 `staging-api.example.com`。
+6. 只开放公网 80/443；SSH 22 仅允许管理 IP。
+7. 不在 Git、聊天、命令历史中保存数据库密码、AppSecret 或支付私钥。
 
-```bash
-# SSH 登录服务器
-ssh root@114.55.96.52
+## 1. 准备服务器
 
-# 更新系统
-apt update && apt upgrade -y
-
-# 安装 Node.js 20
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt install -y nodejs
-
-# 安装 PostgreSQL 14
-apt install -y postgresql postgresql-contrib
-
-# 安装 Redis
-apt install -y redis-server
-
-# 安装 Nginx
-apt install -y nginx
-
-# 安装 PM2 (进程管理)
-npm install -g pm2
-```
-
-### 2. 数据库配置
+安装运行依赖：
 
 ```bash
-# 切换到 postgres 用户
-sudo -u postgres psql
-
-# 创建数据库和用户
-CREATE DATABASE linkmai;
-CREATE USER linkmai WITH PASSWORD 'linkmai';
-GRANT ALL PRIVILEGES ON DATABASE linkmai TO linkmai;
-\q
-
-# 优化 PostgreSQL 内存配置（2GB 服务器）
-sudo nano /etc/postgresql/14/main/postgresql.conf
-
-# 修改以下参数：
-shared_buffers = 128MB          # 默认是 128MB
-effective_cache_size = 512MB    # 降低到 512MB
-work_mem = 4MB                  # 降低到 4MB
-maintenance_work_mem = 64MB     # 降低到 64MB
-
-# 重启 PostgreSQL
-sudo systemctl restart postgresql
+sudo apt update
+sudo apt install -y nginx rsync curl certbot python3-certbot-nginx
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo npm install -g pm2
 ```
 
-### 3. Redis 配置
+2 GiB 机器建议增加 2–4 GiB swap：
 
 ```bash
-# 编辑 Redis 配置
-sudo nano /etc/redis/redis.conf
-
-# 限制内存使用
-maxmemory 50mb
-maxmemory-policy allkeys-lru
-
-# 重启 Redis
-sudo systemctl restart redis
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
 ```
 
-### 4. 部署代码
+将下列内容加入 `/etc/fstab`，确保重启后仍启用：
+
+```text
+/swapfile none swap sw 0 0
+```
+
+创建目录：
 
 ```bash
-# 创建应用目录
-mkdir -p /var/www/linkmai
-cd /var/www/linkmai
-
-# 克隆代码 (或从本地上传)
-# git clone <your-repo-url> .
-# 或使用 rsync/scp 上传
-
-# 安装依赖
-cd server
-npm install --production
-
-# 复制环境变量
-cp .env.production .env
-
-# 运行数据库迁移
-npm run migrate
-
-# 创建上传目录
-mkdir -p /var/linkmai/uploads
-chown -R www-data:www-data /var/linkmai/uploads
+sudo mkdir -p /var/www/linkmai-staging/releases /etc/linkmai/secrets /var/log/linkmai
+sudo chown -R "$USER":"$USER" /var/www/linkmai-staging /var/log/linkmai
+sudo chmod 700 /etc/linkmai/secrets
 ```
 
-### 5. PM2 启动
+## 2. 配置 RDS
+
+- 使用 RDS 私网地址，不使用公网地址。
+- 开启 SSL，并从 RDS 控制台下载 CA 证书。
+- 创建 `linkmai_staging` 数据库和 `linkmai_staging` 用户。
+- 在首次迁移前创建 RDS 快照。
+
+应用通过版本化 migration 管理数据库：
 
 ```bash
-# 使用 PM2 启动应用（限制内存）
-pm2 start npm --name "linkmai-api" -- start \
-  --node-args="--max-old-space-size=512"
-
-# 设置开机自启
-pm2 startup
-pm2 save
-
-# 查看状态
-pm2 status
-pm2 logs linkmai-api
+npm --prefix server run build
+npm --prefix server run db:migrate
 ```
 
-### 6. Nginx 配置
+迁移状态记录在 `schema_migrations`。已应用迁移的 checksum 不允许被修改。
+
+## 3. 配置服务器密钥
+
+从 `server/.env.staging.example` 创建 `/etc/linkmai/staging.env`：
 
 ```bash
-# 创建 Nginx 配置
-sudo nano /etc/nginx/sites-available/linkmai
+sudo install -m 600 server/.env.staging.example /etc/linkmai/staging.env
+sudoedit /etc/linkmai/staging.env
 ```
 
-```nginx
-# 上游服务器
-upstream linkmai_backend {
-    server 127.0.0.1:8000;
-    keepalive 32;
-}
+支付证书和密钥使用独立文件：
 
-# HTTPS 服务器
-server {
-    listen 443 ssl http2;
-    server_name api.linkmai.com;
-
-    # SSL 证书 (需要申请)
-    ssl_certificate /etc/nginx/ssl/linkmai.crt;
-    ssl_certificate_key /etc/nginx/ssl/linkmai.key;
-
-    # SSL 优化
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers on;
-
-    # 客户端上传大小限制
-    client_max_body_size 20M;
-
-    # API 路由
-    location /api/ {
-        proxy_pass http://linkmai_backend;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        
-        # 超时设置
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-
-    # 静态文件（上传的图片）
-    location /uploads/ {
-        alias /var/linkmai/uploads/;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Gzip 压缩
-    gzip on;
-    gzip_types application/json text/css text/javascript;
-    gzip_min_length 1000;
-}
-
-# HTTP 重定向到 HTTPS
-server {
-    listen 80;
-    server_name api.linkmai.com;
-    return 301 https://$server_name$request_uri;
-}
+```text
+/etc/linkmai/secrets/rds-ca.pem
+/etc/linkmai/secrets/apiclient_key.pem
+/etc/linkmai/secrets/wechat_api_v3_key
+/etc/linkmai/secrets/wechatpay_platform.pem
 ```
+
+权限要求：
 
 ```bash
-# 启用配置
-sudo ln -s /etc/nginx/sites-available/linkmai /etc/nginx/sites-enabled/
+sudo chmod 600 /etc/linkmai/staging.env /etc/linkmai/secrets/*
+```
+
+关键配置：
+
+- `NODE_ENV=staging`
+- `DB_TYPE=postgres`
+- `POSTGRES_SSL=true`
+- `POSTGRES_SSL_CA_FILE=/etc/linkmai/secrets/rds-ca.pem`
+- `ALLOW_MOCK_WECHAT_LOGIN=false`
+- `PAYMENT_PROVIDER=wechat`
+- `WECHAT_PAY_NOTIFY_URL=https://<staging-domain>/api/payments/wechat/notify`
+- `JWT_SECRET` 至少 32 字符随机值
+
+staging 和 production 启动时都会严格校验这些配置，缺失时服务会拒绝启动。
+
+## 4. 配置 Nginx 与 HTTPS
+
+先使用不引用证书文件的 bootstrap 配置：
+
+```bash
+sudo cp server/deploy/nginx-staging-bootstrap.conf /etc/nginx/sites-available/linkmai-staging
+sudoedit /etc/nginx/sites-available/linkmai-staging
+sudo ln -s /etc/nginx/sites-available/linkmai-staging /etc/nginx/sites-enabled/linkmai-staging
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### 7. SSL 证书申请
+DNS 生效后申请证书：
 
 ```bash
-# 安装 certbot
-apt install -y certbot python3-certbot-nginx
-
-# 申请免费证书
-certbot --nginx -d api.linkmai.com
-
-# 自动续期（证书 90 天过期）
-certbot renew --dry-run
+sudo certbot certonly --webroot -w /var/www/html -d <staging-domain>
 ```
 
-## 监控和维护
-
-### PM2 监控
+证书签发成功后，替换为完整 HTTPS 模板：
 
 ```bash
-# 查看实时日志
-pm2 logs linkmai-api --lines 100
-
-# 查看内存使用
-pm2 monit
-
-# 重启服务
-pm2 restart linkmai-api
-
-# 查看启动时间
-pm2 show linkmai-api
+sudo cp server/deploy/nginx-staging.conf /etc/nginx/sites-available/linkmai-staging
+sudoedit /etc/nginx/sites-available/linkmai-staging
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
-### 系统监控
+验证续期：
 
 ```bash
-# 内存使用情况
-free -h
-
-# 磁盘使用
-df -h
-
-# 进程监控
-htop
-
-# 数据库连接数
-sudo -u postgres psql -c "SELECT count(*) FROM pg_stat_activity;"
+sudo certbot renew --dry-run
 ```
 
-### 日志管理
+## 5. 发布与回滚
+
+将仓库同步到服务器的临时源码目录后执行：
 
 ```bash
-# PM2 日志轮转
-pm2 install pm2-logrotate
-pm2 set pm2-logrotate:max_size 10M
-pm2 set pm2-logrotate:retain 7
-
-# Nginx 日志
-tail -f /var/log/nginx/access.log
-tail -f /var/log/nginx/error.log
+LINKMAI_ENV_FILE=/etc/linkmai/staging.env \
+LINKMAI_HEALTH_URL=https://<staging-domain>/api/health \
+./server/scripts/deploy-staging.sh
 ```
 
-## 性能优化
+发布脚本会：
 
-### Node.js 优化
+1. 检查环境文件和内存；
+2. 创建带时间戳 release；
+3. `npm ci`；
+4. 运行测试和 TypeScript build；
+5. 执行数据库 migration；
+6. 原子切换 `current` 软链接；
+7. PM2 reload；
+8. 执行 health check；
+9. 失败时回滚上一 release；
+10. 只保留最近 3 个 release。
+
+手动回滚：
 
 ```bash
-# 限制 Node.js 内存（已在 PM2 启动参数中配置）
-# --max-old-space-size=512
-
-# 启用生产模式
-export NODE_ENV=production
+./server/scripts/rollback-staging.sh
 ```
 
-### 数据库优化
+查看状态：
 
 ```bash
-# 定期 VACUUM（清理碎片）
-sudo -u postgres psql linkmai -c "VACUUM ANALYZE;"
-
-# 创建索引（在应用代码中已定义）
-# 案件表：user_id, status, created_at
-# 对话表：case_id, created_at
+pm2 status
+pm2 logs linkmai-staging-api --lines 100
 ```
 
-### 缓存策略
-
-- 用户会话：Redis（30分钟过期）
-- API 响应：Nginx 缓存（静态资源）
-- 数据库查询：应用层缓存（热点数据）
-
-## 故障排查
-
-### 服务无法启动
+配置开机恢复：
 
 ```bash
-# 检查端口占用
-netstat -tulpn | grep 8000
-
-# 检查日志
-pm2 logs linkmai-api --err
-
-# 检查环境变量
-pm2 show linkmai-api
+pm2 startup
+pm2 save
 ```
 
-### 内存不足
+## 6. 微信小程序 staging 构建
+
+使用 HTTPS staging API 构建：
 
 ```bash
-# 查看内存占用
-pm2 monit
-
-# 临时释放缓存
-echo 3 > /proc/sys/vm/drop_caches
-
-# 重启服务
-pm2 restart linkmai-api
+TARO_APP_API_BASE=https://<staging-domain>/api npm --prefix miniprogram run build:weapp:staging
 ```
 
-### 数据库连接失败
+产物位于 `miniprogram/dist-staging`。
+
+微信公众平台需要配置：
+
+- request 合法域名：staging API 域名
+- uploadFile 合法域名：staging API 域名
+- downloadFile 合法域名：仅在启用下载功能后配置
+
+不要通过关闭合法域名校验代替真实 staging 配置。
+
+## 7. 微信支付验证
+
+回调地址：
+
+```text
+https://<staging-domain>/api/payments/wechat/notify
+```
+
+Nginx 和 Express 必须保持原始请求体不变。回调路由无需 JWT，但会校验微信签名、平台序列号、AppID、商户号、金额和订单归属。
+
+真实付款前单独确认测试金额和付款账号。建议 staging 金额为 1 分，并验证：
+
+- 用户取消支付；
+- 支付成功但客户端退出；
+- 回调延迟和重复回调；
+- 金额不一致被拒绝；
+- 已支付案件不重复收费；
+- 服务重启后订单和权益仍可查询。
+
+## 8. Smoke tests
+
+部署完成后运行：
 
 ```bash
-# 检查 PostgreSQL 状态
-sudo systemctl status postgresql
-
-# 查看连接数
-sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
-
-# 重启数据库
-sudo systemctl restart postgresql
+npm --prefix server run staging:smoke -- https://<staging-domain>
 ```
 
-## 升级指南
+应验证：
 
-```bash
-# 拉取最新代码
-cd /var/www/linkmai/server
-git pull
+- `/api/health` 返回 200；
+- 未认证 session/case 接口返回 401；
+- 缺少微信 code 返回 400；
+- 受保护上传接口返回 401。
 
-# 安装依赖
-npm install --production
+随后在微信真机完成：登录 → 创建案件 → 上传 → OCR → 确认材料 → 支付 → 回调 → 生成并重开报告。
 
-# 运行迁移
-npm run migrate
+## 9. 运维与安全
 
-# 重启服务
-pm2 restart linkmai-api
-
-# 验证
-curl https://api.linkmai.com/api/v1/health
-```
-
-## 备份策略
-
-### 数据库备份
-
-```bash
-# 每日自动备份
-sudo crontab -e
-
-# 添加定时任务（每天凌晨 3 点）
-0 3 * * * pg_dump -U linkmai linkmai > /var/backups/linkmai_$(date +\%Y\%m\%d).sql
-
-# 保留最近 7 天
-0 4 * * * find /var/backups -name "linkmai_*.sql" -mtime +7 -delete
-```
-
-### 文件备份
-
-```bash
-# 上传文件备份到 OSS（配置 OSS 后）
-# 或定期打包
-tar -czf /var/backups/uploads_$(date +%Y%m%d).tar.gz /var/linkmai/uploads
-```
-
-## 安全建议
-
-1. **防火墙配置**
-```bash
-ufw allow 22/tcp   # SSH
-ufw allow 80/tcp   # HTTP
-ufw allow 443/tcp  # HTTPS
-ufw enable
-```
-
-2. **修改默认密码**
-- PostgreSQL: `linkmai` 用户密码
-- 服务器 root 密码
-
-3. **禁用 root SSH 登录**
-```bash
-sudo nano /etc/ssh/sshd_config
-# PermitRootLogin no
-```
-
-4. **启用 fail2ban**
-```bash
-apt install fail2ban
-systemctl enable fail2ban
-```
-
-## 联系方式
-
-遇到问题请查看日志：
-- 应用日志: `pm2 logs linkmai-api`
-- Nginx 日志: `/var/log/nginx/error.log`
-- 系统日志: `journalctl -xe`
+- 安装并配置 `pm2-logrotate`，单文件 10 MB，保留 7 天。
+- 开启 RDS 自动备份，并至少做一次恢复演练。
+- 每次发布记录 Git SHA、migration 版本和 release ID。
+- 日志不得写入 AppSecret、数据库密码、支付私钥、API v3 key 或完整敏感材料。
+- 监控内存超过 80%、磁盘超过 75%、5xx、数据库不可用和支付回调失败。
+- 保持轻量服务器安全更新与实例续费。

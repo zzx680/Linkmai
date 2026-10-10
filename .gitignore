@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Build outputs
 dist/
@@ -15,6 +14,7 @@ dist/
 # Environment
 .env
 .env.local
+.env.staging
 
 # OS
 .DS_Store

@@ -51,8 +51,8 @@ export default function Materials() {
       })
       setIsProcessing(true)
       Taro.showLoading({ title: '上传并识别中' })
-      const imageUrl = await useAppStore.getState().uploadImage(result.tempFilePaths[0])
-      const material = await processMaterial(selectedType, imageUrl)
+      const uploaded = await useAppStore.getState().uploadImage(result.tempFilePaths[0])
+      const material = await processMaterial(selectedType, uploaded.artifactId)
       setExpandedId(material.id)
       Taro.hideLoading()
       Taro.showToast({ title: '识别完成，请核对', icon: 'success' })
@@ -75,12 +75,16 @@ export default function Materials() {
     }))
   }
 
-  const confirmMaterialFields = (materialId: string) => {
+  const confirmMaterialFields = async (materialId: string) => {
     const fields = draftFields[materialId] || []
-    confirmMaterial(materialId, fields)
-    setConfirmedIds(current => current.includes(materialId) ? current : [...current, materialId])
-    setExpandedId(null)
-    Taro.showToast({ title: '信息已确认', icon: 'success' })
+    try {
+      await confirmMaterial(materialId, fields)
+      setConfirmedIds(current => current.includes(materialId) ? current : [...current, materialId])
+      setExpandedId(null)
+      Taro.showToast({ title: '信息已确认', icon: 'success' })
+    } catch (error: any) {
+      Taro.showToast({ title: error.message || '确认失败', icon: 'none' })
+    }
   }
 
   const viewRawText = (materialId: string) => {

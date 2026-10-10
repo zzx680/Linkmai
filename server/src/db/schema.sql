@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_openid ON users(openid);
+CREATE INDEX IF NOT EXISTS idx_users_openid ON users(openid);
 
 -- 案件表
 CREATE TABLE IF NOT EXISTS cases (
@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS cases (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_cases_user_id ON cases(user_id);
-CREATE INDEX idx_cases_is_active ON cases(user_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_cases_user_id ON cases(user_id);
+CREATE INDEX IF NOT EXISTS idx_cases_is_active ON cases(user_id, is_active);
 
 -- 对话表
 CREATE TABLE IF NOT EXISTS conversations (
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_conversations_user_id ON conversations(user_id);
-CREATE INDEX idx_conversations_status ON conversations(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_status ON conversations(user_id, status);
 
 -- 消息表
 CREATE TABLE IF NOT EXISTS messages (
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_messages_conversation_id ON messages(conversation_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id, created_at);
 
 -- 材料文件表
 CREATE TABLE IF NOT EXISTS artifacts (
@@ -73,11 +73,13 @@ CREATE TABLE IF NOT EXISTS artifacts (
   file_size BIGINT NOT NULL,
   mime_type VARCHAR(100),
   status VARCHAR(50) NOT NULL DEFAULT 'uploaded',
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_artifacts_case_id ON artifacts(case_id);
+CREATE INDEX IF NOT EXISTS idx_artifacts_case_id ON artifacts(case_id);
+ALTER TABLE artifacts ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 -- 提取字段表（材料识别结果）
 CREATE TABLE IF NOT EXISTS extracted_fields (
@@ -93,7 +95,7 @@ CREATE TABLE IF NOT EXISTS extracted_fields (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_extracted_fields_artifact_id ON extracted_fields(artifact_id);
+CREATE INDEX IF NOT EXISTS idx_extracted_fields_artifact_id ON extracted_fields(artifact_id);
 
 -- 报告表
 CREATE TABLE IF NOT EXISTS reports (
@@ -106,7 +108,7 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_reports_case_id ON reports(case_id);
+CREATE INDEX IF NOT EXISTS idx_reports_case_id ON reports(case_id);
 
 -- 案件级一次性付费权益
 CREATE TABLE IF NOT EXISTS case_entitlements (
@@ -155,8 +157,8 @@ CREATE TABLE IF NOT EXISTS consultations (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_consultations_case_id ON consultations(case_id);
-CREATE INDEX idx_consultations_user_id ON consultations(user_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_case_id ON consultations(case_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_user_id ON consultations(user_id);
 
 -- 审计日志表
 CREATE TABLE IF NOT EXISTS audit_logs (
@@ -170,5 +172,5 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id, created_at);
-CREATE INDEX idx_audit_logs_resource ON audit_logs(resource_type, resource_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource_type, resource_id);

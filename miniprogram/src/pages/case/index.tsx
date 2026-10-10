@@ -2,7 +2,8 @@ import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useEffect, useMemo, useState } from 'react'
 import { useAppStore } from '../../store'
-import { createPaymentOrder } from '../../services/api'
+import { createPaymentOrder, getPaymentOrder } from '../../services/api'
+import { IS_H5 } from '../../config/env'
 import { Icon, SkeletonCaseCard } from '../../components'
 import './index.scss'
 
@@ -10,6 +11,18 @@ const DEFAULT_PRICE_CENTS = 4990
 
 function formatPrice(amountCents?: number) {
   return `¥${((amountCents || DEFAULT_PRICE_CENTS) / 100).toFixed(2)}`
+}
+
+async function waitForPaymentConfirmation(orderId: string) {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const order = await getPaymentOrder(orderId)
+    if (order.status === 'paid' || order.entitlement?.status === 'paid') return true
+    if (['failed', 'closed', 'refunded'].includes(order.status)) return false
+    if (attempt < 5) {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+  }
+  return false
 }
 
 function getNextAction(caseData: ReturnType<typeof useAppStore.getState>['currentCase']) {
@@ -27,8 +40,12 @@ export default function CasePage() {
   const [isPaying, setIsPaying] = useState(false)
 
   useEffect(() => {
-    loadCurrentCase()
+    if (!IS_H5) loadCurrentCase()
   }, [loadCurrentCase])
+
+  const handleNotifications = () => {
+    Taro.showToast({ title: '暂无新的案件提醒', icon: 'none' })
+  }
 
   const nextAction = useMemo(() => getNextAction(currentCase), [currentCase])
   const entitlement = currentCase?.entitlement
@@ -54,8 +71,12 @@ export default function CasePage() {
 
       if (!result.alreadyPaid && result.payment && result.orderId) {
         await Taro.requestPayment(result.payment)
+        const paid = await waitForPaymentConfirmation(result.orderId)
         await useAppStore.getState().loadCurrentCase()
-        Taro.showToast({ title: '已解锁完整方案', icon: 'success' })
+        Taro.showToast({
+          title: paid ? '已解锁完整方案' : '支付结果确认中，请稍后刷新',
+          icon: paid ? 'success' : 'none'
+        })
         return
       }
 
@@ -102,6 +123,13 @@ export default function CasePage() {
 
   return (
     <View className="case-page">
+      <View className="top-bar">
+        <Text className="top-title">灵迈</Text>
+        <View className="top-action" onClick={handleNotifications}>
+          <Icon name="notification-3-line" size={24} color="#353F4C" />
+        </View>
+      </View>
+
       <View className="welcome-block">
         <Text className="welcome-eyebrow">Hello 👋</Text>
         <Text className="welcome-title">欢迎使用灵迈</Text>

@@ -22,7 +22,7 @@ sudo systemctl start postgresql
 docker run -d \
   --name linkmai-postgres \
   -e POSTGRES_USER=linkmai \
-  -e POSTGRES_PASSWORD=linkmai123 \
+  -e POSTGRES_PASSWORD=<set-a-strong-password> \
   -e POSTGRES_DB=linkmai \
   -p 5432:5432 \
   postgres:16-alpine
@@ -48,7 +48,7 @@ DB_TYPE=postgres
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_USER=linkmai
-POSTGRES_PASSWORD=linkmai123
+POSTGRES_PASSWORD=<set-a-strong-password>
 POSTGRES_DB=linkmai
 POSTGRES_SSL=false
 ```

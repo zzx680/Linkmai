@@ -1,6 +1,42 @@
+@font-face {
+  font-family: 'linkmai-icons';
+  src: url('../../assets/icons/remixicon.woff2') format('woff2');
+  font-display: block;
+}
+
 .icon-component {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  font-family: 'linkmai-icons';
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
 }
+
+.icon-component::before { display: block; }
+.ri-add-line::before { content: '\ea13'; }
+.ri-alert-line::before { content: '\ea21'; }
+.ri-arrow-right-line::before { content: '\ea6c'; }
+.ri-arrow-right-s-line::before { content: '\ea6e'; }
+.ri-bank-card-line::before { content: '\ea92'; }
+.ri-camera-line::before { content: '\eb31'; }
+.ri-car-line::before { content: '\eb39'; }
+.ri-checkbox-circle-line::before { content: '\eb81'; }
+.ri-file-chart-line::before { content: '\eccd'; }
+.ri-file-list-3-line::before { content: '\ecef'; }
+.ri-file-list-line::before { content: '\ecf1'; }
+.ri-folder-3-line::before { content: '\ed54'; }
+.ri-folder-line::before { content: '\ed6a'; }
+.ri-hospital-line::before { content: '\ee37'; }
+.ri-inbox-line::before { content: '\ee4f'; }
+.ri-information-line::before { content: '\ee59'; }
+.ri-loader-4-line::before { content: '\eec6'; }
+.ri-lock-2-line::before { content: '\eecc'; }
+.ri-notification-3-line::before { content: '\ef94'; }
+.ri-profile-line::before { content: '\f02d'; }
+.ri-question-line::before { content: '\f045'; }
+.ri-route-line::before { content: '\f09b'; }
+.ri-scales-3-line::before { content: '\f0b7'; }
+.ri-settings-3-line::before { content: '\f0e6'; }
+.ri-shield-check-line::before { content: '\f100'; }

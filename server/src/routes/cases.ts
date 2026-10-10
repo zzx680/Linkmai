@@ -18,7 +18,11 @@ async function withEntitlement(caseData: any, userId: string) {
       currency: entitlement?.currency || config.payment.currency,
       paidAt: entitlement?.paidAt || null,
     },
-    nextAction: paid ? ((caseData.hasReport ?? caseData.has_report) ? 'view_report' : 'continue_case') : 'unlock_full_plan',
+    nextAction: !caseData.materialCount
+      ? 'continue_materials'
+      : paid
+        ? ((caseData.hasReport ?? caseData.has_report) ? 'view_report' : 'continue_case')
+        : 'unlock_full_plan',
   }
 }
 

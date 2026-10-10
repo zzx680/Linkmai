@@ -25,7 +25,11 @@ export async function processMaterial(
   try {
     // 1. OCR 识别文字
     const ocrResult = await ocrService.recognizeText(imageUrl)
-    const rawText = ocrResult.text || ''
+    if (!ocrResult.success) {
+      throw new Error(ocrResult.error || 'OCR 识别失败')
+    }
+    const rawText = ocrResult.text?.trim() || ''
+    if (!rawText) throw new Error('OCR 未识别到有效文字')
 
     // 2. 根据材料类型调用 DeepSeek 提取结构化字段
     const fields = await extractFieldsByType(materialType, rawText, imageUrl)
@@ -50,13 +54,13 @@ async function extractFieldsByType(
   imageUrl: string
 ): Promise<MaterialField[]> {
   switch (type) {
-    case 'police-report':
+    case 'accident_report':
       return extractPoliceReportFields(ocrText, imageUrl)
 
     case 'medical-record':
       return extractMedicalFields(ocrText)
 
-    case 'damage-photo':
+    case 'scene_photo':
       return extractDamageFields(imageUrl)
 
     case 'invoice':

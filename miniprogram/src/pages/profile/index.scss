@@ -1,281 +1,183 @@
-@use '../../styles/variables.scss' as *;
+@use '../../styles/design-tokens.scss' as *;
 
 .profile-page {
   min-height: 100vh;
-  background: $color-canvas;
-  padding-bottom: calc($space-2xl + env(safe-area-inset-bottom));
+  padding: 48rpx 32rpx 190rpx;
+  background: $color-bg-base;
 }
 
-// ==========================================
-// 用户区块
-// ==========================================
-.user-section {
-  background: linear-gradient(180deg, $color-brand 0%, $color-brand-hover 100%);
-  padding: $space-2xl $space-lg $space-xl;
-  margin-bottom: $space-lg;
-
-  .user-card {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    border-radius: $radius-lg;
-    padding: $space-xl;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $space-xl;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: $space-lg;
-      flex: 1;
-
-      .avatar-wrapper {
-        width: 112rpx;
-        height: 112rpx;
-        border-radius: $radius-md;
-        background: $color-surface;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: $shadow-md;
-        flex-shrink: 0;
-
-        .avatar {
-          font-size: 64rpx;
-        }
-      }
-
-      .user-details {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: $space-xs;
-
-        .nickname {
-          font-size: $font-2xl;
-          font-weight: $font-weight-semibold;
-          color: $color-text-inverse;
-        }
-
-        .phone {
-          font-size: $font-md;
-          color: rgba(255, 255, 255, 0.8);
-        }
-      }
-    }
-
-    .edit-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: $radius-pill;
-      padding: $space-sm $space-lg;
-      transition: all $transition-fast;
-
-      &:active {
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(0.95);
-      }
-
-      .edit-text {
-        font-size: $font-md;
-        font-weight: $font-weight-medium;
-        color: $color-text-inverse;
-      }
-    }
-  }
-
-  // 数据统计
-  .stats-container {
-    display: flex;
-    gap: $space-md;
-  }
-
-  .stat-item {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: $radius-md;
-    padding: $space-xl;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: $space-sm;
-    transition: all $transition-fast;
-
-    &:active {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateY(-4px);
-    }
-
-    .stat-value {
-      font-size: $font-3xl;
-      font-weight: $font-weight-bold;
-      color: $color-text-inverse;
-
-      &.highlight {
-        color: #FEF3C7;
-      }
-
-      &.success {
-        color: #D1FAE5;
-      }
-    }
-
-    .stat-label {
-      font-size: $font-sm;
-      color: rgba(255, 255, 255, 0.9);
-      font-weight: $font-weight-medium;
-    }
-  }
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32rpx;
 }
 
-// ==========================================
-// 菜单容器
-// ==========================================
-.menu-container {
-  padding: 0 $space-lg;
+.profile-eyebrow {
+  display: block;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+}
+
+.profile-title {
+  display: block;
+  margin-top: 8rpx;
+  color: $color-text-primary;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+}
+
+.profile-header-icon {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-full;
+  background: $color-bg-elevated;
+  box-shadow: $shadow-sm;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx;
+  border-radius: $radius-xl;
+  background: $color-bg-elevated;
+  box-shadow: $shadow-md;
+}
+
+.user-card-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.user-copy {
   display: flex;
   flex-direction: column;
-  gap: $space-xl;
+  margin-left: 24rpx;
+}
+
+.user-name {
+  color: $color-text-primary;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.user-caption {
+  margin-top: 8rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-xs;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.stat-card {
+  flex: 1;
+  padding: 28rpx;
+  border-radius: $radius-lg;
+  background: $color-bg-elevated;
+  box-shadow: $shadow-sm;
+}
+
+.stat-value {
+  display: block;
+  color: $color-text-primary;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+}
+
+.stat-label {
+  display: block;
+  margin-top: 8rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-xs;
 }
 
 .menu-section {
-  .section-title {
-    font-size: $font-sm;
-    color: $color-text-muted;
-    font-weight: $font-weight-semibold;
-    text-transform: uppercase;
-    letter-spacing: 1rpx;
-    display: block;
-    margin-bottom: $space-md;
-    padding: 0 $space-xs;
-  }
+  margin-top: 36rpx;
 }
 
-.menu-group {
-  background: $color-surface;
-  border-radius: $radius-lg;
-  border: 1px solid $color-border;
+.section-title {
+  display: block;
+  margin: 0 8rpx 14rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.menu-card {
   overflow: hidden;
+  border-radius: $radius-lg;
+  background: $color-bg-elevated;
+  box-shadow: $shadow-sm;
 }
 
 .menu-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: $space-xl $space-lg;
-  transition: all $transition-fast;
-  position: relative;
-
-  &:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: $space-lg;
-    right: $space-lg;
-    height: 1px;
-    background: $color-border-pale;
-  }
-
-  &:active {
-    background: $color-surface-hover;
-  }
-
-  .menu-left {
-    display: flex;
-    align-items: center;
-    gap: $space-lg;
-    flex: 1;
-
-    .menu-icon-wrapper {
-      width: 72rpx;
-      height: 72rpx;
-      border-radius: $radius-md;
-      background: $color-surface-secondary;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      .menu-icon {
-        font-size: 40rpx;
-      }
-    }
-
-    .menu-label {
-      font-size: $font-lg;
-      color: $color-text-primary;
-      font-weight: $font-weight-medium;
-    }
-  }
-
-  .menu-right {
-    display: flex;
-    align-items: center;
-    gap: $space-sm;
-
-    .menu-value {
-      font-size: $font-md;
-      color: $color-text-secondary;
-    }
-
-    .menu-arrow {
-      font-size: 48rpx;
-      color: $color-text-muted;
-      font-weight: $font-weight-normal;
-      line-height: 1;
-    }
-  }
+  min-height: 104rpx;
+  margin: 0 28rpx;
+  border-bottom: 1rpx solid $color-border-light;
 }
 
-// ==========================================
-// 退出登录
-// ==========================================
-.logout-section {
-  padding: $space-2xl $space-lg;
+.menu-item-last {
+  border-bottom: 0;
 }
 
-.logout-btn {
-  background: $color-surface;
-  border: 1px solid $color-border;
-  border-radius: $radius-lg;
-  padding: $space-xl;
-  text-align: center;
-  transition: all $transition-fast;
-
-  &:active {
-    background: $color-danger-light;
-    border-color: $color-danger;
-
-    .logout-text {
-      color: $color-danger;
-    }
-  }
-
-  .logout-text {
-    font-size: $font-lg;
-    color: $color-text-secondary;
-    font-weight: $font-weight-semibold;
-    transition: color $transition-fast;
-  }
-}
-
-// ==========================================
-// 页脚信息
-// ==========================================
-.footer-info {
-  padding: 0 $space-lg;
+.menu-icon {
+  width: 56rpx;
+  height: 56rpx;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: $space-xs;
+  justify-content: center;
+  margin-right: 20rpx;
+  border-radius: $radius-full;
+  background: $color-brand-light;
+}
 
-  .footer-text {
-    font-size: $font-xs;
-    color: $color-text-muted;
-    text-align: center;
-  }
+.menu-label {
+  flex: 1;
+  color: $color-text-primary;
+  font-size: $font-size-base;
+}
+
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.menu-value {
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96rpx;
+  margin-top: 36rpx;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-lg;
+  background: $color-bg-elevated;
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+}
+
+.profile-footer {
+  display: block;
+  margin-top: 36rpx;
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  text-align: center;
 }

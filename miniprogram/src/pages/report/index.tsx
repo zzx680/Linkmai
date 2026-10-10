@@ -2,7 +2,6 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useEffect, useState } from 'react'
 import Taro from '@tarojs/taro'
 import { useAppStore } from '../../store'
-import { exportReport } from '../../services/api'
 import { Icon } from '../../components'
 import './index.scss'
 
@@ -19,7 +18,6 @@ export default function Report() {
     generateReport,
     loadReport
   } = useAppStore()
-  const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -34,24 +32,6 @@ export default function Report() {
       await generateReport()
     } catch {
       setError('报告生成失败，请稍后重试')
-    }
-  }
-
-  const handleExport = async (format: 'pdf' | 'word') => {
-    if (!currentCase) return
-    setIsExporting(true)
-    try {
-      const result = await exportReport(currentCase.id, format)
-      if (result.downloadUrl) {
-        Taro.setClipboardData({ data: result.downloadUrl })
-        Taro.showToast({ title: '下载地址已复制', icon: 'success' })
-      } else {
-        Taro.showToast({ title: result.message || '导出功能即将上线', icon: 'none' })
-      }
-    } catch (exportError: any) {
-      Taro.showToast({ title: exportError.message || '导出失败', icon: 'none' })
-    } finally {
-      setIsExporting(false)
     }
   }
 
@@ -199,11 +179,6 @@ export default function Report() {
           <Text className="source-title">依据与复核</Text>
           <Text className="source-text">本报告依据当前案件中已确认的 {materials.length} 份材料生成。采取下一步行动前，可以随时返回原始材料核对事实。</Text>
           <View className="source-actions"><View onClick={goMaterials}><Text>查看原始材料 →</Text></View></View>
-        </View>
-
-        <View className="export-actions">
-          <View className="export-button secondary" onClick={() => handleExport('word')}><Text>{isExporting ? '处理中' : '导出 Word'}</Text></View>
-          <View className="export-button primary" onClick={() => handleExport('pdf')}><Text>{isExporting ? '处理中' : '导出 PDF'}</Text></View>
         </View>
       </ScrollView>
     </View>

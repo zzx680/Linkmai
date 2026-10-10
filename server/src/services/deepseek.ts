@@ -1,7 +1,5 @@
 import axios from 'axios'
-
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || ''
-const DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1'
+import { config } from '../config'
 
 interface DeepSeekMessage {
   role: 'system' | 'user' | 'assistant'
@@ -42,17 +40,18 @@ export async function callDeepSeek(
   }
 ): Promise<DeepSeekResponse> {
   const response = await axios.post(
-    `${DEEPSEEK_BASE_URL}/chat/completions`,
+    `${config.deepseek.apiUrl}/chat/completions`,
     {
-      model: 'deepseek-flash',
+      model: config.deepseek.model,
       messages,
       temperature: options?.temperature ?? 0.7,
       max_tokens: options?.maxTokens ?? 2000,
     },
     {
+      timeout: config.deepseek.timeoutMs,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
+        Authorization: `Bearer ${config.deepseek.apiKey}`,
       },
     }
   )

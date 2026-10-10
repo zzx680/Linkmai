@@ -37,6 +37,7 @@ export async function requirePaidEntitlement(userId: string, caseId: string) {
 }
 
 export async function createCasePaymentOrder(userId: string, caseId: string, openid: string, idempotencyKey?: string) {
+  if (config.payment.provider === 'disabled') throw new Error('PAYMENT_PROVIDER_NOT_CONFIGURED')
   const caseData = await db.findCaseById(userId, caseId)
   if (!caseData) throw new Error('CASE_NOT_FOUND')
   const entitlement = await db.getCaseEntitlement(userId, caseId)

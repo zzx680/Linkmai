@@ -63,9 +63,9 @@ export async function sendAgentMessage(
   message: ChatMessage,
 ): Promise<AgentMessageResponse> {
   const res = await Taro.request({
-    url: `${API_BASE}/agent/message`,
+    url: `${API_BASE}/conversations/current/messages`,
     method: 'POST',
-    data: message,
+    data: { text: message.text, images: message.artifact?.urls || [] },
   })
   return res.data as AgentMessageResponse
 }

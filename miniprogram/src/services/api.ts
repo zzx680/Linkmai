@@ -1,10 +1,11 @@
 import Taro from '@tarojs/taro'
+import { getApiBase } from '../config/env'
 
-const API_BASE = 'http://localhost:8000/api'
+const API_BASE = getApiBase()
 
 type RequestConfig = {
   url: string
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   data?: any
   headers?: Record<string, string>
 }
@@ -62,6 +63,10 @@ export interface User {
 export interface LoginResponse {
   token: string
   user: User
+}
+
+export async function getSession(): Promise<User> {
+  return request<User>({ url: '/auth/session' })
 }
 
 export async function login(code: string): Promise<LoginResponse> {
@@ -146,7 +151,7 @@ export async function createCase(): Promise<Case> {
 }
 
 export async function updateCase(updates: Partial<Case>): Promise<Case> {
-  return request<Case>({ url: '/cases/current', method: 'PUT', data: updates })
+  return request<Case>({ url: '/cases/current', method: 'PATCH', data: updates })
 }
 
 export async function getCurrentCaseEntitlement(): Promise<CaseEntitlement & { caseId: string }> {
@@ -259,7 +264,13 @@ export interface MaterialProcessResult {
   rawText?: string
 }
 
-export async function uploadImage(filePath: string): Promise<{ url: string; key: string }> {
+export interface UploadedImage {
+  url: string
+  key: string
+  artifactId: string
+}
+
+export async function uploadImage(filePath: string): Promise<UploadedImage> {
   return new Promise((resolve, reject) => {
     const token = getToken()
     Taro.uploadFile({
@@ -286,26 +297,26 @@ export async function uploadImage(filePath: string): Promise<{ url: string; key:
 
 export async function processMaterial(
   materialType: MaterialType,
-  imageUrl: string
-): Promise<MaterialProcessResult> {
-  return request<MaterialProcessResult>({
+  artifactId: string,
+  caseId?: string
+): Promise<Material> {
+  return request<Material>({
     url: '/materials/process',
     method: 'POST',
-    data: { materialType, imageUrl }
+    data: { materialType, artifactId, caseId }
   })
 }
 
 export async function confirmMaterial(
   caseId: string,
-  materialType: MaterialType | string,
-  imageUrl: string,
+  artifactId: string,
   fields: MaterialField[],
   rawText?: string
-): Promise<{ confirmed: boolean }> {
-  return request<{ confirmed: boolean }>({
+): Promise<{ confirmed: boolean; material?: Material | null }> {
+  return request<{ confirmed: boolean; material?: Material | null }>({
     url: '/materials/confirm',
     method: 'POST',
-    data: { caseId, materialType, imageUrl, fields, rawText }
+    data: { caseId, artifactId, fields, rawText }
   })
 }
 
@@ -327,15 +338,17 @@ export interface ReportResponse {
 }
 
 export async function generateReport(facts: Array<{ label: string; value: string; confirmed: boolean }>): Promise<ReportData> {
-  return request<ReportData>({
+  const result = await request<ReportResponse>({
     url: '/reports/generate',
     method: 'POST',
     data: { facts }
   })
+  return result.report
 }
 
-export async function getReport(caseId: string): Promise<any> {
-  return request<any>({ url: `/reports/${caseId}` })
+export async function getReport(caseId: string): Promise<ReportData> {
+  const result = await request<ReportResponse>({ url: `/reports/${caseId}` })
+  return result.report
 }
 
 export async function exportReport(caseId: string, format: 'pdf' | 'word') {

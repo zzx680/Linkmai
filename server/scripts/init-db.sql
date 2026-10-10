@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_openid ON users(openid);
+CREATE INDEX IF NOT EXISTS idx_users_openid ON users(openid);
 
 -- 案件表
 CREATE TABLE IF NOT EXISTS cases (
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS cases (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_cases_user_id ON cases(user_id);
-CREATE INDEX idx_cases_is_active ON cases(is_active);
+CREATE INDEX IF NOT EXISTS idx_cases_user_id ON cases(user_id);
+CREATE INDEX IF NOT EXISTS idx_cases_is_active ON cases(is_active);
 
 -- 对话表
 CREATE TABLE IF NOT EXISTS conversations (
@@ -45,9 +45,9 @@ CREATE TABLE IF NOT EXISTS conversations (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_conversations_user_id ON conversations(user_id);
-CREATE INDEX idx_conversations_case_id ON conversations(case_id);
-CREATE INDEX idx_conversations_status ON conversations(status);
+CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_case_id ON conversations(case_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_status ON conversations(status);
 
 -- 消息表
 CREATE TABLE IF NOT EXISTS messages (
@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
-CREATE INDEX idx_messages_created_at ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
 
 -- 材料表
 CREATE TABLE IF NOT EXISTS artifacts (
@@ -74,12 +74,14 @@ CREATE TABLE IF NOT EXISTS artifacts (
   file_size BIGINT NOT NULL,
   mime_type VARCHAR(100),
   status VARCHAR(50) NOT NULL DEFAULT 'uploaded',
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_artifacts_case_id ON artifacts(case_id);
-CREATE INDEX idx_artifacts_type ON artifacts(type);
+CREATE INDEX IF NOT EXISTS idx_artifacts_case_id ON artifacts(case_id);
+CREATE INDEX IF NOT EXISTS idx_artifacts_type ON artifacts(type);
+ALTER TABLE artifacts ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 -- 提取字段表
 CREATE TABLE IF NOT EXISTS extracted_fields (
@@ -95,7 +97,7 @@ CREATE TABLE IF NOT EXISTS extracted_fields (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_extracted_fields_artifact_id ON extracted_fields(artifact_id);
+CREATE INDEX IF NOT EXISTS idx_extracted_fields_artifact_id ON extracted_fields(artifact_id);
 
 -- 报告表
 CREATE TABLE IF NOT EXISTS reports (
@@ -108,7 +110,43 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_reports_case_id ON reports(case_id);
+CREATE INDEX IF NOT EXISTS idx_reports_case_id ON reports(case_id);
+
+-- 案件级一次性付费权益
+CREATE TABLE IF NOT EXISTS case_entitlements (
+  id VARCHAR(64) PRIMARY KEY,
+  case_id VARCHAR(64) UNIQUE NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+  user_id VARCHAR(64) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status VARCHAR(20) NOT NULL DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'pending', 'paid', 'refunded')),
+  amount_cents INTEGER NOT NULL,
+  currency VARCHAR(3) NOT NULL DEFAULT 'CNY',
+  paid_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_case_entitlements_user_id ON case_entitlements(user_id);
+
+-- 案件支付订单
+CREATE TABLE IF NOT EXISTS payment_orders (
+  id VARCHAR(64) PRIMARY KEY,
+  order_no VARCHAR(64) UNIQUE NOT NULL,
+  case_id VARCHAR(64) NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+  user_id VARCHAR(64) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount_cents INTEGER NOT NULL,
+  currency VARCHAR(3) NOT NULL DEFAULT 'CNY',
+  status VARCHAR(20) NOT NULL DEFAULT 'created' CHECK (status IN ('created', 'pending', 'paid', 'failed', 'closed', 'refunded')),
+  wechat_transaction_id VARCHAR(128) UNIQUE,
+  prepay_id VARCHAR(128),
+  idempotency_key VARCHAR(128),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  paid_at TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMP NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_payment_orders_idempotency ON payment_orders(user_id, case_id, idempotency_key) WHERE idempotency_key IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_payment_orders_case_status ON payment_orders(case_id, status, expires_at);
 
 -- 咨询表
 CREATE TABLE IF NOT EXISTS consultations (
@@ -122,5 +160,5 @@ CREATE TABLE IF NOT EXISTS consultations (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_consultations_case_id ON consultations(case_id);
-CREATE INDEX idx_consultations_user_id ON consultations(user_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_case_id ON consultations(case_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_user_id ON consultations(user_id);

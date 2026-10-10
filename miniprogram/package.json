@@ -4,8 +4,11 @@
   "description": "灵迈交通事故助手",
   "main": "index.js",
   "scripts": {
-    "build:weapp": "taro build --type weapp",
-    "dev:weapp": "npm run build:weapp -- --watch",
+    "build:weapp": "NODE_ENV=production taro build --type weapp",
+    "build:weapp:staging": "NODE_ENV=production TARO_OUTPUT_ROOT=dist-staging taro build --type weapp",
+    "build:weapp:dev": "NODE_ENV=development taro build --type weapp",
+    "dev:weapp": "NODE_ENV=development taro build --type weapp --watch",
+    "dev:h5": "NODE_ENV=development taro build --type h5 --watch",
     "start": "npm run dev:weapp",
     "convert:icons": "node scripts/convert-icons.js"
   },
@@ -22,7 +25,6 @@
     "ali-oss": "^6.18.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "remixicon": "^4.9.1",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
@@ -30,7 +32,9 @@
     "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
     "@babel/preset-typescript": "^7.29.7",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
     "@tarojs/cli": "4.0.7",
+    "@tarojs/plugin-platform-h5": "^4.0.7",
     "@tarojs/taro-loader": "4.0.7",
     "@tarojs/webpack5-runner": "4.0.7",
     "@types/react": "^18.3.12",

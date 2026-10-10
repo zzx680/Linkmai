@@ -1,9 +1,11 @@
 import express from 'express'
+import { config } from '../config'
 import { db } from '../db'
 import { createCasePaymentOrder, getEntitlement, processPaymentNotification, queryPaymentOrder } from '../services/payment'
 
 const casePaymentRouter = express.Router()
 const paymentOrderRouter = express.Router()
+const testPaymentRouter = express.Router()
 
 function respondWithError(res: express.Response, err: unknown) {
   const code = (err as Error).message
@@ -65,5 +67,38 @@ export async function paymentNotificationHandler(req: express.Request, res: expr
   }
 }
 
-export { casePaymentRouter, paymentOrderRouter }
+testPaymentRouter.post('/complete', async (req, res) => {
+  if (config.nodeEnv !== 'test' || !config.payment.testSecret) {
+    return res.status(404).json({ error: 'NotFound', message: '接口不存在' })
+  }
+
+  if (req.headers['x-payment-test-secret'] !== config.payment.testSecret) {
+    return res.status(403).json({ error: 'Forbidden', message: '测试支付密钥无效' })
+  }
+
+  const { orderNo, amountCents, currency } = req.body
+  if (!orderNo || !Number.isInteger(amountCents) || !currency) {
+    return res.status(400).json({ error: 'InvalidRequest', message: '测试支付参数不完整' })
+  }
+
+  try {
+    const order = await db.findPaymentOrderByOrderNo(orderNo)
+    if (!order || order.userId !== req.userId) {
+      return res.status(404).json({ error: 'NotFound', message: '未找到支付订单' })
+    }
+
+    const updated = await db.completePaymentOrder({
+      orderNo,
+      userId: req.userId!,
+      amountCents,
+      currency,
+      wechatTransactionId: `test_${orderNo}`,
+    })
+    res.json({ success: true, data: updated })
+  } catch (err) {
+    respondWithError(res, err)
+  }
+})
+
+export { casePaymentRouter, paymentOrderRouter, testPaymentRouter }
 export default paymentOrderRouter

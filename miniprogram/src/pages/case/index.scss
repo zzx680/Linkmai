@@ -1,197 +1,186 @@
-@use '../../styles/variables.scss' as *;
+@use '../../styles/design-tokens.scss' as *;
 
 .case-page {
   min-height: 100vh;
+  padding: 48rpx 32rpx 190rpx;
   box-sizing: border-box;
-  background: $bg-primary;
-  padding: 56rpx $space-lg 160rpx;
+  background: $color-bg-base;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 44rpx;
+}
+
+.top-title {
+  color: $color-text-primary;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.top-action {
+  position: relative;
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  background: $color-bg-elevated;
+  box-shadow: $shadow-sm;
 }
 
 .welcome-block {
   display: flex;
   flex-direction: column;
-  margin: 16rpx 4rpx 48rpx;
+  margin: 0 4rpx 40rpx;
+}
 
-  .welcome-eyebrow {
-    margin-bottom: 10rpx;
-    color: $text-secondary;
-    font-size: $font-md;
-    letter-spacing: 1rpx;
-  }
+.welcome-eyebrow {
+  margin-bottom: 8rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+}
 
-  .welcome-title {
-    color: $text-primary;
-    font-size: 52rpx;
-    font-weight: 700;
-    line-height: 1.25;
-  }
+.welcome-title {
+  color: $color-text-primary;
+  font-size: 52rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.25;
+}
 
-  .welcome-description {
-    margin-top: 18rpx;
-    color: $text-secondary;
-    font-size: $font-sm;
-    line-height: 1.5;
-  }
+.welcome-description {
+  max-width: 620rpx;
+  margin-top: 16rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
 }
 
 .case-card {
   box-sizing: border-box;
   padding: 32rpx;
-  background: $bg-white;
-  border: 1rpx solid rgba(30, 67, 168, 0.08);
-  border-radius: $radius-lg;
+  background: $color-bg-elevated;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-xl;
   box-shadow: $shadow-md;
 }
 
 .empty-case-card {
   display: flex;
   flex-direction: column;
-  min-height: 390rpx;
-  justify-content: center;
-}
-
-.case-card-header {
-  display: flex;
-  align-items: flex-start;
 }
 
 .case-card-icon,
 .next-step-icon {
+  width: 72rpx;
+  height: 72rpx;
   display: flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 64rpx;
-  height: 64rpx;
-  margin-right: 20rpx;
-  background: $accent-tint;
-  border-radius: $radius-sm;
-}
-
-.case-card-heading {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-}
-
-.case-card-kicker,
-.next-step-label {
-  color: $text-secondary;
-  font-size: $font-xs;
+  margin-bottom: 24rpx;
+  border-radius: $radius-md;
+  background: $color-brand-light;
 }
 
 .case-card-title {
-  margin-top: 6rpx;
-  overflow: hidden;
-  color: $text-primary;
-  font-size: $font-lg;
-  font-weight: 600;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: $color-text-primary;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
 }
 
-.case-card-meta,
 .case-card-description {
-  margin-top: 10rpx;
-  color: $text-secondary;
-  font-size: $font-xs;
-  line-height: 1.5;
-}
-
-.case-card-copy {
-  display: flex;
-  flex-direction: column;
-  margin: 22rpx 0 34rpx;
-}
-
-.progress-track {
-  height: 10rpx;
-  margin: 34rpx 0 28rpx;
-  overflow: hidden;
-  background: #edf0f5;
-  border-radius: $radius-pill;
-}
-
-.progress-value {
-  height: 100%;
-  background: $accent-primary;
-  border-radius: $radius-pill;
-  transition: width $transition-normal;
-}
-
-.case-summary {
-  display: flex;
-  padding: 24rpx 0;
-  border-top: 1rpx solid $border-color;
-  border-bottom: 1rpx solid $border-color;
-}
-
-.summary-item {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-
-  & + .summary-item {
-    padding-left: 24rpx;
-    border-left: 1rpx solid $border-color;
-  }
-}
-
-.summary-label {
-  color: $text-secondary;
-  font-size: $font-xs;
-}
-
-.summary-value {
-  margin-top: 8rpx;
-  color: $text-primary;
-  font-size: $font-md;
-  font-weight: 600;
-}
-
-.payment-note,
-.unlocked-note {
-  display: flex;
-  align-items: center;
-  margin-top: 24rpx;
-  color: $text-secondary;
-  font-size: $font-xs;
-  line-height: 1.45;
-
-  .icon-component {
-    flex-shrink: 0;
-    margin-right: 10rpx;
-  }
-}
-
-.unlocked-note {
-  color: $accent-primary;
+  margin-top: 12rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
 }
 
 .primary-action {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 88rpx;
-  margin-top: 28rpx;
-  padding: 0 24rpx;
-  box-sizing: border-box;
-  background: $accent-primary;
-  border-radius: $radius-sm;
+  gap: 12rpx;
+  min-height: 96rpx;
+  margin-top: 32rpx;
+  border-radius: $radius-md;
+  background: $color-brand-primary;
   color: #fff;
-  font-size: $font-md;
-  font-weight: 600;
-  transition: opacity $transition-fast, transform $transition-fast;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+}
 
-  .icon-component {
-    margin-left: 12rpx;
+.current-case-card {
+  .case-card-header,
+  .case-meta-row,
+  .progress-row {
+    display: flex;
+    align-items: center;
   }
 
-  &:active {
-    opacity: 0.88;
-    transform: scale(0.985);
+  .case-card-header {
+    justify-content: space-between;
+  }
+
+  .case-label {
+    color: $color-text-tertiary;
+    font-size: $font-size-xs;
+  }
+
+  .case-name {
+    display: block;
+    margin-top: 8rpx;
+    color: $color-text-primary;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+  }
+
+  .status-badge {
+    padding: 10rpx 16rpx;
+    border-radius: $radius-full;
+    background: $color-brand-light;
+    color: $color-brand-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+  }
+
+  .progress-row {
+    justify-content: space-between;
+    margin-top: 32rpx;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  .progress-track {
+    height: 12rpx;
+    margin-top: 12rpx;
+    overflow: hidden;
+    border-radius: $radius-full;
+    background: $color-bg-subtle;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: $color-brand-primary;
+  }
+
+  .case-meta-row {
+    justify-content: space-between;
+    margin-top: 24rpx;
+    color: $color-text-secondary;
+    font-size: $font-size-xs;
+  }
+
+  .payment-note {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    margin-top: 24rpx;
+    color: $color-brand-primary;
+    font-size: $font-size-xs;
   }
 }
 
@@ -200,16 +189,17 @@
   align-items: center;
   margin-top: 24rpx;
   padding: 24rpx;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-lg;
   background: rgba(255, 255, 255, 0.72);
-  border: 1rpx solid $border-color;
-  border-radius: $radius-md;
 }
 
 .next-step-icon {
-  width: 52rpx;
-  height: 52rpx;
-  margin-right: 16rpx;
-  border-radius: $radius-xs;
+  flex: 0 0 auto;
+  width: 56rpx;
+  height: 56rpx;
+  margin: 0 16rpx 0 0;
+  border-radius: $radius-sm;
 }
 
 .next-step-copy {
@@ -218,32 +208,35 @@
   flex-direction: column;
 }
 
-.next-step-title {
-  margin-top: 6rpx;
-  color: $text-primary;
-  font-size: $font-sm;
-  font-weight: 500;
-  line-height: 1.45;
+.next-step-label {
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
 }
 
-.loading-page {
-  .skeleton-welcome {
-    margin-bottom: 48rpx;
-  }
+.next-step-title {
+  margin-top: 6rpx;
+  color: $color-text-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-relaxed;
+}
+
+.loading-page .skeleton-welcome {
+  margin-bottom: 48rpx;
 }
 
 .skeleton-line {
   height: 30rpx;
-  background: #e8ebf0;
-  border-radius: $radius-xs;
+  border-radius: $radius-sm;
+  background: $color-bg-subtle;
+}
 
-  &.short {
-    width: 180rpx;
-    margin-bottom: 20rpx;
-  }
+.skeleton-line.short {
+  width: 180rpx;
+  margin-bottom: 20rpx;
+}
 
-  &.long {
-    width: 440rpx;
-    height: 58rpx;
-  }
+.skeleton-line.long {
+  width: 440rpx;
+  height: 58rpx;
 }

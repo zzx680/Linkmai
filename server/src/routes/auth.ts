@@ -3,6 +3,7 @@ import { db } from '../db'
 import jwt from 'jsonwebtoken'
 import { config } from '../config'
 import { authMiddleware } from '../middleware/auth'
+import { exchangeWechatCode, WechatLoginError } from '../services/wechat'
 
 const router = express.Router()
 
@@ -15,11 +16,8 @@ router.post('/wechat/login', async (req, res) => {
       return res.status(400).json({ success: false, error: '缺少微信授权码' })
     }
 
-    // TODO: 调用微信 API 获取 openid
-    // 临时模拟：直接用 code 作为 openid
-    const openid = `mock_${code}`
+    const { openid } = await exchangeWechatCode(code)
 
-    // 查找或创建用户
     let user = await db.findUserByOpenid(openid)
 
     if (!user) {
@@ -46,8 +44,39 @@ router.post('/wechat/login', async (req, res) => {
       },
     })
   } catch (err) {
+    if (err instanceof WechatLoginError) {
+      const status = err.code === 'INVALID_CODE' ? 400 : 503
+      return res.status(status).json({ success: false, error: err.message })
+    }
     console.error('登录错误:', err)
     res.status(500).json({ success: false, error: '登录失败' })
+  }
+})
+
+// 当前会话
+router.get('/session', authMiddleware, async (req, res) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ success: false, error: '未认证' })
+    }
+
+    const user = await db.findUserById(req.userId)
+    if (!user) {
+      return res.status(401).json({ success: false, error: '用户不存在' })
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: user.id,
+        openid: user.openid,
+        nickname: user.nickname,
+        avatar: user.avatar,
+      },
+    })
+  } catch (err) {
+    console.error('恢复会话错误:', err)
+    res.status(500).json({ success: false, error: '恢复会话失败' })
   }
 })
 

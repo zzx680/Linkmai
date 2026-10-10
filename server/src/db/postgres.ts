@@ -7,7 +7,12 @@ const pool = new Pool({
   database: config.database.name,
   user: config.database.user,
   password: config.database.password,
-  ssl: config.database.ssl ? { rejectUnauthorized: false } : false,
+  ssl: config.database.ssl
+    ? {
+        rejectUnauthorized: Boolean(config.database.sslCa),
+        ...(config.database.sslCa ? { ca: config.database.sslCa } : {}),
+      }
+    : false,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -71,6 +76,14 @@ export const db = {
     const result = await pool.query(
       'SELECT * FROM users WHERE openid = $1',
       [openid]
+    )
+    return result.rows[0] || null
+  },
+
+  async findUserById(userId: string) {
+    const result = await pool.query(
+      'SELECT * FROM users WHERE id = $1',
+      [userId]
     )
     return result.rows[0] || null
   },
@@ -204,7 +217,7 @@ export const db = {
     }
   },
 
-  async updateCase(userId: string, updates: any) {
+  async updateCase(userId: string, updates: any, caseId?: string) {
     const fields = []
     const values = []
     let index = 1
@@ -222,10 +235,12 @@ export const db = {
 
     fields.push(`updated_at = NOW()`)
     values.push(userId)
+    const whereClause = caseId ? `id = $${index} AND user_id = $${index + 1}` : `user_id = $${index} AND is_active = TRUE`
+    if (caseId) values.push(caseId)
 
     const result = await pool.query(
       `UPDATE cases SET ${fields.join(', ')}
-       WHERE user_id = $${index} AND is_active = TRUE
+       WHERE ${whereClause}
        RETURNING *`,
       values
     )
@@ -263,8 +278,10 @@ export const db = {
   async findOrCreateConversation(userId: string, caseId?: string) {
     // 查找活跃对话
     const existing = await pool.query(
-      'SELECT * FROM conversations WHERE user_id = $1 AND status = $2 ORDER BY created_at DESC LIMIT 1',
-      [userId, 'active']
+      `SELECT * FROM conversations
+       WHERE user_id = $1 AND status = $2 AND case_id IS NOT DISTINCT FROM $3
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, 'active', caseId || null]
     )
 
     if (existing.rows[0]) {
@@ -387,13 +404,14 @@ export const db = {
     fileSize: number
     mimeType?: string
     status: string
+    metadata?: any
   }) {
     const id = generateId('artifact')
     const result = await pool.query(
       `INSERT INTO artifacts (
         id, case_id, name, type, oss_url, oss_key,
-        file_size, mime_type, status, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+        file_size, mime_type, status, metadata, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
       RETURNING *`,
       [
         id,
@@ -405,6 +423,7 @@ export const db = {
         artifact.fileSize,
         artifact.mimeType || null,
         artifact.status,
+        JSON.stringify(artifact.metadata || {}),
       ]
     )
     const row = result.rows[0]
@@ -418,8 +437,153 @@ export const db = {
       fileSize: row.file_size,
       mimeType: row.mime_type,
       status: row.status,
+      metadata: row.metadata || {},
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+    }
+  },
+
+  async getArtifactsByCase(caseId: string) {
+    const result = await pool.query(
+      'SELECT * FROM artifacts WHERE case_id = $1 ORDER BY created_at ASC',
+      [caseId]
+    )
+    return result.rows.map(row => ({
+      id: row.id,
+      caseId: row.case_id,
+      name: row.name,
+      type: row.type,
+      ossUrl: row.oss_url,
+      ossKey: row.oss_key,
+      fileSize: row.file_size,
+      mimeType: row.mime_type,
+      status: row.status,
+      metadata: row.metadata || {},
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }))
+  },
+
+  async findArtifactById(caseId: string, artifactId: string) {
+    const result = await pool.query(
+      'SELECT * FROM artifacts WHERE case_id = $1 AND id = $2 LIMIT 1',
+      [caseId, artifactId]
+    )
+    const row = result.rows[0]
+    if (!row) return null
+    return {
+      id: row.id,
+      caseId: row.case_id,
+      name: row.name,
+      type: row.type,
+      ossUrl: row.oss_url,
+      ossKey: row.oss_key,
+      fileSize: row.file_size,
+      mimeType: row.mime_type,
+      status: row.status,
+      metadata: row.metadata || {},
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }
+  },
+
+  async findArtifactByUrl(caseId: string, imageUrl: string) {
+    const result = await pool.query(
+      'SELECT * FROM artifacts WHERE case_id = $1 AND oss_url = $2 LIMIT 1',
+      [caseId, imageUrl]
+    )
+    const row = result.rows[0]
+    if (!row) return null
+    return {
+      id: row.id,
+      caseId: row.case_id,
+      name: row.name,
+      type: row.type,
+      ossUrl: row.oss_url,
+      ossKey: row.oss_key,
+      fileSize: row.file_size,
+      mimeType: row.mime_type,
+      status: row.status,
+      metadata: row.metadata || {},
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }
+  },
+
+  async updateArtifact(caseId: string, artifactId: string, updates: { type?: string; status?: string; metadata?: any }) {
+    const result = await pool.query(
+      `UPDATE artifacts
+       SET type = COALESCE($1, type), status = COALESCE($2, status), metadata = COALESCE($3, metadata), updated_at = NOW()
+       WHERE id = $4 AND case_id = $5
+       RETURNING *`,
+      [updates.type || null, updates.status || null, updates.metadata ? JSON.stringify(updates.metadata) : null, artifactId, caseId]
+    )
+    const row = result.rows[0]
+    if (!row) return null
+    return {
+      id: row.id,
+      caseId: row.case_id,
+      name: row.name,
+      type: row.type,
+      ossUrl: row.oss_url,
+      ossKey: row.oss_key,
+      fileSize: row.file_size,
+      mimeType: row.mime_type,
+      status: row.status,
+      metadata: row.metadata || {},
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }
+  },
+
+  async confirmArtifact(userId: string, caseId: string, artifactId: string, fields: any[], rawText?: string) {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const artifactResult = await client.query(
+        `SELECT a.* FROM artifacts a
+         JOIN cases c ON c.id = a.case_id
+         WHERE a.id = $1 AND a.case_id = $2 AND c.user_id = $3 AND a.status = 'processed'
+         FOR UPDATE`,
+        [artifactId, caseId, userId]
+      )
+      const artifact = artifactResult.rows[0]
+      if (!artifact) {
+        await client.query('ROLLBACK')
+        return null
+      }
+      const previous = artifact.metadata || {}
+      const changed = !previous.confirmed || JSON.stringify(previous.fields || []) !== JSON.stringify(fields)
+      const metadata = { ...previous, fields, rawText: rawText ?? previous.rawText, confirmed: true, confirmedAt: new Date().toISOString() }
+      const updatedResult = await client.query(
+        'UPDATE artifacts SET metadata = $1, updated_at = NOW() WHERE id = $2 AND case_id = $3 RETURNING *',
+        [JSON.stringify(metadata), artifactId, caseId]
+      )
+      if (changed) {
+        await client.query(
+          `UPDATE cases SET
+             material_count = material_count + $1,
+             has_report = FALSE,
+             status = 'collecting',
+             status_label = '材料已更新，需重新分析',
+             updated_at = NOW()
+           WHERE id = $2 AND user_id = $3`,
+          [previous.confirmed ? 0 : 1, caseId, userId]
+        )
+      }
+      await client.query('COMMIT')
+      const row = updatedResult.rows[0]
+      return {
+        id: row.id, caseId: row.case_id, name: row.name, type: row.type,
+        ossUrl: row.oss_url, ossKey: row.oss_key, fileSize: row.file_size,
+        mimeType: row.mime_type, status: row.status, metadata: row.metadata || {},
+        createdAt: row.created_at, updatedAt: row.updated_at,
+      }
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
     }
   },
 

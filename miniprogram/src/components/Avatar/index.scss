@@ -1,4 +1,4 @@
-@use '../../styles/variables.scss' as *;
+@use '../../styles/design-tokens.scss' as *;
 
 .ui-avatar {
   display: inline-flex;
@@ -18,7 +18,7 @@
 }
 
 .ui-avatar-text {
-  color: $bg-white;
-  font-weight: 600;
+  color: $color-bg-elevated;
+  font-weight: $font-weight-semibold;
   line-height: 1;
 }

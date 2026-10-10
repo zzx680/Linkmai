@@ -3,7 +3,6 @@ export default defineAppConfig({
     'pages/case/index',
     'pages/agent/index',
     'pages/profile/index',
-    'pages/case-detail/index',
     'pages/materials/index',
     'pages/report/index'
   ],
@@ -12,7 +11,7 @@ export default defineAppConfig({
     navigationBarBackgroundColor: '#FFFFFF',
     navigationBarTitleText: '灵迈',
     navigationBarTextStyle: 'black',
-    backgroundColor: '#F7F4EF'
+    backgroundColor: '#F5F7FA'
   },
   tabBar: {
     custom: true,
@@ -29,7 +28,7 @@ export default defineAppConfig({
       },
       {
         pagePath: 'pages/agent/index',
-        text: 'Agent',
+        text: '处理',
         iconPath: 'assets/icons/agent.png',
         selectedIconPath: 'assets/icons/agent-active.png'
       },

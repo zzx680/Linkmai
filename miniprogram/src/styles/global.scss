@@ -22,11 +22,6 @@ scroll-view {
   -webkit-overflow-scrolling: touch;
 }
 
-// 统一 box-sizing
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
 // ============================================
 // 通用工具类
 // ============================================

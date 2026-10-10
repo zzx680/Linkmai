@@ -36,8 +36,8 @@ router.post('/current/messages', async (req, res) => {
       return res.status(401).json({ success: false, error: '未认证' })
     }
 
-    // 获取或创建对话
-    const conversation = await db.findOrCreateConversation(userId)
+    const currentCase = await db.findActiveCase(userId)
+    const conversation = await db.findOrCreateConversation(userId, currentCase?.id)
     const agentState = conversation.agentState || {
       stage: 'collecting',
       collectedFacts: [],
@@ -53,41 +53,7 @@ router.post('/current/messages', async (req, res) => {
       images ? { images, materialType } : undefined
     )
 
-    let materials: Array<{ type: string; url: string; extractedData?: any }> = []
-
-    // 如果用户上传了图片材料
-    if (images && images.length > 0) {
-      try {
-        const { processMaterial } = await import('../services/material')
-
-        // 处理材料并提取数据
-        for (const imageUrl of images) {
-          const result = await processMaterial(materialType || 'police-report', imageUrl)
-
-          // 将字段转换为结构化数据
-          const extractedData: any = {}
-          result.fields.forEach((f: any) => {
-            extractedData[f.key] = f.value
-          })
-
-          materials.push({
-            type: materialType || 'image',
-            url: imageUrl,
-            extractedData,
-          })
-        }
-
-        // 更新案件材料计数
-        const currentCase = await db.findActiveCase(userId)
-        if (currentCase) {
-          await db.updateCase(userId, {
-            materialCount: (currentCase.materialCount || 0) + images.length,
-          })
-        }
-      } catch (err: any) {
-        console.error('材料处理失败:', err)
-      }
-    }
+    const materials: Array<{ type: string; url: string; extractedData?: any }> = []
 
     // 使用 Agent 状态管理更新对话
     const { processUserMessage } = await import('../services/agent')
@@ -151,8 +117,8 @@ router.get('/current/messages', async (req, res) => {
       return res.status(401).json({ success: false, error: '未认证' })
     }
 
-    // 获取或创建对话
-    const conversation = await db.findOrCreateConversation(userId)
+    const currentCase = await db.findActiveCase(userId)
+    const conversation = await db.findOrCreateConversation(userId, currentCase?.id)
 
     // 获取消息
     const messages = await db.getMessages(conversation.id)

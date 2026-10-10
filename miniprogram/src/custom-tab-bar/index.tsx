@@ -27,7 +27,7 @@ export default class CustomTabBar extends Component<{}, TabBarState> {
       },
       {
         pagePath: '/pages/agent/index',
-        text: 'Agent',
+        text: '处理',
         icon: '/assets/icons/agent.png',
         activeIcon: '/assets/icons/agent-active.png'
       },

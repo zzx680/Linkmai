@@ -1,15 +1,16 @@
 import OSS from 'ali-oss'
 import { v4 as uuidv4 } from 'uuid'
+import { config } from '../config'
 
 let client: OSS | null = null
 
 function getClient(): OSS {
   if (!client) {
     client = new OSS({
-      region: process.env.ALIYUN_OSS_REGION || '',
-      accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID || '',
-      accessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET || '',
-      bucket: process.env.ALIYUN_OSS_BUCKET || '',
+      region: config.oss.region,
+      accessKeyId: config.oss.accessKeyId,
+      accessKeySecret: config.oss.accessKeySecret,
+      bucket: config.oss.bucket,
     })
   }
   return client

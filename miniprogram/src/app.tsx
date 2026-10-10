@@ -1,9 +1,17 @@
 import { Component } from 'react'
-import 'remixicon/fonts/remixicon.css'
+import Taro from '@tarojs/taro'
 import './app.scss'
+import { useAppStore } from './store'
+import { IS_H5 } from './config/env'
 
 class App extends Component {
-  componentDidMount() {}
+  componentDidMount() {
+    if (IS_H5) return
+    useAppStore.getState().checkLoginStatus().catch(error => {
+      console.error('App initialization error:', error)
+      Taro.showToast({ title: '正在恢复账户状态', icon: 'none' })
+    })
+  }
 
   componentDidShow() {}
 

@@ -1,5 +1,14 @@
 import path from 'path'
 
+const isH5 = process.env.TARO_ENV === 'h5'
+const isProduction = process.env.NODE_ENV === 'production'
+const apiBase = process.env.TARO_APP_API_BASE || 'http://localhost:8000/api'
+const outputRoot = process.env.TARO_OUTPUT_ROOT || (isH5 ? 'dist-h5' : 'dist')
+
+if (isProduction && !apiBase.startsWith('https://')) {
+  throw new Error('生产构建必须提供 HTTPS TARO_APP_API_BASE')
+}
+
 const config = {
   projectName: 'linkmai',
   date: '2026-9-17',
@@ -11,18 +20,26 @@ const config = {
     828: 1.81 / 2
   },
   sourceRoot: 'src',
-  outputRoot: 'dist',
+  outputRoot,
   plugins: [
-    '@tarojs/plugin-html',
-    '@tarojs/plugin-framework-react'
+    '@tarojs/plugin-framework-react',
+    '@tarojs/plugin-platform-h5'
   ],
-  defineConstants: {},
+  defineConstants: {
+    __API_BASE__: JSON.stringify(apiBase),
+    __IS_H5__: JSON.stringify(isH5)
+  },
   copy: {
     patterns: [],
     options: {}
   },
   framework: 'react',
-  compiler: 'webpack5',
+  compiler: {
+    type: 'webpack5',
+    prebundle: {
+      enable: false
+    }
+  },
   cache: {
     enable: false
   },

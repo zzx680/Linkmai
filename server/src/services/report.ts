@@ -54,7 +54,7 @@ ${factsText}
     const parsed = parseReportResponse(response)
 
     return {
-      caseId: '',
+      caseId,
       facts,
       analysis: parsed.analysis,
       liability: parsed.liability,
@@ -83,21 +83,19 @@ function parseReportResponse(response: string): {
 
     const jsonStr = jsonMatch[1] || jsonMatch[0]
     const data = JSON.parse(jsonStr)
+    if (!data || typeof data.analysis !== 'string' || !data.analysis.trim() || typeof data.liability !== 'string' || typeof data.compensation !== 'string' || !Array.isArray(data.recommendations) || data.recommendations.some((item: unknown) => typeof item !== 'string')) {
+      throw new Error('AI 返回的报告结构无效')
+    }
 
     return {
-      analysis: data.analysis || '暂无分析',
-      liability: data.liability || '责任认定中',
-      compensation: data.compensation || '赔偿计算中',
-      recommendations: data.recommendations || [],
+      analysis: data.analysis,
+      liability: data.liability,
+      compensation: data.compensation,
+      recommendations: data.recommendations,
     }
   } catch (err) {
     console.error('解析报告失败:', err)
-    return {
-      analysis: '报告生成中遇到问题，请稍后重试',
-      liability: '',
-      compensation: '',
-      recommendations: [],
-    }
+    throw new Error('AI 返回的报告结构无效')
   }
 }
 

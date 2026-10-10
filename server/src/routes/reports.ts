@@ -13,17 +13,9 @@ const router = Router()
 router.post('/generate', async (req, res) => {
   try {
     const userId = req.userId
-    const { facts } = req.body
 
     if (!userId) {
       return res.status(401).json({ success: false, error: '未认证' })
-    }
-
-    if (!Array.isArray(facts) || facts.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: '缺少事实信息',
-      })
     }
 
     const currentCase = await db.findActiveCase(userId)
@@ -31,15 +23,50 @@ router.post('/generate', async (req, res) => {
       return res.status(404).json({ success: false, error: '未找到活跃案件' })
     }
 
-    const report = await generateReport(facts as CollectedFact[], currentCase.id)
-    await db.createReport(currentCase.id, report)
+    try {
+      await requirePaidEntitlement(userId, currentCase.id)
+    } catch (paymentError) {
+      if ((paymentError as Error).message === 'PAYMENT_REQUIRED') {
+        const entitlement = (paymentError as Error & { entitlement?: { amountCents: number; currency: string } }).entitlement!
+        return res.status(402).json({
+          error: 'PAYMENT_REQUIRED',
+          message: '请先解锁本案件的完整处理方案',
+          caseId: currentCase.id,
+          amountCents: entitlement.amountCents,
+          currency: entitlement.currency,
+        })
+      }
+      throw paymentError
+    }
+
+    const artifacts = await db.getArtifactsByCase(currentCase.id)
+    const facts = artifacts.flatMap((artifact: any) => {
+      const metadata = artifact.metadata || {}
+      if (!metadata.confirmed || !Array.isArray(metadata.fields)) return []
+      return metadata.fields.map((field: any): CollectedFact => ({
+        key: field.key,
+        label: field.label,
+        value: field.value,
+        source: `material:${artifact.id}`,
+        confidence: field.confidence || 'medium',
+        confirmed: true,
+        materialId: artifact.id,
+      }))
+    })
+
+    if (facts.length === 0) {
+      return res.status(400).json({ success: false, error: '请先确认至少一份材料' })
+    }
+
+    const report = await generateReport(facts, currentCase.id)
+    const savedReport = await db.createReport(currentCase.id, report)
     await db.updateCase(userId, {
       hasReport: true,
       status: 'ready',
       statusLabel: '报告已完成',
       liability: report.liability,
       compensation: report.compensation,
-    })
+    }, currentCase.id)
 
     res.json({ success: true, data: report })
   } catch (err: any) {
@@ -90,7 +117,7 @@ router.get('/:caseId', async (req, res) => {
       throw paymentError
     }
 
-    res.json({ success: true, data: report })
+    res.json({ success: true, data: { report: report.content } })
   } catch (err: any) {
     console.error('报告查询失败:', err)
     res.status(500).json({

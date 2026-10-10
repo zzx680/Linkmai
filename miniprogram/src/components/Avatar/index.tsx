@@ -20,12 +20,10 @@ export default function Avatar({
 
   const getColorFromName = (name: string) => {
     const colors = [
-      '#C4612F', // terracotta
-      '#34c759', // green
-      '#007AFF', // blue
-      '#FF9500', // orange
-      '#AF52DE', // purple
-      '#FF2D55'  // pink
+      '#1E43A8',
+      '#315CC7',
+      '#5B7BD5',
+      '#153589'
     ]
     const index = name.charCodeAt(0) % colors.length
     return colors[index]

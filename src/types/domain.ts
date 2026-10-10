@@ -37,6 +37,8 @@ export interface Artifact {
   label: string
   status: 'uploaded' | 'processing' | 'ready' | 'failed'
   urls?: string[]  // OSS 上传后的 URL 列表
+  localPath?: string
+  fieldKey?: string
 }
 
 export interface ExtractedField {

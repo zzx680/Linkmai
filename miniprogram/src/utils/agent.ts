@@ -1,6 +1,8 @@
 import Taro from '@tarojs/taro'
+import { getApiBase } from '../config/env'
+import { getToken } from '../services/api'
 
-const SERVER_URL = 'http://localhost:3000'
+const API_BASE = getApiBase()
 
 export interface Message {
   id: string
@@ -21,12 +23,13 @@ export async function sendMessage(
   content: string,
   images?: string[]
 ): Promise<AgentResponse> {
+  const token = getToken()
   const response = await Taro.request({
-    url: `${SERVER_URL}/api/agent/message`,
+    url: `${API_BASE}/conversations/current/messages`,
     method: 'POST',
+    header: token ? { Authorization: `Bearer ${token}` } : {},
     data: {
-      conversationId,
-      content,
+      text: content,
       images
     }
   })
@@ -39,16 +42,18 @@ export async function sendMessage(
 }
 
 export async function createConversation(): Promise<string> {
+  const token = getToken()
   const response = await Taro.request({
-    url: `${SERVER_URL}/api/agent/conversation`,
-    method: 'POST'
+    url: `${API_BASE}/conversations/current`,
+    method: 'POST',
+    header: token ? { Authorization: `Bearer ${token}` } : {}
   })
 
   if (response.statusCode !== 200) {
     throw new Error('Failed to create conversation')
   }
 
-  return response.data.conversationId
+  return response.data?.data?.id || response.data?.id
 }
 
 export function startVoiceRecording(): Promise<string> {

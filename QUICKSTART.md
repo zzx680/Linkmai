@@ -188,7 +188,7 @@ DB_TYPE=postgres
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_USER=linkmai
-POSTGRES_PASSWORD=linkmai123
+POSTGRES_PASSWORD=<set-a-strong-password>
 POSTGRES_DB=linkmai
 ```
 
