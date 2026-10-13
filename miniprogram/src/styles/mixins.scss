@@ -34,12 +34,13 @@
 // 卡片样式
 @mixin card($shadow: $shadow-sm) {
   background: $color-bg-elevated;
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   box-shadow: $shadow;
 }
 
 // 页面容器
 @mixin page-container {
+  box-sizing: border-box;
   min-height: 100vh;
   background: $color-bg-base;
   padding: $space-4;
@@ -48,7 +49,7 @@
 // 页面标题
 @mixin page-title {
   font-family: $font-family-heading;
-  font-size: $font-size-2xl;
+  font-size: $font-size-xl;
   font-weight: $font-weight-bold;
   color: $color-text-primary;
   line-height: $line-height-tight;
@@ -82,8 +83,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: $space-3 $space-6;
-  border-radius: $radius-lg;
+  box-sizing: border-box;
+  min-height: 96rpx;
+  padding: $space-3 $space-4;
+  border-radius: $radius-md;
   font-size: $font-size-base;
   font-weight: $font-weight-medium;
   transition: all $transition-base;
@@ -172,7 +175,7 @@
   @if $status == 'collecting' {
     @include badge($color-warning-bg, $color-status-collecting);
   } @else if $status == 'confirming' {
-    @include badge(#FFF4E6, $color-status-confirming);
+    @include badge($color-warning-bg, $color-warning-text);
   } @else if $status == 'analyzing' {
     @include badge($color-info-bg, $color-status-analyzing);
   } @else if $status == 'ready' {

@@ -1,5 +1,6 @@
 import { Pool, PoolClient } from 'pg'
 import { config } from '../config'
+import { materialSnapshot } from '../services/material-snapshot'
 
 const pool = new Pool({
   host: config.database.host,
@@ -234,9 +235,8 @@ export const db = {
     if (fields.length === 0) return null
 
     fields.push(`updated_at = NOW()`)
-    values.push(userId)
     const whereClause = caseId ? `id = $${index} AND user_id = $${index + 1}` : `user_id = $${index} AND is_active = TRUE`
-    if (caseId) values.push(caseId)
+    values.push(...(caseId ? [caseId, userId] : [userId]))
 
     const result = await pool.query(
       `UPDATE cases SET ${fields.join(', ')}
@@ -510,13 +510,13 @@ export const db = {
     }
   },
 
-  async updateArtifact(caseId: string, artifactId: string, updates: { type?: string; status?: string; metadata?: any }) {
+  async updateArtifact(caseId: string, artifactId: string, updates: { type?: string; status?: string; metadata?: any }, expectedStatuses?: string[]) {
     const result = await pool.query(
       `UPDATE artifacts
        SET type = COALESCE($1, type), status = COALESCE($2, status), metadata = COALESCE($3, metadata), updated_at = NOW()
-       WHERE id = $4 AND case_id = $5
+       WHERE id = $4 AND case_id = $5 AND ($6::text[] IS NULL OR status = ANY($6))
        RETURNING *`,
-      [updates.type || null, updates.status || null, updates.metadata ? JSON.stringify(updates.metadata) : null, artifactId, caseId]
+      [updates.type || null, updates.status || null, updates.metadata ? JSON.stringify(updates.metadata) : null, artifactId, caseId, expectedStatuses || null]
     )
     const row = result.rows[0]
     if (!row) return null
@@ -540,6 +540,11 @@ export const db = {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
+      const ownedCase = await client.query('SELECT id FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE', [caseId, userId])
+      if (!ownedCase.rows[0]) {
+        await client.query('ROLLBACK')
+        return null
+      }
       const artifactResult = await client.query(
         `SELECT a.* FROM artifacts a
          JOIN cases c ON c.id = a.case_id
@@ -553,7 +558,7 @@ export const db = {
         return null
       }
       const previous = artifact.metadata || {}
-      const changed = !previous.confirmed || JSON.stringify(previous.fields || []) !== JSON.stringify(fields)
+      const changed = !previous.confirmed || JSON.stringify(previous.fields || []) !== JSON.stringify(fields) || (rawText !== undefined && rawText !== previous.rawText)
       const metadata = { ...previous, fields, rawText: rawText ?? previous.rawText, confirmed: true, confirmedAt: new Date().toISOString() }
       const updatedResult = await client.query(
         'UPDATE artifacts SET metadata = $1, updated_at = NOW() WHERE id = $2 AND case_id = $3 RETURNING *',
@@ -579,6 +584,31 @@ export const db = {
         mimeType: row.mime_type, status: row.status, metadata: row.metadata || {},
         createdAt: row.created_at, updatedAt: row.updated_at,
       }
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
+  },
+
+  async publishReport(userId: string, caseId: string, content: { liability: string; compensation: string }, snapshot: string) {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const owned = await client.query('SELECT id FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE', [caseId, userId])
+      if (!owned.rows[0]) throw new Error('CASE_NOT_FOUND')
+      const materials = await client.query('SELECT id, type, metadata FROM artifacts WHERE case_id = $1 ORDER BY id', [caseId])
+      if (materialSnapshot(materials.rows) !== snapshot) throw new Error('REPORT_STALE')
+      await client.query(
+        'INSERT INTO reports (id, case_id, content, input_snapshot, created_at) VALUES ($1, $2, $3, $4, NOW())',
+        [generateId('report'), caseId, JSON.stringify(content), JSON.stringify({ materialSnapshot: snapshot })]
+      )
+      await client.query(
+        `UPDATE cases SET has_report = TRUE, status = 'ready', status_label = '报告已完成', liability = $1, compensation = $2, updated_at = NOW() WHERE id = $3 AND user_id = $4`,
+        [content.liability, content.compensation, caseId, userId]
+      )
+      await client.query('COMMIT')
     } catch (error) {
       await client.query('ROLLBACK')
       throw error
@@ -684,6 +714,46 @@ export const db = {
     return toPaymentOrder(result.rows[0])
   },
 
+  async findPendingPaymentOrder(userId: string, caseId: string) {
+    const result = await pool.query(
+      `SELECT * FROM payment_orders
+       WHERE user_id = $1 AND case_id = $2 AND status IN ('created', 'pending')
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, caseId]
+    )
+    return toPaymentOrder(result.rows[0])
+  },
+
+  async updatePaymentOrderStatus(orderId: string, status: 'failed' | 'closed') {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const result = await client.query(
+        `UPDATE payment_orders SET status = $1, updated_at = NOW()
+         WHERE id = $2 AND status IN ('created', 'pending') RETURNING *`,
+        [status, orderId]
+      )
+      if (result.rows[0]) {
+        await client.query(
+          `UPDATE case_entitlements SET status = 'unpaid', updated_at = NOW()
+           WHERE case_id = $1 AND status = 'pending'
+             AND NOT EXISTS (
+               SELECT 1 FROM payment_orders
+               WHERE case_id = $1 AND status IN ('created', 'pending') AND id <> $2
+             )`,
+          [result.rows[0].case_id, orderId]
+        )
+      }
+      await client.query('COMMIT')
+      return toPaymentOrder(result.rows[0])
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    } finally {
+      client.release()
+    }
+  },
+
   async createPaymentOrder(input: {
     caseId: string
     userId: string
@@ -721,12 +791,6 @@ export const db = {
         await client.query('COMMIT')
         return toPaymentOrder(active.rows[0])
       }
-      const expired = await client.query(
-        `UPDATE payment_orders SET status = 'closed', updated_at = NOW()
-         WHERE user_id = $1 AND case_id = $2 AND status IN ('created', 'pending') AND expires_at <= NOW()`,
-        [input.userId, input.caseId]
-      )
-      void expired
       const nowId = generateId('order')
       const orderNo = `LM${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
       const result = await client.query(

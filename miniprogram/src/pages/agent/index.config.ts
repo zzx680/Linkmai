@@ -2,6 +2,6 @@ export default definePageConfig({
   navigationBarTitleText: 'Agent'
 })
 
-function definePageConfig(config) {
+function definePageConfig<T>(config: T): T {
   return config
 }

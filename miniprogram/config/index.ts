@@ -43,6 +43,9 @@ const config = {
   cache: {
     enable: false
   },
+  h5: {
+    devServer: { port: Number(process.env.PORT) || 10086 }
+  },
   mini: {
     postcss: {
       pxtransform: {

@@ -75,17 +75,6 @@ export function startVoiceRecording(): Promise<string> {
   })
 }
 
-export function voiceToText(filePath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    Taro.getRecorderManager().onFrameRecorded((res) => {
-      // 微信内置语音识别
-      wx.startRecognition({
-        lang: 'zh_CN',
-        success: (result) => {
-          resolve(result.result)
-        },
-        fail: reject
-      })
-    })
-  })
+export function voiceToText(_filePath: string): Promise<string> {
+  return Promise.reject(new Error('当前版本暂不支持语音识别'))
 }

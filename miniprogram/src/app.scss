@@ -1,1 +1,5 @@
 @use './styles/global.scss';
+
+html, body, #app, .taro-tabbar__container, .taro-tabbar__panel {
+  height: 100%;
+}

@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto'
 import { config } from '../config'
-import { db } from '../db'
-import { paymentProvider } from './payment/provider'
+import { db, PaymentOrder } from '../db'
+import { paymentProvider, ProviderOrder } from './payment/provider'
 
 const entitlementFeatures = (paid: boolean) => ({
   fullReport: paid,
@@ -36,76 +36,104 @@ export async function requirePaidEntitlement(userId: string, caseId: string) {
   return entitlement
 }
 
-export async function createCasePaymentOrder(userId: string, caseId: string, openid: string, idempotencyKey?: string) {
-  if (config.payment.provider === 'disabled') throw new Error('PAYMENT_PROVIDER_NOT_CONFIGURED')
-  const caseData = await db.findCaseById(userId, caseId)
-  if (!caseData) throw new Error('CASE_NOT_FOUND')
-  const entitlement = await db.getCaseEntitlement(userId, caseId)
-  if (entitlement?.status === 'paid') {
-    return { alreadyPaid: true as const, entitlement: { caseId, status: 'paid' as const, paidAt: entitlement.paidAt || null } }
+function validateProviderOrder(order: PaymentOrder, providerOrder: ProviderOrder) {
+  if (providerOrder.orderNo !== order.orderNo) throw new Error('ORDER_MISMATCH')
+  if (providerOrder.appId !== config.payment.wechat.appId) throw new Error('PAYMENT_APPID_MISMATCH')
+  if (providerOrder.mchId !== config.payment.wechat.mchId) throw new Error('PAYMENT_MCHID_MISMATCH')
+  if (providerOrder.userId && providerOrder.userId !== order.userId) throw new Error('ORDER_USER_MISMATCH')
+  if (providerOrder.amountCents !== order.amountCents || providerOrder.currency !== order.currency) {
+    throw new Error('PAYMENT_AMOUNT_MISMATCH')
   }
-  if (idempotencyKey) {
-    const idempotent = await db.findPaymentOrderByIdempotency(userId, caseId, idempotencyKey)
-    if (idempotent?.status === 'paid') {
-      return { alreadyPaid: true as const, entitlement: { caseId, status: 'paid' as const, paidAt: idempotent.paidAt || null } }
-    }
-    if (idempotent && (!['created', 'pending'].includes(idempotent.status) || idempotent.expiresAt.getTime() <= Date.now())) {
-      throw new Error(idempotent.expiresAt.getTime() <= Date.now() ? 'ORDER_EXPIRED' : 'ORDER_NOT_PAYABLE')
-    }
-    if (idempotent) {
-      const payment = idempotent.prepayId ? paymentProvider.createPaymentParams(idempotent.prepayId) : undefined
-      return orderResponse(idempotent, payment)
-    }
-  }
-  const activeOrder = await db.findActivePaymentOrder(userId, caseId)
-  if (activeOrder?.prepayId) {
-    return orderResponse(activeOrder, paymentProvider.createPaymentParams(activeOrder.prepayId))
-  }
-  if (config.payment.provider !== 'wechat' && config.nodeEnv === 'production') {
-    throw new Error('PAYMENT_PROVIDER_NOT_CONFIGURED')
-  }
-  const now = new Date()
-  const provisional = await db.createPaymentOrder({
-    caseId,
-    userId,
-    amountCents: config.payment.amountCents,
-    currency: config.payment.currency,
-    idempotencyKey: idempotencyKey || `server_${randomBytes(16).toString('hex')}`,
-  })
-  if (!provisional) throw new Error('ORDER_CREATE_FAILED')
-  if (provisional.status === 'paid') throw new Error('ALREADY_PAID')
-  if (provisional.prepayId) return orderResponse(provisional, paymentProvider.createPaymentParams(provisional.prepayId))
-  const providerOrder = await paymentProvider.createOrder({
-    orderNo: provisional.orderNo,
-    description: '灵迈案件完整处理方案',
-    amountCents: provisional.amountCents,
-    currency: provisional.currency,
-    expiresAt: provisional.expiresAt || new Date(now.getTime() + config.payment.orderExpiresMinutes * 60_000),
-    openid,
-    userId,
-  })
-  const order = await db.setPaymentOrderPrepay(provisional.id, providerOrder.prepayId)
-  return orderResponse(order, providerOrder.payment)
 }
 
-async function createLaunchParams(prepayId: string) {
-  return paymentProvider.createPaymentParams(prepayId)
-}
-
-function orderResponse(order: any, payment?: any) {
-  return {
-    alreadyPaid: false as const,
-    orderId: order.id,
+async function completeOrder(order: PaymentOrder, providerOrder: ProviderOrder) {
+  validateProviderOrder(order, providerOrder)
+  if (!providerOrder.transactionId) throw new Error('PAYMENT_TRANSACTION_MISSING')
+  return db.completePaymentOrder({
     orderNo: order.orderNo,
-    ...(payment ? { payment } : {}),
-    expiresAt: order.expiresAt,
+    userId: order.userId,
+    amountCents: order.amountCents,
+    currency: order.currency,
+    wechatTransactionId: providerOrder.transactionId,
+  })
+}
+
+async function closeExpiredOrder(order: PaymentOrder) {
+  try {
+    await paymentProvider.closeOrder(order.orderNo)
+  } catch (error) {
+    if ((error as Error).message !== 'ORDER_NOT_PAYABLE') throw error
+  }
+  return db.updatePaymentOrderStatus(order.id, 'closed')
+}
+
+async function recoverCreateOrderFailure(order: PaymentOrder, originalError: unknown): Promise<never> {
+  try {
+    const providerOrder = await paymentProvider.queryOrder(order.orderNo)
+    validateProviderOrder(order, providerOrder)
+    if (providerOrder.tradeState === 'SUCCESS') {
+      await completeOrder(order, providerOrder)
+      throw new Error('ALREADY_PAID')
+    }
+    if (providerOrder.tradeState === 'NOTPAY') {
+      await closeExpiredOrder(order)
+      throw originalError
+    }
+    if (['CLOSED', 'REVOKED'].includes(providerOrder.tradeState)) {
+      await db.updatePaymentOrderStatus(order.id, 'closed')
+      throw originalError
+    }
+    if (providerOrder.tradeState === 'PAYERROR') {
+      await db.updatePaymentOrderStatus(order.id, 'failed')
+      throw originalError
+    }
+    throw new Error('PAYMENT_CONFIRMATION_PENDING')
+  } catch (recoveryError) {
+    if ((recoveryError as Error).message === 'PAYMENT_ORDER_NOT_FOUND') {
+      await db.updatePaymentOrderStatus(order.id, 'failed')
+      throw originalError
+    }
+    throw recoveryError
   }
 }
 
-export async function queryPaymentOrder(userId: string, orderId: string) {
-  const order = await db.findPaymentOrderById(userId, orderId)
-  if (!order) throw new Error('ORDER_NOT_FOUND')
-  const entitlement = await db.getCaseEntitlement(userId, order.caseId)
+async function reconcilePaymentOrder(order: PaymentOrder): Promise<PaymentOrder> {
+  if (!['created', 'pending'].includes(order.status)) return order
+
+  let providerOrder: ProviderOrder
+  try {
+    providerOrder = await paymentProvider.queryOrder(order.orderNo)
+  } catch (error) {
+    if ((error as Error).message === 'PAYMENT_ORDER_NOT_FOUND' && order.status === 'created') {
+      return (await db.updatePaymentOrderStatus(order.id, 'failed')) || order
+    }
+    throw error
+  }
+
+  validateProviderOrder(order, providerOrder)
+  switch (providerOrder.tradeState) {
+    case 'SUCCESS':
+      return completeOrder(order, providerOrder)
+    case 'CLOSED':
+    case 'REVOKED':
+      return (await db.updatePaymentOrderStatus(order.id, 'closed')) || order
+    case 'PAYERROR':
+      return (await db.updatePaymentOrderStatus(order.id, 'failed')) || order
+    case 'REFUND':
+      return (await db.refundPaymentOrder(order.id)) || order
+    case 'NOTPAY':
+      if (order.expiresAt.getTime() <= Date.now()) {
+        return (await closeExpiredOrder(order)) || order
+      }
+      return order
+    case 'USERPAYING':
+      return order
+    default:
+      throw new Error('PAYMENT_TRADE_STATE_UNKNOWN')
+  }
+}
+
+function paymentOrderResponse(order: PaymentOrder, entitlement: Awaited<ReturnType<typeof getEntitlement>>) {
   return {
     orderId: order.id,
     orderNo: order.orderNo,
@@ -114,29 +142,103 @@ export async function queryPaymentOrder(userId: string, orderId: string) {
     amountCents: order.amountCents,
     currency: order.currency,
     paidAt: order.paidAt || null,
-    entitlement: { status: entitlement?.status || 'unpaid', paidAt: entitlement?.paidAt || null },
+    expiresAt: order.expiresAt,
+    entitlement,
   }
 }
 
-export async function processPaymentNotification(headers: Record<string, string | string[] | undefined>, rawBody: Buffer) {
-  if (config.payment.provider !== 'wechat') throw new Error('PAYMENT_PROVIDER_NOT_CONFIGURED')
-  const notification = paymentProvider.verifyNotification(headers, rawBody)
-  if (notification.appId !== config.payment.wechat.appId || notification.mchId !== config.payment.wechat.mchId) {
-    throw new Error('WECHAT_MERCHANT_MISMATCH')
+export async function createCasePaymentOrder(userId: string, caseId: string, openid: string, idempotencyKey?: string) {
+  if (config.payment.provider === 'disabled') throw new Error('PAYMENT_PROVIDER_NOT_CONFIGURED')
+  const caseData = await db.findCaseById(userId, caseId)
+  if (!caseData) throw new Error('CASE_NOT_FOUND')
+  const entitlement = await db.getCaseEntitlement(userId, caseId)
+  if (entitlement?.status === 'paid') {
+    return { alreadyPaid: true as const, entitlement: await getEntitlement(userId, caseId) }
   }
+
+  let existing = idempotencyKey
+    ? await db.findPaymentOrderByIdempotency(userId, caseId, idempotencyKey)
+    : null
+  if (!existing) existing = await db.findPendingPaymentOrder(userId, caseId)
+
+  if (existing) {
+    const reconciled = await reconcilePaymentOrder(existing)
+    if (reconciled.status === 'paid') {
+      return { alreadyPaid: true as const, entitlement: await getEntitlement(userId, caseId) }
+    }
+    if (['created', 'pending'].includes(reconciled.status) && reconciled.expiresAt.getTime() > Date.now()) {
+      if (!reconciled.prepayId) throw new Error('PAYMENT_CONFIRMATION_PENDING')
+      return {
+        alreadyPaid: false as const,
+        orderId: reconciled.id,
+        orderNo: reconciled.orderNo,
+        payment: paymentProvider.createPaymentParams(reconciled.prepayId),
+        expiresAt: reconciled.expiresAt,
+      }
+    }
+  }
+
+  const order = await db.createPaymentOrder({
+    caseId,
+    userId,
+    amountCents: config.payment.amountCents,
+    currency: config.payment.currency,
+    idempotencyKey,
+  })
+  if (!order) throw new Error('ORDER_CREATION_FAILED')
+  if (order.status === 'paid') {
+    return { alreadyPaid: true as const, entitlement: await getEntitlement(userId, caseId) }
+  }
+
+  try {
+    const providerOrder = await paymentProvider.createOrder({
+      orderNo: order.orderNo,
+      description: `灵迈案件完整处理方案-${caseId.slice(-8)}`,
+      amountCents: order.amountCents,
+      currency: order.currency,
+      expiresAt: order.expiresAt,
+      openid,
+      userId,
+    })
+    const pendingOrder = await db.setPaymentOrderPrepay(order.id, providerOrder.prepayId)
+    return {
+      alreadyPaid: false as const,
+      orderId: pendingOrder.id,
+      orderNo: pendingOrder.orderNo,
+      payment: providerOrder.payment,
+      expiresAt: pendingOrder.expiresAt,
+    }
+  } catch (error) {
+    return recoverCreateOrderFailure(order, error)
+  }
+}
+
+export async function queryPaymentOrder(userId: string, orderId: string) {
+  const order = await db.findPaymentOrderById(userId, orderId)
+  if (!order) throw new Error('ORDER_NOT_FOUND')
+  const reconciled = await reconcilePaymentOrder(order)
+  return paymentOrderResponse(reconciled, await getEntitlement(userId, reconciled.caseId))
+}
+
+export async function processPaymentNotification(
+  headers: Record<string, string | string[] | undefined>,
+  rawBody: Buffer,
+) {
+  const notification = paymentProvider.verifyNotification(headers, rawBody)
   const order = await db.findPaymentOrderByOrderNo(notification.orderNo)
   if (!order) throw new Error('ORDER_NOT_FOUND')
-  if (notification.userId !== order.userId) throw new Error('ORDER_USER_MISMATCH')
-  if (notification.amountCents !== order.amountCents || notification.currency !== order.currency) throw new Error('PAYMENT_AMOUNT_MISMATCH')
-  if (notification.tradeState !== 'SUCCESS') return { success: true, paid: false }
-  const updated = await db.completePaymentOrder({
-    orderNo: notification.orderNo,
-    userId: order.userId,
-    amountCents: notification.amountCents,
-    currency: notification.currency,
-    wechatTransactionId: notification.transactionId,
-  })
-  return { success: true, paid: updated.status === 'paid' }
+  validateProviderOrder(order, notification)
+
+  if (notification.tradeState === 'SUCCESS') {
+    const updated = await completeOrder(order, notification)
+    return { success: true, paid: updated.status === 'paid' }
+  }
+  if (['CLOSED', 'REVOKED'].includes(notification.tradeState)) {
+    await db.updatePaymentOrderStatus(order.id, 'closed')
+  } else if (notification.tradeState === 'PAYERROR') {
+    await db.updatePaymentOrderStatus(order.id, 'failed')
+  }
+  return { success: true, paid: false }
 }
 
 export function paymentRequiredPayload(caseId: string, entitlement: { amountCents: number; currency: string }) {

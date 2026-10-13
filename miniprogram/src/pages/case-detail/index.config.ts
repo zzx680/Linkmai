@@ -5,6 +5,6 @@ export default definePageConfig({
   backgroundColor: '#F5F7FA'
 })
 
-function definePageConfig(config) {
+function definePageConfig<T>(config: T): T {
   return config
 }

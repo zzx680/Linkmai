@@ -3,12 +3,17 @@
 
 .materials-page {
   @include page-container;
-  padding-bottom: $space-8;
+  padding-bottom: calc($space-8 + env(safe-area-inset-bottom));
 }
 
+.materials-page {
 .page-header {
   @include flex-between;
+  gap: $space-3;
+  align-items: flex-start;
   margin-bottom: $space-6;
+
+  > view, > taro-view-core { min-width: 0; }
 
   .eyebrow {
     display: block;
@@ -153,7 +158,7 @@
   gap: $space-4;
   padding: $space-5;
   margin-bottom: $space-8;
-  background: $color-text-primary;
+  background: $color-brand-primary;
   border-radius: $radius-lg;
   color: $color-text-inverse;
   transition: transform $transition-fast;
@@ -174,6 +179,7 @@
 
   .upload-copy {
     flex: 1;
+    min-width: 0;
 
     .upload-title,
     .upload-subtitle {
@@ -319,7 +325,7 @@
   }
 
   .material-status {
-    @include badge(#FFF4E6, $color-status-confirming);
+    @include badge($color-warning-bg, $color-warning-text);
     flex-shrink: 0;
 
     &.confirmed {
@@ -377,6 +383,7 @@
       }
 
       .field-input {
+        box-sizing: border-box;
         width: 100%;
         min-height: 56rpx;
         padding: 0 $space-2;
@@ -388,7 +395,7 @@
         font-weight: $font-weight-medium;
 
         &.low-confidence {
-          color: $color-warning;
+          color: $color-warning-text;
           border-color: rgba($color-warning, 0.45);
           background: $color-warning-bg;
         }
@@ -400,7 +407,7 @@
       flex-shrink: 0;
 
       &.low {
-        @include badge($color-warning-bg, $color-warning);
+        @include badge($color-warning-bg, $color-warning-text);
       }
 
       &.high {
@@ -433,6 +440,15 @@
     .confirm-action {
       color: $color-text-inverse;
       background: $color-brand-primary;
+      min-height: 96rpx;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity $transition-fast;
+
+      &:active { opacity: 0.85; }
     }
   }
+}
 }

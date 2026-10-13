@@ -1,5 +1,7 @@
 import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
+import { entitlementLabel } from '../../utils/payment'
+import { IS_H5 } from '../../config/env'
 import { useAppStore } from '../../store'
 import { Avatar, Icon } from '../../components'
 import './index.scss'
@@ -17,13 +19,21 @@ interface MenuSection {
 }
 
 export default function Profile() {
-  const { user, currentCase, isLoggedIn, logout } = useAppStore()
+  const { user, currentCase, isLoggedIn, authRetryable, logout, retryAuth } = useAppStore()
   const nickname = user?.nickname || (isLoggedIn ? '灵迈用户' : '未登录')
   const caseCount = currentCase ? 1 : 0
   const materialCount = currentCase?.materialCount || 0
   const reportCount = currentCase?.hasReport ? 1 : 0
 
+  useDidShow(() => {
+    if (!IS_H5 && useAppStore.getState().isLoggedIn) useAppStore.getState().loadCurrentCase()
+  })
+
   const openTask = (key: string) => {
+    if (key === 'payments') {
+      Taro.navigateTo({ url: '/pages/payments/index' })
+      return
+    }
     if (key === 'case') {
       Taro.switchTab({ url: '/pages/case/index' })
       return
@@ -48,6 +58,12 @@ export default function Profile() {
       Taro.showToast({ title: '请在处理页面描述你的问题', icon: 'none' })
       return
     }
+    if (key === 'login') {
+      retryAuth().then(ok => {
+        Taro.showToast({ title: ok ? '登录成功' : '登录失败，请重试', icon: ok ? 'success' : 'none' })
+      })
+      return
+    }
     if (key === 'logout') {
       logout()
       Taro.switchTab({ url: '/pages/case/index' })
@@ -61,6 +77,12 @@ export default function Profile() {
         { icon: 'file-list-3-line', label: '当前案件', key: 'case', value: currentCase ? '处理中' : '尚未创建' },
         { icon: 'folder-3-line', label: '材料与证据', key: 'materials', value: `${materialCount} 份` },
         { icon: 'file-chart-line', label: '事故报告', key: 'report', value: reportCount ? '可查看' : '未生成' }
+      ]
+    },
+    {
+      title: '付费服务',
+      items: [
+        { icon: 'bank-card-line', label: '订阅与付费', key: 'payments', value: !isLoggedIn ? '登录后查看' : currentCase ? entitlementLabel(currentCase.entitlement?.status) : '暂无案件' }
       ]
     },
     {
@@ -130,6 +152,12 @@ export default function Profile() {
           </View>
         </View>
       ))}
+
+      {!isLoggedIn && (
+        <View className="logout-button" onClick={() => openTask('login')}>
+          <Text>{authRetryable ? '重新登录' : '登录'}</Text>
+        </View>
+      )}
 
       {isLoggedIn && (
         <View className="logout-button" onClick={() => openTask('logout')}>

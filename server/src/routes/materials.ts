@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { db } from '../db'
-import { processMaterial } from '../services/material'
+import { processMaterial, supportedMaterialTypes } from '../services/material'
 
 export const materialsRouter = Router()
 
@@ -31,15 +31,16 @@ async function getOwnedCase(userId: string, caseId?: string) {
  * 处理上传的材料并保存识别结果
  */
 materialsRouter.post('/process', async (req, res) => {
+  // 只有本次请求成功 claim 后，异常才允许将 processing 改为 failed。
+  let claimed: { caseId: string; artifactId: string } | undefined
   try {
     const userId = req.userId
-    const { artifactId, materialType, caseId } = req.body
+    const { artifactId, materialType, caseId } = req.body || {}
     if (!userId) return res.status(401).json({ success: false, error: '未认证' })
     if (typeof artifactId !== 'string' || !artifactId || typeof caseId !== 'string' || !caseId) {
       return res.status(400).json({ success: false, error: '材料处理参数不完整' })
     }
-    const supportedTypes = new Set(['accident_report', 'medical_record', 'scene_photo', 'id_card', 'vehicle_license', 'driver_license', 'invoice', 'other'])
-    if (!supportedTypes.has(materialType)) {
+    if (typeof materialType !== 'string' || !supportedMaterialTypes.has(materialType)) {
       return res.status(400).json({ success: false, error: '不支持的材料类型' })
     }
 
@@ -47,34 +48,49 @@ materialsRouter.post('/process', async (req, res) => {
     if (!currentCase) return res.status(404).json({ success: false, error: '案件不存在' })
 
     const artifact = await db.findArtifactById(currentCase.id, artifactId)
-    if (!artifact || !['uploaded', 'failed'].includes(artifact.status) || !artifact.mimeType?.startsWith('image/')) {
+    if (!artifact) return res.status(404).json({ success: false, error: '材料不存在' })
+    if (artifact.status === 'processed') {
+      return res.json({ success: true, data: toMaterial(artifact) })
+    }
+    if (artifact.status === 'processing') {
+      return res.status(409).json({ success: false, error: '材料正在处理中，请稍后重试' })
+    }
+    if (!['uploaded', 'failed'].includes(artifact.status) || !artifact.mimeType?.startsWith('image/')) {
       return res.status(404).json({ success: false, error: '未找到可处理的上传材料' })
     }
 
-    const result = await processMaterial(materialType, artifact.ossUrl)
+    const processing = await db.updateArtifact(currentCase.id, artifact.id, {
+      type: materialType,
+      status: 'processing',
+    }, ['uploaded', 'failed'])
+    if (!processing) {
+      const latest = await db.findArtifactById(currentCase.id, artifact.id)
+      if (latest?.status === 'processed') {
+        return res.json({ success: true, data: toMaterial(latest) })
+      }
+      return res.status(409).json({ success: false, error: '材料状态已变化，请稍后重试' })
+    }
+    claimed = { caseId: currentCase.id, artifactId: artifact.id }
+
+    const result = await processMaterial(materialType, processing.ossUrl)
     const updated = await db.updateArtifact(currentCase.id, artifact.id, {
       type: materialType,
       status: 'processed',
-      metadata: { fields: result.fields || [], rawText: result.rawText, confirmed: false },
-    })
+      metadata: { fields: result.fields, rawText: result.rawText, confirmed: false },
+    }, ['processing'])
 
     if (!updated) {
-      return res.status(404).json({ success: false, error: '材料不存在' })
+      return res.status(409).json({ success: false, error: '材料状态已变化，请重新加载' })
     }
 
     res.json({ success: true, data: toMaterial(updated) })
   } catch (err: any) {
     console.error('材料处理失败:', err)
-    const userId = req.userId
-    const { artifactId, caseId } = req.body || {}
-    if (userId && typeof caseId === 'string' && typeof artifactId === 'string') {
-      const ownedCase = await getOwnedCase(userId, caseId)
-      if (ownedCase) {
-        await db.updateArtifact(caseId, artifactId, {
-          status: 'failed',
-          metadata: { error: err.message || '材料处理失败', failedAt: new Date().toISOString() },
-        }).catch(() => undefined)
-      }
+    if (claimed) {
+      await db.updateArtifact(claimed.caseId, claimed.artifactId, {
+        status: 'failed',
+        metadata: { error: err.message || '材料处理失败', failedAt: new Date().toISOString() },
+      }, ['processing']).catch(() => undefined)
     }
     res.status(422).json({ success: false, error: err.message || '材料处理失败' })
   }
@@ -102,10 +118,17 @@ materialsRouter.get('/:caseId', async (req, res) => {
 materialsRouter.post('/confirm', async (req, res) => {
   try {
     const userId = req.userId
-    const { caseId, artifactId, fields, rawText } = req.body
+    const { caseId, artifactId, fields, rawText } = req.body || {}
     if (!userId) return res.status(401).json({ success: false, error: '未认证' })
-    if (!caseId || !artifactId || !Array.isArray(fields)) {
+    if (typeof caseId !== 'string' || !caseId || typeof artifactId !== 'string' || !artifactId || !Array.isArray(fields)) {
       return res.status(400).json({ success: false, error: '材料确认参数不完整' })
+    }
+    if (!fields.every(field =>
+      field !== null && typeof field === 'object' && !Array.isArray(field) &&
+      typeof field.key === 'string' && typeof field.label === 'string' && typeof field.value === 'string' &&
+      (field.confidence === undefined || ['high', 'medium', 'low'].includes(field.confidence))
+    ) || (rawText !== undefined && typeof rawText !== 'string')) {
+      return res.status(400).json({ success: false, error: '材料字段或原始文本格式不正确' })
     }
     const currentCase = await getOwnedCase(userId, caseId)
     if (!currentCase) return res.status(404).json({ success: false, error: '案件不存在' })

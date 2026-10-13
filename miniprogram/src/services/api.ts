@@ -1,12 +1,13 @@
 import Taro from '@tarojs/taro'
 import { getApiBase } from '../config/env'
+import { readReportEnvelope, ReportContract, ReportEnvelope } from './report-contract'
 
 const API_BASE = getApiBase()
 
 type RequestConfig = {
   url: string
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-  data?: any
+  data?: Record<string, unknown>
   headers?: Record<string, string>
 }
 
@@ -26,31 +27,56 @@ function clearToken() {
   Taro.removeStorageSync('token')
 }
 
-async function request<T = any>(config: RequestConfig): Promise<T> {
+let onUnauthorized: (() => void) | undefined
+export function setUnauthorizedHandler(handler: () => void) { onUnauthorized = handler }
+function expireSession(token: string | null) {
+  if (token !== getToken()) return
+  clearToken()
+  onUnauthorized?.()
+}
+
+export class ApiError extends Error {
+  constructor(message: string, public readonly statusCode: number) { super(message) }
+}
+
+export class UnauthorizedError extends ApiError {
+  constructor(message: string) { super(message, 401) }
+}
+
+async function request<T>(config: RequestConfig): Promise<T> {
   const token = getToken()
-  const response = await Taro.request({
-    url: `${API_BASE}${config.url}`,
-    method: config.method || 'GET',
-    data: config.data,
-    header: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...config.headers
+  try {
+    const response = await Taro.request({
+      url: `${API_BASE}${config.url}`,
+      method: config.method || 'GET',
+      data: config.data,
+      header: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...config.headers
+      }
+    })
+
+    if (response.statusCode === 401) {
+      expireSession(token)
+      throw new UnauthorizedError('登录已过期，请重新登录')
     }
-  })
 
-  if (response.statusCode === 401) {
-    clearToken()
-    throw new Error('登录已过期，请重新登录')
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      const body = response.data as { message?: string; error?: string } | undefined
+      throw new ApiError(body?.message || body?.error || '请求失败', response.statusCode)
+    }
+
+    const body = response.data as { data?: unknown } | undefined
+    return (body?.data !== undefined ? body.data : body) as T
+  } catch (error) {
+    if (error instanceof UnauthorizedError || error instanceof ApiError) throw error
+    if ((error as { statusCode?: number }).statusCode === 401) {
+      expireSession(token)
+      throw new UnauthorizedError('登录已过期，请重新登录')
+    }
+    throw error
   }
-
-  if (response.statusCode < 200 || response.statusCode >= 300) {
-    const body = response.data as any
-    throw new Error(body?.message || body?.error || '请求失败')
-  }
-
-  const body = response.data as any
-  return body?.data !== undefined ? body.data : body
 }
 
 export interface User {
@@ -201,32 +227,46 @@ export interface SendMessageResponse {
   agentState?: { stage: ConversationState; collectedFactsCount?: number }
 }
 
-function normalizeMessage(message: any, index: number): Message {
+function normalizeMessage(message: unknown, index: number): Message {
+  const value = message as {
+    id?: string
+    role?: Message['role']
+    content?: string
+    text?: string
+    metadata?: { images?: string[]; quickReplies?: QuickReply[] }
+    images?: string[]
+    quickReplies?: QuickReply[]
+    timestamp?: string
+    createdAt?: string
+  }
   return {
-    id: message.id || `message-${index}`,
-    role: message.role || 'assistant',
-    content: message.content || message.text || '',
-    images: message.metadata?.images || message.images || [],
-    quickReplies: message.metadata?.quickReplies || message.quickReplies || [],
-    timestamp: message.timestamp || message.createdAt || new Date().toISOString()
+    id: value.id || `message-${index}`,
+    role: value.role || 'assistant',
+    content: value.content || value.text || '',
+    images: value.metadata?.images || value.images || [],
+    quickReplies: value.metadata?.quickReplies || value.quickReplies || [],
+    timestamp: value.timestamp || value.createdAt || new Date().toISOString()
   }
 }
 
-export async function getConversationHistory(): Promise<ConversationHistory> {
-  const result = await request<any>({ url: '/conversations/current/messages' })
-  const messages = Array.isArray(result) ? result.map(normalizeMessage) : []
-  return { messages }
+export async function getConversationHistory(caseId: string): Promise<ConversationHistory> {
+  const result = await request<ConversationHistory | Message[]>({
+    url: `/conversations/current/messages?caseId=${encodeURIComponent(caseId)}`
+  })
+  if (Array.isArray(result)) return { messages: result.map(normalizeMessage) }
+  return { ...result, messages: (result.messages || []).map(normalizeMessage) }
 }
 
 export async function sendMessage(
+  caseId: string,
   text: string,
-  images?: string[],
-  materialType?: MaterialType
+  action?: string,
+  artifactIds?: string[]
 ): Promise<SendMessageResponse> {
   return request<SendMessageResponse>({
     url: '/conversations/current/messages',
     method: 'POST',
-    data: { text, images, materialType }
+    data: { caseId, text, action, artifactIds }
   })
 }
 
@@ -270,15 +310,21 @@ export interface UploadedImage {
   artifactId: string
 }
 
-export async function uploadImage(filePath: string): Promise<UploadedImage> {
+export async function uploadImage(filePath: string, caseId: string): Promise<UploadedImage> {
   return new Promise((resolve, reject) => {
     const token = getToken()
     Taro.uploadFile({
       url: `${API_BASE}/upload/image`,
       filePath,
       name: 'file',
+      formData: { caseId },
       header: token ? { Authorization: `Bearer ${token}` } : {},
       success: (response) => {
+        if (response.statusCode === 401) {
+          expireSession(token)
+          reject(new UnauthorizedError('登录已过期，请重新登录'))
+          return
+        }
         if (response.statusCode < 200 || response.statusCode >= 300) {
           reject(new Error('上传失败'))
           return
@@ -298,7 +344,7 @@ export async function uploadImage(filePath: string): Promise<UploadedImage> {
 export async function processMaterial(
   materialType: MaterialType,
   artifactId: string,
-  caseId?: string
+  caseId: string
 ): Promise<Material> {
   return request<Material>({
     url: '/materials/process',
@@ -324,31 +370,25 @@ export async function getMaterials(caseId: string): Promise<Material[]> {
   return request<Material[]>({ url: `/materials/${caseId}` })
 }
 
-export interface ReportData {
-  caseId?: string
-  analysis: string
-  liability: string
-  compensation: string
-  recommendations: string[]
-  generatedAt: string
-}
+export interface ReportData extends ReportContract {}
 
-export interface ReportResponse {
-  report: ReportData
-}
+export type ReportResponse = ReportEnvelope<ReportData>
 
-export async function generateReport(facts: Array<{ label: string; value: string; confirmed: boolean }>): Promise<ReportData> {
+export async function generateReport(
+  caseId: string,
+  facts: Array<{ label: string; value: string; confirmed: boolean }>
+): Promise<ReportData> {
   const result = await request<ReportResponse>({
     url: '/reports/generate',
     method: 'POST',
-    data: { facts }
+    data: { caseId, facts }
   })
-  return result.report
+  return readReportEnvelope(result)
 }
 
 export async function getReport(caseId: string): Promise<ReportData> {
   const result = await request<ReportResponse>({ url: `/reports/${caseId}` })
-  return result.report
+  return readReportEnvelope(result)
 }
 
 export async function exportReport(caseId: string, format: 'pdf' | 'word') {

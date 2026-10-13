@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { db } from '../db'
 import { generateReport } from '../services/report'
 import { CollectedFact } from '../services/agent'
+import { materialSnapshot } from '../services/material-snapshot'
 import { requirePaidEntitlement } from '../services/payment'
 
 const router = Router()
@@ -18,7 +19,9 @@ router.post('/generate', async (req, res) => {
       return res.status(401).json({ success: false, error: '未认证' })
     }
 
-    const currentCase = await db.findActiveCase(userId)
+    const caseId = req.body.caseId
+    if (typeof caseId !== 'string' || !caseId) return res.status(400).json({ success: false, error: '缺少案件编号' })
+    const currentCase = await db.findCaseById(userId, caseId)
     if (!currentCase) {
       return res.status(404).json({ success: false, error: '未找到活跃案件' })
     }
@@ -58,18 +61,13 @@ router.post('/generate', async (req, res) => {
       return res.status(400).json({ success: false, error: '请先确认至少一份材料' })
     }
 
+    const snapshot = materialSnapshot(artifacts)
     const report = await generateReport(facts, currentCase.id)
-    const savedReport = await db.createReport(currentCase.id, report)
-    await db.updateCase(userId, {
-      hasReport: true,
-      status: 'ready',
-      statusLabel: '报告已完成',
-      liability: report.liability,
-      compensation: report.compensation,
-    }, currentCase.id)
+    await db.publishReport(userId, currentCase.id, report, snapshot)
 
-    res.json({ success: true, data: report })
+    res.json({ success: true, data: { report } })
   } catch (err: any) {
+    if (err.message === 'REPORT_STALE') return res.status(409).json({ success: false, error: '材料已更新，请重新生成报告' })
     console.error('报告生成失败:', err)
     res.status(500).json({
       success: false,
@@ -96,6 +94,7 @@ router.get('/:caseId', async (req, res) => {
       return res.status(404).json({ success: false, error: '未找到案件' })
     }
 
+    if (!caseData.hasReport) return res.status(409).json({ success: false, error: '材料已更新，请重新生成报告' })
     const report = await db.getReportByCase(caseId)
     if (!report) {
       return res.status(404).json({ success: false, error: '报告尚未生成' })

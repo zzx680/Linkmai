@@ -1,0 +1,385 @@
+@use '../../styles/design-tokens.scss' as *;
+
+.payments-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 56rpx 32rpx calc(112rpx + env(safe-area-inset-bottom));
+  background: #F4F5F7;
+}
+
+.centered-page {
+  display: flex;
+  align-items: center;
+}
+
+.payments-header {
+  display: flex;
+  flex-direction: column;
+  margin: 0 8rpx 38rpx;
+}
+
+.payments-eyebrow {
+  color: $color-brand-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.payments-title {
+  margin-top: 12rpx;
+  color: #111827;
+  font-size: 58rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.12;
+  letter-spacing: -2rpx;
+}
+
+.payments-description,
+.empty-description {
+  margin-top: 18rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+  line-height: $line-height-relaxed;
+}
+
+.plan-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 420rpx;
+  box-sizing: border-box;
+  padding: 38rpx;
+  border-radius: 46rpx;
+  background: linear-gradient(142deg, #080A0F 0%, #12151D 54%, #08090D 100%);
+  box-shadow: 0 28rpx 64rpx rgba(17, 24, 39, 0.2);
+}
+
+.plan-card-paid {
+  background: linear-gradient(142deg, #071713 0%, #0D2C25 56%, #07130F 100%);
+}
+
+.plan-card-refunded {
+  background: linear-gradient(142deg, #1D1D20 0%, #2A2B31 56%, #121316 100%);
+}
+
+.plan-glow {
+  position: absolute;
+  border-radius: $radius-full;
+  filter: blur(10rpx);
+  opacity: 0.7;
+}
+
+.plan-glow-one {
+  top: -110rpx;
+  right: 10rpx;
+  width: 320rpx;
+  height: 320rpx;
+  background: radial-gradient(circle, rgba(57, 91, 190, 0.8) 0%, rgba(57, 91, 190, 0) 70%);
+}
+
+.plan-glow-two {
+  bottom: -170rpx;
+  left: 70rpx;
+  width: 360rpx;
+  height: 360rpx;
+  background: radial-gradient(circle, rgba(110, 63, 144, 0.58) 0%, rgba(110, 63, 144, 0) 68%);
+}
+
+.plan-card-paid .plan-glow-one {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.52) 0%, rgba(16, 185, 129, 0) 70%);
+}
+
+.plan-card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.plan-topline,
+.plan-price-row,
+.status-pill,
+.status-panel,
+.benefit-item,
+.explanation-card {
+  display: flex;
+  align-items: center;
+}
+
+.plan-topline,
+.plan-price-row {
+  justify-content: space-between;
+}
+
+.plan-kicker,
+.plan-price-label,
+.plan-caption {
+  color: rgba(255, 255, 255, 0.64);
+  font-size: $font-size-sm;
+}
+
+.status-pill {
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  border-radius: $radius-full;
+  color: #111827;
+  background: rgba(255, 255, 255, 0.94);
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+}
+
+.plan-title {
+  display: block;
+  overflow: hidden;
+  margin-top: 28rpx;
+  color: #FFFFFF;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-price-row {
+  margin-top: 72rpx;
+}
+
+.plan-price-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-price {
+  margin-top: 8rpx;
+  color: #FFFFFF;
+  font-size: 62rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+  letter-spacing: -2rpx;
+}
+
+.plan-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 92rpx;
+  height: 92rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.14);
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12rpx);
+}
+
+.plan-caption {
+  display: block;
+  margin-top: 26rpx;
+}
+
+.status-panel {
+  gap: 16rpx;
+  margin-top: 28rpx;
+  padding: 22rpx 26rpx;
+  border-radius: $radius-lg;
+  color: #24458F;
+  background: #E6EDFF;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+}
+
+.status-panel-success {
+  color: #057A55;
+  background: #E7F8F1;
+}
+
+.status-panel-muted {
+  color: $color-text-secondary;
+  background: #EAECF0;
+}
+
+.action-panel {
+  margin-top: 28rpx;
+}
+
+.primary-button,
+.secondary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 108rpx;
+  box-sizing: border-box;
+  padding: 24rpx 30rpx;
+  border-radius: $radius-full;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  transition: transform $transition-fast, opacity $transition-fast;
+}
+
+.primary-button {
+  color: #FFFFFF;
+  background: #17191E;
+  box-shadow: 0 18rpx 40rpx rgba(17, 24, 39, 0.22);
+}
+
+.secondary-button {
+  margin-top: 18rpx;
+  color: #17191E;
+  border: 2rpx solid #D8DBE2;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.primary-button:active,
+.secondary-button:active {
+  transform: scale(0.985);
+}
+
+.button-disabled {
+  opacity: 0.58;
+}
+
+.features-section {
+  margin-top: 64rpx;
+}
+
+.section-title {
+  display: block;
+  margin: 0 6rpx 24rpx;
+  color: #17191E;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  letter-spacing: -1rpx;
+}
+
+.benefits-card,
+.explanation-card,
+.empty-card,
+.loading-card {
+  box-sizing: border-box;
+  border: 1rpx solid rgba(229, 231, 235, 0.76);
+  border-radius: 40rpx;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18rpx 44rpx rgba(31, 41, 55, 0.07);
+}
+
+.benefits-card {
+  padding: 10rpx 32rpx;
+}
+
+.benefit-item {
+  gap: 24rpx;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #EEF0F3;
+}
+
+.benefit-item:last-child {
+  border-bottom: none;
+}
+
+.benefit-icon,
+.explanation-icon,
+.empty-icon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 24rpx;
+  background: #F0F2F5;
+}
+
+.benefit-copy,
+.explanation-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.benefit-title,
+.explanation-title {
+  color: #17191E;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-normal;
+}
+
+.benefit-description,
+.explanation-text {
+  margin-top: 6rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+}
+
+.explanation-card {
+  gap: 22rpx;
+  margin-top: 28rpx;
+  padding: 28rpx 32rpx;
+}
+
+.explanation-icon {
+  width: 70rpx;
+  height: 70rpx;
+  border-radius: 22rpx;
+  background: #E9EFFF;
+}
+
+.empty-card,
+.loading-card {
+  width: 100%;
+  padding: 40rpx;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-icon {
+  width: 96rpx;
+  height: 96rpx;
+  margin: 0 auto 28rpx;
+  border-radius: $radius-full;
+  background: #E9EFFF;
+}
+
+.empty-title {
+  display: block;
+  color: #17191E;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.empty-card .primary-button {
+  margin-top: 34rpx;
+}
+
+.loading-line {
+  height: 32rpx;
+  margin-top: 22rpx;
+  border-radius: $radius-full;
+  background: #ECEEF2;
+}
+
+.loading-line:first-child {
+  margin-top: 0;
+}
+
+.loading-line-short {
+  width: 45%;
+}
+
+@media screen and (max-width: 360px) {
+  .payments-page {
+    padding-right: 24rpx;
+    padding-left: 24rpx;
+  }
+
+  .payments-title {
+    font-size: 52rpx;
+  }
+
+  .plan-card {
+    min-height: 390rpx;
+    padding: 32rpx;
+  }
+
+  .plan-price-row {
+    margin-top: 58rpx;
+  }
+}

@@ -1,764 +1,557 @@
 @use '../../styles/variables.scss' as *;
 
 .agent-page {
+  box-sizing: border-box;
   height: 100vh;
+  height: 100dvh;
+  padding-bottom: calc(154rpx + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  background: $color-canvas;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 84% 3%, rgba(89, 112, 214, 0.11), transparent 32%),
+    radial-gradient(circle at 0 24%, rgba(138, 160, 238, 0.08), transparent 28%),
+    $color-canvas;
 }
 
-// ==========================================
-// 案件状态栏
-// ==========================================
+.agent-page {
 .case-status-bar {
-  background: $color-surface;
-  padding: $space-md $space-lg;
-  border-bottom: 1px solid $color-border;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: $z-sticky;
+  margin: 20rpx 24rpx 0;
+  padding: 22rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  flex-shrink: 0;
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16rpx 42rpx rgba(30, 67, 168, 0.08);
+  backdrop-filter: blur(24rpx);
+  transition: transform $transition-fast, box-shadow $transition-fast;
 
-  .status-left {
-    display: flex;
-    align-items: center;
-    gap: $space-md;
+  &:active {
+    transform: scale(0.99);
+    box-shadow: 0 10rpx 28rpx rgba(30, 67, 168, 0.07);
+  }
   }
 
-  .case-title {
-    font-size: $font-lg;
-    font-weight: $font-weight-semibold;
-    color: $color-text-primary;
-  }
-
-  .status-badge {
-    display: flex;
-    align-items: center;
-    gap: 6rpx;
-    padding: 6rpx $space-md;
-    border-radius: $radius-pill;
-    font-size: $font-xs;
-    font-weight: $font-weight-medium;
-
-    .status-dot {
-      width: 12rpx;
-      height: 12rpx;
-      border-radius: 50%;
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    &.status-init {
-      background: $color-status-draft-bg;
-      .status-text { color: $color-status-draft; }
-      .status-dot { background: $color-status-draft; }
-    }
-
-    &.status-collecting {
-      background: $color-info-light;
-      .status-text { color: $color-info; }
-      .status-dot { background: $color-info; }
-    }
-
-    &.status-analyzing {
-      background: $color-status-analyzing-bg;
-      .status-text { color: $color-status-analyzing; }
-      .status-dot { background: $color-status-analyzing; }
-    }
-
-    &.status-reviewing {
-      background: $color-warning-light;
-      .status-text { color: $color-warning; }
-      .status-dot { background: $color-warning; }
-    }
-
-    &.status-completed {
-      background: $color-status-completed-bg;
-      .status-text { color: $color-status-completed; }
-      .status-dot { background: $color-status-completed; animation: none; }
-    }
-  }
-
-  .progress-indicator {
-    .progress-text {
-      font-size: $font-sm;
-      color: $color-text-secondary;
-      font-weight: $font-weight-medium;
-    }
-  }
+.context-toggle {
+  transition: transform $transition-fast;
+  &.expanded { transform: rotate(90deg); }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+.status-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
 }
 
-// ==========================================
-// 工作区容器
-// ==========================================
+.case-title {
+  color: $color-text-primary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+}
+
+.status-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  color: $color-brand-primary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  .status-dot {
+    width: 10rpx;
+    height: 10rpx;
+    border-radius: $radius-full;
+    background: currentColor;
+    box-shadow: 0 0 0 7rpx rgba(30, 67, 168, 0.09);
+  }
+
+  &.status-reviewing { color: $color-warning-text; }
+  &.status-analyzing { color: $color-info; }
+  &.status-completed { color: $color-success; }
+}
+
+.material-summary {
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+}
+
 .workspace-container {
   flex: 1;
-  padding: $space-lg;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 26rpx 30rpx 36rpx;
 }
 
-// ==========================================
-// 初始状态
-// ==========================================
-.init-section {
-  .welcome-header {
-    text-align: center;
-    margin-bottom: $space-2xl;
-    padding-top: $space-xl;
+.workspace-content {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-    .welcome-title {
-      font-size: $font-3xl;
-      font-weight: $font-weight-semibold;
-      color: $color-text-primary;
-      display: block;
-      margin-bottom: $space-sm;
-    }
+.init-section,
+.conversation-empty {
+  flex: 1;
+  min-height: 620rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
 
-    .welcome-subtitle {
-      font-size: $font-md;
-      color: $color-text-secondary;
-      display: block;
-    }
-  }
+.welcome-header {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
 
-  .case-type-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: $space-md;
-    margin-bottom: $space-2xl;
-  }
+.welcome-title,
+.empty-title {
+  color: $color-text-primary;
+  font-size: 44rpx;
+  font-weight: $font-weight-semibold;
+  letter-spacing: -1rpx;
+}
 
-  .type-card {
-    background: $color-surface;
-    border: 1px solid $color-border;
-    border-radius: $radius-lg;
-    padding: $space-xl;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: $space-sm;
-    transition: all $transition-base;
-    position: relative;
+.welcome-subtitle,
+.empty-description {
+  max-width: 580rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
+}
 
-    &.primary {
-      border-color: $color-brand;
-      border-width: 2px;
-      box-shadow: 0 0 0 4px $color-brand-pale;
-    }
+.assistant-mark {
+  position: relative;
+  width: 92rpx;
+  height: 92rpx;
+  margin-bottom: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30rpx;
+  color: $color-text-inverse;
+  font-size: 36rpx;
+  font-weight: $font-weight-semibold;
+  background: linear-gradient(145deg, #173A9A, #6178D8);
+  box-shadow: 0 22rpx 52rpx rgba(30, 67, 168, 0.24);
+  animation: assistantFloat 4.8s ease-in-out infinite;
 
-    &.subtle {
-      background: $color-surface-secondary;
-      border-style: dashed;
-    }
-
-    &:active {
-      transform: translateY(-4px);
-      box-shadow: $shadow-lg;
-    }
-
-    .card-icon-wrapper {
-      width: 96rpx;
-      height: 96rpx;
-      border-radius: $radius-md;
-      background: linear-gradient(135deg, $color-brand-light, $color-brand-pale);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: $space-xs;
-
-      .card-icon {
-        font-size: 64rpx;
-      }
-    }
-
-    .card-title {
-      font-size: $font-lg;
-      font-weight: $font-weight-semibold;
-      color: $color-text-primary;
-    }
-
-    .card-desc {
-      font-size: $font-sm;
-      color: $color-text-muted;
-    }
-
-    .card-badge {
-      position: absolute;
-      top: $space-md;
-      right: $space-md;
-      background: $color-brand;
-      color: $color-text-inverse;
-      font-size: $font-xs;
-      padding: 4rpx $space-sm;
-      border-radius: $radius-sm;
-      font-weight: $font-weight-medium;
-    }
-  }
-
-  .info-cards {
-    display: flex;
-    flex-direction: column;
-    gap: $space-md;
-    padding: 0 $space-xs;
-  }
-
-  .info-card {
-    background: $color-surface-secondary;
-    border-radius: $radius-md;
-    padding: $space-lg;
-    display: flex;
-    align-items: center;
-    gap: $space-md;
-
-    .info-icon {
-      font-size: 48rpx;
-      flex-shrink: 0;
-    }
-
-    .info-content {
-      flex: 1;
-
-      .info-title {
-        font-size: $font-md;
-        font-weight: $font-weight-semibold;
-        color: $color-text-primary;
-        display: block;
-        margin-bottom: 4rpx;
-      }
-
-      .info-text {
-        font-size: $font-sm;
-        color: $color-text-secondary;
-        display: block;
-      }
-    }
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -12rpx;
+    z-index: -1;
+    border-radius: 38rpx;
+    background: rgba(94, 118, 215, 0.12);
+    animation: assistantGlow 3s ease-in-out infinite;
   }
 }
 
-// ==========================================
-// AI 执行计划
-// ==========================================
-.plan-preview-card {
-  background: linear-gradient(135deg, $color-info-light, $color-surface);
-  border: 1px solid rgba(78, 106, 122, 0.2);
-  border-radius: $radius-lg;
-  padding: $space-lg;
-  margin-bottom: $space-xl;
+.empty-description { margin-top: 16rpx; }
 
-  .plan-header {
-    display: flex;
-    align-items: center;
-    gap: $space-sm;
-    margin-bottom: $space-lg;
+.starter-actions {
+  width: 100%;
+  margin-top: 34rpx;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
 
-    .plan-icon {
-      font-size: 40rpx;
-    }
+.starter-action {
+  min-height: 72rpx;
+  box-sizing: border-box;
+  padding: 16rpx 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.86);
+  color: $color-text-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  box-shadow: $shadow-xs;
+  transition: transform $transition-fast, background-color $transition-fast;
 
-    .plan-title {
-      flex: 1;
-      font-size: $font-lg;
-      font-weight: $font-weight-semibold;
-      color: $color-text-primary;
-    }
-
-    .plan-dismiss {
-      width: 48rpx;
-      height: 48rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.6);
-      transition: all $transition-fast;
-
-      &:active {
-        transform: scale(0.9);
-        background: rgba(255, 255, 255, 0.9);
-      }
-
-      .dismiss-icon {
-        font-size: 40rpx;
-        color: $color-text-muted;
-      }
-    }
+  &.primary {
+    border-color: transparent;
+    background: $color-brand-primary;
+    color: $color-text-inverse;
+    box-shadow: 0 12rpx 28rpx rgba(30, 67, 168, 0.2);
   }
 
-  .plan-steps {
-    display: flex;
-    flex-direction: column;
-    gap: $space-md;
-  }
+  &:active { transform: scale(0.97); }
+}
 
-  .plan-step {
+.starter-checklist {
+  margin-top: 30rpx;
+  padding-top: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  border-top: 1rpx solid $color-border-light;
+}
+
+.checklist-label {
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+}
+
+.checklist-text {
+  color: $color-text-secondary;
+  font-size: $font-size-xs;
+  line-height: $line-height-relaxed;
+}
+
+.case-context-panel {
+  margin-bottom: 28rpx;
+  padding: 24rpx;
+  border: 1rpx solid rgba(30, 67, 168, 0.1);
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: $shadow-xs;
+  animation: panelReveal 220ms ease-out;
+}
+
+.context-progress {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.context-step {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  color: $color-text-tertiary;
+  font-size: 22rpx;
+
+  > text:first-child {
+    width: 34rpx;
+    height: 34rpx;
     display: flex;
     align-items: center;
-    gap: $space-md;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: $radius-full;
+    background: $color-bg-subtle;
+    color: $color-text-secondary;
+    font-size: 20rpx;
+  }
 
-    .step-indicator {
-      width: 48rpx;
-      height: 48rpx;
-      border-radius: 50%;
-      background: $color-surface;
-      border: 2px solid $color-border;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+  &.active {
+    color: $color-brand-primary;
+    > text:first-child { background: $color-brand-primary; color: $color-text-inverse; }
+  }
 
-      &.active {
-        background: $color-brand;
-        border-color: $color-brand;
-
-        .step-number {
-          color: $color-text-inverse;
-        }
-      }
-
-      .step-number {
-        font-size: $font-sm;
-        font-weight: $font-weight-semibold;
-        color: $color-text-muted;
-      }
-    }
-
-    .step-text {
-      font-size: $font-md;
-      color: $color-text-primary;
-      line-height: $line-height-normal;
-    }
+  &.complete {
+    color: $color-success;
+    > text:first-child { background: $color-success-bg; color: $color-success; }
   }
 }
 
-// ==========================================
-// 证据材料区
-// ==========================================
-.evidence-section {
-  margin-bottom: $space-xl;
+.context-actions { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 20rpx; }
+.context-materials { margin-top: 22rpx; }
+.context-material-list { display: inline-flex; gap: 14rpx; }
 
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: $space-sm;
-    margin-bottom: $space-lg;
-
-    .section-icon {
-      font-size: 32rpx;
-    }
-
-    .section-title {
-      flex: 1;
-      font-size: $font-lg;
-      font-weight: $font-weight-semibold;
-      color: $color-text-primary;
-    }
-
-    .section-count {
-      background: $color-brand-light;
-      color: $color-brand;
-      font-size: $font-sm;
-      font-weight: $font-weight-semibold;
-      padding: 4rpx $space-md;
-      border-radius: $radius-pill;
-    }
-  }
-
-  .evidence-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: $space-md;
-  }
-
-  .evidence-item {
-    background: $color-surface;
-    border: 1px solid $color-border;
-    border-radius: $radius-md;
-    overflow: hidden;
-    transition: all $transition-fast;
-
-    &:active {
-      transform: translateY(-2px);
-      box-shadow: $shadow-md;
-    }
-
-    .evidence-thumbnail {
-      width: 100%;
-      height: 200rpx;
-      object-fit: cover;
-    }
-
-    .evidence-info {
-      padding: $space-md;
-
-      .evidence-name {
-        font-size: $font-sm;
-        font-weight: $font-weight-medium;
-        color: $color-text-primary;
-        display: block;
-        margin-bottom: $space-xs;
-      }
-
-      .evidence-status {
-        display: flex;
-        align-items: center;
-        gap: 6rpx;
-
-        .status-dot {
-          font-size: 16rpx;
-        }
-
-        .status-label {
-          font-size: $font-xs;
-          color: $color-text-secondary;
-        }
-
-        &.uploaded {
-          .status-dot { color: $color-info; }
-        }
-
-        &.analyzing {
-          .status-dot { color: $color-status-analyzing; }
-        }
-
-        &.extracted {
-          .status-dot { color: $color-success; }
-        }
-      }
-    }
-  }
+.context-material {
+  width: 280rpx;
+  padding: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  border-radius: 18rpx;
+  background: $color-bg-subtle;
 }
 
-// ==========================================
-// 对话记录
-// ==========================================
-.conversation-section {
-  margin-bottom: $space-xl;
-
-  .messages-list {
-    display: flex;
-    flex-direction: column;
-    gap: $space-md;
-    margin-top: $space-lg;
-  }
+.context-material-thumb {
+  width: 70rpx;
+  height: 70rpx;
+  flex-shrink: 0;
+  border-radius: 14rpx;
+  background: $color-border-light;
 }
+
+.context-material-copy { min-width: 0; display: flex; flex-direction: column; gap: 6rpx; }
+.context-material-name { overflow: hidden; color: $color-text-primary; font-size: $font-size-xs; text-overflow: ellipsis; white-space: nowrap; }
+.context-material-status { color: $color-warning-text; font-size: 20rpx; &.confirmed { color: $color-success; } }
+
+.conversation-section { margin-bottom: 18rpx; }
+.messages-list { display: flex; flex-direction: column; gap: 30rpx; padding: 10rpx 0 0; }
 
 .message {
   display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  animation: messageEnter 240ms ease-out both;
 
-  &.assistant {
-    justify-content: flex-start;
-
-    .message-bubble {
-      background: $color-surface;
-      border: 1px solid $color-border;
-      border-radius: $radius-lg $radius-lg $radius-lg $radius-xs;
-    }
-  }
-
-  &.user {
-    justify-content: flex-end;
-
-    .message-bubble {
-      background: $color-brand;
-      border-radius: $radius-lg $radius-lg $radius-xs $radius-lg;
-
-      .message-text {
-        color: $color-text-inverse;
-      }
-    }
-  }
+  &.assistant { padding-right: 44rpx; }
+  &.user { justify-content: flex-end; padding-left: 80rpx; }
 }
+
+.message-avatar {
+  width: 48rpx;
+  height: 48rpx;
+  margin-top: 4rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 16rpx;
+  color: $color-text-inverse;
+  font-size: 20rpx;
+  font-weight: $font-weight-semibold;
+  background: linear-gradient(145deg, $color-brand-primary, #6D83DE);
+  box-shadow: 0 8rpx 18rpx rgba(30, 67, 168, 0.16);
+}
+
+.message-body { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.user .message-body { align-items: flex-end; }
 
 .message-bubble {
-  max-width: 540rpx;
-  padding: $space-md $space-lg;
+  max-width: 100%;
+  padding: 4rpx 0;
+  color: $color-text-primary;
 
   .message-text {
-    font-size: $font-md;
-    line-height: $line-height-relaxed;
-    color: $color-text-primary;
-  }
-
-  &.loading {
-    display: flex;
-    gap: $space-xs;
-    justify-content: center;
-    padding: $space-md !important;
-
-    .loading-dot {
-      font-size: 24rpx;
-      color: $color-text-secondary;
-      animation: bounce 1.4s infinite ease-in-out both;
-
-      &:nth-child(1) {
-        animation-delay: -0.32s;
-      }
-
-      &:nth-child(2) {
-        animation-delay: -0.16s;
-      }
-    }
+    display: block;
+    font-size: $font-size-base;
+    line-height: 1.72;
+    word-break: break-word;
   }
 }
 
-@keyframes bounce {
-  0%, 80%, 100% {
-    transform: scale(0.8);
-    opacity: 0.3;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.user .message-bubble {
+  padding: 20rpx 26rpx;
+  border-radius: 28rpx 28rpx 8rpx 28rpx;
+  background: linear-gradient(145deg, $color-brand-primary, #365BC1);
+  color: $color-text-inverse;
+  box-shadow: 0 12rpx 30rpx rgba(30, 67, 168, 0.16);
 }
 
 .message-images {
+  margin-bottom: 14rpx;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: $space-xs;
-  margin-bottom: $space-sm;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10rpx;
 }
 
 .message-image {
-  width: 100%;
+  width: 210rpx;
   height: 160rpx;
-  border-radius: $radius-sm;
+  border-radius: 18rpx;
   object-fit: cover;
 }
 
-// ==========================================
-// 分析结果确认
-// ==========================================
-.review-section {
-  margin-bottom: $space-xl;
-
-  .review-card {
-    background: linear-gradient(135deg, $color-brand-pale, $color-surface);
-    border: 2px solid $color-brand-light;
-    border-radius: $radius-lg;
-    padding: $space-2xl;
-
-    .review-title {
-      font-size: $font-2xl;
-      font-weight: $font-weight-semibold;
-      color: $color-text-primary;
-      text-align: center;
-      display: block;
-      margin-bottom: $space-xs;
-    }
-
-    .review-subtitle {
-      font-size: $font-md;
-      color: $color-text-secondary;
-      text-align: center;
-      display: block;
-      margin-bottom: $space-2xl;
-    }
-
-    .review-result {
-      background: $color-surface;
-      border-radius: $radius-md;
-      padding: $space-xl;
-      display: flex;
-      flex-direction: column;
-      gap: $space-lg;
-      margin-bottom: $space-xl;
-
-      .result-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .result-label {
-          font-size: $font-md;
-          color: $color-text-secondary;
-        }
-
-        .result-value {
-          font-size: $font-xl;
-          font-weight: $font-weight-semibold;
-          color: $color-text-primary;
-
-          &.highlight {
-            color: $color-brand;
-          }
-        }
-      }
-    }
-
-    .review-actions {
-      display: flex;
-      gap: $space-md;
-
-      .action-btn {
-        flex: 1;
-        padding: $space-lg;
-        border-radius: $radius-pill;
-        text-align: center;
-        transition: all $transition-fast;
-
-        &.secondary {
-          background: $color-surface;
-          border: 1px solid $color-border;
-
-          .btn-text {
-            color: $color-text-primary;
-          }
-
-          &:active {
-            background: $color-surface-hover;
-          }
-        }
-
-        &.primary {
-          background: $color-brand;
-
-          .btn-text {
-            color: $color-text-inverse;
-          }
-
-          &:active {
-            background: $color-brand-hover;
-            transform: translateY(-2px);
-          }
-        }
-
-        .btn-text {
-          font-size: $font-md;
-          font-weight: $font-weight-semibold;
-        }
-      }
-    }
-  }
+.quick-replies {
+  margin-top: 16rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
 
-// ==========================================
-// 输入栏
-// ==========================================
-.input-bar {
-  background: $color-surface;
-  border-top: 1px solid $color-border;
-  padding: $space-md $space-lg;
+.quick-reply {
+  min-height: 64rpx;
+  box-sizing: border-box;
+  padding: 13rpx 22rpx;
   display: flex;
   align-items: center;
-  gap: $space-sm;
-  padding-bottom: calc($space-md + env(safe-area-inset-bottom));
+  border: 1rpx solid rgba(30, 67, 168, 0.2);
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.8);
+  color: $color-brand-primary;
+  font-size: $font-size-sm;
+  transition: transform $transition-fast, background-color $transition-fast;
+
+  &:active { transform: scale(0.97); background: $color-brand-light; }
+}
+
+.loading {
+  min-width: 86rpx;
+  padding: 18rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 9rpx;
+  border-radius: 22rpx;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: $shadow-xs;
+}
+
+.loading-dot {
+  width: 9rpx;
+  height: 9rpx;
+  border-radius: $radius-full;
+  background: $color-brand-primary;
+  animation: typingBounce 1.15s ease-in-out infinite;
+  &:nth-child(2) { animation-delay: 140ms; }
+  &:nth-child(3) { animation-delay: 280ms; }
+}
+
+.typing-label { margin-top: 8rpx; color: $color-text-tertiary; font-size: 20rpx; }
+
+.input-bar {
+  flex-shrink: 0;
+  padding: 10rpx 24rpx 14rpx;
+  background: linear-gradient(180deg, rgba(245, 247, 250, 0), rgba(245, 247, 250, 0.96) 24%);
+}
+
+.composer-shell {
+  min-height: 100rpx;
+  box-sizing: border-box;
+  padding: 12rpx 12rpx 12rpx 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  border: 1rpx solid rgba(30, 67, 168, 0.1);
+  border-radius: 34rpx;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16rpx 44rpx rgba(30, 55, 110, 0.13);
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &:focus-within {
+    border-color: rgba(30, 67, 168, 0.32);
+    box-shadow: 0 18rpx 48rpx rgba(30, 67, 168, 0.17);
+  }
 }
 
 .attach-button,
 .send-button {
   width: 72rpx;
   height: 72rpx;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all $transition-fast;
   flex-shrink: 0;
+  border-radius: $radius-full;
+  transition: transform $transition-fast, opacity $transition-fast, background-color $transition-fast;
+
+  &:active { transform: scale(0.92); }
 }
 
-.attach-button {
-  background: $color-surface-secondary;
-  border: 1px solid $color-border;
-
-  &:active {
-    transform: scale(0.95);
-    background: $color-surface-hover;
-  }
-
-  .icon {
-    font-size: 40rpx;
-    color: $color-text-secondary;
-  }
+.attach-button { background: $color-bg-subtle; &.disabled { opacity: 0.45; pointer-events: none; } }
+.input-wrapper { flex: 1; min-width: 0; }
+.text-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 56rpx;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: $color-text-primary;
+  font-family: inherit;
+  font-size: $font-size-base;
+  &::placeholder { color: $color-text-placeholder; }
 }
+.placeholder { color: $color-text-placeholder; }
 
 .send-button {
-  background: $color-brand;
+  background: $color-border-medium;
+  opacity: 0.62;
 
-  &:active {
-    transform: scale(0.95);
-    background: $color-brand-hover;
-  }
-
-  .icon {
-    font-size: 32rpx;
-    color: $color-text-inverse;
+  &.ready {
+    opacity: 1;
+    background: linear-gradient(145deg, $color-brand-primary, #5E76D7);
+    box-shadow: 0 10rpx 24rpx rgba(30, 67, 168, 0.24);
   }
 }
 
-.input-wrapper {
-  flex: 1;
-  background: $color-surface-secondary;
-  border-radius: $radius-pill;
-  padding: 0 $space-lg;
-  height: 72rpx;
-  display: flex;
-  align-items: center;
+.composer-hint {
+  display: block;
+  margin-top: 10rpx;
+  color: $color-text-tertiary;
+  font-size: 18rpx;
+  text-align: center;
 }
 
-.text-input {
-  width: 100%;
-  font-size: $font-md;
-  color: $color-text-primary;
-  background: transparent;
-  border: none;
-}
-
-.placeholder {
-  color: $color-text-muted;
-}
-
-// ==========================================
-// 图片预览
-// ==========================================
-.preview-images {
+.image-preview {
   position: absolute;
-  bottom: 100rpx;
-  left: $space-lg;
-  right: $space-lg;
+  z-index: $z-overlay;
+  bottom: 128rpx;
+  left: 30rpx;
+  right: 30rpx;
   display: flex;
-  gap: $space-sm;
-  padding: $space-sm;
-  background: $color-surface;
-  border-radius: $radius-md;
+  gap: 12rpx;
+  padding: 14rpx;
+  border: 1rpx solid $color-border-light;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: $shadow-lg;
-  border: 1px solid $color-border;
 }
 
 .preview-item {
   position: relative;
-  width: 120rpx;
-  height: 120rpx;
+  width: 112rpx;
+  height: 112rpx;
 
-  .preview-image {
-    width: 100%;
-    height: 100%;
-    border-radius: $radius-sm;
-    object-fit: cover;
-  }
-
+  .preview-image { width: 100%; height: 100%; border-radius: 18rpx; object-fit: cover; }
   .remove-button {
     position: absolute;
-    top: -8rpx;
-    right: -8rpx;
-    width: 48rpx;
-    height: 48rpx;
-    border-radius: 50%;
-    background: $color-text-primary;
-    color: $color-text-inverse;
+    top: -10rpx;
+    right: -10rpx;
+    width: 42rpx;
+    height: 42rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32rpx;
-    box-shadow: $shadow-sm;
-
-    &:active {
-      transform: scale(0.9);
-    }
+    border-radius: $radius-full;
+    background: $color-text-primary;
+    color: $color-text-inverse;
+    font-size: 28rpx;
   }
+}
+
+@keyframes messageEnter {
+  from { opacity: 0; transform: translateY(12rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes panelReveal {
+  from { opacity: 0; transform: translateY(-10rpx) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% { opacity: 0.32; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-7rpx); }
+}
+
+@keyframes assistantFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8rpx); }
+}
+
+@keyframes assistantGlow {
+  0%, 100% { opacity: 0.5; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-mark,
+  .assistant-mark::after,
+  .message,
+  .loading-dot,
+  .case-context-panel { animation: none; }
+}
+
+.send-arrow { transform: rotate(-90deg); }
 }

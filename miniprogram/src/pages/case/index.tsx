@@ -1,29 +1,12 @@
 import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
-import { useEffect, useMemo, useState } from 'react'
+import Taro, { useDidShow } from '@tarojs/taro'
+import { useMemo, useState } from 'react'
 import { useAppStore } from '../../store'
-import { createPaymentOrder, getPaymentOrder } from '../../services/api'
+import { useCasePayment } from '../../hooks/useCasePayment'
+import { formatPaymentPrice } from '../../utils/payment'
 import { IS_H5 } from '../../config/env'
 import { Icon, SkeletonCaseCard } from '../../components'
 import './index.scss'
-
-const DEFAULT_PRICE_CENTS = 4990
-
-function formatPrice(amountCents?: number) {
-  return `¥${((amountCents || DEFAULT_PRICE_CENTS) / 100).toFixed(2)}`
-}
-
-async function waitForPaymentConfirmation(orderId: string) {
-  for (let attempt = 0; attempt < 6; attempt += 1) {
-    const order = await getPaymentOrder(orderId)
-    if (order.status === 'paid' || order.entitlement?.status === 'paid') return true
-    if (['failed', 'closed', 'refunded'].includes(order.status)) return false
-    if (attempt < 5) {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-    }
-  }
-  return false
-}
 
 function getNextAction(caseData: ReturnType<typeof useAppStore.getState>['currentCase']) {
   if (!caseData) return 'create_case'
@@ -37,11 +20,12 @@ function getNextAction(caseData: ReturnType<typeof useAppStore.getState>['curren
 export default function CasePage() {
   const { currentCase, isLoadingCase, loadCurrentCase, createCase } = useAppStore()
   const [isCreating, setIsCreating] = useState(false)
-  const [isPaying, setIsPaying] = useState(false)
+  const { isPaying, handlePayment, reconcilePendingPayment } = useCasePayment()
 
-  useEffect(() => {
-    if (!IS_H5) loadCurrentCase()
-  }, [loadCurrentCase])
+  useDidShow(() => {
+    if (IS_H5) return
+    loadCurrentCase().finally(reconcilePendingPayment)
+  })
 
   const handleNotifications = () => {
     Taro.showToast({ title: '暂无新的案件提醒', icon: 'none' })
@@ -50,51 +34,22 @@ export default function CasePage() {
   const nextAction = useMemo(() => getNextAction(currentCase), [currentCase])
   const entitlement = currentCase?.entitlement
   const isPaid = entitlement?.status === 'paid'
-  const price = formatPrice(entitlement?.amountCents)
+  const price = formatPaymentPrice(entitlement)
 
   const handleCreateCase = async () => {
     setIsCreating(true)
     try {
       await createCase()
-      Taro.reLaunch({ url: '/pages/agent/index' })
+      await Taro.switchTab({ url: '/pages/agent/index' })
     } finally {
       setIsCreating(false)
     }
   }
 
-  const handlePayment = async () => {
-    if (!currentCase || isPaying) return
-    setIsPaying(true)
-    try {
-      const idempotencyKey = `${currentCase.id}-${Date.now()}-${Math.random().toString(36).slice(2)}`
-      const result = await createPaymentOrder(currentCase.id, idempotencyKey)
-
-      if (!result.alreadyPaid && result.payment && result.orderId) {
-        await Taro.requestPayment(result.payment)
-        const paid = await waitForPaymentConfirmation(result.orderId)
-        await useAppStore.getState().loadCurrentCase()
-        Taro.showToast({
-          title: paid ? '已解锁完整方案' : '支付结果确认中，请稍后刷新',
-          icon: paid ? 'success' : 'none'
-        })
-        return
-      }
-
-      await useAppStore.getState().loadCurrentCase()
-      if (result.alreadyPaid) {
-        Taro.showToast({ title: '该案件已解锁', icon: 'success' })
-      }
-    } catch (error: any) {
-      if (error?.errMsg?.includes('cancel')) return
-      Taro.showToast({ title: error?.message || '支付未完成，请稍后重试', icon: 'none' })
-    } finally {
-      setIsPaying(false)
-    }
-  }
-
   const handlePrimaryAction = () => {
+    if (isCreating || isPaying) return
     if (nextAction === 'create_case') return handleCreateCase()
-    if (nextAction === 'unlock_full_plan') return handlePayment()
+    if (nextAction === 'unlock_full_plan') return price ? handlePayment() : Taro.navigateTo({ url: '/pages/payments/index' })
     if (nextAction === 'view_report') return Taro.navigateTo({ url: '/pages/report/index' })
     return Taro.reLaunch({ url: '/pages/agent/index' })
   }
@@ -114,7 +69,7 @@ export default function CasePage() {
   const actionLabel = nextAction === 'create_case'
     ? '免费开始处理'
     : nextAction === 'unlock_full_plan'
-      ? `解锁完整方案 ${price}`
+      ? price ? `解锁完整方案 ${price}` : '查看付费权益'
       : nextAction === 'view_report'
         ? '查看完整方案'
         : nextAction === 'continue_materials'
@@ -143,7 +98,7 @@ export default function CasePage() {
             <Text className="case-card-title">从一份材料开始</Text>
             <Text className="case-card-description">上传事故材料，灵迈会帮你整理出清晰的处理路径。</Text>
           </View>
-          <View className="primary-action" onClick={handlePrimaryAction}>
+          <View className={`primary-action${isCreating || isPaying ? ' primary-action-disabled' : ''}`} onClick={handlePrimaryAction}>
             <Text>{isCreating ? '正在创建...' : actionLabel}</Text>
             <Icon name="arrow-right-line" size={20} color="#FFFFFF" />
           </View>
@@ -181,7 +136,7 @@ export default function CasePage() {
           )}
           {isPaid && <View className="unlocked-note"><Icon name="checkbox-circle-line" size={18} color="#1E43A8" /><Text>本案件已解锁完整处理方案</Text></View>}
 
-          <View className="primary-action" onClick={handlePrimaryAction}>
+          <View className={`primary-action${isCreating || isPaying ? ' primary-action-disabled' : ''}`} onClick={handlePrimaryAction}>
             <Text>{isPaying ? '正在准备支付...' : actionLabel}</Text>
             {!isPaying && <Icon name="arrow-right-line" size={20} color="#FFFFFF" />}
           </View>

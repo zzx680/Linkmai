@@ -33,10 +33,10 @@ export default function LazyImage({
   useEffect(() => {
     if (!src) return
 
-    const observer = Taro.createIntersectionObserver(null, { threshold: [0.01] })
+    const observer = Taro.createIntersectionObserver({}, { thresholds: [0.01] })
 
     observer.relativeToViewport({ bottom: 100 }).observe('.lazy-image', (res) => {
-      if (res.intersectionRatio > 0) {
+      if ((res.intersectionRatio || 0) > 0) {
         // 图片进入可视区域，开始加载
         setImageSrc(src)
         observer.disconnect()

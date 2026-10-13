@@ -1,0 +1,11 @@
+<svg width="960" height="256" viewBox="0 0 960 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>灵迈品牌字标</title>
+  <desc>黑色 LM 字母标与灵迈中文名称组合</desc>
+  <g transform="translate(20 20) scale(.421875)">
+    <path d="M146 104V350C146 394.183 181.817 430 226 430H252" stroke="#000000" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M252 430V270C252 234.654 280.654 206 316 206C351.346 206 380 234.654 380 270V430" stroke="#000000" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M380 430V286C380 242 407 206 440 206" stroke="#000000" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="250" y="145" fill="#000000" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="72" font-weight="700" letter-spacing="12">灵迈</text>
+  <text x="254" y="191" fill="#000000" fill-opacity=".55" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="19" font-weight="600" letter-spacing="7">LINKMAI</text>
+</svg>

@@ -51,17 +51,21 @@ rsync -a --delete \
   --exclude 'dist' \
   "$SOURCE_ROOT/" "$RELEASE_DIR/"
 
-cd "$RELEASE_DIR/server"
-npm ci
-npm test
-npm run build
-(
+if ! (
+  cd "$RELEASE_DIR/server"
+  npm ci
+  npm run build
+  npm test
   set -a
   source "$ENV_FILE"
   set +a
   npm run db:migrate
-)
-npm prune --omit=dev
+  npm prune --omit=dev
+); then
+  echo "发布门禁失败，清理候选 release"
+  rm -rf "$RELEASE_DIR"
+  exit 1
+fi
 chown -R linkmai:linkmai "$RELEASE_DIR"
 find "$RELEASE_DIR" -type d -exec chmod 750 {} +
 find "$RELEASE_DIR" -type f -exec chmod 640 {} +
@@ -92,12 +96,14 @@ rollback() {
 if ! pm2 startOrReload "$PM2_CONFIG" --update-env; then
   echo "进程启动失败，开始回滚"
   rollback
+  rm -rf "$RELEASE_DIR"
   exit 1
 fi
 
 if ! curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 2 "$HEALTH_URL" >/dev/null; then
   echo "健康检查失败，开始回滚"
   rollback
+  rm -rf "$RELEASE_DIR"
   exit 1
 fi
 

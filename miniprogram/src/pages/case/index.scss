@@ -112,6 +112,11 @@
   font-weight: $font-weight-semibold;
 }
 
+.primary-action-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .current-case-card {
   .case-card-header,
   .case-meta-row,

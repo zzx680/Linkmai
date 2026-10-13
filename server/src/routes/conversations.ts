@@ -1,24 +1,34 @@
 import express from 'express'
 import { db } from '../db'
+import { generateNextQuestion, normalizeAgentAction, processUserMessage, type AgentMaterial, type AgentState } from '../services/agent'
 
 const router = express.Router()
 
-// 获取或创建对话
+async function ownedCase(req: express.Request, res: express.Response, caseId: unknown) {
+  if (!req.userId) {
+    res.status(401).json({ success: false, error: '未认证' })
+    return null
+  }
+  if (typeof caseId !== 'string' || !caseId.trim()) {
+    res.status(400).json({ success: false, error: '请明确提供 caseId' })
+    return null
+  }
+  const caseData = await db.findCaseById(req.userId, caseId)
+  if (!caseData) res.status(404).json({ success: false, error: '案件不存在' })
+  return caseData
+}
+
+function initialState(): AgentState {
+  const state: AgentState = { stage: 'collecting', collectedFacts: [] }
+  const next = generateNextQuestion(state)
+  return { ...state, nextQuestion: next.question, quickReplies: next.quickReplies || [] }
+}
+
 router.post('/current', async (req, res) => {
   try {
-    const userId = req.userId
-
-    if (!userId) {
-      return res.status(401).json({ success: false, error: '未认证' })
-    }
-
-    // 获取当前活跃案件
-    const currentCase = await db.findActiveCase(userId)
-    const caseId = currentCase?.id
-
-    // 查找或创建对话
-    const conversation = await db.findOrCreateConversation(userId, caseId)
-
+    const caseData = await ownedCase(req, res, req.body?.caseId)
+    if (!caseData) return
+    const conversation = await db.findOrCreateConversation(req.userId!, caseData.id)
     res.json({ success: true, data: conversation })
   } catch (err) {
     console.error('获取对话错误:', err)
@@ -26,104 +36,65 @@ router.post('/current', async (req, res) => {
   }
 })
 
-// 发送消息（带 Agent 状态管理）
 router.post('/current/messages', async (req, res) => {
   try {
-    const userId = req.userId
-    const { text, images, materialType } = req.body
-
-    if (!userId) {
-      return res.status(401).json({ success: false, error: '未认证' })
+    const { caseId, text, action, artifactIds = [], images, imageUrl, url } = req.body || {}
+    const caseData = await ownedCase(req, res, caseId)
+    if (!caseData) return
+    // 只接收本案件已上传材料的 ID；识别、核对、确认由 materials 流程负责。
+    if (images !== undefined || imageUrl !== undefined || url !== undefined) {
+      return res.status(400).json({ success: false, error: '不接受图片 URL，请先上传材料并提供 artifactIds' })
+    }
+    if ((text !== undefined && (typeof text !== 'string' || text.length > 10000)) ||
+        !Array.isArray(artifactIds) || artifactIds.length > 20 || artifactIds.some(id => typeof id !== 'string' || !id.trim()) ||
+        (action !== undefined && (typeof action !== 'string' || !/^(confirm|edit|finish|upload|generate_report|manual_input|confirm:correct|confirm:edit|no_more_materials|edit:(accident_type|accident_date|accident_location|parties_involved|accident_description|liability))$/.test(action)))) {
+      return res.status(400).json({ success: false, error: '消息参数不合法' })
+    }
+    if (!text?.trim() && !action && artifactIds.length === 0) {
+      return res.status(400).json({ success: false, error: '消息不能为空' })
     }
 
-    const currentCase = await db.findActiveCase(userId)
-    const conversation = await db.findOrCreateConversation(userId, currentCase?.id)
-    const agentState = conversation.agentState || {
-      stage: 'collecting',
-      collectedFacts: [],
-      nextQuestion: '您好！我是灵迈事故理赔助手。请问您遇到了什么类型的事故？',
-    }
-
-    // 保存用户消息
-    await db.createMessage(
-      conversation.id,
-      'user',
-      'text',
-      text,
-      images ? { images, materialType } : undefined
-    )
-
-    const materials: Array<{ type: string; url: string; extractedData?: any }> = []
-
-    // 使用 Agent 状态管理更新对话
-    const { processUserMessage } = await import('../services/agent')
-    const newState = await processUserMessage(agentState, text || '', materials)
-
-    // 保存更新后的状态
-    await db.updateConversationState(conversation.id, newState)
-
-    // 构造回复消息
-    let assistantText = newState.nextQuestion || '好的，我已记录。'
-    const quickReplies = newState.quickReplies || []
-
-    // 如果有待确认的信息，展示确认消息
-    if (materials.length > 0) {
-      const unconfirmedFacts = newState.collectedFacts.filter(f => !f.confirmed)
-      if (unconfirmedFacts.length > 0) {
-        const fieldsSummary = unconfirmedFacts
-          .map((f) => `• ${f.label}: ${f.value}`)
-          .join('\n')
-
-        assistantText = `我已识别出以下信息：\n\n${fieldsSummary}\n\n请确认这些信息是否正确？`
-        quickReplies.push(
-          { label: '✅ 信息正确', value: 'confirm:correct', action: 'confirm' },
-          { label: '✏️ 需要修改', value: 'confirm:edit', action: 'edit' }
-        )
+    const materials: AgentMaterial[] = []
+    const attachedIds: string[] = [...new Set<string>(artifactIds)]
+    for (const artifactId of attachedIds) {
+      const artifact = await db.findArtifactById(caseData.id, artifactId)
+      if (!artifact) return res.status(404).json({ success: false, error: '材料不存在或不属于该案件' })
+      const extractedData: Record<string, unknown> = {}
+      // 不把未经核对的识别字段变成对话事实，也不在对话中重复调用收费识别 API。
+      if (artifact.status === 'processed' && artifact.metadata?.confirmed === true) {
+        for (const field of artifact.metadata.fields || []) extractedData[field.key] = field.value
       }
+      materials.push({ type: artifact.type, artifactId, extractedData, confirmed: artifact.metadata?.confirmed === true })
     }
 
-    // 保存 Agent 回复
-    await db.createMessage(
-      conversation.id,
-      'assistant',
-      'text',
-      assistantText,
-      quickReplies.length > 0 ? { quickReplies } : undefined
-    )
-
-    res.json({
-      success: true,
-      data: {
-        message: assistantText,
-        quickReplies,
-        agentState: {
-          stage: newState.stage,
-          collectedFactsCount: newState.collectedFacts.length,
-        },
-      },
+    const conversation = await db.findOrCreateConversation(req.userId!, caseData.id)
+    const newState = await processUserMessage(conversation.agentState || initialState(), text || '', materials, action)
+    if (attachedIds.length && materials.every(material => !Object.keys(material.extractedData || {}).length)) {
+      newState.nextQuestion = `材料已附加到对话。请在材料页面完成识别、核对和确认。\n${newState.nextQuestion}`
+    }
+    await db.createMessage(conversation.id, 'user', 'text', text || '', {
+      ...(action ? { action: normalizeAgentAction(action) } : {}),
+      ...(attachedIds.length ? { artifactIds: attachedIds } : {}),
     })
+    await db.updateConversationState(conversation.id, newState)
+    const assistantText = newState.nextQuestion || '好的，我已记录。'
+    const quickReplies = newState.quickReplies || []
+    await db.createMessage(conversation.id, 'assistant', 'text', assistantText, { quickReplies })
+    res.json({ success: true, data: { message: assistantText, quickReplies, agentState: newState, conversationState: newState.stage } })
   } catch (err) {
     console.error('发送消息错误:', err)
     res.status(500).json({ success: false, error: '发送消息失败' })
   }
 })
 
-// 获取消息历史
 router.get('/current/messages', async (req, res) => {
   try {
-    const userId = req.userId
-
-    if (!userId) {
-      return res.status(401).json({ success: false, error: '未认证' })
-    }
-
-    const currentCase = await db.findActiveCase(userId)
-    const conversation = await db.findOrCreateConversation(userId, currentCase?.id)
-
-    // 获取消息
+    const caseData = await ownedCase(req, res, req.query.caseId)
+    if (!caseData) return
+    const conversation = await db.findOrCreateConversation(req.userId!, caseData.id)
     const messages = await db.getMessages(conversation.id)
-
-    res.json({ success: true, data: messages })
+    const agentState = conversation.agentState || initialState()
+    res.json({ success: true, data: { messages, agentState, conversationState: agentState.stage } })
   } catch (err) {
     console.error('获取消息错误:', err)
     res.status(500).json({ success: false, error: '获取消息失败' })

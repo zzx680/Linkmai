@@ -64,7 +64,7 @@ export default function Report() {
     return (
       <View className="report-page">
         <View className="page-header">
-          <Text className="eyebrow">CASE PLAN</Text>
+          <Text className="eyebrow">案件报告</Text>
           <Text className="page-title">完整处理方案</Text>
           <Text className="page-description">材料整理完成后，一次解锁本案件的分析、赔偿估算和行动步骤。</Text>
         </View>
@@ -93,7 +93,7 @@ export default function Report() {
     return (
       <View className="report-page">
         <View className="page-header">
-          <Text className="eyebrow">CASE BRIEF</Text>
+          <Text className="eyebrow">案件报告</Text>
           <Text className="page-title">案件报告</Text>
           <Text className="page-description">报告会把已确认的材料整理成可阅读、可复核的处理摘要。</Text>
         </View>
@@ -133,7 +133,7 @@ export default function Report() {
       <ScrollView className="report-scroll" scrollY showScrollbar={false}>
         <View className="page-header result-header">
           <View>
-            <Text className="eyebrow">ANALYSIS REPORT</Text>
+            <Text className="eyebrow">案件报告</Text>
             <Text className="page-title">案件分析报告</Text>
             <Text className="page-description">{currentCase?.title || '当前案件'} · {new Date(currentReport.generatedAt).toLocaleString('zh-CN')}</Text>
           </View>

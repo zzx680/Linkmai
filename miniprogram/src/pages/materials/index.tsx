@@ -56,10 +56,11 @@ export default function Materials() {
       setExpandedId(material.id)
       Taro.hideLoading()
       Taro.showToast({ title: '识别完成，请核对', icon: 'success' })
-    } catch (error: any) {
+    } catch (error: unknown) {
       Taro.hideLoading()
-      if (!error.errMsg?.includes('cancel')) {
-        Taro.showToast({ title: error.message || '材料处理失败', icon: 'none' })
+      const failure = error as { errMsg?: string; message?: string }
+      if (!failure.errMsg?.includes('cancel')) {
+        Taro.showToast({ title: failure.message || '材料处理失败，可再次上传重试', icon: 'none' })
       }
     } finally {
       setIsProcessing(false)
@@ -82,8 +83,8 @@ export default function Materials() {
       setConfirmedIds(current => current.includes(materialId) ? current : [...current, materialId])
       setExpandedId(null)
       Taro.showToast({ title: '信息已确认', icon: 'success' })
-    } catch (error: any) {
-      Taro.showToast({ title: error.message || '确认失败', icon: 'none' })
+    } catch (error: unknown) {
+      Taro.showToast({ title: (error as Error).message || '确认失败', icon: 'none' })
     }
   }
 

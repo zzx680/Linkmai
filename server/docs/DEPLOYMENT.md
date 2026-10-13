@@ -87,7 +87,7 @@ sudoedit /etc/linkmai/staging.env
 /etc/linkmai/secrets/rds-ca.pem
 /etc/linkmai/secrets/apiclient_key.pem
 /etc/linkmai/secrets/wechat_api_v3_key
-/etc/linkmai/secrets/wechatpay_platform.pem
+/etc/linkmai/secrets/wechatpay_public_key.pem
 ```
 
 权限要求：
@@ -104,6 +104,12 @@ sudo chmod 600 /etc/linkmai/staging.env /etc/linkmai/secrets/*
 - `POSTGRES_SSL_CA_FILE=/etc/linkmai/secrets/rds-ca.pem`
 - `ALLOW_MOCK_WECHAT_LOGIN=false`
 - `PAYMENT_PROVIDER=wechat`
+- `WECHAT_MCH_ID` 与小程序已关联的商户号一致
+- `WECHAT_MCH_SERIAL_NO` 是商户 API 证书序列号
+- `WECHAT_MCH_PRIVATE_KEY_FILE=/etc/linkmai/secrets/apiclient_key.pem`
+- `WECHAT_API_V3_KEY_FILE=/etc/linkmai/secrets/wechat_api_v3_key`
+- `WECHAT_PAY_PUBLIC_KEY_FILE=/etc/linkmai/secrets/wechatpay_public_key.pem`
+- `WECHAT_PAY_PUBLIC_KEY_ID=PUB_KEY_ID_...`，必须与商户平台下载的平台公钥一致
 - `WECHAT_PAY_NOTIFY_URL=https://<staging-domain>/api/payments/wechat/notify`
 - `JWT_SECRET` 至少 32 字符随机值
 

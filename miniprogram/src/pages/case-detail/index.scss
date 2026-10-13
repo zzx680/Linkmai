@@ -136,7 +136,7 @@
 }
 
 .result-card.highlight {
-  background: linear-gradient(135deg, rgba(196, 97, 47, 0.05), rgba(196, 97, 47, 0.02));
+  background: linear-gradient(135deg, rgba($color-brand, 0.05), rgba($color-brand, 0.02));
   border: 2px solid $accent-primary;
 }
 
@@ -209,7 +209,7 @@
   &.current {
     background: $bg-white;
     border-color: $accent-primary;
-    box-shadow: 0 0 0 4px rgba(196, 97, 47, 0.15);
+    box-shadow: 0 0 0 4px rgba($color-brand, 0.15);
   }
 
   &.pending {
@@ -278,7 +278,7 @@
 }
 
 .fault-ratio {
-  background: linear-gradient(135deg, $accent-tint, rgba(196, 97, 47, 0.08));
+  background: linear-gradient(135deg, $accent-tint, rgba($color-brand, 0.08));
   border-radius: $radius-md;
   padding: $space-xl;
   text-align: center;

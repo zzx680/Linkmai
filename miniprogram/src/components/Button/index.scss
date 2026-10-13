@@ -1,11 +1,13 @@
 @use '../../styles/variables.scss' as *;
 
 .ui-button {
+  box-sizing: border-box;
+  font-family: $font-family-body;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: $space-xs;
-  border-radius: $radius-pill;
+  border-radius: $radius-md;
   font-weight: 500;
   transition: all $transition-fast;
   position: relative;
@@ -18,19 +20,19 @@
 
 // Sizes
 .ui-button-small {
-  height: 56px;
+  height: 64rpx;
   padding: 0 $space-lg;
   font-size: $font-sm;
 }
 
 .ui-button-medium {
-  height: 72px;
+  height: 96rpx;
   padding: 0 $space-xl;
   font-size: $font-md;
 }
 
 .ui-button-large {
-  height: 88px;
+  height: 112rpx;
   padding: 0 $space-2xl;
   font-size: $font-lg;
 }
@@ -50,7 +52,7 @@
 .ui-button-secondary {
   background: $bg-surface;
   color: $accent-primary;
-  border: 2px solid $border-color;
+  border: 1rpx solid $color-brand-primary;
 
   &:active:not(.ui-button-disabled):not(.ui-button-loading) {
     background: $accent-tint;
@@ -63,17 +65,18 @@
   color: $accent-primary;
 
   &:active:not(.ui-button-disabled):not(.ui-button-loading) {
-    background: rgba(196, 97, 47, 0.08);
+    background: $color-brand-light;
   }
 }
 
 .ui-button-danger {
-  background: #ff3b30;
+  background: $color-error;
   color: $bg-white;
   box-shadow: $shadow-sm;
 
   &:active:not(.ui-button-disabled):not(.ui-button-loading) {
-    background: #e63329;
+    background: $color-error;
+    opacity: 0.85;
     box-shadow: $shadow-md;
   }
 }

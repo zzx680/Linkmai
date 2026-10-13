@@ -1,6 +1,7 @@
 // 内存存储（MVP 临时方案，生产环境需替换为真实数据库）
 
 import { config } from '../config'
+import { materialSnapshot } from '../services/material-snapshot'
 
 export interface User {
   id: string
@@ -343,10 +344,11 @@ export const memoryDB = {
   async updateArtifact(
     caseId: string,
     artifactId: string,
-    updates: Partial<Pick<Artifact, 'type' | 'status' | 'metadata'>>
+    updates: Partial<Pick<Artifact, 'type' | 'status' | 'metadata'>>,
+    expectedStatuses?: string[]
   ): Promise<Artifact | null> {
     const artifact = artifacts.get(artifactId)
-    if (!artifact || artifact.caseId !== caseId) return null
+    if (!artifact || artifact.caseId !== caseId || (expectedStatuses && !expectedStatuses.includes(artifact.status))) return null
     const updatedArtifact = { ...artifact, ...updates, updatedAt: new Date() }
     artifacts.set(artifactId, updatedArtifact)
     return updatedArtifact
@@ -357,7 +359,7 @@ export const memoryDB = {
     const artifact = artifacts.get(artifactId)
     if (!caseData || caseData.userId !== userId || !artifact || artifact.caseId !== caseId || artifact.status !== 'processed') return null
     const metadata = { ...artifact.metadata, fields, rawText: rawText ?? artifact.metadata?.rawText, confirmed: true, confirmedAt: new Date().toISOString() }
-    const changed = !artifact.metadata?.confirmed || JSON.stringify(artifact.metadata?.fields) !== JSON.stringify(fields)
+    const changed = !artifact.metadata?.confirmed || JSON.stringify(artifact.metadata?.fields) !== JSON.stringify(fields) || (rawText !== undefined && rawText !== artifact.metadata?.rawText)
     const updated = { ...artifact, metadata, updatedAt: new Date() }
     artifacts.set(artifactId, updated)
     if (changed) {
@@ -371,6 +373,19 @@ export const memoryDB = {
       })
     }
     return updated
+  },
+
+  async publishReport(userId: string, caseId: string, content: { liability: string; compensation: string }, snapshot: string) {
+    const caseData = cases.get(caseId)
+    if (!caseData || caseData.userId !== userId) throw new Error('CASE_NOT_FOUND')
+    const inputs = [...artifacts.values()].filter(item => item.caseId === caseId)
+    if (materialSnapshot(inputs) !== snapshot) throw new Error('REPORT_STALE')
+    const report = {
+      id: `report_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      caseId, content, inputSnapshot: { materialSnapshot: snapshot }, createdAt: new Date(),
+    }
+    reports.set(caseId, report)
+    cases.set(caseId, { ...caseData, hasReport: true, status: 'ready', statusLabel: '报告已完成', liability: content.liability, compensation: content.compensation, updatedAt: new Date() })
   },
 
   // Reports
@@ -453,6 +468,26 @@ export const memoryDB = {
       (item.status === 'created' || item.status === 'pending') && item.expiresAt.getTime() > now
     )
     return order || null
+  },
+
+  async findPendingPaymentOrder(userId: string, caseId: string): Promise<PaymentOrder | null> {
+    const orders = [...paymentOrders.values()]
+      .filter((item) => item.userId === userId && item.caseId === caseId && ['created', 'pending'].includes(item.status))
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+    return orders[0] || null
+  },
+
+  async updatePaymentOrderStatus(orderId: string, status: 'failed' | 'closed'): Promise<PaymentOrder | null> {
+    const order = paymentOrders.get(orderId)
+    if (!order || order.status === 'paid' || order.status === 'refunded') return order || null
+    order.status = status
+    order.updatedAt = new Date()
+    const entitlement = entitlements.get(order.caseId)
+    if (entitlement && entitlement.status === 'pending') {
+      entitlement.status = 'unpaid'
+      entitlement.updatedAt = new Date()
+    }
+    return order
   },
 
   async createPaymentOrder(input: {

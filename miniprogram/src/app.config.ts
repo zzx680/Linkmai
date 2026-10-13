@@ -4,7 +4,8 @@ export default defineAppConfig({
     'pages/agent/index',
     'pages/profile/index',
     'pages/materials/index',
-    'pages/report/index'
+    'pages/report/index',
+    'pages/payments/index'
   ],
   window: {
     backgroundTextStyle: 'dark',
@@ -43,6 +44,6 @@ export default defineAppConfig({
   sitemapLocation: 'sitemap.json'
 })
 
-function defineAppConfig(config) {
+function defineAppConfig<T>(config: T): T {
   return config
 }

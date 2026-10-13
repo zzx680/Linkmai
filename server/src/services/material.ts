@@ -1,12 +1,17 @@
 // 材料识别服务
 import { ocrService } from './ocr'
-import { analyzeText } from './deepseek'
+import { analyzeAccidentImage, analyzeText } from './deepseek'
+
+export const supportedMaterialTypes: ReadonlySet<string> = new Set([
+  'accident_report', 'medical_record', 'scene_photo', 'id_card',
+  'vehicle_license', 'driver_license', 'invoice', 'other',
+])
 
 export interface MaterialField {
   key: string
   label: string
   value: string
-  confidence: 'high' | 'medium' | 'low'
+  confidence?: 'high' | 'medium' | 'low'
 }
 
 export interface MaterialProcessResult {
@@ -23,7 +28,15 @@ export async function processMaterial(
   imageUrl: string
 ): Promise<MaterialProcessResult> {
   try {
-    // 1. OCR 识别文字
+    if (!supportedMaterialTypes.has(materialType)) {
+      throw new Error('不支持的材料类型')
+    }
+    // 现场照片不依赖文字，直接使用图片分析，避免无文字照片被 OCR 拒绝。
+    if (materialType === 'scene_photo') {
+      return { type: materialType, fields: await extractDamageFields(imageUrl) }
+    }
+
+    // 文字材料必须先识别到有效文字，不能在 OCR 失败后生成猜测字段。
     const ocrResult = await ocrService.recognizeText(imageUrl)
     if (!ocrResult.success) {
       throw new Error(ocrResult.error || 'OCR 识别失败')
@@ -32,7 +45,7 @@ export async function processMaterial(
     if (!rawText) throw new Error('OCR 未识别到有效文字')
 
     // 2. 根据材料类型调用 DeepSeek 提取结构化字段
-    const fields = await extractFieldsByType(materialType, rawText, imageUrl)
+    const fields = await extractFieldsByType(materialType, rawText)
 
     return {
       type: materialType,
@@ -50,18 +63,14 @@ export async function processMaterial(
  */
 async function extractFieldsByType(
   type: string,
-  ocrText: string,
-  imageUrl: string
+  ocrText: string
 ): Promise<MaterialField[]> {
   switch (type) {
     case 'accident_report':
-      return extractPoliceReportFields(ocrText, imageUrl)
+      return extractPoliceReportFields(ocrText)
 
-    case 'medical-record':
+    case 'medical_record':
       return extractMedicalFields(ocrText)
-
-    case 'scene_photo':
-      return extractDamageFields(imageUrl)
 
     case 'invoice':
       return extractInvoiceFields(ocrText)
@@ -75,8 +84,7 @@ async function extractFieldsByType(
  * 提取交警认定书字段
  */
 async function extractPoliceReportFields(
-  ocrText: string,
-  imageUrl: string
+  ocrText: string
 ): Promise<MaterialField[]> {
   const prompt = `
 你是一个专业的交通事故材料分析助手。请从以下交警认定书的 OCR 文本中提取关键信息：
@@ -203,7 +211,10 @@ ${ocrText}
 async function extractDamageFields(imageUrl: string): Promise<MaterialField[]> {
   const prompt = '请描述图片中的车辆损伤情况，包括损伤部位、严重程度等。'
 
-  const response = await analyzeText(prompt, [imageUrl])
+  const response = await analyzeAccidentImage(imageUrl, prompt)
+  if (typeof response !== 'string' || !response.trim()) {
+    throw new Error('图片分析未返回有效内容')
+  }
 
   return [
     {

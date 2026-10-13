@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import * as api from '../services/api'
 import Taro from '@tarojs/taro'
+import { CaseRequestContext, CaseRequestGuard } from './request-guard'
 
 interface AppState {
   user: api.User | null
   token: string | null
   isLoggedIn: boolean
+  authRetryable: boolean
   currentCase: api.Case | null
   isLoadingCase: boolean
   messages: api.Message[]
@@ -19,11 +21,12 @@ interface AppState {
   login: (code: string) => Promise<void>
   logout: () => void
   checkLoginStatus: () => Promise<boolean>
+  retryAuth: () => Promise<boolean>
   loadCurrentCase: () => Promise<void>
   createCase: () => Promise<void>
   updateCase: (updates: Partial<api.Case>) => Promise<void>
   loadMessages: () => Promise<void>
-  sendMessage: (content: string, images?: string[], materialType?: api.MaterialType) => Promise<void>
+  sendMessage: (content: string, action?: string, artifactIds?: string[]) => Promise<void>
   setAiTyping: (typing: boolean) => void
   uploadImage: (filePath: string) => Promise<api.UploadedImage>
   processMaterial: (type: api.MaterialType, artifactId: string) => Promise<api.Material>
@@ -39,16 +42,41 @@ const initialState = {
   user: null,
   token: api.getToken(),
   isLoggedIn: !!api.getToken(),
+  authRetryable: false,
   currentCase: null,
   isLoadingCase: false,
-  messages: [],
+  messages: [] as api.Message[],
   conversationState: 'collecting' as api.ConversationState,
   isAiTyping: false,
-  materials: [],
+  materials: [] as api.Material[],
   uploadingFiles: new Map<string, number>(),
-  currentReport: null,
+  currentReport: null as api.ReportData | null,
   isGeneratingReport: false
 }
+
+/**
+ * 会话内案件请求上下文。任何案件切换/创建都会 bump epoch，
+ * 使旧案件的迟到响应在下发 set 前被丢弃，避免串案数据。
+ */
+const requestGuard = new CaseRequestGuard()
+
+function beginCaseSession(caseId: string | null): CaseRequestContext | null {
+  return caseId ? requestGuard.activate(caseId) : (requestGuard.invalidate(), null)
+}
+
+function isStale(context: CaseRequestContext): boolean {
+  return !requestGuard.isCurrent(context)
+}
+
+api.setUnauthorizedHandler(() => {
+  beginCaseSession(null)
+  useAppStore.setState({
+    ...initialState,
+    uploadingFiles: new Map(),
+    authRetryable: true
+  })
+  Taro.showToast({ title: '登录已过期，请重新进入', icon: 'none' })
+})
 
 export const useAppStore = create<AppState>((set, get) => ({
   ...initialState,
@@ -58,12 +86,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       token: result.token,
       isLoggedIn: true,
-      user: result.user
+      user: result.user,
+      authRetryable: false
     })
   },
 
   logout: () => {
     api.logout()
+    beginCaseSession(null)
     set({
       ...initialState,
       token: null,
@@ -74,10 +104,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   checkLoginStatus: async () => {
     const restoreSession = async () => {
-      const loginResult = await Taro.login()
-      if (!loginResult.code) return false
-      await get().login(loginResult.code)
-      return true
+      try {
+        const loginResult = await Taro.login()
+        if (!loginResult.code) return false
+        await get().login(loginResult.code)
+        return true
+      } catch {
+        return false
+      }
     }
 
     const token = api.getToken()
@@ -89,39 +123,84 @@ export const useAppStore = create<AppState>((set, get) => ({
         } catch {
           api.clearToken()
           if (!await restoreSession()) {
-            set({ isLoggedIn: false })
+            set({ isLoggedIn: false, authRetryable: true })
             return false
           }
         }
       } else if (!await restoreSession()) {
-        set({ isLoggedIn: false })
+        set({ isLoggedIn: false, authRetryable: true })
         return false
       }
 
       await get().loadCurrentCase()
-      await get().loadMessages()
       return true
     } catch (error) {
       console.error('Login restore error:', error)
       api.clearToken()
-      set({ user: null, token: null, isLoggedIn: false })
+      beginCaseSession(null)
+      set({ user: null, token: null, isLoggedIn: false, authRetryable: true })
       return false
     }
   },
 
+  retryAuth: async () => {
+    set({ authRetryable: false })
+    return get().checkLoginStatus()
+  },
+
   loadCurrentCase: async () => {
-    set({ isLoadingCase: true, currentReport: null, materials: [], messages: [] })
+    const requestEpoch = requestGuard.invalidate()
+    set({ isLoadingCase: true, isAiTyping: false })
     try {
       const currentCase = await api.getCurrentCase()
-      set({ currentCase, isLoadingCase: false })
-      if (currentCase) {
-        const materials = await api.getMaterials(currentCase.id)
-        set({ materials })
-      } else {
-        set({ materials: [] })
+      if (requestEpoch !== requestGuard.getSnapshot().epoch) return
+      if (!currentCase) {
+        requestGuard.invalidate()
+        set({
+          currentCase: null,
+          isLoadingCase: false,
+          materials: [],
+          messages: [],
+          currentReport: null,
+          conversationState: 'collecting'
+        })
+        return
       }
+
+      const isDifferentCase = get().currentCase?.id !== currentCase.id
+      const context = beginCaseSession(currentCase.id)!
+      set({
+        currentCase,
+        isLoadingCase: false,
+        ...(isDifferentCase ? {
+          materials: [],
+          messages: [],
+          currentReport: null,
+          conversationState: 'collecting' as api.ConversationState
+        } : {})
+      })
+
+      const [materialsResult, historyResult, reportResult] = await Promise.allSettled([
+        api.getMaterials(currentCase.id),
+        api.getConversationHistory(currentCase.id),
+        currentCase.hasReport ? api.getReport(currentCase.id) : Promise.resolve(null)
+      ])
+      if (isStale(context)) return
+
+      const patch: Partial<AppState> = {}
+      if (materialsResult.status === 'fulfilled') patch.materials = materialsResult.value
+      if (historyResult.status === 'fulfilled') {
+        patch.messages = historyResult.value.messages
+        patch.conversationState = historyResult.value.conversationState
+          || historyResult.value.agentState?.stage
+          || 'collecting'
+      }
+      if (reportResult.status === 'fulfilled') patch.currentReport = reportResult.value
+      set(patch)
     } catch (error) {
-      set({ currentCase: null, materials: [], isLoadingCase: false })
+      if (requestEpoch !== requestGuard.getSnapshot().epoch) return
+      requestGuard.invalidate()
+      set({ currentCase: null, materials: [], messages: [], currentReport: null, isLoadingCase: false })
       console.error('Load case error:', error)
     }
   },
@@ -129,32 +208,57 @@ export const useAppStore = create<AppState>((set, get) => ({
   createCase: async () => {
     try {
       const currentCase = await api.createCase()
-      set({ currentCase })
-    } catch (error: any) {
-      Taro.showToast({ title: error.message || '创建案件失败', icon: 'none' })
+      beginCaseSession(currentCase.id)
+      set({
+        currentCase,
+        isLoadingCase: false,
+        materials: [],
+        messages: [],
+        currentReport: null,
+        conversationState: 'collecting',
+        isAiTyping: false
+      })
+    } catch (error: unknown) {
+      Taro.showToast({ title: (error as Error).message || '创建案件失败', icon: 'none' })
       throw error
     }
   },
 
   updateCase: async (updates) => {
     const currentCase = await api.updateCase(updates)
-    set({ currentCase })
+    set(state => (state.currentCase && state.currentCase.id === currentCase.id
+      ? { currentCase }
+      : state.currentCase ? {} : { currentCase }))
   },
 
   loadMessages: async () => {
-    const history = await api.getConversationHistory()
-    set({
-      messages: history.messages,
-      conversationState: history.conversationState || history.agentState?.stage || 'collecting'
-    })
+    const currentCase = get().currentCase
+    if (!currentCase) return
+    const context = requestGuard.capture(currentCase.id)
+    try {
+      const history = await api.getConversationHistory(currentCase.id)
+      if (isStale(context)) return
+      set({
+        messages: history.messages,
+        conversationState: history.conversationState || history.agentState?.stage || 'collecting'
+      })
+    } catch (error) {
+      if (isStale(context)) return
+      throw error
+    }
   },
 
-  sendMessage: async (content, images, materialType) => {
+  sendMessage: async (content, action, artifactIds) => {
+    const currentCase = get().currentCase
+    if (!currentCase) {
+      Taro.showToast({ title: '请先创建案件', icon: 'none' })
+      return
+    }
+    const context = requestGuard.capture(currentCase.id)
     const temporaryMessage: api.Message = {
       id: `temp-${Date.now()}`,
       role: 'user',
       content,
-      images,
       timestamp: new Date().toISOString()
     }
 
@@ -164,7 +268,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     }))
 
     try {
-      const response = await api.sendMessage(content, images, materialType)
+      const response = await api.sendMessage(currentCase.id, content, action, artifactIds)
+      if (isStale(context)) return
       const assistantMessage: api.Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
@@ -177,12 +282,13 @@ export const useAppStore = create<AppState>((set, get) => ({
         conversationState: response.agentState?.stage || state.conversationState,
         isAiTyping: false
       }))
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (isStale(context)) return
       set(state => ({
         messages: state.messages.filter(message => message.id !== temporaryMessage.id),
         isAiTyping: false
       }))
-      Taro.showToast({ title: error.message || '发送失败', icon: 'none' })
+      Taro.showToast({ title: (error as Error).message || '发送失败', icon: 'none' })
       throw error
     }
   },
@@ -190,10 +296,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAiTyping: (typing) => set({ isAiTyping: typing }),
 
   uploadImage: async (filePath) => {
+    const currentCase = get().currentCase
+    if (!currentCase) throw new Error('请先创建案件')
     const fileId = `upload-${Date.now()}`
     get().setUploadProgress(fileId, 10)
     try {
-      const result = await api.uploadImage(filePath)
+      const result = await api.uploadImage(filePath, currentCase.id)
       get().setUploadProgress(fileId, 100)
       setTimeout(() => {
         set(state => {
@@ -214,7 +322,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   processMaterial: async (type, artifactId) => {
-    const material = await api.processMaterial(type, artifactId, get().currentCase?.id)
+    const currentCase = get().currentCase
+    if (!currentCase) throw new Error('请先创建案件')
+    const context = requestGuard.capture(currentCase.id)
+    const material = await api.processMaterial(type, artifactId, currentCase.id)
+    if (isStale(context)) throw new Error('案件已切换，请在当前案件重新上传')
     get().addMaterial(material)
     return material
   },
@@ -228,13 +340,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   addMaterial: (material) => {
-    set(state => ({ materials: [...state.materials, material] }))
+    set(state => {
+      const activeCaseId = requestGuard.getSnapshot().activeCaseId
+      if (activeCaseId && material.caseId && material.caseId !== activeCaseId) return {}
+      return { materials: [...state.materials, material] }
+    })
   },
 
   confirmMaterial: async (materialId, fields) => {
     const material = get().materials.find(item => item.id === materialId)
     const currentCase = get().currentCase
     if (!material || !currentCase) return
+    const context = requestGuard.capture(currentCase.id)
 
     const result = await api.confirmMaterial(
       currentCase.id,
@@ -242,6 +359,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       fields,
       material.rawText
     )
+    if (isStale(context)) return
     const confirmedMaterial = result.material || { ...material, fields, confirmed: result.confirmed }
     set(state => ({
       materials: state.materials.map(item => item.id === materialId ? confirmedMaterial : item)
@@ -250,6 +368,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   generateReport: async () => {
+    const currentCase = get().currentCase
+    if (!currentCase) {
+      Taro.showToast({ title: '请先创建案件', icon: 'none' })
+      return
+    }
     const facts = get().materials
       .filter(material => material.confirmed)
       .flatMap(material =>
@@ -265,28 +388,44 @@ export const useAppStore = create<AppState>((set, get) => ({
       return
     }
 
+    const context = requestGuard.capture(currentCase.id)
     set({ isGeneratingReport: true })
     try {
-      const report = await api.generateReport(facts)
-      set({ currentReport: report, isGeneratingReport: false })
-      if (get().currentCase) {
-        set(state => ({
-          currentCase: state.currentCase ? { ...state.currentCase, hasReport: true } : null
-        }))
-      }
-    } catch (error: any) {
+      const report = await api.generateReport(currentCase.id, facts)
+      if (isStale(context)) return
+      set(state => ({
+        currentReport: report,
+        isGeneratingReport: false,
+        currentCase: state.currentCase ? { ...state.currentCase, hasReport: true } : null
+      }))
+    } catch (error: unknown) {
+      if (isStale(context)) return
       set({ isGeneratingReport: false })
-      Taro.showToast({ title: error.message || '报告生成失败', icon: 'none' })
+      Taro.showToast({ title: (error as Error).message || '报告生成失败', icon: 'none' })
       throw error
     }
   },
 
   loadReport: async (caseId) => {
-    const report = await api.getReport(caseId)
-    if (report?.caseId === caseId) {
-      set({ currentReport: report })
+    const context = requestGuard.capture(caseId)
+    try {
+      const report = await api.getReport(caseId)
+      if (isStale(context)) return
+      if (report?.caseId === caseId || !report?.caseId) {
+        set({ currentReport: report })
+      }
+    } catch (error) {
+      if (isStale(context)) return
+      if ((error as { statusCode?: number }).statusCode !== 404) throw error
     }
   },
 
-  reset: () => set({ ...initialState, uploadingFiles: new Map() })
+  reset: () => {
+    beginCaseSession(null)
+    set({ ...initialState, uploadingFiles: new Map() })
+  }
 }))
+
+export function __getCaseSessionForTests(): { activeCaseId: string | null; epoch: number } {
+  return requestGuard.getSnapshot()
+}

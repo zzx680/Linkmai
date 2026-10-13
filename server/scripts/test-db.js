@@ -5,11 +5,11 @@
  * 用法: node scripts/test-db.js
  */
 
-import dotenv from 'dotenv'
-import pg from 'pg'
+const dotenv = require('dotenv')
+const { Pool } = require('pg')
+const path = require('node:path')
 
-dotenv.config()
-const { Pool } = pg
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
 const dbType = process.env.DB_TYPE || 'memory'
 
@@ -21,14 +21,27 @@ if (dbType === 'memory') {
   process.exit(0)
 }
 
-// 测试 PostgreSQL 连接
+if (dbType !== 'postgres') {
+  console.error(`不支持的数据库类型: ${dbType}`)
+  process.exit(1)
+}
+
+const { readFileSync } = require('node:fs')
+const sslCa = process.env.POSTGRES_SSL_CA_FILE
+  ? readFileSync(process.env.POSTGRES_SSL_CA_FILE, 'utf8').trim()
+  : (process.env.POSTGRES_SSL_CA || '').replace(/\\n/g, '\n')
+
+// 测试 PostgreSQL 连接，与服务端保持一致的 TLS 校验。
 const pool = new Pool({
   host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT || '5432'),
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
-  ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  user: process.env.POSTGRES_USER || 'postgres',
+  password: process.env.POSTGRES_PASSWORD || '',
+  database: process.env.POSTGRES_DB || 'linkmai',
+  connectionTimeoutMillis: 5000,
+  ssl: process.env.POSTGRES_SSL === 'true'
+    ? { rejectUnauthorized: true, ...(sslCa ? { ca: sslCa } : {}) }
+    : false,
 })
 
 async function test() {
@@ -59,12 +72,15 @@ async function test() {
 
     const expectedTables = [
       'artifacts',
+      'case_entitlements',
       'cases',
       'consultations',
       'conversations',
       'extracted_fields',
       'messages',
+      'payment_orders',
       'reports',
+      'schema_migrations',
       'users',
     ]
 
@@ -82,15 +98,14 @@ async function test() {
 
     if (missingTables.length > 0) {
       console.log()
-      console.log('⚠️  发现缺失的表，请运行初始化脚本:')
-      console.log('   ./scripts/setup-db.sh')
+      console.log('发现缺失的表，请从 server 目录运行初始化命令:')
+      console.log('   npm run db:migrate:dev')
     } else {
       console.log()
       console.log('✓ 所有表结构正常')
     }
 
-    await pool.end()
-    process.exit(missingTables.length > 0 ? 1 : 0)
+    process.exitCode = missingTables.length > 0 ? 1 : 0
   } catch (err) {
     console.error()
     console.error('✗ 连接失败:', err.message)
@@ -100,8 +115,13 @@ async function test() {
     console.error('  2. .env 配置是否正确')
     console.error('  3. 数据库是否已创建')
     console.error()
-    process.exit(1)
+    process.exitCode = 1
+  } finally {
+    await pool.end()
   }
 }
 
-test()
+test().catch(err => {
+  console.error('数据库测试失败:', err.message)
+  process.exitCode = 1
+})

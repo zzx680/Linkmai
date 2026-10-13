@@ -10,35 +10,33 @@
 }
 
 .ui-loading-spinner {
-  border-radius: 50%;
+  border-radius: $radius-full;
   border-style: solid;
-  border-color: rgba(196, 97, 47, 0.2);
-  border-top-color: $accent-primary;
+  border-color: $color-brand-light;
+  border-top-color: $color-brand;
   animation: spin 0.8s linear infinite;
 }
 
 .ui-loading-small .ui-loading-spinner {
-  width: 32px;
-  height: 32px;
-  border-width: 3px;
+  width: 32rpx;
+  height: 32rpx;
+  border-width: 3rpx;
 }
 
 .ui-loading-medium .ui-loading-spinner {
-  width: 48px;
-  height: 48px;
-  border-width: 4px;
+  width: 48rpx;
+  height: 48rpx;
+  border-width: 4rpx;
 }
 
 .ui-loading-large .ui-loading-spinner {
-  width: 64px;
-  height: 64px;
-  border-width: 5px;
+  width: 64rpx;
+  height: 64rpx;
+  border-width: 5rpx;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 .ui-loading-text {

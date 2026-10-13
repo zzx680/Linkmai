@@ -15,7 +15,12 @@ function respondWithError(res: express.Response, err: unknown) {
     PAYMENT_PROVIDER_NOT_CONFIGURED: { status: 503, message: '支付服务暂不可用' },
     ORDER_EXPIRED: { status: 410, message: '支付订单已过期，请重新创建' },
     ALREADY_PAID: { status: 409, message: '本案件已解锁' },
-    ORDER_NOT_PAYABLE: { status: 409, message: '支付订单当前不可支付' },
+    ORDER_NOT_PAYABLE: { status: 409, message: '支付订单当前不可支付，请重新创建' },
+    ORDER_CREATION_FAILED: { status: 500, message: '支付订单创建失败' },
+    PAYMENT_ORDER_NOT_FOUND: { status: 409, message: '微信支付订单不存在，请重新创建' },
+    PAYMENT_PROVIDER_ERROR: { status: 502, message: '微信支付服务暂时不可用，请稍后重试' },
+    PAYMENT_CONFIRMATION_PENDING: { status: 409, message: '支付状态确认中，请稍后刷新' },
+    PAYMENT_TRADE_STATE_UNKNOWN: { status: 502, message: '暂时无法确认支付状态，请稍后刷新' },
     PAYMENT_AMOUNT_MISMATCH: { status: 400, message: '支付金额校验失败' },
     TRANSACTION_MISMATCH: { status: 409, message: '支付交易信息不一致' },
     TRANSACTION_ALREADY_USED: { status: 409, message: '该支付交易已关联其他订单' },
@@ -62,7 +67,8 @@ export async function paymentNotificationHandler(req: express.Request, res: expr
     await processPaymentNotification(req.headers as Record<string, string | string[] | undefined>, req.body)
     res.json({ code: 'SUCCESS', message: '成功' })
   } catch (err) {
-    console.error('WeChat payment notification rejected:', (err as Error).message)
+    const code = (err as Error).message
+    console.error('WeChat payment notification rejected:', { code, requestId: res.getHeader('X-Request-Id') })
     res.status(400).json({ code: 'FAIL', message: '通知校验失败' })
   }
 }

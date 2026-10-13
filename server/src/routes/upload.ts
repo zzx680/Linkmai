@@ -50,7 +50,10 @@ router.post('/image', imageUpload.single('file'), async (req: Request, res: Resp
     }
 
     const userId = req.userId
-    const currentCase = userId ? await db.findActiveCase(userId) : null
+    const requestedCaseId = typeof req.body.caseId === 'string' ? req.body.caseId : undefined
+    const currentCase = userId
+      ? (requestedCaseId ? await db.findCaseById(userId, requestedCaseId) : await db.findActiveCase(userId))
+      : null
     if (!currentCase) {
       return res.status(409).json({ error: '请先创建案件' })
     }
@@ -104,7 +107,10 @@ router.post('/video', videoUpload.single('file'), async (req: Request, res: Resp
     }
 
     const userId = req.userId
-    const currentCase = userId ? await db.findActiveCase(userId) : null
+    const requestedCaseId = typeof req.body.caseId === 'string' ? req.body.caseId : undefined
+    const currentCase = userId
+      ? (requestedCaseId ? await db.findCaseById(userId, requestedCaseId) : await db.findActiveCase(userId))
+      : null
     if (!currentCase) {
       return res.status(409).json({ error: '请先创建案件' })
     }

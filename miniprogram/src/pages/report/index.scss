@@ -3,15 +3,22 @@
 
 .report-page {
   @include page-container;
+  padding-bottom: calc($space-8 + env(safe-area-inset-bottom));
+}
+
+.report-page {
+.report-scroll {
+  height: calc(100vh - 96rpx);
+  height: calc(100dvh - 96rpx);
+  box-sizing: border-box;
   padding-bottom: $space-8;
 }
 
-.report-scroll {
-  height: 100vh;
-}
-
 .page-header {
-  @include flex-between;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: $space-2;
   margin-bottom: $space-6;
 
   .eyebrow {
@@ -37,6 +44,7 @@
   }
 
   .report-status {
+    align-self: flex-start;
     @include badge($color-success-bg, $color-success);
     flex-shrink: 0;
   }
@@ -240,7 +248,7 @@
 
     .section-index {
       color: $color-brand-primary;
-      font-family: $font-family-mono;
+      font-family: $font-family-body;
       font-size: $font-size-sm;
     }
 
@@ -309,7 +317,7 @@
 
     .recommendation-number {
       color: $color-brand-primary;
-      font-family: $font-family-mono;
+      font-family: $font-family-body;
       font-size: $font-size-sm;
       font-weight: $font-weight-semibold;
     }
@@ -326,8 +334,9 @@
 .source-card {
   padding: $space-5;
   margin-bottom: $space-5;
-  background: $color-text-primary;
-  color: $color-text-inverse;
+  background: $color-bg-elevated;
+  color: $color-text-primary;
+  border: 1rpx solid $color-border-light;
 
   .source-title,
   .source-text {
@@ -341,7 +350,7 @@
   }
 
   .source-text {
-    color: rgba(255, 255, 255, 0.68);
+    color: $color-text-secondary;
     font-size: $font-size-sm;
     line-height: $line-height-relaxed;
     margin-bottom: $space-5;
@@ -350,7 +359,7 @@
   .source-actions {
     display: flex;
     gap: $space-5;
-    color: $color-brand-light;
+    color: $color-brand-primary;
     font-size: $font-size-sm;
   }
 }
@@ -375,4 +384,5 @@
       background: $color-brand-primary;
     }
   }
+}
 }

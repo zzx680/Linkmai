@@ -1,10 +1,10 @@
-import { Component } from 'react'
+import { Component, PropsWithChildren } from 'react'
 import Taro from '@tarojs/taro'
 import './app.scss'
 import { useAppStore } from './store'
 import { IS_H5 } from './config/env'
 
-class App extends Component {
+class App extends Component<PropsWithChildren> {
   componentDidMount() {
     if (IS_H5) return
     useAppStore.getState().checkLoginStatus().catch(error => {
