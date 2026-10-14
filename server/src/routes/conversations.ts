@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import express from 'express'
 import { db } from '../db'
 import { generateNextQuestion, normalizeAgentAction, processUserMessage, type AgentMaterial, type AgentState } from '../services/agent'
@@ -31,7 +32,7 @@ router.post('/current', async (req, res) => {
     const conversation = await db.findOrCreateConversation(req.userId!, caseData.id)
     res.json({ success: true, data: conversation })
   } catch (err) {
-    console.error('获取对话错误:', err)
+    console.error('获取对话错误:', safeError(err))
     res.status(500).json({ success: false, error: '获取对话失败' })
   }
 })
@@ -82,7 +83,7 @@ router.post('/current/messages', async (req, res) => {
     await db.createMessage(conversation.id, 'assistant', 'text', assistantText, { quickReplies })
     res.json({ success: true, data: { message: assistantText, quickReplies, agentState: newState, conversationState: newState.stage } })
   } catch (err) {
-    console.error('发送消息错误:', err)
+    console.error('发送消息错误:', safeError(err))
     res.status(500).json({ success: false, error: '发送消息失败' })
   }
 })
@@ -96,7 +97,7 @@ router.get('/current/messages', async (req, res) => {
     const agentState = conversation.agentState || initialState()
     res.json({ success: true, data: { messages, agentState, conversationState: agentState.stage } })
   } catch (err) {
-    console.error('获取消息错误:', err)
+    console.error('获取消息错误:', safeError(err))
     res.status(500).json({ success: false, error: '获取消息失败' })
   }
 })

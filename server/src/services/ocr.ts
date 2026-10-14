@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import Ocr20191230, * as $Ocr20191230 from '@alicloud/ocr20191230'
 import * as $OpenApi from '@alicloud/openapi-client'
 import { config } from '../config'
@@ -46,10 +47,10 @@ export async function recognizeGeneral(imageUrl: string): Promise<OcrResult> {
       text,
     }
   } catch (err: any) {
-    console.error('OCR 识别错误:', err)
+    console.error('OCR 识别错误:', safeError(err))
     return {
       success: false,
-      error: err.message || 'OCR 识别失败',
+      error: 'OCR 识别失败',
     }
   }
 }
@@ -82,10 +83,10 @@ export async function recognizePoliceReport(imageUrl: string): Promise<OcrResult
       },
     }
   } catch (err: any) {
-    console.error('交警认定书识别错误:', err)
+    console.error('交警认定书识别错误:', safeError(err))
     return {
       success: false,
-      error: err.message || '识别失败',
+      error: '识别失败',
     }
   }
 }
@@ -125,10 +126,10 @@ export async function recognizeIdCard(imageUrl: string): Promise<OcrResult> {
       },
     }
   } catch (err: any) {
-    console.error('身份证识别错误:', err)
+    console.error('身份证识别错误:', safeError(err))
     return {
       success: false,
-      error: err.message || '身份证识别失败',
+      error: '身份证识别失败',
     }
   }
 }
@@ -163,10 +164,10 @@ export async function recognizeBusinessLicense(imageUrl: string): Promise<OcrRes
       },
     }
   } catch (err: any) {
-    console.error('营业执照识别错误:', err)
+    console.error('营业执照识别错误:', safeError(err))
     return {
       success: false,
-      error: err.message || '营业执照识别失败',
+      error: '营业执照识别失败',
     }
   }
 }

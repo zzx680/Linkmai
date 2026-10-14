@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import { Pool, PoolClient } from 'pg'
 import { config } from '../config'
 import { materialSnapshot } from '../services/material-snapshot'
@@ -85,6 +86,28 @@ export const db = {
     const result = await pool.query(
       'SELECT * FROM users WHERE id = $1',
       [userId]
+    )
+    return result.rows[0] || null
+  },
+
+  async updateUserProfile(userId: string, updates: { nickname?: string; avatarKey?: string }) {
+    const fields: string[] = []
+    const values: unknown[] = []
+
+    if (updates.nickname !== undefined) {
+      values.push(updates.nickname)
+      fields.push(`nickname = $${values.length}`)
+    }
+    if (updates.avatarKey !== undefined) {
+      values.push(updates.avatarKey)
+      fields.push(`avatar_key = $${values.length}`)
+    }
+    if (fields.length === 0) return null
+
+    values.push(userId)
+    const result = await pool.query(
+      `UPDATE users SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${values.length} RETURNING *`,
+      values
     )
     return result.rows[0] || null
   },
@@ -178,6 +201,23 @@ export const db = {
         'UPDATE cases SET is_active = FALSE, updated_at = NOW() WHERE user_id = $1 AND is_active = TRUE',
         [userId]
       )
+      await client.query(
+        `UPDATE payment_orders SET status = 'closed', updated_at = NOW()
+         WHERE user_id = $1 AND case_id IN (
+           SELECT id FROM cases WHERE user_id = $1 AND is_active = FALSE
+         ) AND status IN ('created', 'pending')`,
+        [userId]
+      )
+      await client.query(
+        `UPDATE case_entitlements SET status = 'unpaid', updated_at = NOW()
+         WHERE user_id = $1 AND status = 'pending'
+           AND NOT EXISTS (
+             SELECT 1 FROM payment_orders
+             WHERE case_entitlements.case_id = payment_orders.case_id
+               AND payment_orders.status IN ('created', 'pending')
+           )`,
+        [userId]
+      )
 
       // 创建新案件
       const id = generateId('case')
@@ -268,7 +308,7 @@ export const db = {
 
   async deleteActiveCase(userId: string) {
     const result = await pool.query(
-      'DELETE FROM cases WHERE user_id = $1 AND is_active = TRUE',
+      'UPDATE cases SET is_active = FALSE, updated_at = NOW() WHERE user_id = $1 AND is_active = TRUE',
       [userId]
     )
     return (result.rowCount || 0) > 0
@@ -889,7 +929,7 @@ export const db = {
       await pool.query('SELECT 1')
       return true
     } catch (err) {
-      console.error('PostgreSQL ping failed:', err)
+      console.error('PostgreSQL ping failed:', safeError(err))
       return false
     }
   },

@@ -1,6 +1,6 @@
 import { Component } from 'react'
-import Taro from '@tarojs/taro'
 import { View, Image } from '@tarojs/components'
+import { getCurrentTabRoute, syncTabRoute, tabNavigation } from './navigation'
 import './index.scss'
 
 interface TabItem {
@@ -16,6 +16,7 @@ interface TabBarState {
 }
 
 export default class CustomTabBar extends Component<{}, TabBarState> {
+  private unsubscribe?: () => void
   state: TabBarState = {
     selected: 0,
     items: [
@@ -40,42 +41,31 @@ export default class CustomTabBar extends Component<{}, TabBarState> {
     ]
   }
 
+  componentDidMount() {
+    this.unsubscribe = tabNavigation.subscribe(route => {
+      const index = this.state.items.findIndex(item => item.pagePath === route)
+      if (index !== -1 && index !== this.state.selected) this.setState({ selected: index })
+    })
+    this.syncSelected()
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe?.()
+  }
+
   componentDidShow() {
     this.syncSelected()
   }
 
-  getCurrentRoute() {
-    const pages = Taro.getCurrentPages()
-    const current = pages[pages.length - 1]
-    return current && current.route ? `/${current.route}` : ''
-  }
-
   syncSelected() {
-    const currentRoute = this.getCurrentRoute()
-    const index = this.state.items.findIndex(item => item.pagePath === currentRoute)
-    if (index !== -1 && index !== this.state.selected) {
-      this.setState({ selected: index })
-    }
+    syncTabRoute(getCurrentTabRoute())
   }
 
   switchTab = (index: number) => {
     const item = this.state.items[index]
     if (!item) return
 
-    if (item.pagePath === this.getCurrentRoute()) {
-      this.setState({ selected: index })
-      return
-    }
-
-    this.setState({ selected: index })
-    Taro.switchTab({
-      url: item.pagePath,
-      success: () => this.syncSelected(),
-      fail: () => {
-        this.syncSelected()
-        Taro.showToast({ title: '页面暂时无法打开', icon: 'none' })
-      }
-    })
+    tabNavigation.request(item.pagePath)
   }
 
   render() {
@@ -93,7 +83,6 @@ export default class CustomTabBar extends Component<{}, TabBarState> {
               hoverStartTime={0}
               hoverStayTime={120}
             >
-              {selected === index && <View className='tab-active-bloom' />}
               <Image
                 className='tab-icon'
                 src={selected === index ? item.activeIcon : item.icon}

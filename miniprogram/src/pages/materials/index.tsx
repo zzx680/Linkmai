@@ -7,13 +7,13 @@ import { Icon } from '../../components'
 import './index.scss'
 
 const materialTypes: Array<{ type: MaterialType; icon: string; label: string; description: string }> = [
-  { type: 'accident_report', icon: 'file-list-3-line', label: '交警认定书', description: '责任认定与事故经过' },
-  { type: 'id_card', icon: 'bank-card-line', label: '身份证', description: '当事人身份信息' },
-  { type: 'vehicle_license', icon: 'car-line', label: '行驶证', description: '车辆与车主信息' },
-  { type: 'driver_license', icon: 'profile-line', label: '驾驶证', description: '驾驶资格信息' },
-  { type: 'medical_record', icon: 'hospital-line', label: '医疗记录', description: '诊断与治疗费用' },
-  { type: 'scene_photo', icon: 'camera-line', label: '现场照片', description: '车辆与现场损失' },
-  { type: 'other', icon: 'folder-line', label: '其他材料', description: '补充证明材料' }
+  { type: 'accident_report', icon: 'file-text', label: '交警认定书', description: '责任认定与事故经过' },
+  { type: 'id_card', icon: 'id-card', label: '身份证', description: '当事人身份信息' },
+  { type: 'vehicle_license', icon: 'car-front', label: '行驶证', description: '车辆与车主信息' },
+  { type: 'driver_license', icon: 'contact-round', label: '驾驶证', description: '驾驶资格信息' },
+  { type: 'medical_record', icon: 'hospital', label: '医疗记录', description: '诊断与治疗费用' },
+  { type: 'scene_photo', icon: 'camera', label: '现场照片', description: '车辆与现场损失' },
+  { type: 'other', icon: 'folder', label: '其他材料', description: '补充证明材料' }
 ]
 
 function getTypeInfo(type: string) {
@@ -109,7 +109,7 @@ export default function Materials() {
       </View>
 
       <View className="notice-card">
-        <Icon name="checkbox-circle-line" size={24} color="#1E43A8" />
+        <Icon name="circle-check" size={24} color="#1E43A8" />
         <View className="notice-content">
           <Text className="notice-title">先确认，再进入分析</Text>
           <Text className="notice-text">识别结果来自图片内容，低置信度字段请结合原件核对。确认信息不会自动构成法律结论。</Text>
@@ -139,13 +139,13 @@ export default function Materials() {
 
       <View className="upload-panel" onClick={chooseAndProcess}>
         <View className="upload-icon">
-          <Icon name="add-line" size={32} color="#1E43A8" />
+          <Icon name="plus" size={32} color="#1E43A8" />
         </View>
         <View className="upload-copy">
           <Text className="upload-title">上传{getTypeInfo(selectedType).label}</Text>
           <Text className="upload-subtitle">支持拍照或从相册选择 JPG、PNG 图片</Text>
         </View>
-        <Icon name="arrow-right-line" size={24} color="#8E8E93" />
+        <Icon name="arrow-right" size={24} color="#8E8E93" />
       </View>
 
       {uploadingProgress.length > 0 && (
@@ -165,7 +165,7 @@ export default function Materials() {
 
       {materials.length === 0 ? (
         <View className="empty-card">
-          <Icon name="inbox-line" size={48} color="#8E8E93" />
+          <Icon name="inbox" size={48} color="#8E8E93" />
           <Text className="empty-title">还没有材料</Text>
           <Text className="empty-text">建议先上传交警认定书，它通常包含责任分析最关键的信息。</Text>
         </View>

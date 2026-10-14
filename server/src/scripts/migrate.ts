@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import { createHash } from 'crypto'
 import { readdir, readFile } from 'fs/promises'
 import path from 'path'
@@ -92,7 +93,7 @@ async function main() {
 
 if (require.main === module) {
   main().catch(error => {
-    console.error('数据库迁移失败:', error)
+    console.error('数据库迁移失败:', safeError(error))
     process.exit(1)
   })
 }

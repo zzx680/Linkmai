@@ -1,5 +1,5 @@
 import OSS from 'ali-oss'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 import { config } from '../config'
 
 let client: OSS | null = null
@@ -11,6 +11,7 @@ function getClient(): OSS {
       accessKeyId: config.oss.accessKeyId,
       accessKeySecret: config.oss.accessKeySecret,
       bucket: config.oss.bucket,
+      secure: true,
     })
   }
   return client
@@ -47,10 +48,11 @@ export async function uploadFile(
   folder: string = 'uploads'
 ): Promise<UploadResult> {
   const client = getClient()
-  const ext = filename.split('.').pop()
-  const objectName = `${folder}/${Date.now()}-${uuidv4()}.${ext}`
+  const ext = filename.split('.').pop()?.toLowerCase()
+  const safeExtension = ext && /^[a-z0-9]{1,10}$/.test(ext) ? ext : 'bin'
+  const objectName = `${folder}/${Date.now()}-${randomUUID()}.${safeExtension}`
 
-  const result = await client.put(objectName, buffer)
+  const result = await client.put(objectName, buffer, { headers: { 'x-oss-object-acl': 'private' } })
 
   return {
     url: result.url,
@@ -58,6 +60,24 @@ export async function uploadFile(
     name: objectName,
     size: buffer.length,
   }
+}
+
+export async function uploadUserAvatar(
+  userId: string,
+  buffer: Buffer,
+  extension: string
+): Promise<UploadResult> {
+  const client = getClient()
+  const objectName = `avatars/${userId}/avatar`
+  const contentType = extension === 'jpg' ? 'image/jpeg' : `image/${extension}`
+  const result = await client.put(objectName, buffer, {
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-cache, max-age=0',
+      'x-oss-object-acl': 'private',
+    },
+  })
+  return { url: result.url, key: objectName, name: objectName, size: buffer.length }
 }
 
 /**
@@ -71,7 +91,7 @@ export async function getUploadCredentials(
 ): Promise<UploadCredentials> {
   const client = getClient()
   const ext = filename.split('.').pop()
-  const objectKey = `cases/${caseId}/${fileType}/${Date.now()}-${uuidv4()}.${ext}`
+  const objectKey = `cases/${caseId}/${fileType}/${Date.now()}-${randomUUID()}.${ext}`
 
   const url = client.signatureUrl(objectKey, {
     method: 'PUT',

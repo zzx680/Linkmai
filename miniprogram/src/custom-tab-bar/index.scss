@@ -2,18 +2,17 @@
 
 .tab-shell {
   position: fixed;
-  z-index: 99;
+  z-index: $z-fixed;
   left: 0;
   right: 0;
   bottom: 0;
   padding: 0 34rpx 18rpx;
   padding-bottom: calc(18rpx + constant(safe-area-inset-bottom));
   padding-bottom: calc(18rpx + env(safe-area-inset-bottom));
-  pointer-events: none;
 }
 
 .tab-pill {
-  height: 112rpx;
+  min-height: 112rpx;
   padding: 10rpx;
   border: 1rpx solid $color-border-light;
   border-radius: $radius-full;
@@ -28,7 +27,7 @@
 .tab-item {
   position: relative;
   flex: 1;
-  height: 92rpx;
+  min-height: 112rpx;
   border-radius: $radius-full;
   background: transparent;
   color: $color-text-tertiary;
@@ -39,41 +38,44 @@
   align-items: center;
   justify-content: center;
   gap: 6rpx;
-  transition: transform $transition-fast, background-color $transition-fast, color $transition-fast;
-}
-
-.tab-item-active {
-  color: $color-brand-primary;
-  background: $color-brand-light;
-  box-shadow: 0 4rpx 16rpx rgba(30, 67, 168, 0.12);
-}
-
-.tab-active-bloom {
-  position: absolute;
-  inset: 8rpx 14rpx;
-  border-radius: $radius-full;
-  background: rgba(30, 67, 168, 0.08);
-  pointer-events: none;
 }
 
 .tab-icon {
+  pointer-events: none;
   position: relative;
   width: 40rpx;
   height: 40rpx;
   display: block;
+  transition: transform $transition-fast;
+}
+
+.tab-item-active .tab-icon {
+  animation: tab-icon-select 240ms ease-out;
+}
+
+@keyframes tab-icon-select {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-4rpx) scale(1.08); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .tab-label {
+  pointer-events: none;
   position: relative;
   line-height: 1;
   white-space: nowrap;
 }
 
-.tab-item-pressed {
-  transform: scale(0.96);
-  background-color: $color-bg-subtle;
+.tab-item-pressed .tab-icon {
+  transform: scale(0.92);
 }
 
-.tab-item-active.tab-item-pressed {
-  background-color: $color-brand-light;
+@media (prefers-reduced-motion: reduce) {
+  .tab-icon {
+    transition: none;
+  }
+
+  .tab-item-active .tab-icon {
+    animation: none;
+  }
 }

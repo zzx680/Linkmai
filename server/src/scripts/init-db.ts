@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 
+import { safeError } from '../utils/safe-error'
 import { pool } from '../db/postgres'
 import { runMigrations } from './migrate'
 
@@ -19,6 +20,6 @@ async function initDatabase() {
 }
 
 initDatabase().catch(error => {
-  console.error('数据库初始化失败:', error)
+  console.error('数据库初始化失败:', safeError(error))
   process.exit(1)
 })

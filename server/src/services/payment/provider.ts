@@ -35,6 +35,7 @@ export interface ProviderOrder {
 export interface VerifiedPaymentNotification extends ProviderOrder {
   userId: string
   transactionId: string
+  eventType?: string
 }
 
 export interface PaymentProvider {
@@ -214,10 +215,26 @@ export function verifyNotification(
     envelope.resource,
     required(config.payment.wechat.apiV3Key, 'WECHAT_API_V3_KEY'),
   )
+  const eventType = typeof envelope.event_type === 'string' ? envelope.event_type : undefined
+  if (eventType === 'REFUND.SUCCESS') {
+    return {
+      orderNo: result.out_trade_no,
+      transactionId: result.transaction_id,
+      tradeState: 'REFUND',
+      tradeStateDescription: result.refund_status,
+      amountCents: 0,
+      currency: '',
+      appId: '',
+      mchId: '',
+      userId: '',
+      eventType,
+    }
+  }
   return {
     ...toProviderOrder(result),
     userId: result.attach || '',
     transactionId: result.transaction_id || '',
+    ...(eventType ? { eventType } : {}),
   }
 }
 

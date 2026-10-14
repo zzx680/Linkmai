@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(20),
   nickname VARCHAR(100),
   avatar TEXT,
+  avatar_key TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

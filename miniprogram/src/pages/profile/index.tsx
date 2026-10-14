@@ -1,9 +1,11 @@
-import { View, Text } from '@tarojs/components'
+import { Button, Input, Text, View } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
+import { useEffect, useState } from 'react'
 import { entitlementLabel } from '../../utils/payment'
 import { IS_H5 } from '../../config/env'
 import { useAppStore } from '../../store'
 import { Avatar, Icon } from '../../components'
+import { syncTabRoute } from '../../custom-tab-bar/navigation'
 import './index.scss'
 
 interface MenuItem {
@@ -19,13 +21,18 @@ interface MenuSection {
 }
 
 export default function Profile() {
-  const { user, currentCase, isLoggedIn, authRetryable, logout, retryAuth } = useAppStore()
-  const nickname = user?.nickname || (isLoggedIn ? '灵迈用户' : '未登录')
+  const { user, currentCase, isLoggedIn, authRetryable, logout, retryAuth, updateProfile, uploadProfileAvatar } = useAppStore()
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [draftNickname, setDraftNickname] = useState('')
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const nickname = user?.nickname || (isLoggedIn ? 'momo' : '未登录')
   const caseCount = currentCase ? 1 : 0
   const materialCount = currentCase?.materialCount || 0
   const reportCount = currentCase?.hasReport ? 1 : 0
 
   useDidShow(() => {
+    syncTabRoute('/pages/profile/index')
     if (!IS_H5 && useAppStore.getState().isLoggedIn) useAppStore.getState().loadCurrentCase()
   })
 
@@ -70,27 +77,73 @@ export default function Profile() {
     }
   }
 
+  useEffect(() => {
+    if (!isEditingProfile) setDraftNickname(user?.nickname || '')
+  }, [isEditingProfile, user?.nickname])
+
+  const openProfileEditor = () => {
+    if (!isLoggedIn) {
+      openTask('login')
+      return
+    }
+    setDraftNickname(user?.nickname || '')
+    setIsEditingProfile(true)
+  }
+
+  const handleChooseAvatar = async (event: any) => {
+    const filePath = event?.detail?.avatarUrl
+    if (!filePath || isUploadingAvatar) return
+    setIsUploadingAvatar(true)
+    try {
+      await uploadProfileAvatar(filePath)
+      Taro.showToast({ title: '头像已更新', icon: 'success' })
+    } catch (error: any) {
+      Taro.showToast({ title: error?.message || '头像上传失败，请重试', icon: 'none' })
+    } finally {
+      setIsUploadingAvatar(false)
+    }
+  }
+
+  const saveProfile = async () => {
+    if (isSavingProfile || isUploadingAvatar) return
+    const value = draftNickname.trim()
+    if (!value) {
+      Taro.showToast({ title: '请输入昵称', icon: 'none' })
+      return
+    }
+    setIsSavingProfile(true)
+    try {
+      await updateProfile(value)
+      setIsEditingProfile(false)
+      Taro.showToast({ title: '资料已保存', icon: 'success' })
+    } catch (error: any) {
+      Taro.showToast({ title: error?.message || '资料保存失败，请重试', icon: 'none' })
+    } finally {
+      setIsSavingProfile(false)
+    }
+  }
+
   const sections: MenuSection[] = [
     {
       title: '案件管理',
       items: [
-        { icon: 'file-list-3-line', label: '当前案件', key: 'case', value: currentCase ? '处理中' : '尚未创建' },
-        { icon: 'folder-3-line', label: '材料与证据', key: 'materials', value: `${materialCount} 份` },
-        { icon: 'file-chart-line', label: '事故报告', key: 'report', value: reportCount ? '可查看' : '未生成' }
+        { icon: 'file-text', label: '当前案件', key: 'case', value: currentCase ? '处理中' : '尚未创建' },
+        { icon: 'folder-open', label: '材料与证据', key: 'materials', value: `${materialCount} 份` },
+        { icon: 'chart-no-axes-combined', label: '事故报告', key: 'report', value: reportCount ? '可查看' : '未生成' }
       ]
     },
     {
       title: '付费服务',
       items: [
-        { icon: 'bank-card-line', label: '订阅与付费', key: 'payments', value: !isLoggedIn ? '登录后查看' : currentCase ? entitlementLabel(currentCase.entitlement?.status) : '暂无案件' }
+        { icon: 'credit-card', label: '订阅与付费', key: 'payments', value: !isLoggedIn ? '登录后查看' : currentCase ? entitlementLabel(currentCase.entitlement?.status) : '暂无案件' }
       ]
     },
     {
       title: '帮助与设置',
       items: [
-        { icon: 'question-line', label: '帮助与反馈', key: 'help' },
-        { icon: 'shield-check-line', label: '隐私与安全', key: 'help' },
-        { icon: 'information-line', label: '关于灵迈', key: 'help' }
+        { icon: 'circle-help', label: '帮助与反馈', key: 'help' },
+        { icon: 'shield-check', label: '隐私与安全', key: 'help' },
+        { icon: 'info', label: '关于灵迈', key: 'help' }
       ]
     }
   ]
@@ -103,20 +156,75 @@ export default function Profile() {
           <Text className="profile-title">账户与案件</Text>
         </View>
         <View className="profile-header-icon" onClick={() => openTask('help')}>
-          <Icon name="settings-3-line" size={22} color="#353F4C" />
+          <Icon name="settings" size={22} color="#000000" />
         </View>
       </View>
 
-      <View className="user-card">
+      <View className="user-card" onClick={openProfileEditor}>
         <View className="user-card-main">
-          <Avatar name={nickname} size={96} />
+          <Avatar name={nickname} src={user?.avatar} size={96} />
           <View className="user-copy">
             <Text className="user-name">{nickname}</Text>
-            <Text className="user-caption">{user?.openid ? '已连接灵迈账户' : '完成登录后可保存案件进度'}</Text>
+            {user?.openid
+              ? (user.nickname || user.avatar) && <Text className="user-caption">微信资料已连接 · 点击编辑</Text>
+              : <Text className="user-caption">完成登录后可保存案件进度</Text>}
           </View>
         </View>
-        <Icon name="arrow-right-s-line" size={24} color="#8A94A3" />
+        <Icon name="chevron-right" size={24} color="#000000" />
       </View>
+
+      {isEditingProfile && (
+        <View className="profile-editor">
+          <View className="profile-editor-heading">
+            <View>
+              <Text className="profile-editor-title">完善个人资料</Text>
+              <Text className="profile-editor-description">头像和昵称仅用于你的灵迈账户展示</Text>
+            </View>
+            <View className="profile-editor-close" onClick={() => setIsEditingProfile(false)}>
+              <Icon name="x" size={20} color="#000000" />
+            </View>
+          </View>
+
+          <View className="profile-editor-body">
+            {IS_H5 ? (
+              <View className="avatar-picker avatar-picker-disabled" onClick={() => Taro.showToast({ title: '请在微信小程序中选择头像', icon: 'none' })}>
+                <Avatar name={nickname} src={user?.avatar} size={76} />
+                <Text>请在微信小程序中更换头像</Text>
+              </View>
+            ) : (
+              <Button
+                className="avatar-picker"
+                openType="chooseAvatar"
+                onChooseAvatar={handleChooseAvatar}
+                disabled={isUploadingAvatar || isSavingProfile}
+              >
+                <Avatar name={nickname} src={user?.avatar} size={76} />
+                <Text>{isUploadingAvatar ? '正在上传头像...' : '选择微信头像'}</Text>
+                <Icon name="camera" size={18} color="#000000" />
+              </Button>
+            )}
+
+            <View className="nickname-field">
+              <Text className="field-label">昵称</Text>
+              <Input
+                className="nickname-input"
+                type={IS_H5 ? 'text' : 'nickname'}
+                value={draftNickname}
+                maxlength={30}
+                placeholder="输入你的昵称"
+                onInput={event => setDraftNickname(event.detail.value)}
+              />
+            </View>
+          </View>
+
+          <View className="profile-editor-actions">
+            <View className="profile-action-secondary" onClick={() => setIsEditingProfile(false)}><Text>暂不设置</Text></View>
+            <View className={`profile-action-primary${isSavingProfile || isUploadingAvatar ? ' profile-action-disabled' : ''}`} onClick={saveProfile}>
+              <Text>{isSavingProfile ? '正在保存...' : '保存资料'}</Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       <View className="stats-grid">
         <View className="stat-card" onClick={() => openTask('case')}>
@@ -140,12 +248,12 @@ export default function Profile() {
                 onClick={() => openTask(item.key)}
               >
                 <View className="menu-icon">
-                  <Icon name={item.icon} size={20} color="#1E43A8" />
+                  <Icon name={item.icon} size={20} color="#000000" />
                 </View>
                 <Text className="menu-label">{item.label}</Text>
                 <View className="menu-right">
                   {item.value && <Text className="menu-value">{item.value}</Text>}
-                  <Icon name="arrow-right-s-line" size={22} color="#A3ACB8" />
+                  <Icon name="chevron-right" size={22} color="#000000" />
                 </View>
               </View>
             ))}
@@ -164,8 +272,6 @@ export default function Profile() {
           <Text>退出登录</Text>
         </View>
       )}
-
-      <Text className="profile-footer">灵迈 · 让事故处理更清楚</Text>
     </View>
   )
 }

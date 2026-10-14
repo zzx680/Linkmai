@@ -1,10 +1,11 @@
+import { safeError } from '../utils/safe-error'
 import { Router, Request, Response } from 'express'
 import multer from 'multer'
-import { uploadFile } from '../services/oss'
+import { uploadFile, getSignedUrl } from '../services/oss'
+import { hasValidImageSignature, isSupportedImageMime } from '../utils/image'
 import { db } from '../db'
 
 const router = Router()
-const imageMimes = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 const imageUpload = multer({
   storage: multer.memoryStorage(),
@@ -13,7 +14,7 @@ const imageUpload = multer({
     files: 1,
   },
   fileFilter: (_req, file, callback) => {
-    callback(null, imageMimes.has(file.mimetype))
+    callback(null, isSupportedImageMime(file.mimetype))
   },
 })
 
@@ -25,14 +26,8 @@ const videoUpload = multer({
   },
 })
 
-function hasValidImageSignature(buffer: Buffer, mimeType: string) {
-  if (mimeType === 'image/jpeg') {
-    return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff
-  }
-  if (mimeType === 'image/png') {
-    return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
-  }
-  return buffer.length >= 12 && buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP'
+function hasValidVideoSignature(buffer: Buffer) {
+  return buffer.length >= 12 && buffer.subarray(4, 8).toString('ascii') === 'ftyp'
 }
 
 /**
@@ -45,7 +40,7 @@ router.post('/image', imageUpload.single('file'), async (req: Request, res: Resp
       return res.status(400).json({ error: '未上传文件' })
     }
 
-    if (!imageMimes.has(req.file.mimetype) || !hasValidImageSignature(req.file.buffer, req.file.mimetype)) {
+    if (!isSupportedImageMime(req.file.mimetype) || !hasValidImageSignature(req.file.buffer, req.file.mimetype)) {
       return res.status(400).json({ error: '仅支持有效的 JPG/PNG/WEBP 图片' })
     }
 
@@ -77,10 +72,10 @@ router.post('/image', imageUpload.single('file'), async (req: Request, res: Resp
 
     res.json({
       success: true,
-      data: { ...result, artifactId: artifact.id },
+      data: { ...result, url: await getSignedUrl(result.key), artifactId: artifact.id },
     })
   } catch (error) {
-    console.error('Upload error:', error)
+    console.error('Upload error:', safeError(error))
     res.status(500).json({ error: '上传失败' })
   }
 })
@@ -97,7 +92,7 @@ router.post('/video', videoUpload.single('file'), async (req: Request, res: Resp
 
     // 验证文件类型
     const allowedMimes = ['video/mp4', 'video/quicktime']
-    if (!allowedMimes.includes(req.file.mimetype)) {
+    if (!allowedMimes.includes(req.file.mimetype) || !hasValidVideoSignature(req.file.buffer)) {
       return res.status(400).json({ error: '仅支持 MP4/MOV 格式' })
     }
 
@@ -134,10 +129,10 @@ router.post('/video', videoUpload.single('file'), async (req: Request, res: Resp
 
     res.json({
       success: true,
-      data: { ...result, artifactId: artifact.id },
+      data: { ...result, url: await getSignedUrl(result.key), artifactId: artifact.id },
     })
   } catch (error) {
-    console.error('Upload error:', error)
+    console.error('Upload error:', safeError(error))
     res.status(500).json({ error: '上传失败' })
   }
 })

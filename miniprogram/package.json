@@ -38,6 +38,7 @@
     "@tarojs/taro-loader": "4.0.7",
     "@tarojs/webpack5-runner": "4.0.7",
     "@types/react": "^18.3.12",
+    "lucide-static": "1.56.0",
     "sharp": "^0.35.4",
     "typescript": "^5.7.2",
     "webpack": "^5.78.0"

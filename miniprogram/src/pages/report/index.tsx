@@ -46,7 +46,7 @@ export default function Report() {
       <View className="report-page">
         <View className="generating-state">
           <View className="generating-mark">
-            <Icon name="loader-4-line" size={48} color="#1E43A8" />
+            <Icon name="loader-circle" size={48} color="#1E43A8" />
           </View>
           <Text className="generating-title">正在整理案件分析</Text>
           <Text className="generating-description">灵迈正在基于已确认的材料生成分析，请保持页面打开。</Text>
@@ -71,10 +71,10 @@ export default function Report() {
 
         <View className="preflight-card locked-report-card">
           <View className="preflight-icon">
-            <Icon name="lock-2-line" size={32} color="#1E43A8" />
+            <Icon name="lock-keyhole" size={32} color="#1E43A8" />
           </View>
           <Text className="preflight-title">本案件尚未解锁</Text>
-          <Text className="preflight-description">一次付费后，本案件后续补充材料、重新分析和文书更新都不再重复收费。</Text>
+          <Text className="preflight-description">一次付费后，本案件后续补充材料、重新分析和报告更新都不再重复收费。</Text>
           <View className="preflight-list">
             <View className="preflight-row"><Text>完整责任分析</Text><Text className="row-value">包含</Text></View>
             <View className="preflight-row"><Text>赔偿项目与金额</Text><Text className="row-value">包含</Text></View>
@@ -100,7 +100,7 @@ export default function Report() {
 
         <View className="preflight-card">
           <View className="preflight-icon">
-            <Icon name="checkbox-circle-line" size={32} color="#1E43A8" />
+            <Icon name="circle-check" size={32} color="#1E43A8" />
           </View>
           <Text className="preflight-title">生成前检查</Text>
           <Text className="preflight-description">只有已确认的材料字段会进入报告，所有结论都会保留对应材料依据，方便你随时核对。</Text>
@@ -117,7 +117,7 @@ export default function Report() {
         </View>
 
         <View className="report-note">
-          <Icon name="information-line" size={20} color="#6B7280" />
+          <Icon name="info" size={20} color="#6B7280" />
           <Text>报告会明确区分材料事实、AI 分析和行动建议，重要结论请回到原始材料核对。</Text>
         </View>
       </View>
@@ -141,7 +141,7 @@ export default function Report() {
         </View>
 
         <View className="scope-banner">
-          <Icon name="alert-line" size={24} color="#1E43A8" />
+          <Icon name="triangle-alert" size={24} color="#1E43A8" />
           <View><Text className="scope-title">阅读边界</Text><Text className="scope-text">以下内容是基于已确认材料的 AI 辅助分析，不是确定的法律结论。</Text></View>
         </View>
 
@@ -154,7 +154,7 @@ export default function Report() {
           <View className="section-heading"><Text className="section-index">02</Text><Text className="section-title">责任认定</Text></View>
           <View className="content-card liability-card">
             <View className="liability-mark">
-              <Icon name="scales-3-line" size={32} color="#1E43A8" />
+              <Icon name="scale" size={32} color="#1E43A8" />
             </View>
             <View className="liability-copy">{liabilityParagraphs.length ? liabilityParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无责任分析。</Text>}</View>
           </View>

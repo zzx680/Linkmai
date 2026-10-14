@@ -253,3 +253,114 @@ npm --prefix server run staging:smoke -- https://<staging-domain>
 - 日志不得写入 AppSecret、数据库密码、支付私钥、API v3 key 或完整敏感材料。
 - 监控内存超过 80%、磁盘超过 75%、5xx、数据库不可用和支付回调失败。
 - 保持轻量服务器安全更新与实例续费。
+
+# Production 部署指南
+
+Production 与 staging 必须使用独立的域名、主机/进程、PostgreSQL 数据库、OSS 权限、微信支付回调和环境文件。不得复用 staging 环境文件、私钥、数据库、商户测试设置或部署目录。
+
+## 生产发布前 Go / No-Go
+
+在执行迁移、部署、上传小程序或提交审核前，负责人必须确认：
+
+1. 正式 API 域名、DNS、TLS 证书、网络访问策略和发布窗口已就绪。
+2. RDS 使用独立生产库、最小权限账号、私网访问与 SSL；已创建新备份并在生产等价环境演练恢复。
+3. 小程序 AppID 已绑定正式商户号，微信支付异步通知可访问 `https://<production-domain>/api/payments/wechat/notify`。
+4. 值班、告警、代码回滚和数据库恢复的责任人已明确。
+5. 所有正式凭据只存放在受限的服务器文件或密钥系统中。若任一凭据曾进入 Git、聊天、构建日志或客户端制品，先完成轮换与暴露评估。
+
+任一条件未满足即停止发布。
+
+## 1. 生产环境文件与密钥
+
+从 `server/.env.production.example` 建立服务器外部环境文件：
+
+```bash
+sudo install -m 600 server/.env.production.example /etc/linkmai/production.env
+sudoedit /etc/linkmai/production.env
+```
+
+生产证书和密钥使用独立文件，例如：
+
+```text
+/etc/linkmai/secrets/rds-ca.pem
+/etc/linkmai/secrets/apiclient_key.pem
+/etc/linkmai/secrets/wechat_api_v3_key
+/etc/linkmai/secrets/wechatpay_public_key.pem
+```
+
+设置目录和文件权限：
+
+```bash
+sudo chmod 700 /etc/linkmai/secrets
+sudo chmod 600 /etc/linkmai/production.env /etc/linkmai/secrets/*
+```
+
+生产启动会由 `validateRuntimeConfig()` 强制校验：PostgreSQL、远端数据库 SSL/CA、非默认且不少于 32 字符的 JWT 密钥、禁用 mock 微信登录、`PAYMENT_PROVIDER=wechat`，以及完整的微信商户证书、APIv3 key、平台公钥/ID 与 HTTPS 回调地址。不要绕过或弱化这些校验。
+
+## 2. Nginx 与 PM2
+
+使用 `server/deploy/nginx-production-bootstrap.conf` 申请正式域名证书，再替换为 `server/deploy/nginx-production.conf`。将其中的 `PRODUCTION_API_DOMAIN` 替换为已确认的正式域名；不要把真实域名或证书路径提交到仓库。
+
+使用 `server/ecosystem.production.config.js` 启动独立的 `linkmai-production-api` 进程。默认路径为：
+
+```text
+/var/www/linkmai-production/current/server
+/etc/linkmai/production.env
+/var/log/linkmai/production-out.log
+/var/log/linkmai/production-error.log
+```
+
+## 3. 数据库迁移与恢复边界
+
+迁移器会校验 `schema_migrations` 中已执行文件的 checksum，并会在单个迁移失败时回滚该迁移事务。严禁修改已应用迁移文件。
+
+每次 production 发布前：
+
+1. 创建并记录 RDS 备份标识。
+2. 在恢复环境验证该备份可用，执行待发布版本的 `npm run db:migrate`。
+3. 确认旧应用在迁移后的 schema 上仍可运行，或准备经过演练的数据库恢复处置。
+
+`rollback-production.sh` 只能回滚代码 release，不能回滚已执行的 schema、支付订单或权益数据。若迁移与旧代码不兼容，停止扩大流量并依照恢复预案处置，不要把代码软链接回退当作数据库回滚。
+
+## 4. 发布与代码回滚
+
+先将经过审查的同一 Git SHA 同步到生产候选目录。发布脚本会安装依赖、构建、测试、加载受限环境文件、运行生产配置校验、执行迁移、原子切换 release、reload PM2 并进行 health check：
+
+```bash
+LINKMAI_ENV_FILE=/etc/linkmai/production.env \
+LINKMAI_HEALTH_URL=https://<production-domain>/api/health \
+./server/scripts/deploy-production.sh
+```
+
+只在迁移仍与前一 release 兼容时使用代码回滚：
+
+```bash
+LINKMAI_ENV_FILE=/etc/linkmai/production.env \
+./server/scripts/rollback-production.sh
+```
+
+发布后的无凭据烟测：
+
+```bash
+./server/scripts/smoke-production.sh https://<production-domain>
+```
+
+它只验证 health 和未认证接口保护，不会创建订单或发起扣款。
+
+## 5. 微信支付与小程序验收
+
+在提交小程序审核前，由授权人员在真机完成正式闭环：登录 → 创建案件 → 上传并确认材料 → 发起受控小额支付 → 回调验签 → 权益解锁 → 生成并重新读取报告。
+
+至少覆盖取消支付、客户端退出后恢复订单、延迟或重复回调、服务重启后查询订单、金额/AppID/商户号不匹配被拒绝，以及日志不含私钥、token、APIv3 key 或完整签名。
+
+仅在正式 API 域名已配置为微信 request/uploadFile 合法域名后构建小程序：
+
+```bash
+TARO_APP_API_BASE=https://<production-domain>/api npm --prefix miniprogram run build:weapp
+```
+
+确认 `miniprogram/dist` 不含 staging 地址或秘密后，在开发者工具和真机复验支付路径。上传、提交审核和正式发布均需要单独的负责人授权。
+
+## 6. 生产监控
+
+上线后观察 health、5xx、数据库连接、进程内存和磁盘、支付下单成功率、回调失败率与订单状态异常。人工核对微信商户账单、服务端订单和案件权益的一致性；异常时先停止扩大流量，再按代码回滚或已演练的数据库恢复预案处置。

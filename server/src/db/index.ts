@@ -16,6 +16,8 @@ export interface User {
   phone?: string
   nickname?: string
   avatar?: string
+  avatar_key?: string
+  avatarKey?: string
   created_at: Date
   updated_at: Date
 }

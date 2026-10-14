@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import express from 'express'
 import { db } from '../db'
 import { config } from '../config'
@@ -39,7 +40,7 @@ router.get('/current', async (req, res) => {
 
     res.json({ success: true, data: currentCase ? await withEntitlement(currentCase, userId) : null })
   } catch (err) {
-    console.error('获取案件错误:', err)
+    console.error('获取案件错误:', safeError(err))
     res.status(500).json({ success: false, error: '获取案件失败' })
   }
 })
@@ -57,7 +58,7 @@ router.post('/current', async (req, res) => {
 
     res.json({ success: true, data: await withEntitlement(newCase, userId) })
   } catch (err) {
-    console.error('创建案件错误:', err)
+    console.error('创建案件错误:', safeError(err))
     res.status(500).json({ success: false, error: '创建案件失败' })
   }
 })
@@ -66,19 +67,18 @@ router.post('/current', async (req, res) => {
 router.patch('/current', async (req, res) => {
   try {
     const userId = req.userId
-    const { status, statusLabel, materialCount, liability, compensation, hasReport } = req.body
+    const body = req.body || {}
 
     if (!userId) {
       return res.status(401).json({ success: false, error: '未认证' })
     }
 
-    const updates: any = {}
-    if (status !== undefined) updates.status = status
-    if (statusLabel !== undefined) updates.statusLabel = statusLabel
-    if (materialCount !== undefined) updates.materialCount = materialCount
-    if (liability !== undefined) updates.liability = liability
-    if (compensation !== undefined) updates.compensation = compensation
-    if (hasReport !== undefined) updates.hasReport = hasReport
+    // Status, counters and report conclusions are derived by server workflows.
+    if (Object.keys(body).some(key => key !== 'title') || typeof body.title !== 'string'
+      || !body.title.trim() || body.title.length > 100) {
+      return res.status(400).json({ success: false, error: '仅支持修改案件名称（1–100 字）' })
+    }
+    const updates = { title: body.title.trim() }
 
     const updatedCase = await db.updateCase(userId, updates)
 
@@ -86,14 +86,14 @@ router.patch('/current', async (req, res) => {
       return res.status(404).json({ success: false, error: '未找到活跃案件' })
     }
 
-    res.json({ success: true, data: updatedCase })
+    res.json({ success: true, data: await withEntitlement(updatedCase, userId) })
   } catch (err) {
-    console.error('更新案件错误:', err)
+    console.error('更新案件错误:', safeError(err))
     res.status(500).json({ success: false, error: '更新案件失败' })
   }
 })
 
-// 删除当前案件
+// 归档当前案件，保留订单、回调关联及案件材料。
 router.delete('/current', async (req, res) => {
   try {
     const userId = req.userId
@@ -106,7 +106,7 @@ router.delete('/current', async (req, res) => {
 
     res.json({ success: true })
   } catch (err) {
-    console.error('删除案件错误:', err)
+    console.error('删除案件错误:', safeError(err))
     res.status(500).json({ success: false, error: '删除案件失败' })
   }
 })

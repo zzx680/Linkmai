@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { memoryDB } from '../src/db/memory'
-import { requirePaidEntitlement } from '../src/services/payment'
+import { getEntitlement, requirePaidEntitlement } from '../src/services/payment'
 
 test('payment order is idempotent and grants entitlement only after payment', async () => {
   const user = await memoryDB.createUser(`payment-test-${Date.now()}`)
@@ -18,6 +18,7 @@ test('payment order is idempotent and grants entitlement only after payment', as
   const retryOrder = await memoryDB.createPaymentOrder(input)
   assert.equal(retryOrder.id, firstOrder.id)
   assert.equal(firstOrder.status, 'created')
+  assert.equal((await getEntitlement(user.id, caseData.id)).features.documentGeneration, false)
   await assert.rejects(requirePaidEntitlement(user.id, caseData.id), { message: 'PAYMENT_REQUIRED' })
 
   const paidOrder = await memoryDB.completePaymentOrder({
@@ -28,7 +29,15 @@ test('payment order is idempotent and grants entitlement only after payment', as
     wechatTransactionId: `transaction-${Date.now()}`,
   })
   assert.equal(paidOrder.status, 'paid')
-  assert.equal((await requirePaidEntitlement(user.id, caseData.id)).status, 'paid')
+  const entitlement = await requirePaidEntitlement(user.id, caseData.id)
+  assert.equal(entitlement.status, 'paid')
+  assert.deepEqual(entitlement.features, {
+    fullReport: true,
+    compensationEstimate: true,
+    actionPlan: true,
+    documentGeneration: false,
+    rerunAfterMaterialUpdate: true,
+  })
 
   const nextCase = await memoryDB.createCase(user.id, '关闭订单回归测试')
   const closedOrder = await memoryDB.createPaymentOrder({

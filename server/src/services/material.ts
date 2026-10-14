@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 // 材料识别服务
 import { ocrService } from './ocr'
 import { analyzeAccidentImage, analyzeText } from './deepseek'
@@ -53,7 +54,7 @@ export async function processMaterial(
       rawText,
     }
   } catch (error) {
-    console.error('材料处理失败:', error)
+    console.error('材料处理失败:', safeError(error))
     throw error
   }
 }

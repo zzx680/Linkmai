@@ -1,4 +1,5 @@
-import { View } from '@tarojs/components'
+import { Image } from '@tarojs/components'
+import { iconAssets } from './assets'
 import './index.scss'
 
 interface IconProps {
@@ -9,16 +10,17 @@ interface IconProps {
   onClick?: () => void
 }
 
-export default function Icon({ name, size = 24, color, className = '', onClick }: IconProps) {
+export default function Icon({ name, size = 24, color = '#6B7280', className = '', onClick }: IconProps) {
+  const variants = iconAssets[name] || iconAssets['circle-help']
+  const src = variants[color.toUpperCase()] || variants['#6B7280']
   return (
-    <View
-      className={`icon-component ri-${name} ${className}`}
+    <Image
+      className={`icon-component ${className}`}
+      src={src}
+      mode="aspectFit"
       style={{
-        fontSize: `${size}px`,
-        color: color,
         width: `${size}px`,
         height: `${size}px`,
-        lineHeight: `${size}px`
       }}
       onClick={onClick}
     />

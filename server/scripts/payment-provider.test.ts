@@ -134,3 +134,59 @@ test('WeChat Pay notification verifies headers and decrypts transaction', () => 
     Object.assign(config.payment.wechat, previous)
   }
 })
+
+test('WeChat Pay refund notification keeps the original transaction identity', () => {
+  const apiV3Key = '12345678901234567890123456789012'
+  const publicKeyId = 'PUB_KEY_ID_0123456789ABCDEF'
+  const nonceText = 'refund-nonce'
+  const associatedData = 'refund'
+  const payload = {
+    out_trade_no: 'LM_REFUND_ORDER',
+    transaction_id: '4200000001',
+    refund_id: '5000000001',
+    refund_status: 'SUCCESS',
+  }
+  const cipher = createCipheriv('aes-256-gcm', Buffer.from(apiV3Key), Buffer.from(nonceText))
+  cipher.setAAD(Buffer.from(associatedData))
+  const ciphertext = Buffer.concat([cipher.update(JSON.stringify(payload)), cipher.final(), cipher.getAuthTag()])
+  const body = JSON.stringify({
+    event_type: 'REFUND.SUCCESS',
+    resource: {
+      ciphertext: ciphertext.toString('base64'),
+      nonce: nonceText,
+      associated_data: associatedData,
+    },
+  })
+  const timestamp = Math.floor(Date.now() / 1000).toString()
+  const requestNonce = 'refund-header-nonce'
+  const signature = signWithPrivateKey(`${timestamp}\n${requestNonce}\n${body}\n`, privateKey)
+  const headers = {
+    'wechatpay-timestamp': timestamp,
+    'wechatpay-nonce': requestNonce,
+    'wechatpay-signature': signature,
+    'wechatpay-serial': publicKeyId,
+  }
+  const previous = { ...config.payment.wechat }
+  Object.assign(config.payment.wechat, {
+    apiV3Key,
+    platformPublicKey: publicKey,
+    platformPublicKeyId: publicKeyId,
+  })
+
+  try {
+    assert.deepEqual(verifyNotification(headers, Buffer.from(body)), {
+      orderNo: payload.out_trade_no,
+      transactionId: payload.transaction_id,
+      tradeState: 'REFUND',
+      tradeStateDescription: 'SUCCESS',
+      amountCents: 0,
+      currency: '',
+      appId: '',
+      mchId: '',
+      userId: '',
+      eventType: 'REFUND.SUCCESS',
+    })
+  } finally {
+    Object.assign(config.payment.wechat, previous)
+  }
+})

@@ -1,7 +1,11 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <title>灵迈 LM 字母标</title>
-  <desc>由 L 与 M 连续变形组成的黑色极简字母标</desc>
-  <path d="M146 104V350C146 394.183 181.817 430 226 430H252" stroke="#000000" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M252 430V270C252 234.654 280.654 206 316 206C351.346 206 380 234.654 380 270V430" stroke="#000000" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M380 430V286C380 242 407 206 440 206" stroke="#000000" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+  <title>灵迈 M 字母标</title>
+  <desc>由一条连续路径构成的黑色 M 字母标</desc>
+  <path
+    d="M102 408V184C102 151 132 139 150 167L245 322C254 337 273 337 282 322L410 104V408"
+    stroke="#000000"
+    stroke-width="62"
+    stroke-linecap="square"
+    stroke-linejoin="round"
+  />
 </svg>

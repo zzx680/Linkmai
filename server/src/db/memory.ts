@@ -9,6 +9,7 @@ export interface User {
   phone?: string
   nickname?: string
   avatar?: string
+  avatarKey?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -168,6 +169,15 @@ export const memoryDB = {
     return users.get(userId) || null
   },
 
+  async updateUserProfile(userId: string, updates: { nickname?: string; avatarKey?: string }): Promise<User | null> {
+    const user = users.get(userId)
+    if (!user) return null
+    if (updates.nickname !== undefined) user.nickname = updates.nickname
+    if (updates.avatarKey !== undefined) user.avatarKey = updates.avatarKey
+    user.updatedAt = new Date()
+    return user
+  },
+
   async updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
     const user = users.get(userId)
     if (!user) return null
@@ -200,6 +210,11 @@ export const memoryDB = {
           order.status = 'closed'
           order.updatedAt = new Date()
         }
+      }
+      const entitlement = entitlements.get(existingCaseId)
+      if (entitlement?.status === 'pending') {
+        entitlement.status = 'unpaid'
+        entitlement.updatedAt = new Date()
       }
     }
 
@@ -234,7 +249,11 @@ export const memoryDB = {
   async deleteActiveCase(userId: string): Promise<boolean> {
     const caseId = activeCasesByUser.get(userId)
     if (!caseId) return false
-    cases.delete(caseId)
+    const caseData = cases.get(caseId)
+    if (caseData) {
+      caseData.isActive = false
+      caseData.updatedAt = new Date()
+    }
     activeCasesByUser.delete(userId)
     return true
   },

@@ -113,7 +113,7 @@ beforeEach(() => {
   materialCount = 0
   artifact = {
     id: 'artifact-1', caseId: 'case-1', type: 'other', ossUrl: imageUrl,
-    mimeType: 'image/jpeg', status: 'uploaded', metadata: {}, createdAt: new Date(0),
+    mimeType: 'image/jpeg', ossKey: 'owned/material.jpg', status: 'uploaded', metadata: {}, createdAt: new Date(0),
   }
 })
 
@@ -283,7 +283,7 @@ test('OCR failures mark only claimed processing artifacts failed', async () => {
   assert.equal(response.statusCode, 422)
   assert.equal(artifact.status, 'failed')
   assert.deepEqual(writes[1].expectedStatuses, ['processing'])
-  assert.equal(artifact.metadata.error, 'OCR rejected')
+  assert.equal(artifact.metadata.error, '材料处理失败，请稍后重试')
 })
 
 test('exceptions before claim do not alter an existing artifact', async () => {

@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import { Router, Request, Response, NextFunction } from 'express'
 
 const router = Router()
@@ -11,7 +12,7 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  console.error('服务器错误:', err)
+  console.error('服务器错误:', safeError(err))
 
   // API 错误响应
   if (req.path.startsWith('/api/')) {

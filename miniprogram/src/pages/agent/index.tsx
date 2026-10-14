@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, Input, Image } from '@tarojs/components'
 import { useState, useEffect } from 'react'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
+import { syncTabRoute } from '../../custom-tab-bar/navigation'
 import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import { MaterialType, QuickReply } from '../../services/api'
@@ -47,6 +48,8 @@ export default function Agent() {
   const [inputText, setInputText] = useState('')
   const [isUploadingMaterial, setIsUploadingMaterial] = useState(false)
   const [isContextExpanded, setIsContextExpanded] = useState(false)
+
+  useDidShow(() => syncTabRoute('/pages/agent/index'))
 
   useEffect(() => {
     if (!IS_H5) loadMessages().catch(() => undefined)
@@ -121,7 +124,7 @@ export default function Agent() {
             <Text className="material-summary">已整理 {materials.length} 份材料</Text>
           </View>
         </View>
-        {currentCase && <Icon name="arrow-right-s-line" className={`context-toggle ${isContextExpanded ? 'expanded' : ''}`} size={22} color="#6B7280" />}
+        {currentCase && <Icon name="chevron-right" className={`context-toggle ${isContextExpanded ? 'expanded' : ''}`} size={22} color="#6B7280" />}
       </View>
 
       <ScrollView
@@ -246,7 +249,7 @@ export default function Agent() {
         <View className="input-bar">
           <View className="composer-shell">
             <View className={`attach-button ${isUploadingMaterial ? 'disabled' : ''}`} onClick={handleChooseImage}>
-              <Icon name="add-line" size={24} color="#6B7280" />
+              <Icon name="plus" size={24} color="#6B7280" />
             </View>
             <View className="input-wrapper">
               {IS_H5 ? (
@@ -271,7 +274,7 @@ export default function Agent() {
               )}
             </View>
             <View className={`send-button ${inputText.trim() && !isAiTyping ? 'ready' : ''}`} onClick={() => handleSend()}>
-              <Icon name="arrow-right-line" className="send-arrow" size={22} color="#FFFFFF" />
+              <Icon name="arrow-right" className="send-arrow" size={22} color="#FFFFFF" />
             </View>
           </View>
           <Text className="composer-hint">内容由 AI 辅助整理，重要结论请结合原始材料核对</Text>

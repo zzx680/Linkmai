@@ -10,11 +10,10 @@ import { IS_H5 } from '../../config/env'
 import './index.scss'
 
 const FEATURE_DETAILS = {
-  fullReport: { icon: 'file-chart-line', title: '完整事故处理报告', description: '汇总责任、材料与关键结论' },
-  compensationEstimate: { icon: 'scales-3-line', title: '赔偿项目与金额估算', description: '梳理可主张项目和计算依据' },
-  actionPlan: { icon: 'route-line', title: '分步骤处理方案', description: '按当前进展给出下一步行动建议' },
-  documentGeneration: { icon: 'file-list-3-line', title: '相关文书生成', description: '生成案件处理所需的常用文书' },
-  rerunAfterMaterialUpdate: { icon: 'loader-4-line', title: '补充材料后更新分析', description: '材料变化后重新整理完整方案' }
+  fullReport: { icon: 'chart-no-axes-combined', title: '完整事故处理报告', description: '汇总责任、材料与关键结论' },
+  compensationEstimate: { icon: 'scale', title: '赔偿项目与金额估算', description: '梳理可主张项目和计算依据' },
+  actionPlan: { icon: 'route', title: '分步骤处理方案', description: '按当前进展给出下一步行动建议' },
+  rerunAfterMaterialUpdate: { icon: 'loader-circle', title: '补充材料后更新分析', description: '材料变化后重新整理完整方案' }
 } as const
 
 function formatPaidAt(value?: string | null) {
@@ -63,6 +62,7 @@ export default function PaymentsPage() {
   const price = formatPaymentPrice(entitlement)
   const status = entitlement?.status === 'paid' || entitlement?.status === 'refunded'
     ? entitlement.status : confirmation === 'failed' ? 'unpaid' : confirmation || entitlement?.status || 'unpaid'
+  const isPaid = status === 'paid'
   const features = Object.entries(FEATURE_DETAILS)
     .filter(([key]) => !isPaid || !entitlement?.features || entitlement.features[key as keyof typeof FEATURE_DETAILS])
     .map(([, detail]) => detail)
@@ -77,7 +77,7 @@ export default function PaymentsPage() {
     return (
       <View className="payments-page centered-page">
         <View className="empty-card">
-          <View className="empty-icon"><Icon name="user-line" size={30} color="#1E43A8" /></View>
+          <View className="empty-icon"><Icon name="user-round" size={30} color="#1E43A8" /></View>
           <Text className="empty-title">登录后查看付费权益</Text>
           <Text className="empty-description">登录后可查看当前案件的解锁状态，并继续完成支付。</Text>
           <View className="primary-button" onClick={() => retryAuth()}><Text>{authRetryable ? '重新登录' : '登录'}</Text></View>
@@ -98,7 +98,7 @@ export default function PaymentsPage() {
     return (
       <View className="payments-page centered-page">
         <View className="empty-card">
-          <View className="empty-icon"><Icon name="file-list-3-line" size={30} color="#1E43A8" /></View>
+          <View className="empty-icon"><Icon name="file-text" size={30} color="#1E43A8" /></View>
           <Text className="empty-title">暂无可查看的付费权益</Text>
           <Text className="empty-description">创建案件并整理材料后，可以按案件一次性解锁完整处理方案。</Text>
           <View className="primary-button" onClick={goHome}><Text>返回首页创建案件</Text></View>
@@ -108,7 +108,6 @@ export default function PaymentsPage() {
     )
   }
 
-  const isPaid = status === 'paid'
   const isPending = status === 'pending'
   const isRefunded = status === 'refunded'
   const paidAt = formatPaidAt(entitlement?.paidAt)
@@ -129,7 +128,7 @@ export default function PaymentsPage() {
           <View className="plan-topline">
             <Text className="plan-kicker">当前案件</Text>
             <View className="status-pill">
-              <Icon name={isPaid ? 'check-line' : isRefunded ? 'arrow-go-back-line' : 'time-line'} size={14} color="#111827" />
+              <Icon name={isPaid ? 'check' : isRefunded ? 'undo-2' : 'clock-3'} size={14} color="#111827" />
               <Text>{entitlementLabel(status)}</Text>
             </View>
           </View>
@@ -139,7 +138,7 @@ export default function PaymentsPage() {
               <Text className="plan-price-label">一次性解锁</Text>
               <Text className="plan-price">{price || '金额待确认'}</Text>
             </View>
-            <View className="plan-mark"><Icon name="shield-check-line" size={28} color="#FFFFFF" /></View>
+            <View className="plan-mark"><Icon name="shield-check" size={28} color="#FFFFFF" /></View>
           </View>
           <Text className="plan-caption">仅限当前案件 · 不自动续费</Text>
         </View>
@@ -147,7 +146,7 @@ export default function PaymentsPage() {
 
       {(isPaid || isPending || isRefunded || !price) && (
         <View className={`status-panel${isPaid ? ' status-panel-success' : isRefunded || !price ? ' status-panel-muted' : ''}`}>
-          <Icon name={isPaid ? 'checkbox-circle-line' : isRefunded ? 'arrow-go-back-line' : !price ? 'information-line' : 'time-line'} size={20} color={isPaid ? '#057A55' : isRefunded || !price ? '#6B7280' : '#1E43A8'} />
+          <Icon name={isPaid ? 'circle-check' : isRefunded ? 'undo-2' : !price ? 'info' : 'clock-3'} size={20} color={isPaid ? '#057A55' : isRefunded || !price ? '#6B7280' : '#1E43A8'} />
           <Text>{isPaid
             ? `本案件已解锁，后续更新不再收费${paidAt ? ` · ${paidAt}` : ''}`
             : isRefunded ? '该订单已退款，相关付费权益已失效'
@@ -182,7 +181,7 @@ export default function PaymentsPage() {
       </View>}
 
       <View className="explanation-card">
-        <View className="explanation-icon"><Icon name="lock-2-line" size={18} color="#1E43A8" /></View>
+        <View className="explanation-icon"><Icon name="lock-keyhole" size={18} color="#1E43A8" /></View>
         <View className="explanation-copy">
           <Text className="explanation-title">安心支付</Text>
           <Text className="explanation-text">一次付费仅解锁当前案件，不会自动续费，也不会为其他案件自动扣款。</Text>

@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import { analyzeWithDeepSeek } from './deepseek'
 import { CollectedFact } from './agent'
 
@@ -63,8 +64,8 @@ ${factsText}
       generatedAt: new Date().toISOString(),
     }
   } catch (err: any) {
-    console.error('报告生成失败:', err)
-    throw new Error('报告生成失败: ' + err.message)
+    console.error('报告生成失败:', safeError(err))
+    throw new Error('报告生成失败，请稍后重试')
   }
 }
 
@@ -94,7 +95,7 @@ function parseReportResponse(response: string): {
       recommendations: data.recommendations,
     }
   } catch (err) {
-    console.error('解析报告失败:', err)
+    console.error('解析报告失败:', safeError(err))
     throw new Error('AI 返回的报告结构无效')
   }
 }

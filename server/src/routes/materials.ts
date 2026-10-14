@@ -1,16 +1,22 @@
+import { safeError } from '../utils/safe-error'
 import { Router } from 'express'
 import { db } from '../db'
+import { config } from '../config'
 import { processMaterial, supportedMaterialTypes } from '../services/material'
+import { getSignedUrl } from '../services/oss'
 
 export const materialsRouter = Router()
 
-function toMaterial(artifact: any) {
+async function toMaterial(artifact: any) {
   const metadata = artifact.metadata || {}
+  const imageUrl = config.nodeEnv === 'test' && !config.oss.accessKeyId
+    ? artifact.ossUrl
+    : await getSignedUrl(artifact.ossKey)
   return {
     id: artifact.id,
     caseId: artifact.caseId,
     type: artifact.type,
-    imageUrl: artifact.ossUrl,
+    imageUrl,
     fields: metadata.fields || [],
     rawText: metadata.rawText,
     status: artifact.status,
@@ -50,7 +56,7 @@ materialsRouter.post('/process', async (req, res) => {
     const artifact = await db.findArtifactById(currentCase.id, artifactId)
     if (!artifact) return res.status(404).json({ success: false, error: '材料不存在' })
     if (artifact.status === 'processed') {
-      return res.json({ success: true, data: toMaterial(artifact) })
+      return res.json({ success: true, data: await toMaterial(artifact) })
     }
     if (artifact.status === 'processing') {
       return res.status(409).json({ success: false, error: '材料正在处理中，请稍后重试' })
@@ -66,13 +72,16 @@ materialsRouter.post('/process', async (req, res) => {
     if (!processing) {
       const latest = await db.findArtifactById(currentCase.id, artifact.id)
       if (latest?.status === 'processed') {
-        return res.json({ success: true, data: toMaterial(latest) })
+        return res.json({ success: true, data: await toMaterial(latest) })
       }
       return res.status(409).json({ success: false, error: '材料状态已变化，请稍后重试' })
     }
     claimed = { caseId: currentCase.id, artifactId: artifact.id }
 
-    const result = await processMaterial(materialType, processing.ossUrl)
+    const processingUrl = config.nodeEnv === 'test' && !config.oss.accessKeyId
+      ? processing.ossUrl
+      : await getSignedUrl(processing.ossKey)
+    const result = await processMaterial(materialType, processingUrl)
     const updated = await db.updateArtifact(currentCase.id, artifact.id, {
       type: materialType,
       status: 'processed',
@@ -83,16 +92,16 @@ materialsRouter.post('/process', async (req, res) => {
       return res.status(409).json({ success: false, error: '材料状态已变化，请重新加载' })
     }
 
-    res.json({ success: true, data: toMaterial(updated) })
+    res.json({ success: true, data: await toMaterial(updated) })
   } catch (err: any) {
-    console.error('材料处理失败:', err)
+    console.error('材料处理失败:', safeError(err))
     if (claimed) {
       await db.updateArtifact(claimed.caseId, claimed.artifactId, {
         status: 'failed',
-        metadata: { error: err.message || '材料处理失败', failedAt: new Date().toISOString() },
+        metadata: { error: '材料处理失败，请稍后重试', failedAt: new Date().toISOString() },
       }, ['processing']).catch(() => undefined)
     }
-    res.status(422).json({ success: false, error: err.message || '材料处理失败' })
+    res.status(422).json({ success: false, error: '材料处理失败，请稍后重试' })
   }
 })
 
@@ -106,9 +115,9 @@ materialsRouter.get('/:caseId', async (req, res) => {
     const currentCase = await getOwnedCase(userId, req.params.caseId)
     if (!currentCase) return res.status(404).json({ success: false, error: '案件不存在' })
     const artifacts = await db.getArtifactsByCase(currentCase.id)
-    res.json({ success: true, data: artifacts.map(toMaterial) })
+    res.json({ success: true, data: await Promise.all(artifacts.map(toMaterial)) })
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message || '获取材料失败' })
+    res.status(500).json({ success: false, error: '获取材料失败' })
   }
 })
 
@@ -138,8 +147,8 @@ materialsRouter.post('/confirm', async (req, res) => {
     }
     const updated = await db.confirmArtifact(userId, caseId, artifact.id, fields, rawText)
     if (!updated) return res.status(409).json({ success: false, error: '材料状态已变化，请重新加载' })
-    res.json({ success: true, data: { confirmed: true, material: toMaterial(updated) } })
+    res.json({ success: true, data: { confirmed: true, material: await toMaterial(updated) } })
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message || '确认材料失败' })
+    res.status(500).json({ success: false, error: '确认材料失败' })
   }
 })

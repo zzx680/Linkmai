@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import { Router } from 'express'
 import { db } from '../db'
 import { generateReport } from '../services/report'
@@ -68,10 +69,10 @@ router.post('/generate', async (req, res) => {
     res.json({ success: true, data: { report } })
   } catch (err: any) {
     if (err.message === 'REPORT_STALE') return res.status(409).json({ success: false, error: '材料已更新，请重新生成报告' })
-    console.error('报告生成失败:', err)
+    console.error('报告生成失败:', safeError(err))
     res.status(500).json({
       success: false,
-      error: err.message || '报告生成失败',
+      error: '报告生成失败，请稍后重试',
     })
   }
 })
@@ -118,10 +119,10 @@ router.get('/:caseId', async (req, res) => {
 
     res.json({ success: true, data: { report: report.content } })
   } catch (err: any) {
-    console.error('报告查询失败:', err)
+    console.error('报告查询失败:', safeError(err))
     res.status(500).json({
       success: false,
-      error: err.message || '报告查询失败',
+      error: '报告查询失败',
     })
   }
 })

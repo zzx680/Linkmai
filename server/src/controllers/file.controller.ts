@@ -1,3 +1,4 @@
+import { safeError } from '../utils/safe-error'
 import { Request, Response } from 'express'
 import { getUploadCredentials, FileType } from '../services/oss'
 import { z } from 'zod'
@@ -48,7 +49,7 @@ export async function getPresignUrl(req: Request, res: Response) {
       })
     }
 
-    console.error('获取上传凭证失败:', error)
+    console.error('获取上传凭证失败:', safeError(error))
     return res.status(500).json({
       error: 'InternalError',
       message: '获取上传凭证失败',
@@ -85,7 +86,7 @@ export async function confirmUpload(req: Request, res: Response) {
       },
     })
   } catch (error) {
-    console.error('确认上传失败:', error)
+    console.error('确认上传失败:', safeError(error))
     return res.status(500).json({
       error: 'InternalError',
       message: '确认上传失败',

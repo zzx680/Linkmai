@@ -26,3 +26,22 @@ miniprogram/.tea/
 # Temporary files
 *.tmp
 tmp/
+
+# Local previews, caches and private credentials
+.swc/
+project.private.config.json
+.claude/scheduled_tasks.lock
+miniprogram/dist-staging/
+miniprogram/dist-h5/
+linkmai-staging-preview.*
+miniprogram/payment-preview-qr.png
+*.pem
+*.key
+api_v3_key
+wechat_api_v3_key
+*-secrets/
+.env.*
+!.env.example
+!.env.staging.example
+!.env.production.example
+!.env.development

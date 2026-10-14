@@ -105,6 +105,50 @@ export async function login(code: string): Promise<LoginResponse> {
   return result
 }
 
+export async function updateProfile(nickname: string): Promise<User> {
+  return request<User>({
+    url: '/auth/profile',
+    method: 'PATCH',
+    data: { nickname }
+  })
+}
+
+export async function uploadProfileAvatar(filePath: string): Promise<User> {
+  return new Promise((resolve, reject) => {
+    const token = getToken()
+    Taro.uploadFile({
+      url: `${API_BASE}/auth/profile/avatar`,
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success: response => {
+        if (response.statusCode === 401) {
+          expireSession(token)
+          reject(new UnauthorizedError('登录已过期，请重新登录'))
+          return
+        }
+        let body: { data?: User; message?: string; error?: string } | undefined
+        try {
+          body = JSON.parse(response.data)
+        } catch {
+          reject(new ApiError('头像上传响应解析失败', response.statusCode))
+          return
+        }
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          reject(new ApiError(body?.message || body?.error || '头像上传失败', response.statusCode))
+          return
+        }
+        if (!body?.data) {
+          reject(new ApiError('头像上传响应无效', response.statusCode))
+          return
+        }
+        resolve(body.data)
+      },
+      fail: reject
+    })
+  })
+}
+
 export function logout() {
   clearToken()
 }

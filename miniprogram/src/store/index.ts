@@ -10,6 +10,7 @@ interface AppState {
   authRetryable: boolean
   currentCase: api.Case | null
   isLoadingCase: boolean
+  caseLoadError: string | null
   messages: api.Message[]
   conversationState: api.ConversationState
   isAiTyping: boolean
@@ -22,6 +23,8 @@ interface AppState {
   logout: () => void
   checkLoginStatus: () => Promise<boolean>
   retryAuth: () => Promise<boolean>
+  updateProfile: (nickname: string) => Promise<api.User>
+  uploadProfileAvatar: (filePath: string) => Promise<api.User>
   loadCurrentCase: () => Promise<void>
   createCase: () => Promise<void>
   updateCase: (updates: Partial<api.Case>) => Promise<void>
@@ -38,13 +41,15 @@ interface AppState {
   reset: () => void
 }
 
-const initialState = {
+function createInitialState(token: string | null = null) {
+  return {
   user: null,
-  token: api.getToken(),
-  isLoggedIn: !!api.getToken(),
+  token,
+  isLoggedIn: Boolean(token),
   authRetryable: false,
   currentCase: null,
   isLoadingCase: false,
+  caseLoadError: null,
   messages: [] as api.Message[],
   conversationState: 'collecting' as api.ConversationState,
   isAiTyping: false,
@@ -52,7 +57,10 @@ const initialState = {
   uploadingFiles: new Map<string, number>(),
   currentReport: null as api.ReportData | null,
   isGeneratingReport: false
+  }
 }
+
+const initialState = createInitialState(api.getToken())
 
 /**
  * 会话内案件请求上下文。任何案件切换/创建都会 bump epoch，
@@ -71,7 +79,7 @@ function isStale(context: CaseRequestContext): boolean {
 api.setUnauthorizedHandler(() => {
   beginCaseSession(null)
   useAppStore.setState({
-    ...initialState,
+    ...createInitialState(null),
     uploadingFiles: new Map(),
     authRetryable: true
   })
@@ -95,7 +103,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     api.logout()
     beginCaseSession(null)
     set({
-      ...initialState,
+      ...createInitialState(null),
       token: null,
       isLoggedIn: false,
       uploadingFiles: new Map()
@@ -148,9 +156,37 @@ export const useAppStore = create<AppState>((set, get) => ({
     return get().checkLoginStatus()
   },
 
+  updateProfile: async (nickname) => {
+    const state = get()
+    const token = state.token
+    const userId = state.user?.id
+    if (!token || !userId) throw new Error('请先登录')
+    const user = await api.updateProfile(nickname)
+    const latest = get()
+    if (!latest.isLoggedIn || latest.token !== token || latest.user?.id !== userId) {
+      throw new Error('登录状态已变化，请重试')
+    }
+    set({ user })
+    return user
+  },
+
+  uploadProfileAvatar: async (filePath) => {
+    const state = get()
+    const token = state.token
+    const userId = state.user?.id
+    if (!token || !userId) throw new Error('请先登录')
+    const user = await api.uploadProfileAvatar(filePath)
+    const latest = get()
+    if (!latest.isLoggedIn || latest.token !== token || latest.user?.id !== userId) {
+      throw new Error('登录状态已变化，请重试')
+    }
+    set({ user })
+    return user
+  },
+
   loadCurrentCase: async () => {
     const requestEpoch = requestGuard.invalidate()
-    set({ isLoadingCase: true, isAiTyping: false })
+    set({ isLoadingCase: true, caseLoadError: null, isAiTyping: false })
     try {
       const currentCase = await api.getCurrentCase()
       if (requestEpoch !== requestGuard.getSnapshot().epoch) return
@@ -159,6 +195,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({
           currentCase: null,
           isLoadingCase: false,
+          caseLoadError: null,
           materials: [],
           messages: [],
           currentReport: null,
@@ -172,6 +209,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({
         currentCase,
         isLoadingCase: false,
+        caseLoadError: null,
         ...(isDifferentCase ? {
           materials: [],
           messages: [],
@@ -200,14 +238,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (error) {
       if (requestEpoch !== requestGuard.getSnapshot().epoch) return
       requestGuard.invalidate()
-      set({ currentCase: null, materials: [], messages: [], currentReport: null, isLoadingCase: false })
+      set({ isLoadingCase: false, caseLoadError: (error as Error).message || '案件加载失败，请重试' })
       console.error('Load case error:', error)
     }
   },
 
   createCase: async () => {
+    const token = get().token
+    const userId = get().user?.id
+    const epoch = requestGuard.getSnapshot().epoch
     try {
       const currentCase = await api.createCase()
+      const latest = get()
+      if (!latest.isLoggedIn || latest.token !== token || latest.user?.id !== userId
+        || requestGuard.getSnapshot().epoch !== epoch) return
       beginCaseSession(currentCase.id)
       set({
         currentCase,
@@ -283,7 +327,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         isAiTyping: false
       }))
     } catch (error: unknown) {
-      if (isStale(context)) return
+      if (isStale(context)) {
+        set(state => state.currentCase?.id === currentCase.id ? { isGeneratingReport: false } : {})
+        return
+      }
       set(state => ({
         messages: state.messages.filter(message => message.id !== temporaryMessage.id),
         isAiTyping: false
@@ -392,7 +439,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ isGeneratingReport: true })
     try {
       const report = await api.generateReport(currentCase.id, facts)
-      if (isStale(context)) return
+      if (isStale(context)) {
+        set(state => state.currentCase?.id === currentCase.id ? { isGeneratingReport: false } : {})
+        return
+      }
       set(state => ({
         currentReport: report,
         isGeneratingReport: false,
@@ -422,7 +472,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   reset: () => {
     beginCaseSession(null)
-    set({ ...initialState, uploadingFiles: new Map() })
+    set({ ...createInitialState(null), uploadingFiles: new Map() })
   }
 }))
 

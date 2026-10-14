@@ -1,173 +1,115 @@
-# 灵迈 - 一站式交通事故处理服务
+# 灵迈 — 交通事故处理助手
 
-## 项目结构
+面向中国大陆交通事故受伤者及家属的微信小程序。当前流程：微信登录 → 创建案件 → 描述事故和上传材料 → 识别并确认材料字段 → 按案件一次性付费 → 生成报告 → 补充材料后重新分析。
 
-```
-灵迈/
-├── miniprogram/          # 微信小程序前端（Taro）
-│   ├── src/
-│   │   ├── pages/       # 四个主页面
-│   │   │   ├── agent/   # AI Agent 对话
-│   │   │   ├── case/    # 历史案例
-│   │   │   ├── consultation/ # 律师咨询
-│   │   │   └── profile/ # 个人中心
-│   │   ├── store/       # Zustand 状态管理
-│   │   ├── utils/       # 工具函数
-│   │   └── styles/      # 全局样式
-│   └── dist/            # 编译输出
-│
-└── server/              # Node.js 后端（Express）
-    ├── src/
-    │   ├── controllers/ # 业务控制器
-    │   ├── routes/      # 路由定义
-    │   ├── services/    # 核心服务
-    │   │   ├── deepseek.ts  # DeepSeek AI 集成
-    │   │   ├── oss.ts       # 阿里云 OSS
-    │   │   └── ocr.ts       # OCR 识别
-    │   └── index.ts     # 服务入口
-    └── dist/            # 编译输出
+## 工程入口
+
+```text
+miniprogram/                 # 当前客户端：Taro 4 + React 18 + Zustand
+  src/pages/case/            # 首页、当前案件和支付入口
+  src/pages/agent/           # 处理流程、对话和材料上传
+  src/pages/profile/         # 我的
+  src/pages/materials/       # 材料识别结果确认
+  src/pages/report/          # 案件分析报告
+  src/pages/payments/        # 付费权益与支付恢复
+  src/styles/               # 统一蓝色设计变量与样式
+  tests/                    # 前端逻辑与页面渲染回归测试
+server/                     # Express + TypeScript（CommonJS）
+  src/routes/               # 登录、案件、对话、材料、报告、支付、上传
+  src/services/             # AI、OCR、OSS、微信支付等服务
+  src/db/                   # PostgreSQL 与本地内存实现
+  scripts/                  # 测试和部署脚本
+project.config.json         # 微信开发者工具入口，指向 miniprogram/dist/
 ```
 
-## 技术栈
+根目录 `src/` 是历史客户端代码；当前小程序开发以 `miniprogram/src/` 为准。页面注册以 `miniprogram/src/app.config.ts` 为准，`case-detail` 尚未注册。
 
-### 前端
-- **框架**: Taro 4 + React 18
-- **状态管理**: Zustand
-- **样式**: SCSS + Apple Design System
-- **平台**: 微信小程序
+## 当前能力与边界
 
-### 后端
-- **框架**: Express + TypeScript
-- **AI**: DeepSeek Vision API
-- **存储**: 阿里云 OSS
-- **OCR**: 阿里云通用文字识别
+- 微信登录、当前案件管理、材料上传、OCR/图片分析、字段确认、付费权益及案件报告已有实现。
+- 对话采用信息收集、确认和修改状态机；报告目前只使用**已确认的材料字段**，并非全部聊天内容。
+- 按案件一次性收费，金额由后端返回；默认配置为 4990 分。本案件补充材料后可重新分析。
+- 微信支付 API v3 已接入下单、查单、关单及签名校验后的回调处理；权益以服务端确认结果为准。
+- 材料确认发生变化会使旧报告失效；报告发布前会核对材料快照，避免发布过时结果。
+- **文书生成尚未实现**，不属于当前开放权益；`documentGeneration` 返回 `false`。
+- **PDF/Word 导出尚未实现**，`POST /api/reports/:caseId/export` 当前返回 501。
+- 本地测试与构建通过不代表真实微信支付、云数据库、OCR/AI 服务或微信真机联调已验收。
 
-## 快速开始
+## 本地开发
 
-### 1. 安装依赖
-
-```bash
-# 前端
-cd miniprogram
-npm install
-
-# 后端
-cd server
-npm install
-```
-
-### 2. 配置环境变量
+分别在 `server/` 和 `miniprogram/` 执行 `npm install`。后端配置从模板开始：
 
 ```bash
 cd server
 cp .env.example .env
-# 编辑 .env 填入你的配置
 ```
 
-需要配置：
-- 阿里云 OSS（Region, Bucket, AccessKey）
-- DeepSeek API Key
+按环境配置微信登录、JWT、数据库、OSS、OCR、AI 服务及支付。配置项以 `server/src/config/index.ts` 和环境模板为准。`DB_TYPE=memory` 仅适合本地开发/测试，重启后数据丢失；staging/production 要求 PostgreSQL 和真实服务配置。
 
-### 3. 启动开发
+分别在两个终端启动：
 
 ```bash
-# 启动后端
+# 终端一：后端
 cd server
 npm run dev
+```
 
-# 编译小程序
+```bash
+# 终端二：小程序编译与监听
 cd miniprogram
 npm run dev:weapp
 ```
 
-### 4. 微信开发者工具
+微信开发者工具导入**仓库根目录**，由 `project.config.json` 定位编译产物。前端默认 API 为 `http://localhost:8000/api`；真机需配置可访问的服务地址，生产构建必须设置 HTTPS `TARO_APP_API_BASE`。
 
-1. 打开微信开发者工具
-2. 导入项目：选择 `miniprogram` 目录
-3. AppID: `wx38fafb051a96a529`
-4. 预览小程序
+## 当前 API 入口
 
-## API 文档
+除登录、健康检查和验签支付通知外，业务接口需要登录凭证。路由挂载以 `server/src/index.ts` 为准；历史文档中的 `/api/agent` 和 `/api/files/presign` 不属于当前挂载接口。
 
-### Agent 对话
+| 能力 | 接口 |
+| --- | --- |
+| 健康检查 | `GET /api/health` |
+| 微信登录、会话 | `POST /api/auth/wechat/login`、`GET /api/auth/session` |
+| 当前案件 | `GET/POST/PATCH/DELETE /api/cases/current` |
+| 当前权益 | `GET /api/cases/current/entitlement` |
+| 创建订单、查询订单 | `POST /api/cases/:caseId/payment-orders`、`GET /api/payment-orders/:orderId` |
+| 微信支付通知 | `POST /api/payments/wechat/notify` |
+| 对话 | `POST /api/conversations/current`、`GET/POST /api/conversations/current/messages` |
+| 上传图片、视频 | `POST /api/upload/image`、`POST /api/upload/video` |
+| 材料处理、确认、列表 | `POST /api/materials/process`、`POST /api/materials/confirm`、`GET /api/materials/:caseId` |
+| 生成、读取报告 | `POST /api/reports/generate`、`GET /api/reports/:caseId` |
 
-#### 创建会话
-```
-POST /api/agent/conversation
-Response: { conversationId: string }
-```
+报告生成和读取均返回 `{ success: true, data: { report } }`。
 
-#### 发送消息
-```
-POST /api/agent/message
-Body: {
-  conversationId: string
-  content: string
-  images?: string[]
-}
-Response: {
-  message: string
-  nextAction?: 'collect_media' | 'analyze' | 'generate'
-}
-```
+## 验证
 
-### 文件上传
+从仓库根目录执行；测试使用内存数据库并跳过本地 `.env`：
 
-#### 获取上传凭证
-```
-POST /api/files/presign
-Body: { fileType: 'image' | 'video' | 'document' }
-Response: {
-  region: string
-  bucket: string
-  objectKey: string
-  accessKeyId: string
-  accessKeySecret: string
-}
+```bash
+npm --prefix server run build
+./miniprogram/node_modules/.bin/tsc --noEmit -p miniprogram/tsconfig.json
+DOTENV_CONFIG_PATH=/dev/null NODE_ENV=test DB_TYPE=memory npm --prefix server test
+DOTENV_CONFIG_PATH=/dev/null NODE_ENV=test DB_TYPE=memory ./server/node_modules/.bin/tsx --test miniprogram/tests/*.test.ts
 ```
 
-## 工作流程
+小程序开发构建：
 
-1. **初始化** - 用户进入 Agent 页面
-2. **收集信息** - 引导用户上传材料或描述事故
-3. **图片分析** - DeepSeek Vision 分析现场照片
-4. **责任判定** - AI 基于交通规则和案例分析责任
-5. **赔偿计算** - 计算各项赔偿金额
-6. **生成报告** - 生成 PDF 定责和赔偿报告
-
-## 成本估算
-
-基于 DeepSeek Flash 模型：
-- 每个案例约 3-5 张图片
-- 成本约 ¥0.013/案例
-- 比 Claude Vision 便宜 50 倍
+```bash
+npm --prefix miniprogram run build:weapp:dev
+```
 
 ## 部署
 
-### 后端部署
+后端构建后通过 `npm start` 启动；数据库迁移与 staging 部署步骤见 [部署指南](server/docs/DEPLOYMENT.md)。支付私钥和 API v3 密钥使用服务端文件或环境变量配置，不放入客户端或 Git。
+
+小程序生产构建示例（替换为实际服务域名）：
 
 ```bash
-npm run build
-npm start
+cd miniprogram
+TARO_APP_API_BASE=https://your-api.example.com/api npm run build:weapp
 ```
 
-### 小程序发布
-
-1. 编译生产版本：`npm run build:weapp`
-2. 微信开发者工具上传代码
-3. 微信公众平台提交审核
-
-## 开发状态
-
-- ✅ 前端四页面 + Apple 风格 UI
-- ✅ 文件上传工具函数
-- ✅ Agent 状态机
-- ✅ DeepSeek Vision 集成
-- ✅ OSS 文件管理
-- ✅ OCR 文字识别
-- 🚧 真实 AI 分析逻辑
-- 🚧 PDF 报告生成
-- 🚧 微信登录认证
+完成微信开发者工具和真机验证后，再上传并提交审核。历史交接文档用于了解背景，当前行为应结合代码和测试核实。
 
 ## 许可证
 

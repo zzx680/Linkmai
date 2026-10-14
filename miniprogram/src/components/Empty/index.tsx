@@ -12,7 +12,7 @@ interface EmptyProps {
 }
 
 const Empty: FC<EmptyProps> = ({
-  icon = 'file-list-line',
+  icon = 'files',
   title,
   description,
   action,

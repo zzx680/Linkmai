@@ -1,3 +1,4 @@
+import { safeError } from './utils/safe-error'
 import 'dotenv/config'
 import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
@@ -73,9 +74,9 @@ if (process.env.NODE_ENV === 'test') {
   app.use('/api/test/payments', authMiddleware, testPaymentRouter)
 }
 app.use('/api/conversations', authMiddleware, conversationsRouter)
-app.use('/api/reports', authMiddleware, reportRoutes)
-app.use('/api/materials', authMiddleware, materialsRouter)
-app.use('/api/upload', authMiddleware, uploadRoutes)
+app.use('/api/reports', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 10 }), reportRoutes)
+app.use('/api/materials', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 20 }), materialsRouter)
+app.use('/api/upload', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 30 }), uploadRoutes)
 
 // 错误处理
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -86,7 +87,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === 'CORS_ORIGIN_NOT_ALLOWED') {
     return res.status(403).json({ error: 'ForbiddenOrigin', message: '请求来源不允许' })
   }
-  console.error('服务器错误:', err)
+  console.error('服务器错误:', safeError(err))
   res.status(500).json({
     error: 'InternalError',
     message: '服务器内部错误',
@@ -120,6 +121,6 @@ async function start() {
 }
 
 start().catch((err) => {
-  console.error('启动失败:', err)
+  console.error('启动失败:', safeError(err))
   process.exit(1)
 })

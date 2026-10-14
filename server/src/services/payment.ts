@@ -7,7 +7,8 @@ const entitlementFeatures = (paid: boolean) => ({
   fullReport: paid,
   compensationEstimate: paid,
   actionPlan: paid,
-  documentGeneration: paid,
+  // Keep the response field compatible, but do not grant an unimplemented feature.
+  documentGeneration: false,
   rerunAfterMaterialUpdate: paid,
 })
 
@@ -98,7 +99,7 @@ async function recoverCreateOrderFailure(order: PaymentOrder, originalError: unk
 }
 
 async function reconcilePaymentOrder(order: PaymentOrder): Promise<PaymentOrder> {
-  if (!['created', 'pending'].includes(order.status)) return order
+  if (order.status === 'refunded') return order
 
   let providerOrder: ProviderOrder
   try {
@@ -107,6 +108,7 @@ async function reconcilePaymentOrder(order: PaymentOrder): Promise<PaymentOrder>
     if ((error as Error).message === 'PAYMENT_ORDER_NOT_FOUND' && order.status === 'created') {
       return (await db.updatePaymentOrderStatus(order.id, 'failed')) || order
     }
+    if (order.status === 'paid') return order
     throw error
   }
 
@@ -227,6 +229,15 @@ export async function processPaymentNotification(
   const notification = paymentProvider.verifyNotification(headers, rawBody)
   const order = await db.findPaymentOrderByOrderNo(notification.orderNo)
   if (!order) throw new Error('ORDER_NOT_FOUND')
+  if (notification.eventType === 'REFUND.SUCCESS' || notification.tradeState === 'REFUND') {
+    if (order.status === 'refunded') return { success: true, paid: false }
+    if (order.status !== 'paid') throw new Error('ORDER_NOT_PAYABLE')
+    if (!notification.transactionId || notification.transactionId !== order.wechatTransactionId) {
+      throw new Error('TRANSACTION_MISMATCH')
+    }
+    await db.refundPaymentOrder(order.id)
+    return { success: true, paid: false }
+  }
   validateProviderOrder(order, notification)
 
   if (notification.tradeState === 'SUCCESS') {
