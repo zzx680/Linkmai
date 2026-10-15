@@ -1,0 +1,182 @@
+@use '../../styles/design-tokens.scss' as *;
+
+.support-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 56rpx 32rpx calc(72rpx + env(safe-area-inset-bottom));
+  background: $color-bg-base;
+}
+
+.support-header {
+  display: flex;
+  flex-direction: column;
+  margin: 0 8rpx 40rpx;
+}
+
+.support-eyebrow {
+  color: $color-brand-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 1rpx;
+}
+
+.support-title {
+  margin-top: 12rpx;
+  color: $color-text-primary;
+  font-size: 56rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+  letter-spacing: -2rpx;
+}
+
+.support-description {
+  margin-top: 18rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+  line-height: $line-height-relaxed;
+}
+
+.support-section {
+  margin-top: 48rpx;
+}
+
+.section-title {
+  display: block;
+  margin: 0 8rpx 20rpx;
+  color: $color-text-primary;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.support-card {
+  display: flex;
+  gap: 20rpx;
+  box-sizing: border-box;
+  padding: 30rpx;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-xl;
+  background: $color-bg-elevated;
+  box-shadow: $shadow-sm;
+}
+
+.card-icon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-md;
+  background: $color-brand-light;
+}
+
+.card-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.card-title {
+  color: $color-text-primary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+}
+
+.card-description {
+  margin-top: 10rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
+}
+
+.feedback-card {
+  display: block;
+}
+
+.feedback-label {
+  display: block;
+  color: $color-text-primary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+}
+
+.feedback-input {
+  width: 100%;
+  min-height: 224rpx;
+  box-sizing: border-box;
+  margin-top: 20rpx;
+  padding: 22rpx;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-lg;
+  color: $color-text-primary;
+  background: $color-bg-base;
+  font-size: $font-size-base;
+  line-height: $line-height-relaxed;
+}
+
+.feedback-count {
+  display: block;
+  margin-top: 12rpx;
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  text-align: right;
+}
+
+.feedback-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96rpx;
+  margin-top: 24rpx;
+  border-radius: $radius-md;
+  color: #FFFFFF;
+  background: $color-brand-primary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+}
+
+.feedback-submit::after {
+  border: 0;
+}
+
+.privacy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.about-page {
+  align-items: center;
+}
+
+.about-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 112rpx;
+  height: 112rpx;
+  margin: 0 8rpx 32rpx;
+  border-radius: $radius-xl;
+  color: #FFFFFF;
+  background: $color-brand-dark;
+  font-size: 30rpx;
+  font-weight: $font-weight-bold;
+}
+
+.about-header {
+  margin-bottom: 36rpx;
+}
+
+.about-version,
+.support-note {
+  display: block;
+  margin: 32rpx 8rpx 0;
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  line-height: $line-height-relaxed;
+}
+
+.about-version {
+  text-align: center;
+}

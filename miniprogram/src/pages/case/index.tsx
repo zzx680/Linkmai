@@ -1,4 +1,4 @@
-import { Button, Image, Text, View } from '@tarojs/components'
+import { Button, Text, View } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useMemo, useState } from 'react'
 import { Avatar, Icon, SkeletonCaseCard } from '../../components'
@@ -9,7 +9,6 @@ import { useAppStore } from '../../store'
 import { formatPaymentPrice } from '../../utils/payment'
 import { getCaseNextStep, getHomeMode, getHomeStepDetail } from './home-state'
 import CaseJourney from '../../components/CaseJourney'
-import brandMark from '../../assets/brand/linkmai-mark.png'
 import './index.scss'
 
 export default function CasePage() {
@@ -106,11 +105,8 @@ export default function CasePage() {
   if (mode === 'logged_out' || (!user && isAuthenticating)) {
     return (
       <View className="case-page welcome-page">
-        <View className="welcome-brand"><Image src={brandMark} mode="aspectFit" className="welcome-brand-mark" /><Text>灵迈 LINKMAI</Text><Text className="welcome-service">交通事故助手</Text></View>
         <View className="welcome-intro">
-          <Text className="welcome-eyebrow">把复杂的处理过程，理清楚</Text>
-          <Text className="welcome-title">事故发生后，<Text className="welcome-title-blue">下一步不必独自摸索。</Text></Text>
-          <Text className="welcome-description">从讲清经过、整理材料开始，逐步形成可核对的案件分析与行动建议。</Text>
+          <Text className="welcome-title">你好，欢迎使用灵迈</Text>
         </View>
         <View className="welcome-process">
           <View className="welcome-section-heading"><Text>从这里开始</Text><Text className="welcome-section-caption">按自己的进度，逐步处理</Text></View>
@@ -120,9 +116,9 @@ export default function CasePage() {
             ['03', '形成处理方案', '确认事实后，按需解锁案件分析与行动建议。']
           ].map(([number, title, copy]) => <View className="welcome-process-row" key={number}><Text className="welcome-process-number">{number}</Text><View className="welcome-process-copy"><Text className="welcome-process-title">{title}</Text><Text className="welcome-process-detail">{copy}</Text></View></View>)}
         </View>
-        {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text><Text className="auth-error-detail">{authError}</Text><Text className="auth-error-detail">请检查网络与服务配置，然后重试。</Text></View>}
-        <View className="welcome-start"><Button className="welcome-login" loading={isAuthenticating} disabled={isAuthenticating} onClick={handlePrimaryAction}>{isAuthenticating ? '正在连接微信账户' : authRetryable ? '重新连接微信账户' : '微信登录并开始'}</Button><Text className="welcome-privacy">案件与材料在登录后保存 · 按需解锁 · 不自动续费</Text></View>
-        <View className="welcome-boundary"><Text>重要提示</Text><Text>灵迈提供 AI 辅助整理与分析，不替代专业法律意见。涉及紧急情况，请优先联系相关救援部门。</Text></View>
+        {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text></View>}
+        <View className="welcome-start"><Button className="welcome-login" loading={isAuthenticating} disabled={isAuthenticating} onClick={handlePrimaryAction}>{isAuthenticating ? '正在连接微信账户' : authRetryable ? '重新连接' : '微信登录并开始'}</Button></View>
+        <View className="welcome-boundary"><Text>灵迈提供 AI 辅助整理与分析，不替代专业法律意见。</Text></View>
       </View>
     )
   }
@@ -157,7 +153,7 @@ export default function CasePage() {
   return (
     <View className="case-page">
       <CaseJourney active={nextStep === 'view_report' ? 3 : nextStep === 'unlock_full_plan' || nextStep === 'view_payment_status' ? 2 : nextStep === 'confirm_materials' ? 1 : 0} title={hasCase ? '每一步，都有迹可循。' : '先把经过讲清楚。'} description={hasCase ? '材料、事实与下一步行动，集中在你的案件工作台。' : '创建案件后，灵迈会通过对话帮你梳理事故信息。'} />
-      {authError && <View className="auth-error-panel"><Text className="auth-error-title">账户连接需要恢复</Text><Text className="auth-error-detail">{authError}</Text><Button loading={isAuthenticating} disabled={isAuthenticating} onClick={() => retryAuth()} className="auth-retry">重新连接</Button></View>}
+      {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text><Button loading={isAuthenticating} disabled={isAuthenticating} onClick={() => retryAuth()} className="auth-retry">重新连接</Button></View>}
       <View className="identity-block">
         <View className="identity-topline">
           {isLoggedIn && <Avatar name={nickname} src={user?.avatar} size={40} />}

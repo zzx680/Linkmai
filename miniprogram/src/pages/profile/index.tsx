@@ -62,7 +62,15 @@ export default function Profile() {
       return
     }
     if (key === 'help') {
-      Taro.showToast({ title: '请在处理页面描述你的问题', icon: 'none' })
+      Taro.navigateTo({ url: '/pages/help/index' })
+      return
+    }
+    if (key === 'privacy') {
+      Taro.navigateTo({ url: '/pages/privacy/index' })
+      return
+    }
+    if (key === 'about') {
+      Taro.navigateTo({ url: '/pages/about/index' })
       return
     }
     if (key === 'login') {
@@ -146,8 +154,8 @@ export default function Profile() {
       title: '帮助与设置',
       items: [
         { icon: 'circle-help', label: '帮助与反馈', key: 'help' },
-        { icon: 'shield-check', label: '隐私与安全', key: 'help' },
-        { icon: 'info', label: '关于灵迈', key: 'help' }
+        { icon: 'shield-check', label: '隐私与安全', key: 'privacy' },
+        { icon: 'info', label: '关于灵迈', key: 'about' }
       ]
     }
   ]
@@ -174,7 +182,7 @@ export default function Profile() {
               : <Text className="user-caption">完成登录后可保存案件进度</Text>}
           </View>
         </View>
-        <Icon name="chevron-right" size={24} color="#000000" />
+        <Icon name="chevron-right" size={24} color="#FFFFFF" />
       </View>
 
       {isEditingProfile && (
@@ -230,8 +238,7 @@ export default function Profile() {
         </View>
       )}
 
-      <View className="profile-service-note"><Text className="note-title">你的案件，由你掌握</Text><Text className="note-copy">随时继续处理、核对原始材料，或查看当前案件权益。</Text></View>
-      {authError && <View className="auth-error-panel"><Text className="auth-error-title">账户连接未完成</Text><Text className="auth-error-detail">{authError}</Text><Button className="auth-retry" loading={isAuthenticating} disabled={isAuthenticating} onClick={() => openTask('login')}>重新连接</Button></View>}
+      {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text><Button className="auth-retry" loading={isAuthenticating} disabled={isAuthenticating} onClick={() => openTask('login')}>重新连接</Button></View>}
       <View className="stats-grid">
         <View className="stat-card" onClick={() => openTask('case')}>
           <Text className="stat-value">{caseCount}</Text>

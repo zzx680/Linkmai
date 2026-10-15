@@ -5,7 +5,10 @@ export default defineAppConfig({
     'pages/profile/index',
     'pages/materials/index',
     'pages/report/index',
-    'pages/payments/index'
+    'pages/payments/index',
+    'pages/help/index',
+    'pages/privacy/index',
+    'pages/about/index'
   ],
   window: {
     backgroundTextStyle: 'dark',
