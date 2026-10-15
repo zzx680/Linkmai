@@ -287,17 +287,18 @@
 .welcome-service { margin-left: auto; font-size: 24rpx; color: $color-text-secondary; font-weight: 400; }
 .welcome-intro { padding: 56rpx 0 40rpx; }
 .welcome-eyebrow { display: block; color: $color-brand-primary; font-size: 24rpx; letter-spacing: 2rpx; margin-bottom: 24rpx; }
-.welcome-title { display: block; color: $color-brand-dark; font-size: 56rpx; line-height: 1.4; font-weight: 600; letter-spacing: -2rpx; }
+.welcome-title { display: block; color: #000000; font-size: 56rpx; line-height: 1.4; font-weight: 600; letter-spacing: -2rpx; }
+.welcome-title-line { display: block; }
 .welcome-title-blue { display: block; color: $color-brand-primary; }
 .welcome-description { display: block; margin-top: 24rpx; color: $color-text-secondary; font-size: 30rpx; line-height: 1.75; }
 .welcome-process { padding: 32rpx; background: $color-bg-base; border-radius: $radius-xl; }
-.welcome-section-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx; justify-content: space-between; font-size: 30rpx; font-weight: 600; }
+.welcome-section-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx; justify-content: space-between; font-size: 32rpx; font-weight: 600; }
 .welcome-section-caption { font-size: 22rpx; color: $color-text-secondary; font-weight: 400; }
 .welcome-process-row { display: flex; gap: 24rpx; padding-top: 32rpx; }
-.welcome-process-number { flex: none; font-size: 28rpx; color: $color-brand-primary; line-height: 1.5; font-family: $font-family-mono; }
+.welcome-process-number { flex: none; font-size: 26rpx; color: $color-brand-primary; line-height: 1.5; font-family: $font-family-mono; }
 .welcome-process-copy { min-width: 0; display: flex; flex-direction: column; gap: 8rpx; }
-.welcome-process-title { display: block; font-size: 30rpx; font-weight: 600; }
-.welcome-process-detail { display: block; font-size: 28rpx; color: $color-text-secondary; line-height: 1.65; }
+.welcome-process-title { display: block; font-size: 32rpx; font-weight: 600; line-height: 1.4; }
+.welcome-process-detail { display: block; font-size: 24rpx; color: $color-text-secondary; line-height: 1.65; }
 .welcome-start { margin-top: 32rpx; }
 .welcome-login { display: flex; justify-content: center; align-items: center; min-height: 104rpx; margin: 0; border-radius: $radius-md; background: $color-brand-primary; color: #fff; font-size: 32rpx; font-weight: 600; }
 .welcome-login[disabled] { background: $color-brand-light; color: $color-brand-primary; }

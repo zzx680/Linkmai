@@ -164,7 +164,6 @@ export default function Profile() {
     <View className="profile-page">
       <View className="profile-header">
         <View>
-          <Text className="profile-eyebrow">我的</Text>
           <Text className="profile-title">账户与案件</Text>
         </View>
         <View className="profile-header-icon" onClick={() => openTask('help')}>

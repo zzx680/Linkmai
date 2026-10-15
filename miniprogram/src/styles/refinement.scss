@@ -65,4 +65,5 @@
 .profile-page { box-sizing: border-box; }
 .profile-page .user-card { background: $color-brand-dark; color: #fff; padding: 40rpx 32rpx; border-radius: $radius-xl; box-shadow: none; }
 .profile-page .user-name, .profile-page .user-caption { color: #fff; }
+.profile-page .auth-retry { color: #000000; }
 @media (prefers-reduced-motion: reduce) { .agent-page .assistant-mark, .agent-page .assistant-mark::after { animation: none; } }
