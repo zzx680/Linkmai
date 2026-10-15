@@ -6,6 +6,7 @@ import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import { MaterialType, QuickReply } from '../../services/api'
 import { IS_H5 } from '../../config/env'
+import CaseJourney from '../../components/CaseJourney'
 import './index.scss'
 
 const stageLabels: Record<string, string> = {
@@ -113,6 +114,7 @@ export default function Agent() {
 
   return (
     <View className="agent-page">
+      <CaseJourney active={0} title="先说说，发生了什么？" description="从事故经过开始，逐步梳理关键事实。" />
       <View className="case-status-bar" onClick={() => currentCase && setIsContextExpanded(value => !value)}>
         <View className="status-copy">
           <Text className="case-title">案件工作台</Text>
@@ -247,6 +249,7 @@ export default function Agent() {
 
       {currentCase && (
         <View className="input-bar">
+          <Text className="composer-label">补充事故信息</Text>
           <View className="composer-shell">
             <View className={`attach-button ${isUploadingMaterial ? 'disabled' : ''}`} onClick={handleChooseImage}>
               <Icon name="plus" size={24} color="#6B7280" />

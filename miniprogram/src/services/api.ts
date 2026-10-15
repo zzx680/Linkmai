@@ -49,6 +49,7 @@ async function request<T>(config: RequestConfig): Promise<T> {
     const response = await Taro.request({
       url: `${API_BASE}${config.url}`,
       method: config.method || 'GET',
+      timeout: 15000,
       data: config.data,
       header: {
         'Content-Type': 'application/json',
@@ -75,7 +76,10 @@ async function request<T>(config: RequestConfig): Promise<T> {
       expireSession(token)
       throw new UnauthorizedError('登录已过期，请重新登录')
     }
-    throw error
+    const detail = (error as { errMsg?: string }).errMsg || ''
+    if (/timeout/i.test(detail)) throw new ApiError('连接超时，请检查网络后重试', 0)
+    if (/domain|url not in domain/i.test(detail)) throw new ApiError('服务域名未获微信许可，请检查小程序域名配置', 0)
+    throw new ApiError('无法连接服务，请确认网络及 API 服务可用', 0)
   }
 }
 
@@ -101,7 +105,6 @@ export async function login(code: string): Promise<LoginResponse> {
     method: 'POST',
     data: { code }
   })
-  setToken(result.token)
   return result
 }
 

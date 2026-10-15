@@ -21,7 +21,7 @@ interface MenuSection {
 }
 
 export default function Profile() {
-  const { user, currentCase, isLoggedIn, authRetryable, logout, retryAuth, updateProfile, uploadProfileAvatar } = useAppStore()
+  const { user, currentCase, isLoggedIn, authRetryable, authError, isAuthenticating, logout, retryAuth, updateProfile, uploadProfileAvatar } = useAppStore()
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [draftNickname, setDraftNickname] = useState('')
   const [isSavingProfile, setIsSavingProfile] = useState(false)
@@ -66,14 +66,18 @@ export default function Profile() {
       return
     }
     if (key === 'login') {
+      if (isAuthenticating) return
       retryAuth().then(ok => {
-        Taro.showToast({ title: ok ? '登录成功' : '登录失败，请重试', icon: ok ? 'success' : 'none' })
+        if (ok) Taro.showToast({ title: '登录成功', icon: 'success' })
       })
       return
     }
     if (key === 'logout') {
-      logout()
-      Taro.switchTab({ url: '/pages/case/index' })
+      Taro.showModal({ title: '退出当前账户？', content: '已保存的案件不会删除。下次登录后可以继续处理。', confirmText: '退出登录', confirmColor: '#C53434' }).then(result => {
+        if (!result.confirm) return
+        logout()
+        Taro.switchTab({ url: '/pages/case/index' })
+      })
     }
   }
 
@@ -226,6 +230,8 @@ export default function Profile() {
         </View>
       )}
 
+      <View className="profile-service-note"><Text className="note-title">你的案件，由你掌握</Text><Text className="note-copy">随时继续处理、核对原始材料，或查看当前案件权益。</Text></View>
+      {authError && <View className="auth-error-panel"><Text className="auth-error-title">账户连接未完成</Text><Text className="auth-error-detail">{authError}</Text><Button className="auth-retry" loading={isAuthenticating} disabled={isAuthenticating} onClick={() => openTask('login')}>重新连接</Button></View>}
       <View className="stats-grid">
         <View className="stat-card" onClick={() => openTask('case')}>
           <Text className="stat-value">{caseCount}</Text>
@@ -263,7 +269,7 @@ export default function Profile() {
 
       {!isLoggedIn && (
         <View className="logout-button" onClick={() => openTask('login')}>
-          <Text>{authRetryable ? '重新登录' : '登录'}</Text>
+          <Text>{isAuthenticating ? '正在连接微信账户' : authRetryable ? '重新登录' : '登录'}</Text>
         </View>
       )}
 

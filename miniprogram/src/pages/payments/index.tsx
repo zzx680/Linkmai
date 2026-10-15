@@ -7,6 +7,7 @@ import { useCasePayment } from '../../hooks/useCasePayment'
 import { useAppStore } from '../../store'
 import { entitlementLabel, formatPaymentPrice } from '../../utils/payment'
 import { IS_H5 } from '../../config/env'
+import CaseJourney from '../../components/CaseJourney'
 import './index.scss'
 
 const FEATURE_DETAILS = {
@@ -115,6 +116,7 @@ export default function PaymentsPage() {
 
   return (
     <View className="payments-page">
+      <CaseJourney active={2} title="让下一步，更有依据。" description="先核对权益与金额，再决定是否解锁当前案件。" />
       <View className="payments-header">
         <Text className="payments-eyebrow">当前案件权益</Text>
         <Text className="payments-title">解锁完整处理方案</Text>

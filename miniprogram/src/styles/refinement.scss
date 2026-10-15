@@ -1,0 +1,78 @@
+@use './design-tokens.scss' as *;
+
+.case-journey { padding: 32rpx; margin-bottom: 32rpx; background: $color-brand-dark; color: #fff; border-radius: $radius-xl; }
+.journey-heading { display: flex; justify-content: space-between; gap: 16rpx; color: #C3D6F7; font-size: 22rpx; letter-spacing: 2rpx; }
+.journey-title { display: block; margin-top: 24rpx; font-size: 44rpx; font-weight: 600; line-height: 1.3; }
+.journey-description { display: block; margin-top: 16rpx; color: #D5E3FA; font-size: 28rpx; line-height: 1.65; }
+.journey-steps { display: flex; margin-top: 32rpx; border-top: 1rpx solid #44628E; }
+.journey-step { flex: 1; min-width: 0; min-height: 96rpx; padding-top: 16rpx; display: flex; flex-direction: column; gap: 8rpx; color: #C3D6F7; font-size: 22rpx; }
+.journey-step.current { color: #fff; border-top: 4rpx solid #fff; font-weight: 600; }
+.journey-number { display: block; font-size: 24rpx; }
+.journey-step:active { opacity: .7; }
+.journey-step:focus-visible, [role='button']:focus-visible, button:focus-visible, input:focus-visible { outline: 4rpx solid #3C7DE0; outline-offset: 4rpx; }
+.auth-error-panel { margin: 24rpx 0; padding: 24rpx; border: 1rpx solid #EAC2C2; background: #FDEBEC; border-radius: $radius-md; color: #912727; }
+.auth-error-title { display: block; font-size: 28rpx; font-weight: 600; }
+.auth-error-detail { display: block; margin-top: 8rpx; font-size: 28rpx; line-height: 1.6; overflow-wrap: anywhere; }
+.auth-retry { min-height: 88rpx; padding: 0 24rpx; margin-top: 16rpx; display: flex; align-items: center; justify-content: center; color: $color-brand-primary; background: #fff; border-radius: $radius-md; font-size: 28rpx; font-weight: 600; }
+
+.case-page .identity-title { font-size: 56rpx; letter-spacing: -2rpx; }
+.case-page .identity-description { font-size: 30rpx; }
+.case-page .workbench-card { box-shadow: none; border-radius: $radius-lg; }
+.case-page .workbench-card-header { align-items: flex-start; }
+.case-page .workbench-description { font-size: 28rpx; }
+.case-page .summary-grid { border: 1rpx solid $color-border-light; border-radius: $radius-lg; background: #fff; }
+.case-page .summary-item { background: transparent; border: 0; box-shadow: none; }
+.case-page .quick-item { border-radius: 0; border: 0; border-bottom: 1rpx solid $color-border-light; box-shadow: none; }
+.case-page .quick-grid { gap: 2rpx; }
+
+.agent-page .case-journey { margin: 24rpx 24rpx 0; padding: 24rpx; flex-shrink: 0; }
+.agent-page .journey-title { font-size: 36rpx; margin-top: 12rpx; }
+.agent-page .journey-description { display: none; }
+.agent-page .journey-steps { margin-top: 16rpx; }
+.agent-page .journey-step { min-height: 64rpx; flex-direction: row; align-items: center; gap: 8rpx; padding: 8rpx 0; }
+.agent-page .case-status-bar { margin-top: 16rpx; padding: 16rpx 24rpx; box-shadow: none; border-radius: $radius-md; }
+.agent-page .assistant-mark, .agent-page .assistant-mark::after { animation: none; }
+.agent-page .assistant-mark::after { display: none; }
+.agent-page .message-content { border-radius: $radius-lg; box-shadow: none; }
+.agent-page .composer-hint { font-size: 22rpx; }
+.composer-label { display: block; font-size: 24rpx; font-weight: 600; color: $color-text-secondary; padding: 0 8rpx 12rpx; }
+
+.materials-page .page-header { display: none; }
+.materials-page .notice-card { box-shadow: none; border: 0; border-radius: 0; padding: 0 0 24rpx; background: transparent; }
+.materials-page .material-card { border-radius: $radius-lg; box-shadow: none; border: 1rpx solid $color-border-light; }
+.materials-page .type-card { min-width: 152rpx; border-radius: $radius-md; }
+.materials-page .field-row { border-bottom: 1rpx solid $color-border-light; padding: 24rpx 0; }
+.materials-page .field-input { min-height: 88rpx; font-size: 32rpx; }
+.materials-page .text-action { min-height: 96rpx; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
+
+.payments-page .payments-header { display: none; }
+.payments-page .plan-card { min-height: 320rpx; background: #fff; border: 1rpx solid $color-border-light; box-shadow: none; }
+.payments-page .plan-title, .payments-page .plan-price, .payments-page .plan-currency, .payments-page .plan-name { color: $color-text-primary; }
+.payments-page .plan-subtitle, .payments-page .plan-description, .payments-page .plan-unit, .payments-page .plan-footnote, .payments-page .plan-kicker, .payments-page .plan-price-label, .payments-page .plan-caption { color: $color-text-secondary; }
+.payments-page .status-pill { color: $color-brand-primary; background: $color-brand-light; }
+.payments-page .plan-mark { background: $color-brand-primary; border: 0; backdrop-filter: none; }
+.payments-page .plan-price-row { margin-top: 32rpx; }
+.payments-page .benefits-section { padding: 32rpx 0; margin-top: 32rpx; border-top: 1rpx solid $color-border-medium; }
+.payments-page .benefit-icon { background: $color-brand-light; border-radius: $radius-md; }
+.payments-page .benefit-item { padding: 24rpx 0; border-bottom: 1rpx solid $color-border-light; }
+
+.report-page .report-scroll { height: auto; }
+.report-page .page-header { padding-bottom: 24rpx; border-bottom: 1rpx solid $color-border-medium; }
+.report-page .report-section { border-radius: 0; border: 0; border-top: 1rpx solid $color-border-light; box-shadow: none; padding: 32rpx 0; background: transparent; }
+.report-page .section-title { font-size: 36rpx; }
+.report-page .section-text, .report-page .source-text { font-size: 30rpx; line-height: 1.75; }
+.report-page .export-button.disabled { opacity: .5; }
+
+.profile-page { box-sizing: border-box; }
+.profile-page .profile-header { margin-bottom: 24rpx; }
+.profile-page .profile-title { font-size: 48rpx; }
+.profile-page .user-card { background: $color-brand-dark; color: #fff; padding: 40rpx 32rpx; border-radius: $radius-xl; box-shadow: none; }
+.profile-page .user-name { color: #fff; }
+.profile-page .user-id, .profile-page .user-subtitle, .profile-page .edit-text { color: #D5E3FA; }
+.profile-page .stats-grid { gap: 0; border-bottom: 1rpx solid $color-border-medium; padding: 24rpx 0; }
+.profile-page .stat-card { border: 0; background: transparent; box-shadow: none; border-radius: 0; }
+.profile-page .menu-card { border-radius: $radius-lg; box-shadow: none; }
+.profile-service-note { display: flex; flex-direction: column; gap: 8rpx; padding: 24rpx 0; margin-bottom: 16rpx; border-bottom: 1rpx solid $color-border-light; }
+.profile-service-note .note-title { font-size: 28rpx; font-weight: 600; color: $color-brand-primary; }
+.profile-service-note .note-copy { font-size: 28rpx; color: $color-text-secondary; line-height: 1.65; }
+@media (prefers-reduced-motion: reduce) { .agent-page .assistant-mark, .agent-page .assistant-mark::after { animation: none; } }

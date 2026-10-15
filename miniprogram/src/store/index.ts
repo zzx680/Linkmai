@@ -8,6 +8,8 @@ interface AppState {
   token: string | null
   isLoggedIn: boolean
   authRetryable: boolean
+  authError: string | null
+  isAuthenticating: boolean
   currentCase: api.Case | null
   isLoadingCase: boolean
   caseLoadError: string | null
@@ -47,6 +49,8 @@ function createInitialState(token: string | null = null) {
   token,
   isLoggedIn: Boolean(token),
   authRetryable: false,
+  authError: null as string | null,
+  isAuthenticating: false,
   currentCase: null,
   isLoadingCase: false,
   caseLoadError: null,
@@ -61,6 +65,8 @@ function createInitialState(token: string | null = null) {
 }
 
 const initialState = createInitialState(api.getToken())
+let authRevision = 0
+let authPromise: Promise<boolean> | null = null
 
 /**
  * 会话内案件请求上下文。任何案件切换/创建都会 bump epoch，
@@ -90,16 +96,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   ...initialState,
 
   login: async (code) => {
+    const revision = authRevision
     const result = await api.login(code)
+    if (revision !== authRevision) return
+    api.setToken(result.token)
     set({
       token: result.token,
       isLoggedIn: true,
       user: result.user,
-      authRetryable: false
+      authRetryable: false,
+      authError: null
     })
   },
 
   logout: () => {
+    authRevision += 1
+    authPromise = null
     api.logout()
     beginCaseSession(null)
     set({
@@ -110,51 +122,56 @@ export const useAppStore = create<AppState>((set, get) => ({
     })
   },
 
-  checkLoginStatus: async () => {
-    const restoreSession = async () => {
+  checkLoginStatus: () => {
+    if (authPromise) return authPromise
+    const revision = authRevision
+    set({ isAuthenticating: true, authError: null })
+    const restore = async () => {
       try {
-        const loginResult = await Taro.login()
-        if (!loginResult.code) return false
-        await get().login(loginResult.code)
-        return true
-      } catch {
-        return false
-      }
-    }
-
-    const token = api.getToken()
-    try {
-      if (token) {
-        try {
-          const user = await api.getSession()
-          set({ token, isLoggedIn: true, user })
-        } catch {
-          api.clearToken()
-          if (!await restoreSession()) {
-            set({ isLoggedIn: false, authRetryable: true })
-            return false
+        const token = api.getToken()
+        let needsLogin = !token
+        if (token) {
+          try {
+            const user = await api.getSession()
+            if (revision !== authRevision) return false
+            set({ token, isLoggedIn: true, user })
+          } catch (error) {
+            if (!(error instanceof api.UnauthorizedError)) throw error
+            needsLogin = true
           }
         }
-      } else if (!await restoreSession()) {
-        set({ isLoggedIn: false, authRetryable: true })
+        if (needsLogin) {
+          let code: string | undefined
+          try {
+            code = (await Taro.login()).code
+          } catch {
+            throw new Error('微信授权未完成，请确认开发者工具已登录并重试')
+          }
+          if (revision !== authRevision) return false
+          if (!code) throw new Error('未获取到微信授权码，请重新登录')
+          await get().login(code)
+          if (revision !== authRevision) return false
+        }
+        set({ authRetryable: false, authError: null })
+        await get().loadCurrentCase()
+        return get().isLoggedIn
+      } catch (error) {
+        if (revision !== authRevision) return false
+        const message = error instanceof Error ? error.message : '登录暂不可用，请稍后重试'
+        set({ authRetryable: true, authError: message })
         return false
+      } finally {
+        if (revision === authRevision) {
+          set({ isAuthenticating: false })
+          authPromise = null
+        }
       }
-
-      await get().loadCurrentCase()
-      return true
-    } catch (error) {
-      console.error('Login restore error:', error)
-      api.clearToken()
-      beginCaseSession(null)
-      set({ user: null, token: null, isLoggedIn: false, authRetryable: true })
-      return false
     }
+    authPromise = restore()
+    return authPromise
   },
 
-  retryAuth: async () => {
-    set({ authRetryable: false })
-    return get().checkLoginStatus()
-  },
+  retryAuth: () => get().checkLoginStatus(),
 
   updateProfile: async (nickname) => {
     const state = get()

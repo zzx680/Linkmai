@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro'
 import { useAppStore } from '../../store'
 import { MaterialField, MaterialType } from '../../services/api'
 import { Icon } from '../../components'
+import CaseJourney from '../../components/CaseJourney'
 import './index.scss'
 
 const materialTypes: Array<{ type: MaterialType; icon: string; label: string; description: string }> = [
@@ -99,6 +100,7 @@ export default function Materials() {
 
   return (
     <View className="materials-page">
+      <CaseJourney active={1} title="让每个事实，都可核对。" description={`当前共 ${materials.length} 份材料；先核对识别结果，再用于案件分析。`} />
       <View className="page-header">
         <View>
           <Text className="eyebrow">{currentCase ? `案件 #${currentCase.id.slice(0, 8)}` : '材料工作区'}</Text>

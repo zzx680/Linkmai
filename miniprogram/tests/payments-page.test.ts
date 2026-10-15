@@ -46,7 +46,20 @@ function renderPage(options: {
       },
     },
   }
+  const journeyPath = path.resolve(__dirname, '../src/components/CaseJourney.tsx')
+  const journeyModule = { exports: {} as { default: React.ComponentType } }
+  vm.runInNewContext(ts.transpileModule(readFileSync(journeyPath, 'utf8'), {
+    compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
+  }).outputText, {
+    module: journeyModule, exports: journeyModule.exports,
+    require(id: string) {
+      if (id === '@tarojs/components') return { View: 'div', Text: 'span' }
+      if (id === '@tarojs/taro') return { switchTab() {}, navigateTo() {} }
+      return pageRequire(id)
+    },
+  }, { filename: journeyPath })
   const mocks: Record<string, unknown> = {
+    '../../components/CaseJourney': journeyModule.exports,
     '@tarojs/components': { View: 'div', Text: 'span' },
     '@tarojs/taro': { useDidShow() {} },
     '../../services/api': { getCurrentCase: async () => state.currentCase },
