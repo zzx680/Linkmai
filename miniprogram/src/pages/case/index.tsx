@@ -106,7 +106,7 @@ export default function CasePage() {
     return (
       <View className="case-page welcome-page">
         <View className="welcome-intro">
-          <Text className="welcome-title">你好👋<Text className="welcome-title-line">欢迎使用灵迈</Text></Text>
+          <Text className="welcome-title">Hello👋<Text className="welcome-title-line">欢迎使用灵迈</Text></Text>
         </View>
         <View className="welcome-process">
           <View className="welcome-section-heading"><Text>从这里开始</Text><Text className="welcome-section-caption">按自己的进度，逐步处理</Text></View>

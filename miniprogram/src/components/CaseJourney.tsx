@@ -10,7 +10,7 @@ export default function CaseJourney({ active, title, description }: { active: nu
   }
   return (
     <View className="case-journey">
-      <View className="journey-heading"><Text className="journey-kicker">LINKMAI · 案件服务</Text><Text className="journey-stage">{String(active + 1).padStart(2, '0')} / 04</Text></View>
+      <View className="journey-heading"><Text className="journey-stage">{String(active + 1).padStart(2, '0')} / 04</Text></View>
       <Text className="journey-title">{title}</Text>
       <Text className="journey-description">{description}</Text>
       <View className="journey-steps">
