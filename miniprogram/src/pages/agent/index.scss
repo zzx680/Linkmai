@@ -292,71 +292,9 @@
 .context-material-status { color: $color-warning-text; font-size: 20rpx; &.confirmed { color: $color-success; } }
 
 .conversation-section { margin-bottom: 18rpx; }
-.messages-list { display: flex; flex-direction: column; gap: 30rpx; padding: 10rpx 0 0; }
+.messages-list { display: flex; flex-direction: column; padding: 10rpx 0 0; }
 
-.message {
-  display: flex;
-  align-items: flex-start;
-  gap: 16rpx;
-  animation: messageEnter 240ms ease-out both;
-
-  &.assistant { padding-right: 44rpx; }
-  &.user { justify-content: flex-end; padding-left: 80rpx; }
-}
-
-.message-avatar {
-  width: 48rpx;
-  height: 48rpx;
-  margin-top: 4rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 16rpx;
-  color: $color-text-inverse;
-  font-size: 20rpx;
-  font-weight: $font-weight-semibold;
-  background: $color-brand-primary;
-  box-shadow: 0 8rpx 18rpx rgba(23, 75, 155, 0.16);
-}
-
-.message-body { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
-.user .message-body { align-items: flex-end; }
-
-.message-bubble {
-  max-width: 100%;
-  padding: 4rpx 0;
-  color: $color-text-primary;
-
-  .message-text {
-    display: block;
-    font-size: $font-size-base;
-    line-height: 1.72;
-    word-break: break-word;
-  }
-}
-
-.user .message-bubble {
-  padding: 20rpx 26rpx;
-  border-radius: 28rpx 28rpx 8rpx 28rpx;
-  background: $color-brand-primary;
-  color: $color-text-inverse;
-  box-shadow: 0 12rpx 30rpx rgba(23, 75, 155, 0.16);
-}
-
-.message-images {
-  margin-bottom: 14rpx;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10rpx;
-}
-
-.message-image {
-  width: 210rpx;
-  height: 160rpx;
-  border-radius: 18rpx;
-  object-fit: cover;
-}
+.chat-message-row { width: 100%; margin-bottom: 24rpx; }
 
 .quick-replies {
   margin-top: 16rpx;
@@ -381,154 +319,21 @@
   &:active { transform: scale(0.97); background: $color-brand-light; }
 }
 
-.loading {
-  min-width: 86rpx;
-  padding: 18rpx 20rpx;
-  display: flex;
-  align-items: center;
-  gap: 9rpx;
-  border-radius: 22rpx;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: $shadow-xs;
-}
-
-.loading-dot {
-  width: 9rpx;
-  height: 9rpx;
-  border-radius: $radius-full;
-  background: $color-brand-primary;
-  animation: typingBounce 1.15s ease-in-out infinite;
-  &:nth-child(2) { animation-delay: 140ms; }
-  &:nth-child(3) { animation-delay: 280ms; }
-}
-
-.typing-label { margin-top: 8rpx; color: $color-text-tertiary; font-size: 20rpx; }
-
 .input-bar {
   flex-shrink: 0;
-  padding: 10rpx 24rpx 14rpx;
-  background: linear-gradient(180deg, rgba(245, 247, 250, 0), rgba(245, 247, 250, 0.96) 24%);
+  background: $color-canvas;
 }
 
-.composer-shell {
-  min-height: 100rpx;
-  box-sizing: border-box;
-  padding: 12rpx 12rpx 12rpx 16rpx;
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-  border: 1rpx solid rgba(30, 67, 168, 0.1);
-  border-radius: 34rpx;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 16rpx 44rpx rgba(30, 55, 110, 0.13);
-  transition: border-color $transition-fast, box-shadow $transition-fast;
-
-  &:focus-within {
-    border-color: rgba(30, 67, 168, 0.32);
-    box-shadow: 0 18rpx 48rpx rgba(30, 67, 168, 0.17);
-  }
-}
-
-.attach-button,
-.send-button {
-  width: 72rpx;
-  height: 72rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: $radius-full;
-  transition: transform $transition-fast, opacity $transition-fast, background-color $transition-fast;
-
-  &:active { transform: scale(0.92); }
-}
-
-.attach-button { background: $color-bg-subtle; &.disabled { opacity: 0.45; pointer-events: none; } }
-.input-wrapper { flex: 1; min-width: 0; }
-.text-input {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 56rpx;
-  padding: 0;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: $color-text-primary;
-  font-family: inherit;
-  font-size: $font-size-base;
-  &::placeholder { color: $color-text-placeholder; }
-}
-.placeholder { color: $color-text-placeholder; }
-
-.send-button {
-  background: $color-border-medium;
-  opacity: 0.62;
-
-  &.ready {
-    opacity: 1;
-  background: $color-brand-primary;
-  box-shadow: 0 10rpx 24rpx rgba(23, 75, 155, 0.22);
-  }
-}
-
-.composer-hint {
-  display: block;
-  margin-top: 10rpx;
-  color: $color-text-tertiary;
-  font-size: 18rpx;
-  text-align: center;
-}
-
-.image-preview {
-  position: absolute;
-  z-index: $z-overlay;
-  bottom: 128rpx;
-  left: 30rpx;
-  right: 30rpx;
-  display: flex;
-  gap: 12rpx;
-  padding: 14rpx;
-  border: 1rpx solid $color-border-light;
-  border-radius: 24rpx;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: $shadow-lg;
-}
-
-.preview-item {
-  position: relative;
-  width: 112rpx;
-  height: 112rpx;
-
-  .preview-image { width: 100%; height: 100%; border-radius: 18rpx; object-fit: cover; }
-  .remove-button {
-    position: absolute;
-    top: -10rpx;
-    right: -10rpx;
-    width: 42rpx;
-    height: 42rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: $radius-full;
-    background: $color-text-primary;
-    color: $color-text-inverse;
-    font-size: 28rpx;
-  }
-}
-
-@keyframes messageEnter {
-  from { opacity: 0; transform: translateY(12rpx); }
-  to { opacity: 1; transform: translateY(0); }
+&.keyboard-open {
+  padding-bottom: 0;
+  .case-journey { display: none; }
+  .case-status-bar { margin-top: 12rpx; padding: 12rpx 20rpx; }
+  .composer-hint { display: none; }
 }
 
 @keyframes panelReveal {
   from { opacity: 0; transform: translateY(-10rpx) scale(0.99); }
   to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes typingBounce {
-  0%, 60%, 100% { opacity: 0.32; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-7rpx); }
 }
 
 @keyframes assistantFloat {
@@ -544,10 +349,7 @@
 @media (prefers-reduced-motion: reduce) {
   .assistant-mark,
   .assistant-mark::after,
-  .message,
-  .loading-dot,
   .case-context-panel { animation: none; }
 }
 
-.send-arrow { transform: rotate(-90deg); }
 }

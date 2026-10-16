@@ -1,12 +1,13 @@
-import { View, Text, ScrollView, Input, Image } from '@tarojs/components'
+import { View, Text, ScrollView, Image } from '@tarojs/components'
 import { useState, useEffect } from 'react'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidHide, useDidShow } from '@tarojs/taro'
 import { syncTabRoute } from '../../custom-tab-bar/navigation'
 import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import { MaterialType, QuickReply } from '../../services/api'
 import { IS_H5 } from '../../config/env'
 import CaseJourney from '../../components/CaseJourney'
+import { AgentChatMessage, AgentChatSender } from '../../components/AgentChat'
 import './index.scss'
 
 const stageLabels: Record<string, string> = {
@@ -49,33 +50,43 @@ export default function Agent() {
   const [inputText, setInputText] = useState('')
   const [isUploadingMaterial, setIsUploadingMaterial] = useState(false)
   const [isContextExpanded, setIsContextExpanded] = useState(false)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
   useDidShow(() => syncTabRoute('/pages/agent/index'))
+  useDidHide(() => setKeyboardHeight(0))
 
   useEffect(() => {
     if (!IS_H5) loadMessages().catch(() => undefined)
-  }, [loadMessages])
+  }, [loadMessages, currentCase?.id])
 
   const stage = currentCase ? conversationState : 'collecting'
   const stageLabel = stageLabels[stage] || '收集信息'
   const stageColor = stageColors[stage] || 'status-collecting'
 
-  const handleSend = async (quickReply?: QuickReply) => {
-    if (isAiTyping) return
-    const text = quickReply?.value || inputText.trim()
+  const handleSend = async (quickReply?: QuickReply, value = inputText) => {
+    if (!currentCase || isAiTyping || isUploadingMaterial) return
+    if (quickReply?.action === 'upload') {
+      handleChooseImage()
+      return
+    }
+    if (quickReply?.action === 'generate_report') {
+      Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })
+      return
+    }
+    const text = quickReply?.value || value.trim()
     if (!text && !quickReply?.action) return
 
-    setInputText('')
+    if (!quickReply) setInputText('')
     try {
       await sendMessage(text, quickReply?.action)
     } catch (error: unknown) {
-      if (!quickReply) setInputText(text)
+      if (!quickReply) setInputText(draft => draft || text)
       Taro.showToast({ title: (error as Error).message || '发送失败', icon: 'none' })
     }
   }
 
   const handleChooseImage = async () => {
-    if (isUploadingMaterial) return
+    if (!currentCase || isUploadingMaterial || isAiTyping) return
     try {
       const typeChoice = await Taro.showActionSheet({
         itemList: agentMaterialTypes.map(item => item.label)
@@ -113,7 +124,10 @@ export default function Agent() {
   }
 
   return (
-    <View className="agent-page">
+    <View
+      className={`agent-page${keyboardHeight > 0 ? ' keyboard-open' : ''}`}
+      style={keyboardHeight > 0 ? { height: `calc(100vh - ${keyboardHeight}px)` } : undefined}
+    >
       <CaseJourney active={0} title="先说说，发生了什么？" description="从事故经过开始，逐步梳理关键事实。" />
       <View className="case-status-bar" onClick={() => currentCase && setIsContextExpanded(value => !value)}>
         <View className="status-copy">
@@ -133,7 +147,7 @@ export default function Agent() {
         className="workspace-container"
         scrollY
         scrollWithAnimation
-        scrollIntoView={`msg-${messages.length - 1}`}
+        scrollIntoView={isAiTyping ? 'chat-pending' : messages.length ? `msg-${messages.length - 1}` : ''}
       >
         {!currentCase && (
           <View className="init-section">
@@ -197,33 +211,21 @@ export default function Agent() {
               <View className="conversation-section">
                 <View className="messages-list">
                   {messages.map((msg, index) => (
-                    <View key={msg.id} id={`msg-${index}`} className={`message ${msg.role}`}>
-                      {msg.role === 'assistant' && <View className="message-avatar"><Text>灵</Text></View>}
-                      <View className="message-body">
-                        <View className="message-bubble">
-                          {msg.images && msg.images.length > 0 && (
-                            <View className="message-images">
-                              {msg.images.map((img, imageIndex) => (
-                                <Image key={imageIndex} src={img} className="message-image" mode="aspectFill" />
-                              ))}
+                    <View key={msg.id} id={`msg-${index}`} className="chat-message-row">
+                      <AgentChatMessage message={msg} />
+                      {msg.quickReplies && msg.quickReplies.length > 0 && (
+                        <View className="quick-replies">
+                          {msg.quickReplies.map(reply => (
+                            <View
+                              key={`${reply.action || 'message'}-${reply.value}`}
+                              className="quick-reply"
+                              onClick={() => handleSend(reply)}
+                            >
+                              <Text>{reply.label || reply.text || reply.value}</Text>
                             </View>
-                          )}
-                          <Text className="message-text">{msg.content}</Text>
+                          ))}
                         </View>
-                        {msg.quickReplies && msg.quickReplies.length > 0 && (
-                          <View className="quick-replies">
-                            {msg.quickReplies.map(reply => (
-                              <View
-                                key={`${reply.action || 'message'}-${reply.value}`}
-                                className="quick-reply"
-                                onClick={() => handleSend(reply)}
-                              >
-                                <Text>{reply.label || reply.text || reply.value}</Text>
-                              </View>
-                            ))}
-                          </View>
-                        )}
-                      </View>
+                      )}
                     </View>
                   ))}
                 </View>
@@ -231,16 +233,8 @@ export default function Agent() {
             )}
 
             {isAiTyping && (
-              <View className="message assistant typing-message">
-                <View className="message-avatar"><Text>灵</Text></View>
-                <View className="message-body">
-                  <View className="message-bubble loading">
-                    <Text className="loading-dot" />
-                    <Text className="loading-dot" />
-                    <Text className="loading-dot" />
-                  </View>
-                  <Text className="typing-label">正在整理案件信息</Text>
-                </View>
+              <View id="chat-pending" className="chat-message-row">
+                <AgentChatMessage pending />
               </View>
             )}
           </View>
@@ -249,38 +243,15 @@ export default function Agent() {
 
       {currentCase && (
         <View className="input-bar">
-          <Text className="composer-label">补充事故信息</Text>
-          <View className="composer-shell">
-            <View className={`attach-button ${isUploadingMaterial ? 'disabled' : ''}`} onClick={handleChooseImage}>
-              <Icon name="plus" size={24} color="#6B7280" />
-            </View>
-            <View className="input-wrapper">
-              {IS_H5 ? (
-                <input
-                  className="text-input"
-                  placeholder="把事故情况告诉灵迈…"
-                  value={inputText}
-                  onChange={event => setInputText(event.target.value)}
-                  onKeyDown={event => {
-                    if (event.key === 'Enter' && !event.nativeEvent.isComposing) handleSend()
-                  }}
-                />
-              ) : (
-                <Input
-                  className="text-input"
-                  placeholder="把事故情况告诉灵迈…"
-                  placeholderClass="placeholder"
-                  value={inputText}
-                  onInput={event => setInputText(event.detail.value)}
-                  onConfirm={() => handleSend()}
-                />
-              )}
-            </View>
-            <View className={`send-button ${inputText.trim() && !isAiTyping ? 'ready' : ''}`} onClick={() => handleSend()}>
-              <Icon name="arrow-right" className="send-arrow" size={22} color="#FFFFFF" />
-            </View>
-          </View>
-          <Text className="composer-hint">内容由 AI 辅助整理，重要结论请结合原始材料核对</Text>
+          <AgentChatSender
+            value={inputText}
+            disabled={isAiTyping || isUploadingMaterial}
+            onChange={setInputText}
+            onSend={value => { handleSend(undefined, value) }}
+            onKeyboardHeightChange={height => setKeyboardHeight(Number.isFinite(height) ? Math.max(0, height) : 0)}
+            onAttach={handleChooseImage}
+            uploading={isUploadingMaterial}
+          />
         </View>
       )}
     </View>

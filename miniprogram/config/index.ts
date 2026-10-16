@@ -30,7 +30,10 @@ const config = {
     __IS_H5__: JSON.stringify(isH5)
   },
   copy: {
-    patterns: [],
+    patterns: [{
+      from: path.resolve(__dirname, '../node_modules/tdesign-miniprogram/LICENSE'),
+      to: path.resolve(__dirname, '..', outputRoot, 'licenses/tdesign-miniprogram.txt')
+    }],
     options: {}
   },
   framework: 'react',
@@ -47,6 +50,13 @@ const config = {
     devServer: { port: Number(process.env.PORT) || 10086 }
   },
   mini: {
+    webpackChain(chain) {
+      for (const use of chain.module.rule('template').uses.values()) {
+        if (String(use.get('loader')).includes('miniTemplateLoader')) {
+          use.loader(path.resolve(__dirname, '../scripts/native-chat-template-loader.cjs'))
+        }
+      }
+    },
     postcss: {
       pxtransform: {
         enable: true,
