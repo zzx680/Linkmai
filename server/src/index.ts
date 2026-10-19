@@ -8,6 +8,8 @@ import { authMiddleware } from './middleware/auth'
 import authRouter from './routes/auth'
 import casesRouter from './routes/cases'
 import conversationsRouter from './routes/conversations'
+import feedbackRouter from './routes/feedback'
+import privacyRouter from './routes/privacy'
 import uploadRoutes from './routes/upload'
 import reportRoutes from './routes/reports'
 import { materialsRouter } from './routes/materials'
@@ -21,7 +23,7 @@ const app = express()
 app.disable('x-powered-by')
 const PORT = config.port
 
-app.set('trust proxy', 1)
+app.set('trust proxy', 'loopback')
 app.use(requestContext)
 app.use(securityHeaders)
 
@@ -40,7 +42,7 @@ app.post('/api/payments/wechat/notify', express.raw({ type: 'application/json' }
 app.use(express.json({ limit: '1mb' }))
 app.use(express.urlencoded({ extended: true, limit: '1mb' }))
 
-// 临时认证中间件（MVP 占位）
+// 认证中间件填充的请求上下文
 declare global {
   namespace Express {
     interface Request {
@@ -64,16 +66,19 @@ app.get('/api/health', async (req, res) => {
 })
 
 // 公开路由
-app.use('/api/auth', createRateLimiter({ windowMs: 60_000, max: 20 }), authRouter)
+app.use('/api/auth/wechat/login', createRateLimiter({ windowMs: 60_000, max: 20 }))
+app.use('/api/auth', authRouter)
 
 // 需要认证的路由
-app.use('/api/cases', authMiddleware, casePaymentRouter)
+app.use('/api/cases', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 30 }), casePaymentRouter)
 app.use('/api/cases', authMiddleware, casesRouter)
 app.use('/api/payment-orders', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 30 }), paymentOrderRoutes)
 if (process.env.NODE_ENV === 'test') {
   app.use('/api/test/payments', authMiddleware, testPaymentRouter)
 }
-app.use('/api/conversations', authMiddleware, conversationsRouter)
+app.use('/api/conversations', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 60 }), conversationsRouter)
+app.use('/api/feedback', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 10 }), feedbackRouter)
+app.use('/api/privacy', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 20 }), privacyRouter)
 app.use('/api/reports', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 10 }), reportRoutes)
 app.use('/api/materials', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 20 }), materialsRouter)
 app.use('/api/upload', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 30 }), uploadRoutes)

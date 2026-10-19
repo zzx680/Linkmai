@@ -78,9 +78,9 @@ export default function PaymentsPage() {
     return (
       <View className="payments-page centered-page">
         <View className="empty-card">
-          <View className="empty-icon"><Icon name="user-round" size={30} color="#1E43A8" /></View>
+          <View className="empty-icon"><Icon name="user-round" size={30} color="#4D6BFE" /></View>
           <Text className="empty-title">登录后查看付费权益</Text>
-          <Text className="empty-description">登录后可查看当前案件的解锁状态，并继续完成支付。</Text>
+          <Text className="empty-description">登录后可查看当前案件的解锁状态，并继续完成支付</Text>
           <View className="primary-button" onClick={() => retryAuth()}><Text>{authRetryable ? '重新登录' : '登录'}</Text></View>
         </View>
       </View>
@@ -99,9 +99,9 @@ export default function PaymentsPage() {
     return (
       <View className="payments-page centered-page">
         <View className="empty-card">
-          <View className="empty-icon"><Icon name="file-text" size={30} color="#1E43A8" /></View>
+          <View className="empty-icon"><Icon name="file-text" size={30} color="#4D6BFE" /></View>
           <Text className="empty-title">暂无可查看的付费权益</Text>
-          <Text className="empty-description">创建案件并整理材料后，可以按案件一次性解锁完整处理方案。</Text>
+          <Text className="empty-description">创建案件并整理材料后，可以按案件一次性解锁完整处理方案</Text>
           <View className="primary-button" onClick={goHome}><Text>返回首页创建案件</Text></View>
           <View className="secondary-button" onClick={refresh}><Text>重新加载</Text></View>
         </View>
@@ -116,11 +116,11 @@ export default function PaymentsPage() {
 
   return (
     <View className="payments-page">
-      <CaseJourney active={2} title="让下一步，更有依据。" description="先核对权益与金额，再决定是否解锁当前案件。" />
+      <CaseJourney active={2} title="让下一步，更有依据" description="先核对权益与金额，再决定是否解锁当前案件" />
       <View className="payments-header">
         <Text className="payments-eyebrow">当前案件权益</Text>
         <Text className="payments-title">解锁完整处理方案</Text>
-        <Text className="payments-description">一次付费，获得当前案件从分析到行动的完整支持。</Text>
+        <Text className="payments-description">一次付费，获得当前案件从分析到行动的完整支持</Text>
       </View>
 
       <View className={`plan-card plan-card-${status}`}>
@@ -148,7 +148,7 @@ export default function PaymentsPage() {
 
       {(isPaid || isPending || isRefunded || !price) && (
         <View className={`status-panel${isPaid ? ' status-panel-success' : isRefunded || !price ? ' status-panel-muted' : ''}`}>
-          <Icon name={isPaid ? 'circle-check' : isRefunded ? 'undo-2' : !price ? 'info' : 'clock-3'} size={20} color={isPaid ? '#057A55' : isRefunded || !price ? '#6B7280' : '#1E43A8'} />
+          <Icon name={isPaid ? 'circle-check' : isRefunded ? 'undo-2' : !price ? 'info' : 'clock-3'} size={20} color={isPaid ? '#057A55' : isRefunded || !price ? '#6B7280' : '#4D6BFE'} />
           <Text>{isPaid
             ? `本案件已解锁，后续更新不再收费${paidAt ? ` · ${paidAt}` : ''}`
             : isRefunded ? '该订单已退款，相关付费权益已失效'
@@ -183,7 +183,7 @@ export default function PaymentsPage() {
       </View>}
 
       <View className="explanation-card">
-        <View className="explanation-icon"><Icon name="lock-keyhole" size={18} color="#1E43A8" /></View>
+        <View className="explanation-icon"><Icon name="lock-keyhole" size={18} color="#4D6BFE" /></View>
         <View className="explanation-copy">
           <Text className="explanation-title">安心支付</Text>
           <Text className="explanation-text">一次付费仅解锁当前案件，不会自动续费，也不会为其他案件自动扣款。</Text>

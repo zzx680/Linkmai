@@ -10,7 +10,7 @@ const iconsDir = path.join(sourceRoot, 'assets/icons')
 const outputDir = path.join(iconsDir, 'lucide')
 const packageRoot = path.dirname(require.resolve('lucide-static/package.json'))
 const names = [
-  'arrow-right', 'bell', 'camera', 'car-front', 'chart-no-axes-combined',
+  'arrow-right', 'arrow-up', 'bell', 'camera', 'car-front', 'chart-no-axes-combined',
   'check', 'chevron-right', 'circle-check', 'circle-help', 'clock-3',
   'contact-round', 'credit-card', 'file-text', 'files', 'folder', 'folder-open',
   'hospital', 'house', 'id-card', 'inbox', 'info', 'loader-circle', 'lock-keyhole',
@@ -87,7 +87,7 @@ async function convertIcons() {
   for (const [tab, name] of Object.entries(tabs)) {
     for (const active of [false, true]) {
       const base = `${tab}${active ? '-active' : ''}`
-      const svg = svgFor(name, active ? '#1E43A8' : '#9CA3AF')
+      const svg = svgFor(name, active ? '#4D6BFE' : '#9CA3AF')
       fs.writeFileSync(path.join(iconsDir, `${base}.svg`), svg)
       await sharp(Buffer.from(svg)).resize(96, 96).png().toFile(path.join(iconsDir, `${base}.png`))
     }

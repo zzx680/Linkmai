@@ -12,7 +12,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
     const token = authHeader.substring(7)
 
-    const decoded = jwt.verify(token, config.jwtSecret) as { userId: string; openid: string }
+    const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] })
+    if (typeof decoded === 'string' || typeof decoded.userId !== 'string' || !decoded.userId
+      || typeof decoded.openid !== 'string' || !decoded.openid) {
+      return res.status(401).json({ success: false, error: '认证令牌无效' })
+    }
 
     req.userId = decoded.userId
     req.user = {

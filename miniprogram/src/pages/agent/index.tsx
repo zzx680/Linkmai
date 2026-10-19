@@ -1,13 +1,14 @@
-import { View, Text, ScrollView, Image } from '@tarojs/components'
-import { useState, useEffect } from 'react'
+import { Button, View, Text, ScrollView, Image } from '@tarojs/components'
+import { useState, useEffect, useRef } from 'react'
 import Taro, { useDidHide, useDidShow } from '@tarojs/taro'
 import { syncTabRoute } from '../../custom-tab-bar/navigation'
 import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import { MaterialType, QuickReply } from '../../services/api'
 import { IS_H5 } from '../../config/env'
-import CaseJourney from '../../components/CaseJourney'
+import brandLogo from '../../assets/brand/linkmai-chat.png'
 import { AgentChatMessage, AgentChatSender } from '../../components/AgentChat'
+import { getQuickReplyLabel, getQuickReplySelection } from '../../components/AgentChat/labels'
 import './index.scss'
 
 const stageLabels: Record<string, string> = {
@@ -48,6 +49,7 @@ export default function Agent() {
     loadMessages
   } = useAppStore()
   const [inputText, setInputText] = useState('')
+  const inputRevision = useRef(0)
   const [isUploadingMaterial, setIsUploadingMaterial] = useState(false)
   const [isContextExpanded, setIsContextExpanded] = useState(false)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
@@ -63,24 +65,31 @@ export default function Agent() {
   const stageLabel = stageLabels[stage] || '收集信息'
   const stageColor = stageColors[stage] || 'status-collecting'
 
+  const handleInputChange = (value: string) => {
+    inputRevision.current += 1
+    setInputText(value)
+  }
+
   const handleSend = async (quickReply?: QuickReply, value = inputText) => {
     if (!currentCase || isAiTyping || isUploadingMaterial) return
-    if (quickReply?.action === 'upload') {
+    const selection = quickReply ? getQuickReplySelection(quickReply) : { text: value.trim(), action: undefined }
+    if (selection.action === 'upload') {
       handleChooseImage()
       return
     }
-    if (quickReply?.action === 'generate_report') {
+    if (selection.action === 'generate_report') {
       Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })
       return
     }
-    const text = quickReply?.value || value.trim()
-    if (!text && !quickReply?.action) return
+    const { text, action } = selection
+    if (!text && !action) return
 
+    const draftRevision = inputRevision.current
     if (!quickReply) setInputText('')
     try {
-      await sendMessage(text, quickReply?.action)
+      await sendMessage(text, action)
     } catch (error: unknown) {
-      if (!quickReply) setInputText(draft => draft || text)
+      if (!quickReply && inputRevision.current === draftRevision) setInputText(text)
       Taro.showToast({ title: (error as Error).message || '发送失败', icon: 'none' })
     }
   }
@@ -109,7 +118,7 @@ export default function Agent() {
       if (!failure.errMsg?.includes('cancel')) {
         await Taro.showModal({
           title: '材料处理失败',
-          content: `${failure.message || '上传或识别未完成'}。可再次重试，或前往材料页继续处理。`,
+          content: `${failure.message || '上传或识别未完成'} 可再次重试，或前往材料页继续处理`,
           confirmText: '材料页',
           cancelText: '稍后重试',
           success: result => {
@@ -128,32 +137,31 @@ export default function Agent() {
       className={`agent-page${keyboardHeight > 0 ? ' keyboard-open' : ''}`}
       style={keyboardHeight > 0 ? { height: `calc(100vh - ${keyboardHeight}px)` } : undefined}
     >
-      <CaseJourney active={0} title="先说说，发生了什么？" description="从事故经过开始，逐步梳理关键事实。" />
-      <View className="case-status-bar" onClick={() => currentCase && setIsContextExpanded(value => !value)}>
-        <View className="status-copy">
-          <Text className="case-title">案件工作台</Text>
-          <View className="status-meta">
-            <View className={`status-badge ${stageColor}`}>
-              <View className="status-dot" />
-              <Text className="status-text">{stageLabel}</Text>
-            </View>
-            <Text className="material-summary">已整理 {materials.length} 份材料</Text>
-          </View>
-        </View>
-        {currentCase && <Icon name="chevron-right" className={`context-toggle ${isContextExpanded ? 'expanded' : ''}`} size={22} color="#6B7280" />}
+      <View className="chat-toolbar">
+        <Button className={`chat-context-button ${isContextExpanded ? 'is-open' : ''}`} aria-label="案件进度" onClick={() => currentCase ? setIsContextExpanded(value => !value) : Taro.switchTab({ url: '/pages/case/index' })}>
+          <Icon name="folder-open" size={20} color="#000000" />
+          <Text>案件进度</Text>
+          <View className={`status-badge ${stageColor}`}><View className="status-dot" /></View>
+        </Button>
+        {currentCase && <Button className="chat-materials-button" aria-label="查看材料" onClick={() => Taro.navigateTo({ url: '/pages/materials/index' })}>
+          <Icon name="files" size={20} color="#000000" />
+          <Text>材料 {materials.length}</Text>
+        </Button>}
       </View>
 
       <ScrollView
-        className="workspace-container"
+        className={`workspace-container${!messages.length && !isAiTyping ? ' workspace-empty' : ''}`}
         scrollY
         scrollWithAnimation
         scrollIntoView={isAiTyping ? 'chat-pending' : messages.length ? `msg-${messages.length - 1}` : ''}
       >
         {!currentCase && (
           <View className="init-section">
+            <Image src={brandLogo} className="chat-brand-logo" mode="aspectFit" />
             <View className="welcome-header">
               <Text className="welcome-title">先创建一个案件</Text>
               <Text className="welcome-subtitle">回到首页创建案件后，这里会成为你的处理工作台</Text>
+              <Button className="return-home-button" onClick={() => Taro.switchTab({ url: '/pages/case/index' })}>返回首页</Button>
             </View>
           </View>
         )}
@@ -162,6 +170,8 @@ export default function Agent() {
           <View className="workspace-content">
             {isContextExpanded && (
               <View className="case-context-panel">
+                <View className="context-heading"><Text className="case-title">案件工作台</Text><Text className={`status-badge ${stageColor}`}>{stageLabel}</Text></View>
+                <Text className="material-summary">已整理 {materials.length} 份材料</Text>
                 <View className="context-progress">
                   <View className={`context-step ${materials.length ? 'complete' : 'active'}`}><Text>1</Text><Text>补充材料</Text></View>
                   <View className={`context-step ${conversationState === 'confirming' ? 'active' : ''}`}><Text>2</Text><Text>核对信息</Text></View>
@@ -193,17 +203,8 @@ export default function Agent() {
 
             {messages.length === 0 && !isAiTyping && (
               <View className="conversation-empty">
-                <View className="assistant-mark"><Text>灵</Text></View>
-                <Text className="empty-title">把情况告诉我</Text>
-                <Text className="empty-description">可以直接描述事故经过，也可以先上传认定书、现场照片或医疗材料。</Text>
-                <View className="starter-actions">
-                  <View className="starter-action primary" onClick={() => setInputText('我想描述一下事故经过')}><Text>描述事故经过</Text></View>
-                  <View className="starter-action" onClick={handleChooseImage}><Text>上传事故材料</Text></View>
-                </View>
-                <View className="starter-checklist">
-                  <Text className="checklist-label">建议先准备</Text>
-                  <Text className="checklist-text">事故时间地点 · 双方责任信息 · 认定书或现场照片</Text>
-                </View>
+                <Image src={brandLogo} className="chat-brand-logo" mode="aspectFit" />
+                <Text className="empty-title">欢迎回来，想从哪里开始？</Text>
               </View>
             )}
 
@@ -221,7 +222,7 @@ export default function Agent() {
                               className="quick-reply"
                               onClick={() => handleSend(reply)}
                             >
-                              <Text>{reply.label || reply.text || reply.value}</Text>
+                              <Text>{getQuickReplyLabel(reply)}</Text>
                             </View>
                           ))}
                         </View>
@@ -245,8 +246,8 @@ export default function Agent() {
         <View className="input-bar">
           <AgentChatSender
             value={inputText}
-            disabled={isAiTyping || isUploadingMaterial}
-            onChange={setInputText}
+            sending={isAiTyping}
+            onChange={handleInputChange}
             onSend={value => { handleSend(undefined, value) }}
             onKeyboardHeightChange={height => setKeyboardHeight(Number.isFinite(height) ? Math.max(0, height) : 0)}
             onAttach={handleChooseImage}

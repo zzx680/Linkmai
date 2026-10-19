@@ -6,11 +6,13 @@ import { db } from '../db'
 import jwt from 'jsonwebtoken'
 import { config } from '../config'
 import { authMiddleware } from '../middleware/auth'
+import { createRateLimiter } from '../middleware/security'
 import { exchangeWechatCode, WechatLoginError } from '../services/wechat'
 import { deleteFile, getSignedUrl, uploadUserAvatar } from '../services/oss'
 import { extensionForImageMime, hasValidImageSignature, isSupportedImageMime } from '../utils/image'
 
 const router = express.Router()
+const accountRateLimit = createRateLimiter({ windowMs: 60_000, max: 30 })
 const nicknameSchema = z.object({
   nickname: z.string()
     .transform(value => value.trim())
@@ -80,9 +82,9 @@ function receiveAvatar(req: express.Request, res: express.Response, next: expres
 // 微信登录
 router.post('/wechat/login', async (req, res) => {
   try {
-    const { code } = req.body
+    const { code } = req.body || {}
 
-    if (!code) {
+    if (typeof code !== 'string' || !code.trim() || code.length > 128) {
       return res.status(400).json({ success: false, error: '缺少微信授权码' })
     }
 
@@ -119,7 +121,7 @@ router.post('/wechat/login', async (req, res) => {
 })
 
 // 当前会话
-router.get('/session', authMiddleware, async (req, res) => {
+router.get('/session', authMiddleware, accountRateLimit, async (req, res) => {
   try {
     if (!req.userId) {
       return res.status(401).json({ success: false, error: '未认证' })
@@ -138,7 +140,7 @@ router.get('/session', authMiddleware, async (req, res) => {
 })
 
 // 更新昵称
-router.patch('/profile', authMiddleware, async (req, res) => {
+router.patch('/profile', authMiddleware, accountRateLimit, async (req, res) => {
   try {
     if (!req.userId) return res.status(401).json({ success: false, error: '未认证' })
     const parsed = nicknameSchema.safeParse(req.body)
@@ -168,7 +170,7 @@ async function deleteOldAvatarWithRetry(objectKey: string) {
 }
 
 // 上传微信头像
-router.post('/profile/avatar', authMiddleware, receiveAvatar, async (req, res) => {
+router.post('/profile/avatar', authMiddleware, accountRateLimit, receiveAvatar, async (req, res) => {
   try {
     if (!req.userId) return res.status(401).json({ success: false, error: '未认证' })
     if (!req.file || !isSupportedImageMime(req.file.mimetype)
@@ -198,7 +200,7 @@ router.post('/profile/avatar', authMiddleware, receiveAvatar, async (req, res) =
 })
 
 // 绑定手机号
-router.post('/bind-phone', authMiddleware, async (req, res) => {
+router.post('/bind-phone', authMiddleware, accountRateLimit, async (req, res) => {
   try {
     const { phone } = req.body
     const userId = req.userId

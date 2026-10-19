@@ -1,4 +1,3 @@
-import { randomBytes } from 'crypto'
 import { config } from '../config'
 import { db, PaymentOrder } from '../db'
 import { paymentProvider, ProviderOrder } from './payment/provider'
@@ -122,7 +121,9 @@ async function reconcilePaymentOrder(order: PaymentOrder): Promise<PaymentOrder>
     case 'PAYERROR':
       return (await db.updatePaymentOrderStatus(order.id, 'failed')) || order
     case 'REFUND':
-      return (await db.refundPaymentOrder(order.id)) || order
+      // REFUND also covers partial/in-progress refunds. Only a verified,
+      // successful full-refund notification may revoke this case's access.
+      return order
     case 'NOTPAY':
       if (order.expiresAt.getTime() <= Date.now()) {
         return (await closeExpiredOrder(order)) || order
@@ -168,16 +169,20 @@ export async function createCasePaymentOrder(userId: string, caseId: string, ope
     if (reconciled.status === 'paid') {
       return { alreadyPaid: true as const, entitlement: await getEntitlement(userId, caseId) }
     }
-    if (['created', 'pending'].includes(reconciled.status) && reconciled.expiresAt.getTime() > Date.now()) {
+    if (['created', 'pending'].includes(reconciled.status)) {
+      if (reconciled.expiresAt.getTime() <= Date.now()) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       if (!reconciled.prepayId) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       return {
         alreadyPaid: false as const,
         orderId: reconciled.id,
         orderNo: reconciled.orderNo,
+        amountCents: reconciled.amountCents,
+        currency: reconciled.currency,
         payment: paymentProvider.createPaymentParams(reconciled.prepayId),
         expiresAt: reconciled.expiresAt,
       }
     }
+    if (idempotencyKey && existing.idempotencyKey === idempotencyKey) throw new Error('ORDER_NOT_PAYABLE')
   }
 
   const order = await db.createPaymentOrder({
@@ -190,6 +195,19 @@ export async function createCasePaymentOrder(userId: string, caseId: string, ope
   if (!order) throw new Error('ORDER_CREATION_FAILED')
   if (order.status === 'paid') {
     return { alreadyPaid: true as const, entitlement: await getEntitlement(userId, caseId) }
+  }
+  if (!['created', 'pending'].includes(order.status)) throw new Error('ORDER_NOT_PAYABLE')
+  if (order.expiresAt.getTime() <= Date.now()) throw new Error('PAYMENT_CONFIRMATION_PENDING')
+  if (order.prepayId) {
+    return {
+      alreadyPaid: false as const,
+      orderId: order.id,
+      orderNo: order.orderNo,
+      amountCents: order.amountCents,
+      currency: order.currency,
+      payment: paymentProvider.createPaymentParams(order.prepayId),
+      expiresAt: order.expiresAt,
+    }
   }
 
   try {
@@ -207,6 +225,8 @@ export async function createCasePaymentOrder(userId: string, caseId: string, ope
       alreadyPaid: false as const,
       orderId: pendingOrder.id,
       orderNo: pendingOrder.orderNo,
+      amountCents: pendingOrder.amountCents,
+      currency: pendingOrder.currency,
       payment: providerOrder.payment,
       expiresAt: pendingOrder.expiresAt,
     }
@@ -230,11 +250,19 @@ export async function processPaymentNotification(
   const order = await db.findPaymentOrderByOrderNo(notification.orderNo)
   if (!order) throw new Error('ORDER_NOT_FOUND')
   if (notification.eventType === 'REFUND.SUCCESS' || notification.tradeState === 'REFUND') {
-    if (order.status === 'refunded') return { success: true, paid: false }
-    if (order.status !== 'paid') throw new Error('ORDER_NOT_PAYABLE')
-    if (!notification.transactionId || notification.transactionId !== order.wechatTransactionId) {
+    if (notification.mchId !== config.payment.wechat.mchId) throw new Error('PAYMENT_MCHID_MISMATCH')
+    if (notification.amountCents !== order.amountCents || notification.currency !== order.currency
+      || !Number.isSafeInteger(notification.refundAmountCents) || notification.refundAmountCents! <= 0
+      || notification.refundAmountCents! > order.amountCents) throw new Error('PAYMENT_AMOUNT_MISMATCH')
+    if (notification.tradeStateDescription !== 'SUCCESS') throw new Error('PAYMENT_REFUND_NOT_SUCCESSFUL')
+    if (!notification.transactionId || (order.wechatTransactionId && notification.transactionId !== order.wechatTransactionId)) {
       throw new Error('TRANSACTION_MISMATCH')
     }
+    // Partial goodwill refunds keep access. The current product supports
+    // revoking access for a single successful full-order refund only.
+    if (notification.refundAmountCents !== order.amountCents) return { success: true, paid: order.status === 'paid' }
+    if (order.status === 'refunded') return { success: true, paid: false }
+    if (order.status !== 'paid') throw new Error('ORDER_NOT_PAYABLE')
     await db.refundPaymentOrder(order.id)
     return { success: true, paid: false }
   }

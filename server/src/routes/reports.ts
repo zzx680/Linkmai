@@ -65,9 +65,14 @@ router.post('/generate', async (req, res) => {
     const snapshot = materialSnapshot(artifacts)
     const report = await generateReport(facts, currentCase.id)
     await db.publishReport(userId, currentCase.id, report, snapshot)
+    // Generation can take time; a refund completed meanwhile must prevent delivery.
+    await requirePaidEntitlement(userId, currentCase.id)
 
     res.json({ success: true, data: { report } })
   } catch (err: any) {
+    if (err.message === 'PAYMENT_REQUIRED') {
+      return res.status(402).json({ error: 'PAYMENT_REQUIRED', message: '案件权益已变更，请查看付费记录' })
+    }
     if (err.message === 'REPORT_STALE') return res.status(409).json({ success: false, error: '材料已更新，请重新生成报告' })
     console.error('报告生成失败:', safeError(err))
     res.status(500).json({
@@ -144,25 +149,21 @@ router.post('/:caseId/export', async (req, res) => {
     return res.status(400).json({ success: false, error: '不支持的导出格式' })
   }
 
-  const caseData = await db.findCaseById(userId, caseId)
-  if (!caseData) {
-    return res.status(404).json({ success: false, error: '未找到案件' })
-  }
-
   try {
+    const caseData = await db.findCaseById(userId, caseId)
+    if (!caseData) {
+      return res.status(404).json({ success: false, error: '未找到案件' })
+    }
     await requirePaidEntitlement(userId, caseId)
+    return res.status(501).json({ success: false, error: '报告导出功能尚未实现' })
   } catch (paymentError) {
     if ((paymentError as Error).message === 'PAYMENT_REQUIRED') {
       const entitlement = (paymentError as Error & { entitlement?: { amountCents: number; currency: string } }).entitlement!
       return res.status(402).json({ error: 'PAYMENT_REQUIRED', message: '请先解锁本案件的完整处理方案', caseId, amountCents: entitlement.amountCents, currency: entitlement.currency })
     }
-    throw paymentError
+    console.error('报告导出查询失败:', safeError(paymentError))
+    return res.status(500).json({ success: false, error: '报告导出暂不可用' })
   }
-
-  return res.status(501).json({
-    success: false,
-    error: '报告导出功能尚未实现',
-  })
 })
 
 export default router

@@ -68,20 +68,23 @@ router.post('/current/messages', async (req, res) => {
       materials.push({ type: artifact.type, artifactId, extractedData, confirmed: artifact.metadata?.confirmed === true })
     }
 
-    const conversation = await db.findOrCreateConversation(req.userId!, caseData.id)
-    const newState = await processUserMessage(conversation.agentState || initialState(), text || '', materials, action)
-    if (attachedIds.length && materials.every(material => !Object.keys(material.extractedData || {}).length)) {
-      newState.nextQuestion = `材料已附加到对话。请在材料页面完成识别、核对和确认。\n${newState.nextQuestion}`
-    }
-    await db.createMessage(conversation.id, 'user', 'text', text || '', {
-      ...(action ? { action: normalizeAgentAction(action) } : {}),
-      ...(attachedIds.length ? { artifactIds: attachedIds } : {}),
+    const turn = await db.processConversationTurn({
+      userId: req.userId!,
+      caseId: caseData.id,
+      text: text || '',
+      metadata: {
+        ...(action ? { action: normalizeAgentAction(action) } : {}),
+        ...(attachedIds.length ? { artifactIds: attachedIds } : {}),
+      },
+      advance: async state => {
+        const newState = await processUserMessage(state || initialState(), text || '', materials, action)
+        if (attachedIds.length && materials.every(material => !Object.keys(material.extractedData || {}).length)) {
+          newState.nextQuestion = `材料已附加到对话 请在材料页面完成识别、核对和确认 \n${newState.nextQuestion}`
+        }
+        return newState
+      },
     })
-    await db.updateConversationState(conversation.id, newState)
-    const assistantText = newState.nextQuestion || '好的，我已记录。'
-    const quickReplies = newState.quickReplies || []
-    await db.createMessage(conversation.id, 'assistant', 'text', assistantText, { quickReplies })
-    res.json({ success: true, data: { message: assistantText, quickReplies, agentState: newState, conversationState: newState.stage } })
+    res.json({ success: true, data: { message: turn.assistantText, quickReplies: turn.quickReplies, agentState: turn.agentState, conversationState: turn.agentState.stage } })
   } catch (err) {
     console.error('发送消息错误:', safeError(err))
     res.status(500).json({ success: false, error: '发送消息失败' })

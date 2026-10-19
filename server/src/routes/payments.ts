@@ -45,7 +45,11 @@ casePaymentRouter.post('/:caseId/payment-orders', async (req, res) => {
   try {
     const user = req.user
     if (!user) return res.status(401).json({ error: 'UNAUTHORIZED', message: '请先登录' })
-    const result = await createCasePaymentOrder(user.id, req.params.caseId, user.openid, req.get('Idempotency-Key') || undefined)
+    const key = req.get('Idempotency-Key')
+    if (key !== undefined && !/^[A-Za-z0-9._:-]{1,128}$/.test(key)) {
+      return res.status(400).json({ error: 'INVALID_IDEMPOTENCY_KEY', message: '订单请求标识无效' })
+    }
+    const result = await createCasePaymentOrder(user.id, req.params.caseId, user.openid, key)
     res.status(result.alreadyPaid ? 200 : 201).json(result)
   } catch (err) {
     respondWithError(res, err)

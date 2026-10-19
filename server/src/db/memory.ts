@@ -1,7 +1,9 @@
 // 内存存储（MVP 临时方案，生产环境需替换为真实数据库）
 
 import { config } from '../config'
+import { randomBytes } from 'crypto'
 import { materialSnapshot } from '../services/material-snapshot'
+import { PrivacyRequest, PrivacyRequestKind } from './privacy'
 
 export interface User {
   id: string
@@ -97,6 +99,14 @@ export interface Artifact {
   updatedAt: Date
 }
 
+export interface Feedback {
+  id: string
+  userId: string
+  content: string
+  status: 'new' | 'reviewed' | 'resolved'
+  createdAt: Date
+}
+
 export interface PaymentOrder {
   id: string
   orderNo: string
@@ -132,6 +142,8 @@ const cases = new Map<string, Case>()
 const conversations = new Map<string, Conversation>()
 const messages = new Map<string, Message>()
 const artifacts = new Map<string, Artifact>()
+const feedbacks = new Map<string, Feedback>()
+const privacyRequests = new Map<string, PrivacyRequest>()
 const reports = new Map<string, { id: string; caseId: string; content: any; createdAt: Date }>()
 const entitlements = new Map<string, CaseEntitlement>()
 const paymentOrders = new Map<string, PaymentOrder>()
@@ -144,6 +156,22 @@ const usersByOpenid = new Map<string, string>() // openid -> userId
 const activeCasesByUser = new Map<string, string>() // userId -> caseId
 const conversationsByUser = new Map<string, string[]>() // userId -> conversationIds
 const messagesByConversation = new Map<string, string[]>() // conversationId -> messageIds
+const conversationLocks = new Map<string, Promise<void>>()
+
+async function withConversationLock<T>(caseId: string, operation: () => Promise<T>): Promise<T> {
+  const previous = conversationLocks.get(caseId) || Promise.resolve()
+  let release: () => void = () => undefined
+  const current = new Promise<void>(resolve => { release = resolve })
+  const chained = previous.then(() => current)
+  conversationLocks.set(caseId, chained)
+  await previous
+  try {
+    return await operation()
+  } finally {
+    release()
+    if (conversationLocks.get(caseId) === chained) conversationLocks.delete(caseId)
+  }
+}
 
 export const memoryDB = {
   // Users
@@ -258,6 +286,45 @@ export const memoryDB = {
     return true
   },
 
+  async createPrivacyRequest(userId: string, kind: PrivacyRequestKind): Promise<PrivacyRequest> {
+    if (!users.has(userId)) throw new Error('USER_NOT_FOUND')
+    const existing = [...privacyRequests.values()].find(item => item.userId === userId
+      && item.kind === kind && ['pending', 'processing'].includes(item.status))
+    if (existing) return existing
+    const now = new Date()
+    const item: PrivacyRequest = {
+      id: `privacy_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      userId, kind, status: 'pending', response: null, createdAt: now, updatedAt: now,
+    }
+    privacyRequests.set(item.id, item)
+    return item
+  },
+
+  async getPrivacyRequestsByUser(userId: string): Promise<PrivacyRequest[]> {
+    return [...privacyRequests.values()].filter(item => item.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 20)
+  },
+
+  // Feedback
+  async createFeedback(userId: string, content: string): Promise<Feedback> {
+    if (!users.has(userId)) throw new Error('USER_NOT_FOUND')
+    const feedback: Feedback = {
+      id: `feedback_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      userId,
+      content,
+      status: 'new',
+      createdAt: new Date(),
+    }
+    feedbacks.set(feedback.id, feedback)
+    return feedback
+  },
+
+  async getFeedbackByUser(userId: string): Promise<Feedback[]> {
+    return [...feedbacks.values()]
+      .filter(feedback => feedback.userId === userId)
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+  },
+
   // Conversations
   async findOrCreateConversation(userId: string, caseId?: string): Promise<Conversation> {
     const userConvIds = conversationsByUser.get(userId) || []
@@ -278,7 +345,7 @@ export const memoryDB = {
       agentState: {
         stage: 'collecting',
         collectedFacts: [],
-        nextQuestion: '您好！我是灵迈事故理赔助手。请问您遇到了什么类型的事故？',
+        nextQuestion: '您好！我是灵迈事故理赔助手 请问您遇到了什么类型的事故？',
         quickReplies: [
           { label: '交通事故', value: 'traffic_accident' },
           { label: '工伤事故', value: 'work_injury' },
@@ -299,6 +366,27 @@ export const memoryDB = {
     conversation.agentState = agentState
     conversation.updatedAt = new Date()
     return conversation
+  },
+
+  async processConversationTurn(input: {
+    userId: string
+    caseId: string
+    text: string
+    metadata?: any
+    advance: (state: AgentState) => Promise<AgentState>
+  }) {
+    return withConversationLock(input.caseId, async () => {
+      const conversation = await this.findOrCreateConversation(input.userId, input.caseId)
+      const agentState = await input.advance(conversation.agentState || {
+        stage: 'collecting', collectedFacts: [],
+      })
+      await this.createMessage(conversation.id, 'user', 'text', input.text, input.metadata)
+      await this.updateConversationState(conversation.id, agentState)
+      const assistantText = agentState.nextQuestion || '好的，我已记录'
+      const quickReplies = agentState.quickReplies || []
+      await this.createMessage(conversation.id, 'assistant', 'text', assistantText, { quickReplies })
+      return { agentState, assistantText, quickReplies }
+    })
   },
 
   // Messages
@@ -468,7 +556,7 @@ export const memoryDB = {
 
   async setPaymentOrderPrepay(orderId: string, prepayId: string): Promise<PaymentOrder> {
     const order = paymentOrders.get(orderId)
-    if (!order) throw new Error('ORDER_NOT_FOUND')
+    if (!order || !['created', 'pending'].includes(order.status)) throw new Error('ORDER_NOT_FOUND')
     order.prepayId = prepayId
     order.status = 'pending'
     order.updatedAt = new Date()
@@ -519,15 +607,18 @@ export const memoryDB = {
   }): Promise<PaymentOrder> {
     const caseData = cases.get(input.caseId)
     if (!caseData || caseData.userId !== input.userId) throw new Error('CASE_NOT_FOUND')
-    const existing = input.idempotencyKey
-      ? await this.findPaymentOrderByIdempotency(input.userId, input.caseId, input.idempotencyKey)
-      : null
+    if (entitlements.get(input.caseId)?.status === 'paid') throw new Error('ALREADY_PAID')
+    const existingId = input.idempotencyKey ? paymentOrderByIdempotency.get(`${input.userId}:${input.caseId}:${input.idempotencyKey}`) : null
+    const existing = existingId ? paymentOrders.get(existingId) : null
     if (existing) return existing
+    const pending = [...paymentOrders.values()].find(item => item.userId === input.userId
+      && item.caseId === input.caseId && ['created', 'pending'].includes(item.status))
+    if (pending) return pending
     const now = new Date()
     const id = `order_${Date.now()}_${Math.random().toString(36).slice(2)}`
     const order: PaymentOrder = {
       id,
-      orderNo: `LM${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      orderNo: `LM${randomBytes(15).toString('hex')}`,
       caseId: input.caseId,
       userId: input.userId,
       amountCents: input.amountCents,
@@ -602,10 +693,11 @@ export const memoryDB = {
   async refundPaymentOrder(orderId: string): Promise<PaymentOrder | null> {
     const order = paymentOrders.get(orderId)
     if (!order) return null
+    if (order.status !== 'paid') return order
     order.status = 'refunded'
     order.updatedAt = new Date()
     const entitlement = entitlements.get(order.caseId)
-    if (entitlement) {
+    if (entitlement && ![...paymentOrders.values()].some(item => item.caseId === order.caseId && item.status === 'paid')) {
       entitlement.status = 'refunded'
       entitlement.updatedAt = new Date()
     }

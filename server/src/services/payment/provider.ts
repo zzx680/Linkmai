@@ -36,6 +36,7 @@ export interface VerifiedPaymentNotification extends ProviderOrder {
   userId: string
   transactionId: string
   eventType?: string
+  refundAmountCents?: number
 }
 
 export interface PaymentProvider {
@@ -222,10 +223,11 @@ export function verifyNotification(
       transactionId: result.transaction_id,
       tradeState: 'REFUND',
       tradeStateDescription: result.refund_status,
-      amountCents: 0,
-      currency: '',
+      amountCents: result.amount?.total,
+      currency: result.amount?.currency,
+      refundAmountCents: result.amount?.refund,
       appId: '',
-      mchId: '',
+      mchId: result.mchid,
       userId: '',
       eventType,
     }

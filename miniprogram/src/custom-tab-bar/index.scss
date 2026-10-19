@@ -1,4 +1,5 @@
 @use '../styles/design-tokens.scss' as *;
+@use '../styles/glass.scss' as glass;
 
 .tab-shell {
   position: fixed;
@@ -12,12 +13,9 @@
 }
 
 .tab-pill {
+  @include glass.surface($radius-full);
   min-height: 112rpx;
   padding: 10rpx;
-  border: 1rpx solid $color-border-light;
-  border-radius: $radius-full;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: $shadow-lg;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -52,6 +50,8 @@
 .tab-item-active .tab-icon {
   animation: tab-icon-select 240ms ease-out;
 }
+
+.tab-item-active { color: $color-brand-primary; }
 
 @keyframes tab-icon-select {
   0% { transform: translateY(0) scale(1); }

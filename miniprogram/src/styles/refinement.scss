@@ -9,32 +9,20 @@
 .journey-step.current { color: #fff; border-top: 4rpx solid #fff; font-weight: 600; }
 .journey-number { display: block; font-size: 24rpx; }
 .journey-step:active { opacity: .7; }
-.journey-step:focus-visible, [role='button']:focus-visible, button:focus-visible, input:focus-visible { outline: 4rpx solid #3C7DE0; outline-offset: 4rpx; }
+.journey-step:focus-visible, [role='button']:focus-visible, button:focus-visible, input:focus-visible { outline: 4rpx solid #4D6BFE; outline-offset: 4rpx; }
 .auth-error-panel { margin: 16rpx 0; padding: 20rpx 24rpx; border: 1rpx solid #EAC2C2; background: #FDEBEC; border-radius: $radius-md; color: #912727; }
 .auth-error-title { display: block; font-size: 28rpx; font-weight: 600; }
 .auth-retry { min-height: 76rpx; padding: 0 20rpx; margin-top: 12rpx; display: flex; align-items: center; justify-content: center; color: $color-brand-primary; background: #fff; border-radius: $radius-md; font-size: 28rpx; font-weight: 600; }
 
 .case-page .identity-title { font-size: 56rpx; letter-spacing: -2rpx; }
 .case-page .identity-description { font-size: 30rpx; }
-.case-page .workbench-card { box-shadow: none; border-radius: $radius-lg; }
 .case-page .workbench-card-header { align-items: flex-start; }
 .case-page .workbench-description { font-size: 28rpx; }
 .case-page .summary-grid { border: 1rpx solid $color-border-light; border-radius: $radius-lg; background: #fff; }
 .case-page .summary-item { background: transparent; border: 0; box-shadow: none; }
-.case-page .quick-item { border-radius: 0; border: 0; border-bottom: 1rpx solid $color-border-light; box-shadow: none; }
 .case-page .quick-grid { gap: 2rpx; }
 
-.agent-page .case-journey { margin: 24rpx 24rpx 0; padding: 24rpx; flex-shrink: 0; }
-.agent-page .journey-title { font-size: 36rpx; margin-top: 12rpx; }
-.agent-page .journey-description { display: none; }
-.agent-page .journey-steps { margin-top: 16rpx; }
-.agent-page .journey-step { min-height: 64rpx; flex-direction: row; align-items: center; gap: 8rpx; padding: 8rpx 0; }
-.agent-page .case-status-bar { margin-top: 16rpx; padding: 16rpx 24rpx; box-shadow: none; border-radius: $radius-md; }
-.agent-page .assistant-mark, .agent-page .assistant-mark::after { animation: none; }
-.agent-page .assistant-mark::after { display: none; }
 .agent-page .message-content { border-radius: $radius-lg; box-shadow: none; }
-.agent-page .composer-hint { font-size: 22rpx; }
-.composer-label { display: block; font-size: 24rpx; font-weight: 600; color: $color-text-secondary; padding: 0 8rpx 12rpx; }
 
 .materials-page .page-header { display: none; }
 .materials-page .notice-card { box-shadow: none; border: 0; border-radius: 0; padding: 0 0 24rpx; background: transparent; }
@@ -63,7 +51,6 @@
 .report-page .export-button.disabled { opacity: .5; }
 
 .profile-page { box-sizing: border-box; }
-.profile-page .user-card { background: $color-brand-dark; color: #fff; padding: 40rpx 32rpx; border-radius: $radius-xl; box-shadow: none; }
+.profile-page .user-card { background: #002FA7; color: #fff; padding: 40rpx 32rpx; border-radius: $radius-xl; box-shadow: none; }
 .profile-page .user-name, .profile-page .user-caption { color: #fff; }
 .profile-page .auth-retry { color: #000000; }
-@media (prefers-reduced-motion: reduce) { .agent-page .assistant-mark, .agent-page .assistant-mark::after { animation: none; } }

@@ -258,6 +258,11 @@ npm --prefix server run staging:smoke -- https://<staging-domain>
 
 Production 与 staging 必须使用独立的域名、主机/进程、PostgreSQL 数据库、OSS 权限、微信支付回调和环境文件。不得复用 staging 环境文件、私钥、数据库、商户测试设置或部署目录。
 
+2026-10-17 部署例外：项目负责人明确授权复用现有 OSS、OCR、AI 和微信支付凭据。
+本次保持生产数据库、数据库账号、JWT、环境文件、进程、端口及支付回调独立；
+生产金额使用 4990 分，staging 金额仍为 1 分。复用的是同一小程序和商户的外部服务凭据，
+不复制测试订单、用户、材料或权益；不得将 staging 环境文件整体覆盖生产配置。
+
 ## 生产发布前 Go / No-Go
 
 在执行迁移、部署、上传小程序或提交审核前，负责人必须确认：
@@ -301,7 +306,8 @@ sudo chmod 600 /etc/linkmai/production.env /etc/linkmai/secrets/*
 
 使用 `server/deploy/nginx-production-bootstrap.conf` 申请正式域名证书，再替换为 `server/deploy/nginx-production.conf`。将其中的 `PRODUCTION_API_DOMAIN` 替换为已确认的正式域名；不要把真实域名或证书路径提交到仓库。
 
-使用 `server/ecosystem.production.config.js` 启动独立的 `linkmai-production-api` 进程。默认路径为：
+使用 `server/ecosystem.production.config.js` 启动独立的 `linkmai-production-api` 进程。
+生产 Node 服务监听 `127.0.0.1:8200`，staging 监听 `127.0.0.1:8100`，避免同机部署时端口冲突。默认路径为：
 
 ```text
 /var/www/linkmai-production/current/server

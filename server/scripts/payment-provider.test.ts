@@ -142,9 +142,11 @@ test('WeChat Pay refund notification keeps the original transaction identity', (
   const associatedData = 'refund'
   const payload = {
     out_trade_no: 'LM_REFUND_ORDER',
+    mchid: '1748822650',
     transaction_id: '4200000001',
     refund_id: '5000000001',
     refund_status: 'SUCCESS',
+    amount: { total: 4990, refund: 4990, currency: 'CNY' },
   }
   const cipher = createCipheriv('aes-256-gcm', Buffer.from(apiV3Key), Buffer.from(nonceText))
   cipher.setAAD(Buffer.from(associatedData))
@@ -179,10 +181,11 @@ test('WeChat Pay refund notification keeps the original transaction identity', (
       transactionId: payload.transaction_id,
       tradeState: 'REFUND',
       tradeStateDescription: 'SUCCESS',
-      amountCents: 0,
-      currency: '',
+      amountCents: 4990,
+      currency: 'CNY',
+      refundAmountCents: 4990,
       appId: '',
-      mchId: '',
+      mchId: payload.mchid,
       userId: '',
       eventType: 'REFUND.SUCCESS',
     })

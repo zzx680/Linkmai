@@ -5,9 +5,10 @@ import { db as postgresDB } from '../src/db/postgres'
 import { memoryDB } from '../src/db/memory'
 import { materialSnapshot } from '../src/services/material-snapshot'
 let generate: (facts: unknown[], caseId: string) => Promise<unknown> = async (_facts, caseId) => ({ ...content, caseId })
+let checkPayment: () => Promise<unknown> = async () => undefined
 for (const [path, exports] of [
   ['../src/services/report', { generateReport: (facts: unknown[], caseId: string) => generate(facts, caseId) }],
-  ['../src/services/payment', { requirePaidEntitlement: async () => undefined }],
+  ['../src/services/payment', { requirePaidEntitlement: () => checkPayment() }],
 ] as const) {
   const id = require.resolve(path)
   require.cache[id] = { id, filename: id, loaded: true, exports } as NodeModule
@@ -97,4 +98,26 @@ test('POST and GET reports use the same wrapper and stale GET is rejected', asyn
     }
     assert.equal((await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })).status, 409)
   } finally { generate = previous }
+})
+
+test('a refund completed during generation prevents returning the paid report', async () => {
+  const { user, first } = await fixture()
+  const previous = generate
+  try {
+    generate = async (_facts, caseId) => {
+      checkPayment = async () => { throw new Error('PAYMENT_REQUIRED') }
+      return { ...content, caseId }
+    }
+    const result = await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })
+    assert.equal(result.status, 402)
+    assert.equal(result.payload.data, undefined)
+  } finally { generate = previous; checkPayment = async () => undefined }
+})
+
+test('export database failures return a controlled response instead of an unhandled rejection', async () => {
+  const stub = mock.method(memoryDB, 'findCaseById', async () => { throw new Error('connection failed') })
+  try {
+    const result = await route('post', '/:caseId/export', { userId: 'owner', params: { caseId: 'case' }, body: { format: 'pdf' } })
+    assert.equal(result.status, 500)
+  } finally { stub.mock.restore() }
 })

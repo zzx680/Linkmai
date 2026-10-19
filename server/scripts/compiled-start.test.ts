@@ -26,6 +26,16 @@ test('compiled CommonJS server boots and serves health without external services
     assert.equal(response.status, 200)
     const body = await response.json() as { status: string }
     assert.equal(body.status, 'ok')
+
+    const preflight = await fetch(`http://127.0.0.1:${port}/api/feedback`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'http://localhost:10123',
+        'Access-Control-Request-Method': 'POST',
+      },
+    })
+    assert.equal(preflight.status, 204)
+    assert.equal(preflight.headers.get('access-control-allow-origin'), 'http://localhost:10123')
   } finally {
     if (child.exitCode === null) {
       const stopped = new Promise<void>(resolve => child.once('exit', () => resolve()))

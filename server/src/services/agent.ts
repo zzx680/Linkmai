@@ -63,16 +63,16 @@ function missingFact(state: AgentState) {
 export function generateNextQuestion(state: AgentState): { question: string; quickReplies?: QuickReply[] } {
   if (state.editingFactKey) {
     const label = FACT_DEFINITIONS.find(fact => fact.key === state.editingFactKey)?.label
-    return { question: `请输入修改后的${label || state.editingFactKey}。` }
+    return { question: `请输入修改后的${label || state.editingFactKey}` }
   }
   if (state.collectedFacts.some(fact => !fact.confirmed)) {
     return {
-      question: `请核对以下信息：\n${state.collectedFacts.filter(fact => !fact.confirmed).map(fact => `• ${fact.label}：${fact.value}`).join('\n')}\n确认无误后继续；需要修改时请选择字段。`,
+      question: `请核对以下信息：\n${state.collectedFacts.filter(fact => !fact.confirmed).map(fact => `• ${fact.label}：${fact.value}`).join('\n')}\n确认无误后继续；需要修改时请选择字段`,
       quickReplies: [reply('信息正确', 'confirm'), reply('需要修改', 'edit')],
     }
   }
   if (state.stage === 'ready') {
-    return { question: '信息收集完成，可前往报告页面生成报告。', quickReplies: [reply('查看报告', 'generate_report'), reply('修改信息', 'edit')] }
+    return { question: '信息收集完成，可前往报告页面生成报告', quickReplies: [reply('查看报告', 'generate_report'), reply('修改信息', 'edit')] }
   }
   const missing = missingFact(state)
   switch (missing?.key) {
@@ -86,12 +86,12 @@ export function generateNextQuestion(state: AgentState): { question: string; qui
         ],
       }
     case 'accident_date': return { question: '事故发生在什么时间？' }
-    case 'accident_location': return { question: '事故发生在哪里？请描述具体地点。' }
+    case 'accident_location': return { question: '事故发生在哪里？请描述具体地点' }
     case 'parties_involved':
-      return { question: '请提供涉事方信息（如对方车辆和驾驶员）。也可前往材料页面上传、识别并核对材料。', quickReplies: [reply('上传材料', 'upload'), { label: '手动输入', value: 'manual_input' }] }
-    case 'accident_description': return { question: '请详细描述事故经过。' }
+      return { question: '请提供涉事方信息（如对方车辆和驾驶员） 也可前往材料页面上传、识别并核对材料', quickReplies: [reply('上传材料', 'upload'), { label: '手动输入', value: 'manual_input' }] }
+    case 'accident_description': return { question: '请详细描述事故经过' }
     default:
-      return { question: '主要信息已收集。还有材料需要补充吗？材料请在材料页面识别并核对确认。', quickReplies: [reply('上传材料', 'upload'), reply('结束收集', 'finish'), reply('修改信息', 'edit')] }
+      return { question: '主要信息已收集 还有材料需要补充吗？材料请在材料页面识别并核对确认', quickReplies: [reply('上传材料', 'upload'), reply('结束收集', 'finish'), reply('修改信息', 'edit')] }
   }
 }
 
@@ -153,7 +153,7 @@ export async function processUserMessage(
     next.stage = 'collecting'
     delete next.editingFactKey
     updatePrompt(next)
-    next.nextQuestion = '请选择需要修改的字段，或输入“字段名：修改后的内容”。'
+    next.nextQuestion = '请选择需要修改的字段，或输入“字段名：修改后的内容”'
     next.quickReplies = next.collectedFacts.map(fact => reply(fact.label, `edit:${fact.key}`))
     return next
   }

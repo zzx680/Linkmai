@@ -1,7 +1,9 @@
 import { safeError } from '../utils/safe-error'
+import { randomBytes } from 'crypto'
 import { Pool, PoolClient } from 'pg'
 import { config } from '../config'
 import { materialSnapshot } from '../services/material-snapshot'
+import { PrivacyRequestKind, toPrivacyRequest } from './privacy'
 
 const pool = new Pool({
   host: config.database.host,
@@ -55,6 +57,19 @@ function toEntitlement(row: any) {
     amountCents: row.amount_cents,
     currency: row.currency,
     paidAt: row.paid_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
+function toConversation(row: any) {
+  if (!row) return null
+  return {
+    id: row.id,
+    userId: row.user_id,
+    caseId: row.case_id,
+    status: row.status,
+    agentState: row.agent_state,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -314,6 +329,38 @@ export const db = {
     return (result.rowCount || 0) > 0
   },
 
+  async createPrivacyRequest(userId: string, kind: PrivacyRequestKind) {
+    const result = await pool.query(
+      `INSERT INTO privacy_requests (id, user_id, kind)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, kind) WHERE status IN ('pending', 'processing')
+       DO UPDATE SET kind = EXCLUDED.kind
+       RETURNING *`,
+      [generateId('privacy'), userId, kind]
+    )
+    return toPrivacyRequest(result.rows[0])
+  },
+
+  async getPrivacyRequestsByUser(userId: string) {
+    const result = await pool.query(
+      'SELECT * FROM privacy_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20',
+      [userId]
+    )
+    return result.rows.map(toPrivacyRequest)
+  },
+
+  // Feedback
+  async createFeedback(userId: string, content: string) {
+    const result = await pool.query(
+      `INSERT INTO feedback (id, user_id, content, status, created_at)
+       VALUES ($1, $2, $3, 'new', NOW())
+       RETURNING *`,
+      [generateId('feedback'), userId, content]
+    )
+    const row = result.rows[0]
+    return { id: row.id, userId: row.user_id, content: row.content, status: row.status, createdAt: row.created_at }
+  },
+
   // Conversations
   async findOrCreateConversation(userId: string, caseId?: string) {
     // 查找活跃对话
@@ -342,7 +389,7 @@ export const db = {
     const defaultState = {
       stage: 'collecting',
       collectedFacts: [],
-      nextQuestion: '您好！我是灵迈事故理赔助手。请问您遇到了什么类型的事故？',
+      nextQuestion: '您好！我是灵迈事故理赔助手 请问您遇到了什么类型的事故？',
       quickReplies: [
         { label: '交通事故', value: 'traffic_accident' },
         { label: '工伤事故', value: 'work_injury' },
@@ -353,6 +400,8 @@ export const db = {
     const result = await pool.query(
       `INSERT INTO conversations (id, user_id, case_id, status, agent_state, created_at, updated_at)
        VALUES ($1, $2, $3, 'active', $4, NOW(), NOW())
+       ON CONFLICT (case_id) WHERE status = 'active' AND case_id IS NOT NULL
+       DO UPDATE SET updated_at = conversations.updated_at
        RETURNING *`,
       [id, userId, caseId || null, JSON.stringify(defaultState)]
     )
@@ -388,6 +437,78 @@ export const db = {
       agentState: row.agent_state,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+    }
+  },
+
+  async processConversationTurn(input: {
+    userId: string
+    caseId: string
+    text: string
+    metadata?: any
+    advance: (state: any) => Promise<any>
+  }) {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const ownedCase = await client.query(
+        'SELECT id FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE',
+        [input.caseId, input.userId]
+      )
+      if (!ownedCase.rows[0]) throw new Error('CASE_NOT_FOUND')
+
+      const conversationResult = await client.query(
+        `SELECT * FROM conversations
+         WHERE user_id = $1 AND case_id = $2 AND status = 'active'
+         FOR UPDATE`,
+        [input.userId, input.caseId]
+      )
+      let conversation = conversationResult.rows[0]
+      if (!conversation) {
+        const defaultState = {
+          stage: 'collecting',
+          collectedFacts: [],
+          nextQuestion: '您好！我是灵迈事故理赔助手 请问您遇到了什么类型的事故？',
+          quickReplies: [
+            { label: '交通事故', value: 'traffic_accident' },
+            { label: '工伤事故', value: 'work_injury' },
+            { label: '意外伤害', value: 'personal_injury' },
+          ],
+        }
+        const created = await client.query(
+          `INSERT INTO conversations (id, user_id, case_id, status, agent_state, created_at, updated_at)
+           VALUES ($1, $2, $3, 'active', $4, NOW(), NOW())
+           ON CONFLICT (case_id) WHERE status = 'active' AND case_id IS NOT NULL
+           DO UPDATE SET updated_at = conversations.updated_at
+           RETURNING *`,
+          [generateId('conv'), input.userId, input.caseId, JSON.stringify(defaultState)]
+        )
+        conversation = created.rows[0]
+      }
+
+      const agentState = await input.advance(conversation.agent_state || { stage: 'collecting', collectedFacts: [] })
+      const assistantText = agentState.nextQuestion || '好的，我已记录'
+      const quickReplies = agentState.quickReplies || []
+      await client.query(
+        `INSERT INTO messages (id, conversation_id, role, kind, text, metadata, created_at)
+         VALUES ($1, $2, 'user', 'text', $3, $4, NOW())`,
+        [generateId('msg'), conversation.id, input.text || null, input.metadata ? JSON.stringify(input.metadata) : null]
+      )
+      await client.query(
+        `UPDATE conversations SET agent_state = $1, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(agentState), conversation.id]
+      )
+      await client.query(
+        `INSERT INTO messages (id, conversation_id, role, kind, text, metadata, created_at)
+         VALUES ($1, $2, 'assistant', 'text', $3, $4, NOW())`,
+        [generateId('msg'), conversation.id, assistantText, JSON.stringify({ quickReplies })]
+      )
+      await client.query('COMMIT')
+      return { agentState, assistantText, quickReplies }
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
     }
   },
 
@@ -805,7 +926,8 @@ export const db = {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
-      await client.query('SELECT id FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE', [input.caseId, input.userId])
+      const ownedCase = await client.query('SELECT id FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE', [input.caseId, input.userId])
+      if (!ownedCase.rows[0]) throw new Error('CASE_NOT_FOUND')
       const existingEntitlement = await client.query(
         'SELECT status FROM case_entitlements WHERE case_id = $1 AND user_id = $2 FOR UPDATE',
         [input.caseId, input.userId]
@@ -823,7 +945,7 @@ export const db = {
       }
       const active = await client.query(
         `SELECT * FROM payment_orders WHERE user_id = $1 AND case_id = $2
-         AND status IN ('created', 'pending') AND expires_at > NOW()
+         AND status IN ('created', 'pending')
          ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
         [input.userId, input.caseId]
       )
@@ -832,7 +954,7 @@ export const db = {
         return toPaymentOrder(active.rows[0])
       }
       const nowId = generateId('order')
-      const orderNo = `LM${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
+      const orderNo = `LM${randomBytes(15).toString('hex')}`
       const result = await client.query(
         `INSERT INTO payment_orders (id, order_no, case_id, user_id, amount_cents, currency, status, prepay_id, idempotency_key, created_at, updated_at, expires_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW(), NOW() + ($10 * INTERVAL '1 minute'))
@@ -843,6 +965,7 @@ export const db = {
         `INSERT INTO case_entitlements (id, case_id, user_id, status, amount_cents, currency, created_at, updated_at)
          VALUES ($1, $2, $3, 'pending', $4, $5, NOW(), NOW())
          ON CONFLICT (case_id) DO UPDATE SET status = CASE WHEN case_entitlements.status = 'paid' THEN 'paid' ELSE 'pending' END,
+           amount_cents = EXCLUDED.amount_cents, currency = EXCLUDED.currency,
            updated_at = NOW()`,
         [generateId('entitlement'), input.caseId, input.userId, input.amountCents, input.currency]
       )
@@ -866,6 +989,9 @@ export const db = {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
+      const target = await client.query('SELECT case_id FROM payment_orders WHERE order_no = $1', [input.orderNo])
+      if (!target.rows[0]) throw new Error('ORDER_NOT_FOUND')
+      await client.query('SELECT id FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE', [target.rows[0].case_id, input.userId])
       const result = await client.query('SELECT * FROM payment_orders WHERE order_no = $1 FOR UPDATE', [input.orderNo])
       const order = toPaymentOrder(result.rows[0])
       if (!order || order.userId !== input.userId) throw new Error('ORDER_NOT_FOUND')
@@ -907,12 +1033,19 @@ export const db = {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
-      const result = await client.query('UPDATE payment_orders SET status = \'refunded\', updated_at = NOW() WHERE id = $1 RETURNING *', [orderId])
+      const target = await client.query('SELECT case_id FROM payment_orders WHERE id = $1', [orderId])
+      if (!target.rows[0]) { await client.query('COMMIT'); return null }
+      await client.query('SELECT id FROM cases WHERE id = $1 FOR UPDATE', [target.rows[0].case_id])
+      const result = await client.query('UPDATE payment_orders SET status = \'refunded\', updated_at = NOW() WHERE id = $1 AND status = \'paid\' RETURNING *', [orderId])
       if (!result.rows[0]) {
         await client.query('COMMIT')
         return null
       }
-      await client.query("UPDATE case_entitlements SET status = 'refunded', updated_at = NOW() WHERE case_id = $1", [result.rows[0].case_id])
+      await client.query(
+        `UPDATE case_entitlements SET status = 'refunded', updated_at = NOW() WHERE case_id = $1
+         AND NOT EXISTS (SELECT 1 FROM payment_orders WHERE case_id = $1 AND status = 'paid')`,
+        [result.rows[0].case_id]
+      )
       await client.query('COMMIT')
       return toPaymentOrder(result.rows[0])
     } catch (err) {

@@ -4,7 +4,7 @@ import { createPaymentOrder, getCurrentCase, getPaymentOrder } from '../services
 import { useAppStore } from '../store'
 import { IS_H5 } from '../config/env'
 import {
-  formatPaymentPrice, matchesPendingPayment, paymentConfirmation,
+  formatPaymentPrice, matchesPaymentAmount, matchesPendingPayment, paymentConfirmation,
   PAYMENT_POLL_DELAYS, PENDING_PAYMENT_KEY, PendingPayment, PaymentConfirmation
 } from '../utils/payment'
 
@@ -96,6 +96,11 @@ export function useCasePayment() {
           return
         }
         if (!result.orderId || !result.payment) throw new Error('支付参数未准备好，请稍后重试')
+        if (!matchesPaymentAmount(result, currentCase.entitlement)) {
+          await refreshCase()
+          if (isCurrent()) Taro.showToast({ title: '支付金额已更新，请核对后重新支付', icon: 'none' })
+          return
+        }
         pending = { userId: owner, caseId: currentCase.id, orderId: result.orderId }
         Taro.setStorageSync(PENDING_PAYMENT_KEY, pending)
         try {

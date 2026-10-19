@@ -1,8 +1,6 @@
-const apiBase = process.env.TARO_APP_API_BASE
+import { resolveApiBase } from './api-base'
 
-if (!apiBase || !apiBase.startsWith('https://')) {
-  throw new Error('生产构建必须提供 HTTPS TARO_APP_API_BASE')
-}
+const apiBase = resolveApiBase(process.env.TARO_APP_API_BASE, true)
 
 export default {
   env: {

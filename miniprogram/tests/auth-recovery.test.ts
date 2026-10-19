@@ -15,8 +15,10 @@ const compiled = ts.transpileModule(readFileSync(source, 'utf8'), {
 
 function setup(token: string | null = 'saved-token') {
   class UnauthorizedError extends Error {}
-  const counters = { login: 0, exchange: 0, cleared: 0 }
+  const counters = { login: 0, exchange: 0, cleared: 0, messages: 0 }
   let session: () => Promise<unknown> = async () => ({ id: 'user-1' })
+  let currentCase: unknown = null
+  let consent = true
   const api = {
     UnauthorizedError,
     getToken: () => token,
@@ -26,7 +28,10 @@ function setup(token: string | null = 'saved-token') {
     setUnauthorizedHandler() {},
     getSession: () => session(),
     login: async () => { counters.exchange++; return { token: 'new-token', user: { id: 'user-1' } } },
-    getCurrentCase: async () => null,
+    getCurrentCase: async () => currentCase,
+    getMaterials: async () => [],
+    getConversationHistory: async () => ({ messages: [] }),
+    sendMessage: async () => { counters.messages++; return { message: 'reply' } },
   }
   const module = { exports: {} as any }
   vm.runInNewContext(compiled, {
@@ -34,14 +39,44 @@ function setup(token: string | null = 'saved-token') {
     require(id: string) {
       if (id === '../services/api') return api
       if (id === './request-guard') return { CaseRequestGuard }
+      if (id === '../utils/privacy-consent') return { ensureAccountConsent: async () => consent, ensureCaseDataConsent: async () => consent }
       if (id === '@tarojs/taro') return { login: async () => { counters.login++; return { code: 'real-code' } }, showToast() {} }
       return requireFromSource(id)
     },
   }, { filename: source })
-  return { store: module.exports.useAppStore, counters, setSession: (value: typeof session) => { session = value }, UnauthorizedError, token: () => token }
+  return { store: module.exports.useAppStore, counters, setSession: (value: typeof session) => { session = value }, setCurrentCase: (value: unknown) => { currentCase = value }, setConsent: (value: boolean) => { consent = value }, UnauthorizedError, token: () => token }
 }
 
 describe('authentication recovery', () => {
+  it('does not contact WeChat or create an account when the login notice is declined', async () => {
+    const test = setup(null)
+    test.setConsent(false)
+    assert.equal(await test.store.getState().retryAuth(), false)
+    assert.equal(test.counters.login, 0)
+    assert.equal(test.counters.exchange, 0)
+    assert.equal(test.token(), null)
+    assert.equal(test.store.getState().isAuthenticating, false)
+  })
+
+  it('clears a cached report when refreshed case metadata says materials invalidated it', async () => {
+    const test = setup()
+    test.store.setState({ currentCase: { id: 'case', hasReport: true }, currentReport: { analysis: 'stale' } })
+    test.setCurrentCase({ id: 'case', hasReport: false })
+    await test.store.getState().loadCurrentCase()
+    assert.equal(test.store.getState().currentReport, null)
+  })
+
+  it('declining sensitive data processing never sends content and releases the send lock', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case', hasReport: false })
+    await test.store.getState().checkLoginStatus()
+    test.setConsent(false)
+    await assert.rejects(test.store.getState().sendMessage('private'), /尚未同意案件资料处理/)
+    await assert.rejects(test.store.getState().sendMessage('retry private'), /尚未同意案件资料处理/)
+    assert.equal(test.counters.messages, 0)
+    assert.equal(test.store.getState().messages.length, 0)
+    assert.equal(test.store.getState().isAiTyping, false)
+  })
   it('preserves credentials on a temporary service failure and exposes the cause', async () => {
     const test = setup()
     test.setSession(async () => { throw new Error('服务暂不可用') })

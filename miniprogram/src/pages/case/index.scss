@@ -1,16 +1,28 @@
 @use '../../styles/design-tokens.scss' as *;
 
+@mixin health-card {
+  border-radius: 40rpx;
+  background: #FFFFFF;
+  box-shadow: 0 12rpx 40rpx rgba(38, 48, 74, .045);
+}
+
 .case-page {
   min-height: 100vh;
   box-sizing: border-box;
   padding: 48rpx 32rpx 190rpx;
-  background: $color-bg-base;
+  background-color: #F2F2F7;
+  background-image:
+    radial-gradient(ellipse at 100% 4%, rgba(169, 207, 255, .6), rgba(169, 207, 255, 0) 58%),
+    radial-gradient(ellipse at 0% 36%, rgba(166, 233, 216, .48), rgba(166, 233, 216, 0) 60%),
+    radial-gradient(ellipse at 90% 78%, rgba(212, 193, 246, .48), rgba(212, 193, 246, 0) 62%);
+  background-size: 100% 1700rpx;
+  background-repeat: no-repeat;
 }
 
 .identity-block {
   display: flex;
   flex-direction: column;
-  margin: 0 4rpx 44rpx;
+  margin: 0 4rpx 40rpx;
 }
 
 .identity-topline {
@@ -18,7 +30,27 @@
   align-items: center;
   gap: 14rpx;
   min-height: 44rpx;
-  margin-bottom: 14rpx;
+  margin-top: 24rpx;
+}
+
+.home-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.home-welcome-hello {
+  color: $color-text-primary;
+  font-size: 44rpx;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+}
+
+.home-welcome-title {
+  color: $color-text-primary;
+  font-size: 44rpx;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
 }
 
 .identity-kicker,
@@ -28,19 +60,41 @@
   font-weight: $font-weight-medium;
 }
 
-.identity-title {
+.case-page .case-journey {
+  @include health-card;
   color: $color-text-primary;
-  font-size: 48rpx;
-  font-weight: $font-weight-bold;
-  line-height: $line-height-tight;
 }
 
-.identity-description {
-  max-width: 640rpx;
-  margin-top: 16rpx;
+.case-page .auth-error-panel,
+.case-page .ui-skeleton-case-wrapper {
+  @include health-card;
+  border-color: transparent;
+}
+
+.case-page .auth-retry {
+  border-radius: 28rpx;
+  box-shadow: inset 0 0 0 1rpx #E5E5EA;
+}
+
+.case-page .journey-heading {
+  color: $color-brand-primary;
+  margin: 0 -32rpx;
+  padding: 0 32rpx 24rpx;
+  border-bottom: 1rpx solid #E5E5EA;
+}
+
+.case-page .journey-description,
+.case-page .journey-step {
   color: $color-text-secondary;
-  font-size: $font-size-sm;
-  line-height: $line-height-relaxed;
+}
+
+.case-page .journey-steps {
+  border-color: $color-border-light;
+}
+
+.case-page .journey-step.current {
+  border-color: $color-brand-primary;
+  color: $color-brand-primary;
 }
 
 .load-error-note,
@@ -52,26 +106,27 @@
   box-sizing: border-box;
   margin-bottom: 24rpx;
   padding: 20rpx 24rpx;
-  border-radius: $radius-md;
-  background: $color-info-bg;
+  border-radius: 28rpx;
+  background: #FFFFFF;
   color: $color-brand-primary;
   font-size: $font-size-xs;
   line-height: $line-height-normal;
 }
 
 .workbench-card {
+  @include health-card;
   box-sizing: border-box;
   padding: 32rpx;
-  border: 1rpx solid $color-border-light;
-  border-radius: $radius-xl;
-  background: $color-bg-elevated;
-  box-shadow: $shadow-md;
+  border: 1rpx solid transparent;
 }
 
 .workbench-card-header {
   display: flex;
   align-items: flex-start;
   gap: 20rpx;
+  margin: 0 -32rpx;
+  padding: 0 32rpx 24rpx;
+  border-bottom: 1rpx solid #E5E5EA;
 }
 
 .workbench-icon {
@@ -81,8 +136,8 @@
   justify-content: center;
   width: 72rpx;
   height: 72rpx;
-  border-radius: $radius-md;
-  background: $color-brand-light;
+  border-radius: 24rpx;
+  background: #FFFFFF;
 }
 
 .workbench-heading {
@@ -98,7 +153,7 @@
   align-self: flex-start;
   padding: 7rpx 14rpx;
   border-radius: $radius-full;
-  background: $color-brand-light;
+  background: #FFFFFF;
   color: $color-brand-primary;
   font-size: $font-size-xs;
   font-weight: $font-weight-semibold;
@@ -106,7 +161,7 @@
 
 .workbench-card-view-report .status-pill,
 .workbench-card-continue-case .status-pill {
-  background: $color-success-bg;
+  background: #FFFFFF;
   color: $color-success;
 }
 
@@ -123,6 +178,12 @@
   color: $color-text-secondary;
   font-size: $font-size-sm;
   line-height: $line-height-relaxed;
+}
+
+.case-page .workbench-card-stacked {
+  .workbench-card-header { align-items: center; }
+  .workbench-standalone-title { display: block; margin-top: 24rpx; }
+  .workbench-description { margin-top: 16rpx; }
 }
 
 .progress-row {
@@ -155,7 +216,7 @@
 }
 
 .unlocked-note {
-  background: $color-success-bg;
+  background: #FFFFFF;
   color: $color-success;
 }
 
@@ -166,9 +227,10 @@
   gap: 12rpx;
   min-height: 96rpx;
   margin-top: 32rpx;
-  border-radius: $radius-md;
-  background: $color-brand-primary;
-  color: $color-text-inverse;
+  border-radius: 28rpx;
+  background: #FFFFFF;
+  color: $color-brand-primary;
+  box-shadow: inset 0 0 0 1rpx #E5E5EA;
   font-size: $font-size-base;
   font-weight: $font-weight-semibold;
 }
@@ -180,7 +242,20 @@
 
 .summary-section,
 .quick-section {
+  @include health-card;
   margin-top: 40rpx;
+  padding: 32rpx;
+
+  .section-label {
+    display: block;
+    margin: 0 -32rpx;
+    padding: 0 32rpx 24rpx;
+    border-bottom: 1rpx solid #E5E5EA;
+  }
+}
+
+.summary-section .section-label {
+  color: #000000;
 }
 
 .case-summary {
@@ -188,10 +263,6 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 16rpx;
   overflow: hidden;
-  border: 1rpx solid $color-border-light;
-  border-radius: $radius-lg;
-  background: $color-bg-elevated;
-  box-shadow: $shadow-xs;
 }
 
 .summary-item {
@@ -226,10 +297,8 @@
   justify-content: space-between;
   box-sizing: border-box;
   margin-top: 16rpx;
-  padding: 22rpx 24rpx;
-  border: 1rpx solid $color-border-light;
-  border-radius: $radius-md;
-  background: $color-bg-elevated;
+  padding: 22rpx 0 0;
+  border-top: 1rpx solid #E5E5EA;
   color: $color-brand-primary;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
@@ -250,14 +319,12 @@
   gap: 12rpx;
   min-height: 136rpx;
   padding: 16rpx 8rpx;
-  border: 1rpx solid $color-border-light;
-  border-radius: $radius-md;
-  background: $color-bg-elevated;
+  border: 1rpx solid transparent;
+  border-radius: 32rpx;
   color: $color-text-primary;
   font-size: $font-size-xs;
   font-weight: $font-weight-medium;
   text-align: center;
-  box-shadow: $shadow-xs;
 }
 
 .loading-page .skeleton-identity {
@@ -272,16 +339,16 @@
 
 .skeleton-line.short {
   width: 180rpx;
-  margin-bottom: 20rpx;
 }
 
 .skeleton-line.long {
   width: 440rpx;
   max-width: 100%;
   height: 58rpx;
+  margin-bottom: 20rpx;
 }
 
-.welcome-page { background: #fff; padding-top: 32rpx; }
+.welcome-page { padding-top: 32rpx; }
 .welcome-brand { display: flex; align-items: center; gap: 12rpx; color: $color-brand-dark; font-size: 28rpx; font-weight: 600; }
 .welcome-brand-mark { display: block; width: 64rpx; height: 64rpx; }
 .welcome-service { margin-left: auto; font-size: 24rpx; color: $color-text-secondary; font-weight: 400; }
@@ -291,17 +358,19 @@
 .welcome-title-line { display: block; }
 .welcome-title-blue { display: block; color: $color-brand-primary; }
 .welcome-description { display: block; margin-top: 24rpx; color: $color-text-secondary; font-size: 30rpx; line-height: 1.75; }
-.welcome-process { padding: 32rpx; background: $color-bg-base; border-radius: $radius-xl; }
+.welcome-process { @include health-card; padding: 32rpx; }
 .welcome-section-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx; justify-content: space-between; font-size: 32rpx; font-weight: 600; }
+.welcome-section-heading { margin: 0 -32rpx; padding: 0 32rpx 24rpx; border-bottom: 1rpx solid #E5E5EA; }
 .welcome-section-caption { font-size: 22rpx; color: $color-text-secondary; font-weight: 400; }
 .welcome-process-row { display: flex; gap: 24rpx; padding-top: 32rpx; }
 .welcome-process-number { flex: none; font-size: 26rpx; color: $color-brand-primary; line-height: 1.5; font-family: $font-family-mono; }
 .welcome-process-copy { min-width: 0; display: flex; flex-direction: column; gap: 8rpx; }
-.welcome-process-title { display: block; font-size: 32rpx; font-weight: 600; line-height: 1.4; }
-.welcome-process-detail { display: block; font-size: 24rpx; color: $color-text-secondary; line-height: 1.65; }
+.welcome-process-title { display: block; font-size: 34rpx; font-weight: 600; line-height: 1.4; }
+.welcome-process-detail { display: block; font-size: 22rpx; color: $color-text-secondary; line-height: 1.65; }
 .welcome-start { margin-top: 32rpx; }
-.welcome-login { display: flex; justify-content: center; align-items: center; min-height: 104rpx; margin: 0; border-radius: $radius-md; background: $color-brand-primary; color: #fff; font-size: 32rpx; font-weight: 600; }
-.welcome-login[disabled] { background: $color-brand-light; color: $color-brand-primary; }
+.welcome-login { @include health-card; display: flex; justify-content: center; align-items: center; min-height: 104rpx; margin: 0; border-radius: 28rpx; color: $color-brand-primary; font-size: 32rpx; font-weight: 600; }
+.welcome-login[disabled] { background: #FFFFFF; color: $color-text-tertiary; }
 .welcome-login::after { border: 0; }
 .welcome-privacy { display: block; margin-top: 16rpx; font-size: 22rpx; line-height: 1.6; color: $color-text-secondary; text-align: center; }
+.welcome-privacy-link { padding: 20rpx 0; color: $color-brand-primary; font-size: $font-size-xs; text-align: center; }
 .welcome-boundary { display: flex; flex-direction: column; gap: 8rpx; margin-top: 40rpx; padding-top: 24rpx; border-top: 1rpx solid $color-border-light; color: $color-text-secondary; font-size: 24rpx; line-height: 1.65; }

@@ -1,4 +1,4 @@
-import type { CaseEntitlement, PaymentOrder } from '../services/api'
+import type { CaseEntitlement, PaymentOrder, PaymentOrderResponse } from '../services/api'
 
 export type PaymentConfirmation = 'paid' | 'pending' | 'failed' | 'refunded'
 export type PendingPayment = { userId: string; caseId: string; orderId: string }
@@ -23,6 +23,11 @@ export function formatPaymentPrice(entitlement?: CaseEntitlement): string | null
   if (!entitlement || entitlement.currency !== 'CNY'
     || !Number.isSafeInteger(entitlement.amountCents) || entitlement.amountCents <= 0) return null
   return `¥${(entitlement.amountCents / 100).toFixed(2)}`
+}
+
+export function matchesPaymentAmount(order: Pick<PaymentOrderResponse, 'amountCents' | 'currency'>, entitlement?: CaseEntitlement): boolean {
+  return !!formatPaymentPrice(entitlement)
+    && order.amountCents === entitlement!.amountCents && order.currency === entitlement!.currency
 }
 
 export function entitlementLabel(status?: CaseEntitlement['status']): string {

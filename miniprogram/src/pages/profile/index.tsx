@@ -81,7 +81,7 @@ export default function Profile() {
       return
     }
     if (key === 'logout') {
-      Taro.showModal({ title: '退出当前账户？', content: '已保存的案件不会删除。下次登录后可以继续处理。', confirmText: '退出登录', confirmColor: '#C53434' }).then(result => {
+      Taro.showModal({ title: '退出当前账户？', content: '已保存的案件不会删除 下次登录后可以继续处理', confirmText: '退出登录', confirmColor: '#C53434' }).then(result => {
         if (!result.confirm) return
         logout()
         Taro.switchTab({ url: '/pages/case/index' })
@@ -181,7 +181,7 @@ export default function Profile() {
               : <Text className="user-caption">完成登录后可保存案件进度</Text>}
           </View>
         </View>
-        <Icon name="chevron-right" size={24} color="#FFFFFF" />
+        <Icon name="chevron-right" size={24} color="#000000" />
       </View>
 
       {isEditingProfile && (

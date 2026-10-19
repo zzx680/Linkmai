@@ -156,6 +156,32 @@ export function logout() {
   clearToken()
 }
 
+export async function submitFeedback(content: string): Promise<{ id: string; createdAt: string }> {
+  return request<{ id: string; createdAt: string }>({
+    url: '/feedback',
+    method: 'POST',
+    data: { content }
+  })
+}
+
+export type PrivacyRequestKind = 'export_data' | 'delete_data' | 'close_account'
+export interface PrivacyRequest {
+  id: string
+  kind: PrivacyRequestKind
+  status: 'pending' | 'processing' | 'completed' | 'rejected'
+  response: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export function getPrivacyRequests(): Promise<PrivacyRequest[]> {
+  return request<PrivacyRequest[]>({ url: '/privacy/requests' })
+}
+
+export function submitPrivacyRequest(kind: PrivacyRequestKind): Promise<PrivacyRequest> {
+  return request<PrivacyRequest>({ url: '/privacy/requests', method: 'POST', data: { kind } })
+}
+
 export interface CaseEntitlement {
   status: 'unpaid' | 'pending' | 'paid' | 'refunded'
   amountCents: number
@@ -204,6 +230,8 @@ export interface PaymentOrderResponse {
   alreadyPaid: boolean
   orderId?: string
   orderNo?: string
+  amountCents?: number
+  currency?: string
   payment?: {
     timeStamp: string
     nonceStr: string
@@ -436,14 +464,6 @@ export async function generateReport(
 export async function getReport(caseId: string): Promise<ReportData> {
   const result = await request<ReportResponse>({ url: `/reports/${caseId}` })
   return readReportEnvelope(result)
-}
-
-export async function exportReport(caseId: string, format: 'pdf' | 'word') {
-  return request<{ downloadUrl?: string; message?: string }>({
-    url: `/reports/${caseId}/export`,
-    method: 'POST',
-    data: { format }
-  })
 }
 
 export { getToken, setToken, clearToken }

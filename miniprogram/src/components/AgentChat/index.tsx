@@ -1,6 +1,8 @@
-import { Button, Image, Text, View } from '@tarojs/components'
+import { Button, Image, Slot, Text, View } from '@tarojs/components'
 import { IS_H5 } from '../../config/env'
+import Icon from '../Icon'
 import type { Message } from '../../services/api'
+import { getChatMessageText } from './labels'
 import './index.scss'
 
 interface ChatMessageProps {
@@ -12,6 +14,7 @@ interface ChatMessageProps {
 // preview with the same content and callbacks, without a second chat runtime.
 export function AgentChatMessage({ message, pending = false }: ChatMessageProps) {
   const role = message?.role === 'user' ? 'user' : 'assistant'
+  const text = getChatMessageText(message?.content || '', message?.role || 'assistant')
   if (!IS_H5) {
     const content = [
       ...(role === 'user' && message?.images?.length ? [{
@@ -20,7 +23,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
           fileType: 'image', name: `材料 ${index + 1}`, url, size: 0,
         })),
       }] : []),
-      { type: 'text', data: message?.content || '' },
+      { type: 'text', data: text },
     ]
     return (
       <t-chat-message
@@ -40,7 +43,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
       {role === 'assistant' && <Text className="chat-preview-name">灵迈助手</Text>}
       <View className="chat-preview-content">
         {message?.images?.map(url => <Image key={url} src={url} mode="aspectFill" className="chat-preview-image" />)}
-        <Text selectable>{pending ? '正在整理案件信息…' : message?.content}</Text>
+        <Text selectable>{pending ? '正在整理案件信息…' : text}</Text>
       </View>
     </View>
   )
@@ -48,57 +51,68 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
 
 interface ChatSenderProps {
   value: string
-  disabled: boolean
+  sending: boolean
+  uploading: boolean
   onChange: (value: string) => void
   onSend: (value: string) => void
   onKeyboardHeightChange: (height: number) => void
   onAttach: () => void
-  uploading: boolean
 }
 
-export function AgentChatSender({ value, disabled, onChange, onSend, onKeyboardHeightChange, onAttach, uploading }: ChatSenderProps) {
+export function AgentChatSender({ value, sending, onChange, onSend, onKeyboardHeightChange, onAttach, uploading }: ChatSenderProps) {
+  const send = (text: string) => {
+    if (!sending && !uploading && text.trim()) onSend(text.trim())
+  }
+  const tools = (
+    <View className="composer-tools">
+      <Button className="composer-prompt" disabled={sending || uploading} onClick={() => onChange(value.trim() || '我想描述一下事故经过')}>
+        <Icon name="messages-square" size={16} color="#000000" /><Text>描述经过</Text>
+      </Button>
+      <Button className="composer-upload" disabled={sending || uploading} onClick={onAttach}>
+        <Icon name="plus" size={17} color="#4D6BFE" /><Text>{uploading ? '识别中…' : '上传材料'}</Text>
+      </Button>
+    </View>
+  )
   return (
-    <View className="agent-chat-composer">
-      <View className="composer-toolbar">
-        <Button className="composer-upload" disabled={disabled || uploading} onClick={onAttach}>
-          <Text>＋</Text><Text>{uploading ? '正在识别材料…' : '上传事故材料'}</Text>
-        </Button>
-        <Text className="composer-caption">{disabled ? '正在整理，请稍候' : '补充事故信息'}</Text>
-      </View>
+    <View className={`agent-chat-composer${sending ? ' is-sending' : ''}`}>
       {IS_H5 ? (
         <View className="chat-preview-sender">
           <textarea
             aria-label="事故信息"
-            placeholder="把事故情况告诉灵迈…"
+            placeholder="把事故情况告诉灵迈"
             value={value}
-            disabled={disabled}
+            disabled={uploading}
             rows={2}
             onChange={event => onChange(event.target.value)}
             onKeyDown={event => {
               if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
                 event.preventDefault()
-                onSend(value)
+                send(value)
               }
             }}
           />
-          <Button className="chat-preview-send" disabled={disabled || !value.trim()} onClick={() => onSend(value)}>发送</Button>
+          <View className="composer-footer">
+            {tools}
+            <Button className="chat-preview-send" aria-label="发送消息" disabled={sending || uploading || !value.trim()} onClick={() => send(value)}>
+              <Icon name="arrow-up" size={20} color="#FFFFFF" />
+            </Button>
+          </View>
         </View>
       ) : (
         <t-chat-sender
           value={value}
-          disabled={disabled}
-          placeholder="把事故情况告诉灵迈…"
+          disabled={uploading}
+          placeholder="把事故情况告诉灵迈"
           render-presets={[{ name: 'send', type: 'icon' }]}
-          textarea-props={{ autosize: { minHeight: 48, maxHeight: 160 } }}
+          textarea-props={{ autosize: { minHeight: 48, maxHeight: 120 } }}
           adjust-position={false}
           auto-rise-with-keyboard={false}
           onChange={event => onChange(event.detail.value)}
-          onSend={event => onSend(event.detail.value)}
+          onSend={event => send(event.detail.value)}
           onKeyboardheightchange={event => onKeyboardHeightChange(event.detail.height)}
           onBlur={() => onKeyboardHeightChange(0)}
-        />
+        ><Slot name="footer-prefix">{tools}</Slot></t-chat-sender>
       )}
-      <Text className="composer-hint">AI 辅助整理，重要信息请结合原始材料核对</Text>
     </View>
   )
 }

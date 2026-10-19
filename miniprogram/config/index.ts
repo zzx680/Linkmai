@@ -1,13 +1,10 @@
 import path from 'path'
+import { resolveApiBase } from './api-base'
 
 const isH5 = process.env.TARO_ENV === 'h5'
 const isProduction = process.env.NODE_ENV === 'production'
-const apiBase = process.env.TARO_APP_API_BASE || 'http://localhost:8000/api'
+const apiBase = resolveApiBase(process.env.TARO_APP_API_BASE, isProduction)
 const outputRoot = process.env.TARO_OUTPUT_ROOT || (isH5 ? 'dist-h5' : 'dist')
-
-if (isProduction && !apiBase.startsWith('https://')) {
-  throw new Error('生产构建必须提供 HTTPS TARO_APP_API_BASE')
-}
 
 const config = {
   projectName: 'linkmai',
@@ -47,7 +44,7 @@ const config = {
     enable: false
   },
   h5: {
-    devServer: { port: Number(process.env.PORT) || 10086 }
+    devServer: { host: '127.0.0.1', port: Number(process.env.PORT) || 10086 }
   },
   mini: {
     webpackChain(chain) {

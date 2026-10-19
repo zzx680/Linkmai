@@ -1,7 +1,6 @@
 import { View, Text, ScrollView } from '@tarojs/components'
 import { useEffect, useState } from 'react'
 import Taro from '@tarojs/taro'
-import { exportReport } from '../../services/api'
 import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import CaseJourney from '../../components/CaseJourney'
@@ -21,7 +20,6 @@ export default function Report() {
     loadReport
   } = useAppStore()
   const [error, setError] = useState('')
-  const [exportingFormat, setExportingFormat] = useState<'pdf' | 'word' | null>(null)
 
   useEffect(() => {
     if (currentCase?.hasReport && !currentReport) {
@@ -40,29 +38,6 @@ export default function Report() {
 
   const goMaterials = () => Taro.navigateTo({ url: '/pages/materials/index' })
   const goHome = () => Taro.switchTab({ url: '/pages/case/index' })
-  const handleExport = async (format: 'pdf' | 'word') => {
-    if (!currentCase || exportingFormat) return
-    setExportingFormat(format)
-    try {
-      const result = await exportReport(currentCase.id, format)
-      if (!result.downloadUrl) {
-        Taro.showToast({ title: result.message || '导出文件正在准备', icon: 'none' })
-        return
-      }
-      await Taro.setClipboardData({ data: result.downloadUrl })
-      Taro.showModal({
-        title: `${format.toUpperCase()} 已准备`,
-        content: '下载地址已复制，可在浏览器中打开保存。',
-        showCancel: false,
-        confirmText: '知道了'
-      })
-    } catch (exportError: unknown) {
-      Taro.showToast({ title: (exportError as Error).message || '导出失败，请稍后重试', icon: 'none' })
-    } finally {
-      setExportingFormat(null)
-    }
-  }
-
   const confirmedMaterials = materials.filter(material => material.confirmed)
   const confirmedFieldsCount = confirmedMaterials.reduce((total, material) => total + material.fields.length, 0)
 
@@ -71,10 +46,10 @@ export default function Report() {
       <View className="report-page">
         <View className="generating-state">
           <View className="generating-mark">
-            <Icon name="loader-circle" size={48} color="#1E43A8" />
+            <Icon name="loader-circle" size={48} color="#4D6BFE" />
           </View>
           <Text className="generating-title">正在整理案件分析</Text>
-          <Text className="generating-description">灵迈正在基于已确认的材料生成分析，请保持页面打开。</Text>
+          <Text className="generating-description">灵迈正在基于已确认的材料生成分析，请保持页面打开</Text>
           <View className="generation-steps">
             <View className="generation-step active"><View className="step-dot" /><Text>核对已确认事实</Text></View>
             <View className="generation-step active"><View className="step-dot" /><Text>生成责任与赔偿分析</Text></View>
@@ -91,12 +66,12 @@ export default function Report() {
         <View className="page-header">
           <Text className="eyebrow">案件报告</Text>
           <Text className="page-title">完整处理方案</Text>
-          <Text className="page-description">材料整理完成后，一次解锁本案件的分析、赔偿估算和行动步骤。</Text>
+          <Text className="page-description">材料整理完成后，一次解锁本案件的分析、赔偿估算和行动步骤</Text>
         </View>
 
         <View className="preflight-card locked-report-card">
           <View className="preflight-icon">
-            <Icon name="lock-keyhole" size={32} color="#1E43A8" />
+            <Icon name="lock-keyhole" size={32} color="#4D6BFE" />
           </View>
           <Text className="preflight-title">本案件尚未解锁</Text>
           <Text className="preflight-description">一次付费后，本案件后续补充材料、重新分析和报告更新都不再重复收费。</Text>
@@ -120,15 +95,15 @@ export default function Report() {
         <View className="page-header">
           <Text className="eyebrow">案件报告</Text>
           <Text className="page-title">案件报告</Text>
-          <Text className="page-description">报告会把已确认的材料整理成可阅读、可复核的处理摘要。</Text>
+          <Text className="page-description">报告会把已确认的材料整理成可阅读、可复核的处理摘要</Text>
         </View>
 
         <View className="preflight-card">
           <View className="preflight-icon">
-            <Icon name="circle-check" size={32} color="#1E43A8" />
+            <Icon name="circle-check" size={32} color="#4D6BFE" />
           </View>
           <Text className="preflight-title">生成前检查</Text>
-          <Text className="preflight-description">只有已确认的材料字段会进入报告，所有结论都会保留对应材料依据，方便你随时核对。</Text>
+          <Text className="preflight-description">只有已确认的材料字段会进入报告，所有结论都会保留对应材料依据，方便你随时核对</Text>
           <View className="preflight-list">
             <View className="preflight-row"><Text>已添加材料</Text><Text className="row-value">{materials.length} 份</Text></View>
             <View className="preflight-row"><Text>已确认材料</Text><Text className="row-value">{confirmedMaterials.length} 份</Text></View>
@@ -155,7 +130,7 @@ export default function Report() {
 
   return (
     <View className="report-page">
-      <CaseJourney active={3} title="从已知事实，到下一步。" description="逐项阅读分析，回到原始材料复核重要结论。" />
+      <CaseJourney active={3} title="从已知事实，到下一步" description="逐项阅读分析，回到原始材料复核重要结论" />
       <ScrollView className="report-scroll" scrollY showScrollbar={false}>
         <View className="page-header result-header">
           <View>
@@ -167,22 +142,22 @@ export default function Report() {
         </View>
 
         <View className="scope-banner">
-          <Icon name="triangle-alert" size={24} color="#1E43A8" />
+          <Icon name="triangle-alert" size={24} color="#4D6BFE" />
           <View><Text className="scope-title">阅读边界</Text><Text className="scope-text">以下内容是基于已确认材料的 AI 辅助分析，不是确定的法律结论。</Text></View>
         </View>
 
         <View className="report-section">
           <View className="section-heading"><Text className="section-index">01</Text><Text className="section-title">事故分析</Text></View>
-          <View className="content-card">{analysisParagraphs.length ? analysisParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无事故分析内容。</Text>}</View>
+          <View className="content-card">{analysisParagraphs.length ? analysisParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无事故分析内容</Text>}</View>
         </View>
 
         <View className="report-section">
           <View className="section-heading"><Text className="section-index">02</Text><Text className="section-title">责任认定</Text></View>
           <View className="content-card liability-card">
             <View className="liability-mark">
-              <Icon name="scale" size={32} color="#1E43A8" />
+              <Icon name="scale" size={32} color="#4D6BFE" />
             </View>
-            <View className="liability-copy">{liabilityParagraphs.length ? liabilityParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无责任分析。</Text>}</View>
+            <View className="liability-copy">{liabilityParagraphs.length ? liabilityParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无责任分析</Text>}</View>
           </View>
         </View>
 
@@ -190,7 +165,7 @@ export default function Report() {
           <View className="section-heading"><Text className="section-index">03</Text><Text className="section-title">赔偿建议</Text></View>
           <View className="content-card compensation-card">
             <Text className="card-caption">AI 估算与说明</Text>
-            {compensationParagraphs.length ? compensationParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无赔偿建议。</Text>}
+            {compensationParagraphs.length ? compensationParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无赔偿建议</Text>}
           </View>
         </View>
 
@@ -203,20 +178,10 @@ export default function Report() {
 
         <View className="source-card">
           <Text className="source-title">依据与复核</Text>
-          <Text className="source-text">本报告依据当前案件中已确认的 {materials.length} 份材料生成。采取下一步行动前，可以随时返回原始材料核对事实。</Text>
+          <Text className="source-text">本报告依据当前案件中已确认的 {confirmedMaterials.length} 份材料生成。采取下一步行动前，可以随时返回原始材料核对事实。</Text>
           <View className="source-actions"><View onClick={goMaterials}><Text>查看原始材料 →</Text></View></View>
         </View>
 
-        <View className="export-actions">
-          <View className={`export-button secondary${exportingFormat ? ' disabled' : ''}`} onClick={() => handleExport('word')}>
-            <Icon name="file-text" size={18} color="#174B9B" />
-            <Text>{exportingFormat === 'word' ? '正在准备...' : '导出 Word'}</Text>
-          </View>
-          <View className={`export-button primary${exportingFormat ? ' disabled' : ''}`} onClick={() => handleExport('pdf')}>
-            <Icon name="download" size={18} color="#FFFFFF" />
-            <Text>{exportingFormat === 'pdf' ? '正在准备...' : '导出 PDF'}</Text>
-          </View>
-        </View>
       </ScrollView>
     </View>
   )

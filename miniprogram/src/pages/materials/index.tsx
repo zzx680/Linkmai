@@ -100,21 +100,21 @@ export default function Materials() {
 
   return (
     <View className="materials-page">
-      <CaseJourney active={1} title="让每个事实，都可核对。" description={`当前共 ${materials.length} 份材料；先核对识别结果，再用于案件分析。`} />
+      <CaseJourney active={1} title="让每个事实，都可核对" description={`当前共 ${materials.length} 份材料；先核对识别结果，再用于案件分析`} />
       <View className="page-header">
         <View>
           <Text className="eyebrow">{currentCase ? `案件 #${currentCase.id.slice(0, 8)}` : '材料工作区'}</Text>
           <Text className="page-title">案件材料</Text>
-          <Text className="page-description">上传、核对并确认 AI 将用于分析的事实材料。</Text>
+          <Text className="page-description">上传、核对并确认 AI 将用于分析的事实材料</Text>
         </View>
         <View className="count-badge"><Text>{materials.length} 份</Text></View>
       </View>
 
       <View className="notice-card">
-        <Icon name="circle-check" size={24} color="#1E43A8" />
+        <Icon name="circle-check" size={24} color="#4D6BFE" />
         <View className="notice-content">
           <Text className="notice-title">先确认，再进入分析</Text>
-          <Text className="notice-text">识别结果来自图片内容，低置信度字段请结合原件核对。确认信息不会自动构成法律结论。</Text>
+          <Text className="notice-text">识别结果来自图片内容，低置信度字段请结合原件核对 确认信息不会自动构成法律结论</Text>
         </View>
       </View>
 
@@ -131,7 +131,7 @@ export default function Materials() {
               className={`type-card ${selectedType === item.type ? 'selected' : ''}`}
               onClick={() => setSelectedType(item.type)}
             >
-              <Icon name={item.icon} size={32} color={selectedType === item.type ? '#1E43A8' : '#8E8E93'} />
+              <Icon name={item.icon} size={32} color={selectedType === item.type ? '#4D6BFE' : '#8E8E93'} />
               <Text className="type-label">{item.label}</Text>
               <Text className="type-description">{item.description}</Text>
             </View>
@@ -141,7 +141,7 @@ export default function Materials() {
 
       <View className="upload-panel" onClick={chooseAndProcess}>
         <View className="upload-icon">
-          <Icon name="plus" size={32} color="#1E43A8" />
+          <Icon name="plus" size={32} color="#4D6BFE" />
         </View>
         <View className="upload-copy">
           <Text className="upload-title">上传{getTypeInfo(selectedType).label}</Text>
@@ -169,7 +169,7 @@ export default function Materials() {
         <View className="empty-card">
           <Icon name="inbox" size={48} color="#8E8E93" />
           <Text className="empty-title">还没有材料</Text>
-          <Text className="empty-text">建议先上传交警认定书，它通常包含责任分析最关键的信息。</Text>
+          <Text className="empty-text">建议先上传交警认定书，它通常包含责任分析最关键的信息</Text>
         </View>
       ) : (
         <View className="materials-list">
@@ -184,7 +184,7 @@ export default function Materials() {
                   <Image src={material.imageUrl} className="material-thumbnail" mode="aspectFill" />
                   <View className="material-info">
                     <View className="material-title-row">
-                      <Icon name={typeInfo.icon} size={20} color="#1E43A8" />
+                      <Icon name={typeInfo.icon} size={20} color="#4D6BFE" />
                       <Text className="material-title">{typeInfo.label}</Text>
                     </View>
                     <Text className="material-meta">{fields.length} 个可识别字段 · {new Date(material.createdAt).toLocaleDateString('zh-CN')}</Text>
@@ -201,7 +201,7 @@ export default function Materials() {
                       <Text className="detail-hint">点击字段可修改</Text>
                     </View>
                     {fields.length === 0 ? (
-                      <Text className="no-fields">未识别到结构化字段，请查看原始文本。</Text>
+                      <Text className="no-fields">未识别到结构化字段，请查看原始文本</Text>
                     ) : fields.map((field, index) => (
                       <View key={`${field.key}-${index}`} className="field-row">
                         <View className="field-copy">

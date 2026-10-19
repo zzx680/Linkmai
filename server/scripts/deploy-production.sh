@@ -9,7 +9,7 @@ SOURCE_ROOT=${SOURCE_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}
 RELEASE_DIR="$APP_ROOT/releases/$RELEASE_ID"
 CURRENT_LINK="$APP_ROOT/current"
 PREVIOUS_TARGET=""
-HEALTH_URL=${LINKMAI_HEALTH_URL:-http://127.0.0.1:8100/api/health}
+HEALTH_URL=${LINKMAI_HEALTH_URL:-http://127.0.0.1:8200/api/health}
 KEEP_RELEASES=${LINKMAI_KEEP_RELEASES:-5}
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -37,21 +37,29 @@ fi
 mkdir -p "$RELEASE_DIR"
 rsync -a --delete \
   --exclude '.git' \
+  --exclude '.claude' \
   --exclude '.env*' \
+  --exclude '*.pem' \
+  --exclude '*.key' \
+  --exclude 'api_v3_key' \
+  --exclude 'wechat_api_v3_key' \
+  --exclude '*-secrets' \
   --exclude 'node_modules' \
   --exclude 'dist' \
   "$SOURCE_ROOT/" "$RELEASE_DIR/"
 
 if ! (
-  cd "$RELEASE_DIR/server"
-  npm ci
-  npm run build
-  npm test
-  set -a
-  source "$ENV_FILE"
-  set +a
-  node -e "require('./dist/config').validateRuntimeConfig()"
-  npm run db:migrate
+  # Bash disables errexit inside an `if ! (...)` condition. Chain every gate
+  # explicitly so a failed migration cannot be hidden by a successful prune.
+  cd "$RELEASE_DIR/server" &&
+  npm ci &&
+  npm run build &&
+  DOTENV_CONFIG_PATH=/dev/null NODE_ENV=test DB_TYPE=memory npm test &&
+  set -a &&
+  source "$ENV_FILE" &&
+  set +a &&
+  node -e "require('./dist/config').validateRuntimeConfig()" &&
+  npm run db:migrate &&
   npm prune --omit=dev
 ); then
   echo "发布门禁失败，清理候选 release"

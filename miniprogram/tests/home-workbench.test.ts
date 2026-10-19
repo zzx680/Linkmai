@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import type { Case, Material } from '../src/services/api'
 import { getCaseNextStep, getHomeMode, getHomeStepDetail } from '../src/pages/case/home-state'
+
+const casePageSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.tsx'), 'utf8')
+const caseStylesSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.scss'), 'utf8')
 
 function makeCase(overrides: Partial<Case> = {}): Case {
   return {
@@ -42,6 +47,23 @@ describe('home workbench state', () => {
     assert.equal(getHomeMode({ isLoggedIn: true, isLoadingCase: false, caseLoadError: null, currentCase: makeCase() }), 'case')
   })
 
+  it('places the welcome before the signed-in identity row and journey sections', () => {
+    const identityIndex = casePageSource.indexOf('identity-topline')
+    const welcomeIndex = casePageSource.indexOf('home-welcome')
+    const journeyIndex = casePageSource.indexOf('<CaseJourney')
+
+    assert.ok(welcomeIndex >= 0)
+    assert.ok(identityIndex > welcomeIndex)
+    assert.ok(journeyIndex > identityIndex)
+    assert.match(casePageSource, /Hello👋/)
+    assert.match(casePageSource, /欢迎使用灵迈/)
+    assert.doesNotMatch(casePageSource, /从一份材料开始整理案件/)
+  })
+
+  it('keeps the current journey step visually identifiable', () => {
+    assert.match(caseStylesSource, /\.case-page \.journey-step\.current \{[\s\S]*border-color: \$color-brand-primary;[\s\S]*color: \$color-brand-primary;/)
+  })
+
   it('maps collection and confirmation stages to material actions', () => {
     assert.equal(getCaseNextStep({ currentCase: makeCase(), materials: [], conversationState: 'collecting' }), 'continue_materials')
     assert.equal(getCaseNextStep({ currentCase: makeCase({ nextAction: 'confirm_materials' }), materials: [makeMaterial()], conversationState: 'collecting' }), 'confirm_materials')
@@ -68,5 +90,14 @@ describe('home workbench state', () => {
     })
     assert.equal(action, 'view_case')
     assert.equal(getHomeStepDetail(action, 1).cta, '查看案件')
+  })
+
+  it('routes refunded cases to payment history even when stale actions or reports remain', () => {
+    const action = getCaseNextStep({
+      currentCase: makeCase({ entitlement: { status: 'refunded', amountCents: 4990, currency: 'CNY' }, nextAction: 'unlock_full_plan', hasReport: true }),
+      materials: [makeMaterial(true)], conversationState: 'ready',
+    })
+    assert.equal(action, 'view_refund_status')
+    assert.equal(getHomeStepDetail(action, 1).cta, '查看付费记录')
   })
 })

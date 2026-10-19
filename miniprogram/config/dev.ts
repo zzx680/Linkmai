@@ -1,4 +1,6 @@
-const apiBase = process.env.TARO_APP_API_BASE || 'http://localhost:8000/api'
+import { resolveApiBase } from './api-base'
+
+const apiBase = resolveApiBase(process.env.TARO_APP_API_BASE, false)
 
 export default {
   env: {

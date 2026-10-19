@@ -2,18 +2,31 @@ import { Button, Text, Textarea, View } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState } from 'react'
 import { Icon } from '../../components'
+import { submitFeedback } from '../../services/api'
 import './index.scss'
 
 export default function Help() {
   const [feedback, setFeedback] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const submitFeedback = () => {
-    if (!feedback.trim()) {
+  const submitFeedbackForm = async () => {
+    const content = feedback.trim()
+    if (!content) {
       Taro.showToast({ title: '请先填写你的问题或建议', icon: 'none' })
       return
     }
-    setFeedback('')
-    Taro.showToast({ title: '已收到你的反馈', icon: 'success' })
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await submitFeedback(content)
+      setFeedback('')
+      Taro.showToast({ title: '反馈已提交', icon: 'success' })
+    } catch (error) {
+      Taro.showToast({ title: error instanceof Error ? error.message : '提交失败，请稍后重试', icon: 'none' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -21,14 +34,14 @@ export default function Help() {
       <View className="support-header">
         <Text className="support-eyebrow">帮助中心</Text>
         <Text className="support-title">帮助与反馈</Text>
-        <Text className="support-description">你可以在处理页继续描述事故，也可以在这里留下产品使用反馈。</Text>
+        <Text className="support-description">你可以在处理页继续描述事故，也可以在这里留下产品使用反馈</Text>
       </View>
 
       <View className="support-card quick-help-card">
-        <View className="card-icon"><Icon name="messages-square" size={22} color="#1E43A8" /></View>
+        <View className="card-icon"><Icon name="messages-square" size={22} color="#4D6BFE" /></View>
         <View className="card-copy">
           <Text className="card-title">处理事故</Text>
-          <Text className="card-description">从底部“处理”进入对话，按提示讲清事故经过并整理材料。</Text>
+          <Text className="card-description">从底部“处理”进入对话，按提示讲清事故经过并整理材料</Text>
         </View>
       </View>
 
@@ -45,11 +58,11 @@ export default function Help() {
             onInput={event => setFeedback(event.detail.value)}
           />
           <Text className="feedback-count">{feedback.length}/500</Text>
-          <Button className="feedback-submit" onClick={submitFeedback}>提交反馈</Button>
+          <Button className="feedback-submit" loading={isSubmitting} disabled={isSubmitting} onClick={submitFeedbackForm}>提交反馈</Button>
         </View>
       </View>
 
-      <Text className="support-note">反馈仅在本次页面中确认，不会自动上传你的案件或材料内容。</Text>
+      <Text className="support-note">提交反馈不会自动上传你的案件或材料内容。</Text>
     </View>
   )
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { entitlementLabel, formatPaymentPrice, matchesPendingPayment, paymentConfirmation } from '../src/utils/payment'
+import { entitlementLabel, formatPaymentPrice, matchesPaymentAmount, matchesPendingPayment, paymentConfirmation } from '../src/utils/payment'
 import type { CaseEntitlement, PaymentOrder } from '../src/services/api'
 
 describe('payment presentation and recovery', () => {
@@ -41,5 +41,15 @@ describe('payment presentation and recovery', () => {
     assert.equal(entitlementLabel('pending'), '待确认')
     assert.equal(entitlementLabel('refunded'), '已退款')
     assert.equal(entitlementLabel('unpaid'), '未付费')
+  })
+
+  it('requires the order price and currency to match the amount shown before opening payment', () => {
+    const entitlement: CaseEntitlement = { status: 'unpaid', amountCents: 4990, currency: 'CNY' }
+    assert.equal(matchesPaymentAmount({ amountCents: 4990, currency: 'CNY' }, entitlement), true)
+    for (const order of [{}, { amountCents: 4990 }, { amountCents: 5990, currency: 'CNY' }, { amountCents: 4990, currency: 'USD' }]) {
+      assert.equal(matchesPaymentAmount(order, entitlement), false)
+    }
+    assert.equal(matchesPaymentAmount({ amountCents: 0, currency: 'CNY' }, { ...entitlement, amountCents: 0 }), false)
+    assert.equal(matchesPaymentAmount({ amountCents: 4990, currency: 'CNY' }), false)
   })
 })

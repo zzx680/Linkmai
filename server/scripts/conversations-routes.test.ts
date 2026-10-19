@@ -53,6 +53,19 @@ test('history returns saved real agentState and case conversations remain isolat
   assert.equal((await request('get', {}, { caseId: own.caseId }, own.userId)).data.messages.length, 12)
 })
 
+test('concurrent messages for one case are serialized into complete turns', async () => {
+  const own = await fixture()
+  const [first, second] = await Promise.all([
+    request('post', { caseId: own.caseId, text: 'traffic_accident' }, {}, own.userId),
+    request('post', { caseId: own.caseId, text: '2026年10月1日' }, {}, own.userId),
+  ])
+  assert.equal(first.status, 200)
+  assert.equal(second.status, 200)
+  const history = await request('get', {}, { caseId: own.caseId }, own.userId)
+  assert.equal(history.data.messages.length, 4)
+  assert.deepEqual(history.data.messages.map((message: any) => message.role), ['user', 'assistant', 'user', 'assistant'])
+})
+
 test('attach only owned artifacts, import only material-page-confirmed data, do not increment counts', async () => {
   const own = await fixture()
   const other = await fixture()

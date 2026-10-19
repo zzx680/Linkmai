@@ -11,10 +11,13 @@ const defaultJwtSecret = 'linkmai-secret-key-change-in-production'
 const nodeEnv = process.env.NODE_ENV || 'development'
 const strictEnvironment = ['staging', 'production'].includes(nodeEnv)
 const localDatabaseHosts = new Set(['localhost', '127.0.0.1', '::1'])
-const corsOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'https://servicewechat.com')
+const configuredCorsOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'https://servicewechat.com')
   .split(',')
   .map(origin => origin.trim())
   .filter(Boolean)
+const corsOrigins = strictEnvironment
+  ? configuredCorsOrigins
+  : [...new Set([...configuredCorsOrigins, 'http://localhost:10123'])]
 
 export const config = {
   port: parseInt(process.env.PORT || '8000', 10),
@@ -56,9 +59,9 @@ export const config = {
     timeoutMs: parseInt(process.env.DEEPSEEK_TIMEOUT_MS || '30000', 10),
   },
   payment: {
-    amountCents: parseInt(process.env.PAYMENT_AMOUNT_CENTS || '4990', 10),
+    amountCents: Number(process.env.PAYMENT_AMOUNT_CENTS || '4990'),
     currency: process.env.PAYMENT_CURRENCY || 'CNY',
-    orderExpiresMinutes: parseInt(process.env.PAYMENT_ORDER_EXPIRES_MINUTES || '15', 10),
+    orderExpiresMinutes: Number(process.env.PAYMENT_ORDER_EXPIRES_MINUTES || '15'),
     provider: process.env.PAYMENT_PROVIDER || 'mock',
     testSecret: process.env.PAYMENT_TEST_SECRET || '',
     wechat: {
@@ -99,6 +102,9 @@ export function validateRuntimeConfig() {
     ['ALIYUN_OCR_ACCESS_KEY_ID', Boolean(config.ocr.accessKeyId)],
     ['ALIYUN_OCR_ACCESS_KEY_SECRET', Boolean(config.ocr.accessKeySecret)],
     ['DEEPSEEK_API_KEY', Boolean(config.deepseek.apiKey)],
+    ['PAYMENT_AMOUNT_CENTS positive integer', Number.isSafeInteger(config.payment.amountCents) && config.payment.amountCents > 0 && config.payment.amountCents <= 2147483647],
+    ['PAYMENT_CURRENCY=CNY', config.payment.currency === 'CNY'],
+    ['PAYMENT_ORDER_EXPIRES_MINUTES=1..120', Number.isSafeInteger(config.payment.orderExpiresMinutes) && config.payment.orderExpiresMinutes >= 1 && config.payment.orderExpiresMinutes <= 120],
     ['PAYMENT_PROVIDER=wechat in production', config.nodeEnv !== 'production' || config.payment.provider === 'wechat'],
     ['PAYMENT_PROVIDER=wechat|disabled in staging', config.nodeEnv !== 'staging' || ['wechat', 'disabled'].includes(config.payment.provider)],
     ['WECHAT_MCH_ID', config.payment.provider !== 'wechat' || /^\d{8,15}$/.test(config.payment.wechat.mchId)],

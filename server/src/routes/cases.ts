@@ -11,6 +11,8 @@ async function withEntitlement(caseData: any, userId: string) {
   const paid = entitlement?.status === 'paid'
   return {
     ...caseData,
+    liability: paid ? caseData.liability : null,
+    compensation: paid ? caseData.compensation : null,
     materialCount: caseData.materialCount ?? caseData.material_count ?? 0,
     hasReport: caseData.hasReport ?? caseData.has_report ?? false,
     entitlement: {

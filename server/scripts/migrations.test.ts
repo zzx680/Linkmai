@@ -12,6 +12,8 @@ const requiredTables = [
   'reports',
   'case_entitlements',
   'payment_orders',
+  'feedback',
+  'privacy_requests',
   'audit_logs',
 ]
 

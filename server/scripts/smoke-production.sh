@@ -26,7 +26,7 @@ request() {
   fi
 
   if [ "$status" != "$expected" ]; then
-    echo "$method $path 预期 $expected，实际 $status"
+    echo "$method $path 预期 ${expected}，实际 ${status}"
     cat /tmp/linkmai-production-smoke-response.json
     exit 1
   fi

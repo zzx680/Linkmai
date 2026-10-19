@@ -32,7 +32,8 @@ project.config.json         # 微信开发者工具入口，指向 miniprogram/d
 - 微信支付 API v3 已接入下单、查单、关单及签名校验后的回调处理；权益以服务端确认结果为准。
 - 材料确认发生变化会使旧报告失效；报告发布前会核对材料快照，避免发布过时结果。
 - **文书生成尚未实现**，不属于当前开放权益；`documentGeneration` 返回 `false`。
-- **PDF/Word 导出尚未实现**，`POST /api/reports/:caseId/export` 当前返回 501。
+- **PDF/Word 导出尚未实现**，已移除当前报告页的导出入口；`POST /api/reports/:caseId/export` 当前返回 501。
+- 隐私页支持提交并查询数据导出、删除、注销的人工核验申请；申请入库不等于操作完成。运营处理与发布前待确认项见 [数据申请处理](server/docs/PRIVACY_REQUESTS.md)。
 - 本地测试与构建通过不代表真实微信支付、云数据库、OCR/AI 服务或微信真机联调已验收。
 
 ## 本地开发
@@ -70,6 +71,7 @@ npm run dev:weapp
 | --- | --- |
 | 健康检查 | `GET /api/health` |
 | 微信登录、会话 | `POST /api/auth/wechat/login`、`GET /api/auth/session` |
+| 数据申请、查询进度 | `POST/GET /api/privacy/requests` |
 | 当前案件 | `GET/POST/PATCH/DELETE /api/cases/current` |
 | 当前权益 | `GET /api/cases/current/entitlement` |
 | 创建订单、查询订单 | `POST /api/cases/:caseId/payment-orders`、`GET /api/payment-orders/:orderId` |
@@ -98,9 +100,19 @@ DOTENV_CONFIG_PATH=/dev/null NODE_ENV=test DB_TYPE=memory ./server/node_modules/
 npm --prefix miniprogram run build:weapp:dev
 ```
 
+客户端环境文件由 Taro 从 `miniprogram/` 读取。需要固定本机联调地址时，在
+`miniprogram/.env.development.local` 中设置 `TARO_APP_API_BASE=https://<测试后端域名>/api`，
+再执行上述构建命令。该本地文件已被 Git 忽略，不用于正式发布；仓库根目录的
+`.env.development` 不会被此客户端构建自动读取。API 地址应直达后端，避免使用会跳转到网站的域名。
+
+微信开发者工具当前读取 `miniprogram/dist/`；`build:weapp:staging` 输出到
+`miniprogram/dist-staging/`，执行该命令不会更新当前导入项目读取的目录。
+
 ## 部署
 
 后端构建后通过 `npm start` 启动；数据库迁移与 staging 部署步骤见 [部署指南](server/docs/DEPLOYMENT.md)。支付私钥和 API v3 密钥使用服务端文件或环境变量配置，不放入客户端或 Git。
+
+当前上线前基线见 [2026-10-19 审查记录](server/docs/PRE_RELEASE_REVIEW_2026-10-19.md)，含支付验收来源、修复、验证结果、依赖告警范围和先后端后客户端的发布顺序。
 
 小程序生产构建示例（替换为实际服务域名）：
 

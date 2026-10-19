@@ -1,1 +1,72 @@
 @use '../help/index.scss';
+@use '../../styles/design-tokens.scss' as *;
+
+.privacy-page {
+  .support-title { font-size: $font-size-xl; letter-spacing: 0; }
+  .support-header { margin-left: 0; margin-right: 0; }
+}
+.privacy-version, .privacy-request-note {
+  display: block;
+  margin: 16rpx 0 24rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-xs;
+  line-height: $line-height-relaxed;
+  overflow-wrap: anywhere;
+}
+.privacy-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  border-radius: $radius-xl;
+  background: $color-brand-light;
+}
+.privacy-policy-card, .privacy-history-card, .privacy-operator, .privacy-login { display: block; }
+.privacy-section-number {
+  display: block;
+  margin-bottom: 12rpx;
+  color: $color-brand-primary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+}
+.privacy-paragraph {
+  display: block;
+  margin-top: 16rpx;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
+}
+.privacy-request-actions {
+  overflow: hidden;
+  border-radius: $radius-xl;
+  background: $color-bg-elevated;
+  border: 1rpx solid $color-border-light;
+}
+.privacy-request-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  padding: 28rpx;
+  border-radius: 0;
+  border-bottom: 1rpx solid $color-border-light;
+  color: $color-text-primary;
+  background: $color-bg-elevated;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  text-align: left;
+  &:last-child { border-bottom: 0; }
+  &[disabled] { background: $color-bg-subtle; color: $color-text-secondary; }
+}
+.privacy-action-status { color: $color-text-secondary; font-size: $font-size-xs; flex-shrink: 0; margin-left: 12rpx; }
+.privacy-request-button::after, .privacy-refresh::after, .privacy-primary::after { border: 0; }
+.privacy-history-heading, .privacy-history-top { display: flex; justify-content: space-between; align-items: center; gap: 16rpx; }
+.privacy-history-heading { margin: 32rpx 0 20rpx; }
+.privacy-refresh { margin: 0; padding: 8rpx 16rpx; font-size: $font-size-xs; color: $color-brand-primary; background: transparent; }
+.privacy-request-status { flex-shrink: 0; font-size: $font-size-xs; color: $color-text-secondary; }
+.privacy-request-status-completed { color: $color-success; }
+.privacy-request-status-processing { color: $color-brand-primary; }
+.privacy-error { display: block; margin: 24rpx 0; color: $color-error; font-size: $font-size-sm; line-height: $line-height-relaxed; }
+.privacy-primary { margin-top: 24rpx; border-radius: $radius-md; background: $color-brand-primary; color: $color-text-inverse; font-size: $font-size-base; }
+.privacy-operator { margin-top: 40rpx; }

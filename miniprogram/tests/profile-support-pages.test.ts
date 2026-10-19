@@ -21,12 +21,14 @@ describe('profile support pages', () => {
     assert.match(profileSource, /url: '\/pages\/about\/index'/)
   })
 
-  it('keeps feedback local to the help page', () => {
-    assert.match(helpSource, /<Textarea/)
-    assert.match(helpSource, /if \(!feedback\.trim\(\)\)/)
-    assert.match(helpSource, /已收到你的反馈/)
+  it('submits feedback before confirming success', () => {
+    assert.match(helpSource, /submitFeedback\(content\)/)
+    assert.match(helpSource, /反馈已提交/)
     assert.match(helpSource, /setFeedback\(''\)/)
-    assert.doesNotMatch(helpSource, /services\/api|useAppStore|Taro\.request|setStorage|storage/)
+    assert.match(helpSource, /catch \(error\)/)
+    assert.match(helpSource, /isSubmitting/)
+    assert.doesNotMatch(helpSource, /已收到你的反馈/)
+    assert.doesNotMatch(helpSource, /Taro\.request|setStorage|storage/)
   })
 
   it('uses the shorter retry label', () => {

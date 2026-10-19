@@ -48,7 +48,7 @@ export default function CaseDetail() {
     weather: '晴天，路面干燥',
     responsibility: '对方全责',
     compensation: '¥12,500',
-    description: '在香港中路与南京路交叉口等红绿灯时，被后方车辆追尾，导致车辆后保险杠损坏，驾驶员轻微颈部扭伤。',
+    description: '在香港中路与南京路交叉口等红绿灯时，被后方车辆追尾，导致车辆后保险杠损坏，驾驶员轻微颈部扭伤',
     materials: {
       policeReport: ['https://via.placeholder.com/300x400/C4612F/FFFFFF?text=Police+Report'],
       medical: ['https://via.placeholder.com/300x400/34c759/FFFFFF?text=Medical+1', 'https://via.placeholder.com/300x400/34c759/FFFFFF?text=Medical+2'],
@@ -187,7 +187,7 @@ export default function CaseDetail() {
           <View className="materials-tab">
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="file-text" size={20} color="#1E43A8" />
+                <Icon name="file-text" size={20} color="#4D6BFE" />
                 <Text className="section-title-text">交警认定书</Text>
               </View>
               <View className="material-grid">
@@ -205,7 +205,7 @@ export default function CaseDetail() {
 
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="hospital" size={20} color="#1E43A8" />
+                <Icon name="hospital" size={20} color="#4D6BFE" />
                 <Text className="section-title-text">医疗材料</Text>
               </View>
               <View className="material-grid">
@@ -223,7 +223,7 @@ export default function CaseDetail() {
 
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="car-front" size={20} color="#1E43A8" />
+                <Icon name="car-front" size={20} color="#4D6BFE" />
                 <Text className="section-title-text">车损材料</Text>
               </View>
               <View className="material-grid">
@@ -241,7 +241,7 @@ export default function CaseDetail() {
 
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="camera" size={20} color="#1E43A8" />
+                <Icon name="camera" size={20} color="#4D6BFE" />
                 <Text className="section-title-text">现场照片</Text>
               </View>
               <View className="material-grid">

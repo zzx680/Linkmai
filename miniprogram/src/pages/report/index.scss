@@ -364,25 +364,4 @@
   }
 }
 
-.export-actions {
-  display: flex;
-  gap: $space-3;
-  padding-bottom: $space-8;
-
-  .export-button {
-    @include button-base;
-    flex: 1;
-
-    &.secondary {
-      color: $color-text-primary;
-      background: $color-bg-elevated;
-      border: 2rpx solid $color-border-medium;
-    }
-
-    &.primary {
-      color: $color-text-inverse;
-      background: $color-brand-primary;
-    }
-  }
-}
 }

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import * as api from '../services/api'
 import Taro from '@tarojs/taro'
 import { CaseRequestContext, CaseRequestGuard } from './request-guard'
+import { ensureAccountConsent, ensureCaseDataConsent } from '../utils/privacy-consent'
 
 interface AppState {
   user: api.User | null
@@ -67,6 +68,7 @@ function createInitialState(token: string | null = null) {
 const initialState = createInitialState(api.getToken())
 let authRevision = 0
 let authPromise: Promise<boolean> | null = null
+let sendingCaseId: string | null = null
 
 /**
  * 会话内案件请求上下文。任何案件切换/创建都会 bump epoch，
@@ -141,6 +143,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           }
         }
         if (needsLogin) {
+          if (!await ensureAccountConsent() || revision !== authRevision) return false
           let code: string | undefined
           try {
             code = (await Taro.login()).code
@@ -227,6 +230,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         currentCase,
         isLoadingCase: false,
         caseLoadError: null,
+        ...(!currentCase.hasReport ? { currentReport: null } : {}),
         ...(isDifferentCase ? {
           materials: [],
           messages: [],
@@ -315,7 +319,17 @@ export const useAppStore = create<AppState>((set, get) => ({
       Taro.showToast({ title: '请先创建案件', icon: 'none' })
       return
     }
+    if (sendingCaseId === currentCase.id) return
+    sendingCaseId = currentCase.id
     const context = requestGuard.capture(currentCase.id)
+    try {
+      const userId = get().user?.id
+      if (!userId || !await ensureCaseDataConsent(userId)) throw new Error('尚未同意案件资料处理，可查看隐私说明后再试')
+      if (isStale(context)) throw new Error('案件已切换，请重新发送')
+    } catch (error) {
+      sendingCaseId = null
+      throw error
+    }
     const temporaryMessage: api.Message = {
       id: `temp-${Date.now()}`,
       role: 'user',
@@ -354,6 +368,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       }))
       Taro.showToast({ title: (error as Error).message || '发送失败', icon: 'none' })
       throw error
+    } finally {
+      if (sendingCaseId === currentCase.id) sendingCaseId = null
     }
   },
 
@@ -362,6 +378,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   uploadImage: async (filePath) => {
     const currentCase = get().currentCase
     if (!currentCase) throw new Error('请先创建案件')
+    const context = requestGuard.capture(currentCase.id)
+    const userId = get().user?.id
+    if (!userId || !await ensureCaseDataConsent(userId)) throw new Error('尚未同意案件资料处理，可查看隐私说明后再试')
+    if (isStale(context)) throw new Error('案件已切换，请重新上传')
     const fileId = `upload-${Date.now()}`
     get().setUploadProgress(fileId, 10)
     try {
@@ -389,6 +409,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     const currentCase = get().currentCase
     if (!currentCase) throw new Error('请先创建案件')
     const context = requestGuard.capture(currentCase.id)
+    const userId = get().user?.id
+    if (!userId || !await ensureCaseDataConsent(userId)) throw new Error('尚未同意案件资料处理，可查看隐私说明后再试')
+    if (isStale(context)) throw new Error('案件已切换，请重新处理')
     const material = await api.processMaterial(type, artifactId, currentCase.id)
     if (isStale(context)) throw new Error('案件已切换，请在当前案件重新上传')
     get().addMaterial(material)
@@ -453,6 +476,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     const context = requestGuard.capture(currentCase.id)
+    const userId = get().user?.id
+    if (!userId || !await ensureCaseDataConsent(userId)) throw new Error('尚未同意案件资料处理，可查看隐私说明后再试')
+    if (isStale(context)) throw new Error('案件已切换，请重新生成')
     set({ isGeneratingReport: true })
     try {
       const report = await api.generateReport(currentCase.id, facts)
