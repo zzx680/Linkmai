@@ -37,6 +37,7 @@ export async function callDeepSeek(
   options?: {
     temperature?: number
     maxTokens?: number
+    timeoutMs?: number
   }
 ): Promise<DeepSeekResponse> {
   const response = await axios.post(
@@ -48,7 +49,7 @@ export async function callDeepSeek(
       max_tokens: options?.maxTokens ?? 2000,
     },
     {
-      timeout: config.deepseek.timeoutMs,
+      timeout: Math.min(config.deepseek.timeoutMs, options?.timeoutMs ?? config.deepseek.timeoutMs),
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${config.deepseek.apiKey}`,

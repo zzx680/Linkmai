@@ -8,6 +8,7 @@ import { useAppStore } from '../../store'
 import { entitlementLabel, formatPaymentPrice } from '../../utils/payment'
 import { IS_H5 } from '../../config/env'
 import CaseJourney from '../../components/CaseJourney'
+import OrderHistory from './OrderHistory'
 import './index.scss'
 
 const FEATURE_DETAILS = {
@@ -24,7 +25,7 @@ function formatPaidAt(value?: string | null) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-export default function PaymentsPage() {
+function CasePaymentPanel() {
   const { currentCase, isLoggedIn, authRetryable, retryAuth } = useAppStore()
   const { isPaying, confirmation, handlePayment, reconcilePendingPayment } = useCasePayment()
   const [isLoading, setIsLoading] = useState(false)
@@ -76,9 +77,9 @@ export default function PaymentsPage() {
 
   if (!isLoggedIn) {
     return (
-      <View className="payments-page centered-page">
+      <View className="case-payment-panel centered-page">
         <View className="empty-card">
-          <View className="empty-icon"><Icon name="user-round" size={30} color="#4D6BFE" /></View>
+          <View className="empty-icon"><Icon name="user-round" size={30} color="#2A64F0" /></View>
           <Text className="empty-title">登录后查看付费权益</Text>
           <Text className="empty-description">登录后可查看当前案件的解锁状态，并继续完成支付</Text>
           <View className="primary-button" onClick={() => retryAuth()}><Text>{authRetryable ? '重新登录' : '登录'}</Text></View>
@@ -88,18 +89,18 @@ export default function PaymentsPage() {
   }
 
   if (isLoading && !currentCase) {
-    return <View className="payments-page"><View className="loading-card"><View className="loading-line loading-line-short" /><View className="loading-line" /><View className="loading-line" /></View></View>
+    return <View className="case-payment-panel"><View className="loading-card"><View className="loading-line loading-line-short" /><View className="loading-line" /><View className="loading-line" /></View></View>
   }
 
   if (loadError) {
-    return <View className="payments-page centered-page"><View className="empty-card"><Text className="empty-title">暂时无法加载权益</Text><Text className="empty-description">{loadError}</Text><View className="primary-button" onClick={refresh}><Text>重新加载</Text></View></View></View>
+    return <View className="case-payment-panel centered-page"><View className="empty-card"><Text className="empty-title">暂时无法加载权益</Text><Text className="empty-description">{loadError}</Text><View className="primary-button" onClick={refresh}><Text>重新加载</Text></View></View></View>
   }
 
   if (!currentCase) {
     return (
-      <View className="payments-page centered-page">
+      <View className="case-payment-panel centered-page">
         <View className="empty-card">
-          <View className="empty-icon"><Icon name="file-text" size={30} color="#4D6BFE" /></View>
+          <View className="empty-icon"><Icon name="file-text" size={30} color="#2A64F0" /></View>
           <Text className="empty-title">暂无可查看的付费权益</Text>
           <Text className="empty-description">创建案件并整理材料后，可以按案件一次性解锁完整处理方案</Text>
           <View className="primary-button" onClick={goHome}><Text>返回首页创建案件</Text></View>
@@ -115,7 +116,7 @@ export default function PaymentsPage() {
   const canPay = !isPaid && !isPending && !isRefunded && !!price
 
   return (
-    <View className="payments-page">
+    <View className="case-payment-panel">
       <CaseJourney active={2} title="让下一步，更有依据" description="先核对权益与金额，再决定是否解锁当前案件" />
       <View className="payments-header">
         <Text className="payments-eyebrow">当前案件权益</Text>
@@ -148,7 +149,7 @@ export default function PaymentsPage() {
 
       {(isPaid || isPending || isRefunded || !price) && (
         <View className={`status-panel${isPaid ? ' status-panel-success' : isRefunded || !price ? ' status-panel-muted' : ''}`}>
-          <Icon name={isPaid ? 'circle-check' : isRefunded ? 'undo-2' : !price ? 'info' : 'clock-3'} size={20} color={isPaid ? '#057A55' : isRefunded || !price ? '#6B7280' : '#4D6BFE'} />
+          <Icon name={isPaid ? 'circle-check' : isRefunded ? 'undo-2' : !price ? 'info' : 'clock-3'} size={20} color={isPaid ? '#057A55' : isRefunded || !price ? '#6B7280' : '#2A64F0'} />
           <Text>{isPaid
             ? `本案件已解锁，后续更新不再收费${paidAt ? ` · ${paidAt}` : ''}`
             : isRefunded ? '该订单已退款，相关付费权益已失效'
@@ -183,7 +184,7 @@ export default function PaymentsPage() {
       </View>}
 
       <View className="explanation-card">
-        <View className="explanation-icon"><Icon name="lock-keyhole" size={18} color="#4D6BFE" /></View>
+        <View className="explanation-icon"><Icon name="lock-keyhole" size={18} color="#2A64F0" /></View>
         <View className="explanation-copy">
           <Text className="explanation-title">安心支付</Text>
           <Text className="explanation-text">一次付费仅解锁当前案件，不会自动续费，也不会为其他案件自动扣款。</Text>
@@ -191,4 +192,12 @@ export default function PaymentsPage() {
       </View>
     </View>
   )
+}
+
+export default function PaymentsPage() {
+  const { isLoggedIn, token } = useAppStore()
+  return <View className="payments-page">
+    {isLoggedIn && <OrderHistory key={token} />}
+    <CasePaymentPanel />
+  </View>
 }

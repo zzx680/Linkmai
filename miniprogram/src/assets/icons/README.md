@@ -20,7 +20,7 @@
 
 在 `miniprogram/` 执行 `npm run convert:icons`。脚本使用固定版本的开发依赖 `lucide-static`，扫描页面中的 Icon 名称和颜色，生成 `lucide/` 中的 PNG 及 `components/Icon/assets.ts`。新增图标时先在脚本的 `names` 中加入官方名称，然后重新生成。
 
-页面使用 `<Icon name="file-text" size={24} color="#4D6BFE" />`。PNG 为透明背景的 192 × 192 素材，支持当前 14–64px 的显示尺寸；导航 PNG 为 96 × 96。编译会处理静态导入的图片路径，微信端无需加载远程字体或 SVG。
+页面使用 `<Icon name="file-text" size={24} color="#2A64F0" />`。PNG 为透明背景的 192 × 192 素材，支持当前 14–64px 的显示尺寸；导航 PNG 为 96 × 96。编译会处理静态导入的图片路径，微信端无需加载远程字体或 SVG。
 
 未知名称及未生成的颜色会回退到帮助图标或灰色。新增颜色后也需要重新生成素材。
 

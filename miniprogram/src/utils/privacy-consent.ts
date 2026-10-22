@@ -10,7 +10,7 @@ function hasConsent(key: string) {
 
 async function ask(key: string, title: string, content: string) {
   if (hasConsent(key)) return true
-  const result = await Taro.showModal({ title, content, confirmText: '同意继续', cancelText: '查看说明', confirmColor: '#4D6BFE' })
+  const result = await Taro.showModal({ title, content, confirmText: '同意继续', cancelText: '查看说明', confirmColor: '#2A64F0' })
   if (!result.confirm) {
     await Taro.navigateTo({ url: '/pages/privacy/index' })
     return false
@@ -24,9 +24,14 @@ export function ensureAccountConsent() {
 }
 
 export function ensureCaseDataConsent(userId: string) {
-  return ask(caseDataKey(userId), '案件资料与 AI 分析', '你发送的事故描述、身份及医疗资料可能包含敏感个人信息，将用于案件整理、云端存储、文字识别及 AI 分析，并交由相应服务商处理。请遮盖无关信息，并确认有权提供他人资料。不同意可先查看说明，不影响浏览其他页面。')
+  return ask(caseDataKey(userId), '案件资料与 AI 分析', '你发送的事故描述、身份及医疗资料可能包含敏感个人信息，将由灵迈整理保存，交由阿里云进行材料存储和文字识别，并由 DeepSeek 官方 API 处理必要的案件文本或图片以生成辅助分析。请遮盖无关信息，并确认有权提供他人资料。不同意可先查看说明，不影响浏览其他页面。')
 }
 
 export function revokeCaseDataConsent(userId: string) {
   Taro.removeStorageSync(caseDataKey(userId))
+  Taro.removeStorageSync(`linkmai.privacy.speech.${userId}`)
+}
+
+export function ensureSpeechConsent(userId: string) {
+  return ask(`linkmai.privacy.speech.${userId}`, '语音转文字', '使用麦克风采集你主动口述的声音，并交由腾讯微信同声传译服务转成文字。识别结果先放入输入框，只有你点击发送后才作为案件对话保存。你可以随时取消，或继续使用键盘输入。')
 }

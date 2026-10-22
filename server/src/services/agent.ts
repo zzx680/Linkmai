@@ -1,4 +1,6 @@
-// Agent 对话状态管理服务：只使用受控状态转换，不调用识别或生成 API。
+// Language understanding proposes facts; confirmation, materials, payments and
+// report generation remain controlled state transitions.
+import { contextualAdvice, detectAccidentType, interpretUserMessage, isAcknowledgement, isQuestion, localMessageFacts, validFactValue, type MessageInterpreter } from './agent-language'
 export interface AgentState {
   stage: 'collecting' | 'confirming' | 'analyzing' | 'ready'
   collectedFacts: CollectedFact[]
@@ -67,7 +69,7 @@ export function generateNextQuestion(state: AgentState): { question: string; qui
   }
   if (state.collectedFacts.some(fact => !fact.confirmed)) {
     return {
-      question: `请核对以下信息：\n${state.collectedFacts.filter(fact => !fact.confirmed).map(fact => `• ${fact.label}：${fact.value}`).join('\n')}\n确认无误后继续；需要修改时请选择字段`,
+      question: `请核对以下信息：\n${state.collectedFacts.filter(fact => !fact.confirmed).map(fact => `• ${fact.label}：${fact.key === 'accident_type' ? ({ traffic_accident: '交通事故', work_injury: '工伤事故', personal_injury: '意外伤害' } as Record<string, string>)[fact.value] || fact.value : fact.value}`).join('\n')}\n确认无误后继续；需要修改时请选择字段`,
       quickReplies: [reply('信息正确', 'confirm'), reply('需要修改', 'edit')],
     }
   }
@@ -98,7 +100,7 @@ export function generateNextQuestion(state: AgentState): { question: string; qui
 function updatePrompt(state: AgentState): AgentState {
   state.pendingConfirmation = state.collectedFacts.filter(fact => !fact.confirmed).map(fact => ({ ...fact }))
   if (state.pendingConfirmation.length) state.stage = 'confirming'
-  else if (state.stage !== 'ready') state.stage = 'collecting'
+  else if (state.stage !== 'ready' || missingFact(state)) state.stage = 'collecting'
   const next = generateNextQuestion(state)
   state.nextQuestion = next.question
   state.quickReplies = next.quickReplies || []
@@ -116,21 +118,23 @@ function textFact(key: string, value: string): CollectedFact {
 }
 
 function accidentType(text: string): string | undefined {
-  if (text === 'traffic_accident' || /交通|车祸|追尾/.test(text)) return 'traffic_accident'
-  if (text === 'work_injury' || /工伤|上班|工作/.test(text)) return 'work_injury'
-  if (text === 'personal_injury' || /意外|摔伤|伤害/.test(text)) return 'personal_injury'
+  return detectAccidentType(text)
 }
 
 export async function processUserMessage(
   state: AgentState,
   userMessage: string,
   materials: AgentMaterial[] = [],
-  action?: string
+  action?: string,
+  interpret: MessageInterpreter = interpretUserMessage,
 ): Promise<AgentState> {
   // 不共享数组/事实对象，失败的请求和历史状态不会被意外修改。
   const next: AgentState = { ...state, collectedFacts: state.collectedFacts.map(fact => ({ ...fact })) }
   const text = userMessage.trim()
   const control = normalizeAgentAction(action || text)
+  // Repair acknowledgement values stored as dates by older clients/servers.
+  next.collectedFacts = next.collectedFacts.filter(fact => !(fact.source === 'user_text'
+    && fact.key === 'accident_date' && (isAcknowledgement(fact.value) || isQuestion(fact.value))))
 
   for (const material of materials) {
     const data = material.extractedData
@@ -173,22 +177,56 @@ export async function processUserMessage(
 
   const correction = FACT_DEFINITIONS.find(fact => text.startsWith(`${fact.label}：`) || text.startsWith(`${fact.label}:`) || text.startsWith(`${fact.key}:`))
   const key = next.editingFactKey || correction?.key
+  let response = ''
   if (key) {
     const value = correction ? text.slice(text.indexOf(text.includes('：') ? '：' : ':') + 1).trim() : text
-    if (value) {
+    if (validFactValue(key, value)) {
       setFact(next, textFact(key, key === 'accident_type' ? accidentType(value) || value : value))
       delete next.editingFactKey
       next.stage = 'collecting'
-    }
-  } else if (!next.collectedFacts.some(fact => !fact.confirmed) && next.stage !== 'ready') {
-    // 当前问题决定写入哪个字段，避免一条回答被误当作地点、涉事方和经过。
+    } else response = '还没有收到有效的字段内容，请补充具体信息；不清楚的内容可以稍后核对'
+  } else if (isAcknowledgement(text)) {
+    response = next.collectedFacts.some(fact => !fact.confirmed)
+      ? '请核对已整理的信息，确认无误后点击「信息正确」；需要调整可点击「需要修改」'
+      : '这条回复没有包含新的事故信息，请补充下面问题的具体内容；不清楚的内容可以稍后核对'
+  } else {
     const missing = missingFact(next)
-    if (missing) {
+    const localFacts = localMessageFacts(text)
+    const naturalMessage = !['traffic_accident', 'work_injury', 'personal_injury'].includes(text)
+      && (text.length >= 12 || isQuestion(text) || localFacts.some(fact => fact.key === 'accident_description') || localFacts.length > 1)
+    if (naturalMessage) {
+      const understood = await interpret(next, text)
+      const changedFacts = understood.facts.filter(fact => !next.collectedFacts.some(existing => existing.key === fact.key && existing.value === fact.value))
+      for (const fact of understood.facts) {
+        if (!FACT_DEFINITIONS.some(definition => definition.key === fact.key) || !validFactValue(fact.key, fact.value)) continue
+        // Validate injected interpreters too; only literal user evidence may become a fact.
+        if (!text.includes(fact.evidence) || (fact.key !== 'accident_type' && !fact.evidence.includes(fact.value))) continue
+        if (fact.key === 'accident_type' && accidentType(fact.evidence) !== fact.value) continue
+        const existing = next.collectedFacts.find(item => item.key === fact.key)
+        if (existing?.value === fact.value) continue
+        const directAnswer = changedFacts.length === 1 && missing?.key === fact.key
+          && !isQuestion(text) && !next.collectedFacts.some(item => !item.confirmed) && next.stage !== 'ready'
+        setFact(next, { ...textFact(fact.key, fact.value), confidence: directAnswer ? 'high' : 'medium', confirmed: directAnswer })
+      }
+      response = contextualAdvice(text) || understood.reply
+      if (next.collectedFacts.some(fact => !fact.confirmed)) next.stage = 'confirming'
+      // A detailed answer can still be a single value for the active field, but
+      // never treat a question or greeting as an answer to that field.
+      if (understood.facts.length === 0 && !isQuestion(text)
+        && !next.collectedFacts.some(fact => !fact.confirmed) && next.stage !== 'ready' && missing
+        && missing.key !== 'accident_description' && validFactValue(missing.key, text)) {
+        const value = missing.key === 'accident_type' ? accidentType(text) : text
+        if (value) setFact(next, textFact(missing.key, value))
+      }
+    } else if (!next.collectedFacts.some(fact => !fact.confirmed) && next.stage !== 'ready' && missing
+      && !isQuestion(text) && validFactValue(missing.key, text)) {
       const value = missing.key === 'accident_type' ? accidentType(text) : text
       if (value) setFact(next, textFact(missing.key, value))
     }
   }
-  return updatePrompt(next)
+  updatePrompt(next)
+  if (response) next.nextQuestion = `${response}\n\n${next.nextQuestion}`
+  return next
 }
 
 export function canGenerateReport(state: AgentState): boolean {

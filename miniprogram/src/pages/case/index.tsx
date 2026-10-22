@@ -1,14 +1,16 @@
 import { Button, Text, View } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useMemo, useState } from 'react'
-import { Avatar, Icon, SkeletonCaseCard } from '../../components'
+import { Icon, SkeletonCaseCard } from '../../components'
 import { IS_H5 } from '../../config/env'
 import { syncTabRoute } from '../../custom-tab-bar/navigation'
 import { useCasePayment } from '../../hooks/useCasePayment'
 import { useAppStore } from '../../store'
 import { formatPaymentPrice } from '../../utils/payment'
-import { getCaseNextStep, getHomeMode, getHomeStepDetail } from './home-state'
+import { getCaseNextStep, getHomeMode, getHomeStepDetail, getJourneyStep } from './home-state'
 import CaseJourney from '../../components/CaseJourney'
+import OnboardingGuide from '../../components/OnboardingGuide'
+import { completeGuideSteps } from '../../components/OnboardingGuide/progress'
 import './index.scss'
 
 export default function CasePage() {
@@ -56,6 +58,7 @@ export default function CasePage() {
     setIsCreating(true)
     try {
       await createCase()
+      completeGuideSteps(['login', 'create-case'])
       await Taro.switchTab({ url: '/pages/agent/index' })
     } catch (error) {
       Taro.showToast({ title: error instanceof Error ? error.message : '创建失败，请重试', icon: 'none' })
@@ -68,7 +71,10 @@ export default function CasePage() {
     if (isCreating || isPaying || isAuthenticating) return
     if (mode === 'logged_out' || authRetryable) {
       retryAuth().then(ok => {
-        if (ok) Taro.showToast({ title: '登录成功', icon: 'success' })
+        if (ok) {
+          completeGuideSteps(['login'])
+          Taro.showToast({ title: '登录成功', icon: 'success' })
+        }
       })
       return
     }
@@ -108,16 +114,8 @@ export default function CasePage() {
         <View className="welcome-intro">
           <Text className="welcome-title">Hello👋<Text className="welcome-title-line">欢迎使用灵迈</Text></Text>
         </View>
-        <View className="welcome-process">
-          <View className="welcome-section-heading"><Text>从这里开始</Text><Text className="welcome-section-caption">按自己的进度，逐步处理</Text></View>
-          {[
-            ['01', '讲清事故经过', '用对话梳理时间、地点与当事人信息'],
-            ['02', '核对关键材料', '上传认定书与医疗记录，逐项核对识别结果'],
-            ['03', '形成处理方案', '确认事实后，按需解锁案件分析与行动建议']
-          ].map(([number, title, copy]) => <View className="welcome-process-row" key={number}><Text className="welcome-process-number">{number}</Text><View className="welcome-process-copy"><Text className="welcome-process-title">{title}</Text><Text className="welcome-process-detail">{copy}</Text></View></View>)}
-        </View>
+        <CaseJourney active={0} compact identityLabel="登录后使用案件工作台" actionId="guide-login" actionLabel={isAuthenticating ? '正在连接微信账户' : authRetryable ? '重新连接并开始' : '微信登录并开始'} onAction={handlePrimaryAction} actionLoading={isAuthenticating} />
         {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text></View>}
-        <View className="welcome-start"><Button className="welcome-login" loading={isAuthenticating} disabled={isAuthenticating} onClick={handlePrimaryAction}>{isAuthenticating ? '正在连接微信账户' : authRetryable ? '重新连接' : '微信登录并开始'}</Button></View>
         <View className="welcome-privacy-link" onClick={() => Taro.navigateTo({ url: '/pages/privacy/index' })} role="button"><Text>查看隐私说明与数据管理</Text></View>
         <View className="welcome-boundary"><Text>灵迈提供 AI 辅助整理与分析，不替代专业法律意见。</Text></View>
       </View>
@@ -158,25 +156,21 @@ export default function CasePage() {
           <Text className="home-welcome-hello">Hello👋</Text>
           <Text className="home-welcome-title">欢迎使用灵迈</Text>
         </View>
-        <View className="identity-topline">
-          {isLoggedIn && <Avatar name={nickname} src={user?.avatar} size={40} />}
-          <Text className="identity-kicker">{isLoggedIn ? `${nickname}的案件工作台` : '灵迈案件工作台'}</Text>
-        </View>
       </View>
 
-      <CaseJourney active={nextStep === 'view_report' ? 3 : nextStep === 'unlock_full_plan' || nextStep === 'view_payment_status' || nextStep === 'view_refund_status' ? 2 : nextStep === 'confirm_materials' ? 1 : 0} title={hasCase ? '每一步，都有迹可循' : '先把经过讲清楚'} description={hasCase ? '材料、事实与下一步行动，集中在你的案件工作台' : '创建案件后，灵迈会通过对话帮你梳理事故信息'} />
+      <CaseJourney active={getJourneyStep(nextStep)} compact identityLabel={`${nickname}的案件工作台`} identityAvatar={user?.avatar} actionLabel="开始处理" />
       {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text><Button loading={isAuthenticating} disabled={isAuthenticating} onClick={() => retryAuth()} className="auth-retry">重新连接</Button></View>}
 
       {mode === 'load_error' && (
         <View className="load-error-note">
-          <Icon name="info" size={18} color="#4D6BFE" />
+          <Icon name="info" size={18} color="#2A64F0" />
           <Text>暂时无法更新进度{caseLoadError ? `：${caseLoadError}` : ''}</Text>
         </View>
       )}
 
       <View className={`workbench-card workbench-card-stacked${hasCase ? ` workbench-card-${nextStep}` : ''}`}>
         <View className="workbench-card-header">
-          <View className="workbench-icon"><Icon name={isLoggedOut ? 'user-round' : isEmpty ? 'file-text' : nextStep === 'view_report' ? 'circle-check' : 'route'} size={26} color="#4D6BFE" /></View>
+          <View className="workbench-icon"><Icon name={isLoggedOut ? 'user-round' : isEmpty ? 'file-text' : nextStep === 'view_report' ? 'circle-check' : 'route'} size={26} color="#2A64F0" /></View>
           <View className="workbench-heading">
             <View className="status-pill"><Text>{isLoggedOut ? '账户登录' : isEmpty ? '新建案件' : detail.badge}</Text></View>
           </View>
@@ -199,15 +193,15 @@ export default function CasePage() {
         )}
 
         {hasCase && nextStep === 'unlock_full_plan' && (
-          <View className="payment-note"><Icon name="shield-check" size={18} color="#4D6BFE" /><Text>一次付费，仅解锁当前案件；后续更新不再收费</Text></View>
+          <View className="payment-note"><Icon name="shield-check" size={18} color="#2A64F0" /><Text>一次付费，仅解锁当前案件；后续更新不再收费</Text></View>
         )}
         {hasCase && nextStep === 'continue_case' && (
           <View className="unlocked-note"><Icon name="circle-check" size={18} color="#059669" /><Text>本案件已解锁完整处理方案</Text></View>
         )}
 
-        <View className={`primary-action${isCreating || isPaying ? ' primary-action-disabled' : ''}`} onClick={handlePrimaryAction}>
+        <View id="guide-create-case" className={`primary-action${isCreating || isPaying ? ' primary-action-disabled' : ''}`} onClick={handlePrimaryAction}>
           <Text>{primaryLabel}</Text>
-          {!isCreating && !isPaying && <Icon name="arrow-right" size={20} color="#4D6BFE" />}
+          {!isCreating && !isPaying && <Icon name="arrow-right" size={20} color="#2A64F0" />}
         </View>
       </View>
 
@@ -220,19 +214,22 @@ export default function CasePage() {
               <View className="summary-item"><Text className="summary-value">{confirmedCount}</Text><Text className="summary-label">已确认材料</Text></View>
               <View className="summary-item"><Text className="summary-value">{currentCase?.hasReport ? '已生成' : '处理中'}</Text><Text className="summary-label">完整方案</Text></View>
             </View>
-            <View className="summary-link" onClick={goToMaterials}><Text>查看材料与已整理信息</Text><Icon name="chevron-right" size={18} color="#4D6BFE" /></View>
+            <View className="summary-link" onClick={goToMaterials}><Text>查看材料与已整理信息</Text><Icon name="chevron-right" size={18} color="#2A64F0" /></View>
           </View>
 
           <View className="quick-section">
             <Text className="section-label">快捷入口</Text>
             <View className="quick-grid">
-              <View className="quick-item" onClick={() => Taro.switchTab({ url: '/pages/agent/index' })}><Icon name="messages-square" size={20} color="#4D6BFE" /><Text>处理案件</Text></View>
-              <View className="quick-item" onClick={goToMaterials}><Icon name="folder-open" size={20} color="#4D6BFE" /><Text>材料与证据</Text></View>
-              <View className="quick-item" onClick={() => Taro.navigateTo({ url: '/pages/payments/index' })}><Icon name="credit-card" size={20} color="#4D6BFE" /><Text>案件权益</Text></View>
+              <View className="quick-item" onClick={() => Taro.switchTab({ url: '/pages/agent/index' })}><Icon name="messages-square" size={20} color="#AF52DE" /><Text>处理案件</Text></View>
+              <View className="quick-item" onClick={goToMaterials}><Icon name="folder-open" size={20} color="#34C759" /><Text>材料与证据</Text></View>
+              <View className="quick-item" onClick={() => Taro.navigateTo({ url: '/pages/payments/index' })}><Icon name="credit-card" size={20} color="#FF9500" /><Text>案件权益</Text></View>
             </View>
           </View>
         </>
       )}
+      <OnboardingGuide enabled={isEmpty && !isCreating && !isAuthenticating && !authError} scrollPage steps={[
+        { id: 'create-case', target: 'guide-create-case', number: '01 / 03', title: '从第一个案件开始', description: '点击这里创建案件，接下来就可以描述经过、整理事故材料', nextLabel: '知道了', targetLabel: '创建第一个案件', onTarget: handlePrimaryAction }
+      ]} />
     </View>
   )
 }

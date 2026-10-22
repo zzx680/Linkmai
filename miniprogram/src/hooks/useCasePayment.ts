@@ -71,14 +71,7 @@ export function useCasePayment() {
     try {
       let pending = readPending()
       if (resume) {
-        if (!pending) {
-          Taro.showToast({
-            title: currentCase.entitlement?.status === 'pending'
-              ? '尚未确认付款，可点击继续支付核对原订单' : '已刷新案件权益',
-            icon: 'none'
-          })
-          return
-        }
+        if (!pending) return
       } else {
         if (IS_H5) {
           Taro.showToast({ title: '请在微信小程序中完成支付', icon: 'none' })

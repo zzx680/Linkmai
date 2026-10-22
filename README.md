@@ -27,7 +27,8 @@ project.config.json         # 微信开发者工具入口，指向 miniprogram/d
 ## 当前能力与边界
 
 - 微信登录、当前案件管理、材料上传、OCR/图片分析、字段确认、付费权益及案件报告已有实现。
-- 对话采用信息收集、确认和修改状态机；报告目前只使用**已确认的材料字段**，并非全部聊天内容。
+- 聊天输入支持可选的「口述经过」转文字，结果先进入可编辑草稿。微信同声传译插件已在灵迈小程序后台通过授权，默认构建启用；平台隐私声明与真机验收见 [语音输入接入](miniprogram/src/services/speech/README.md)。
+- 对话由 DeepSeek 辅助理解自然描述，一次提取多个有原文依据的事故事实，先回应问题，再核对信息和追问缺项；确认、修改及页面操作仍由状态机控制。模型调用最多等待 6.5 秒，失败时退回本地规则。报告目前只使用**已确认的材料字段**，并非全部聊天内容。
 - 按案件一次性收费，金额由后端返回；默认配置为 4990 分。本案件补充材料后可重新分析。
 - 微信支付 API v3 已接入下单、查单、关单及签名校验后的回调处理；权益以服务端确认结果为准。
 - 材料确认发生变化会使旧报告失效；报告发布前会核对材料快照，避免发布过时结果。
@@ -75,6 +76,7 @@ npm run dev:weapp
 | 当前案件 | `GET/POST/PATCH/DELETE /api/cases/current` |
 | 当前权益 | `GET /api/cases/current/entitlement` |
 | 创建订单、查询订单 | `POST /api/cases/:caseId/payment-orders`、`GET /api/payment-orders/:orderId` |
+| 全部订单记录（按登录账户隔离） | `GET /api/payment-orders?limit=20&offset=0` |
 | 微信支付通知 | `POST /api/payments/wechat/notify` |
 | 对话 | `POST /api/conversations/current`、`GET/POST /api/conversations/current/messages` |
 | 上传图片、视频 | `POST /api/upload/image`、`POST /api/upload/video` |

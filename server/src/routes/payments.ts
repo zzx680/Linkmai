@@ -56,6 +56,33 @@ casePaymentRouter.post('/:caseId/payment-orders', async (req, res) => {
   }
 })
 
+paymentOrderRouter.get('/', async (req, res) => {
+  const limit = req.query.limit === undefined ? 20 : Number(req.query.limit)
+  const offset = req.query.offset === undefined ? 0 : Number(req.query.offset)
+  if ((req.query.limit !== undefined && typeof req.query.limit !== 'string')
+    || (req.query.offset !== undefined && typeof req.query.offset !== 'string')
+    || !Number.isSafeInteger(limit) || limit < 1 || limit > 50
+    || !Number.isSafeInteger(offset) || offset < 0) {
+    return res.status(400).json({ error: 'INVALID_PAGINATION', message: '订单分页参数无效' })
+  }
+  try {
+    // Ownership comes exclusively from the authenticated session. Never expose
+    // provider credentials, prepay IDs or another user's order through this list.
+    const orders = await db.listPaymentOrders(req.userId!, limit + 1, offset)
+    res.json({
+      orders: orders.slice(0, limit).map(order => ({
+        orderId: order.id, orderNo: order.orderNo, caseId: order.caseId,
+        status: order.status, amountCents: order.amountCents, currency: order.currency,
+        createdAt: order.createdAt, paidAt: order.paidAt || null, updatedAt: order.updatedAt,
+      })),
+      hasMore: orders.length > limit,
+      nextOffset: offset + Math.min(orders.length, limit),
+    })
+  } catch (err) {
+    respondWithError(res, err)
+  }
+})
+
 paymentOrderRouter.get('/:orderId', async (req, res) => {
   try {
     const result = await queryPaymentOrder(req.userId!, req.params.orderId)

@@ -3,6 +3,8 @@ import Taro from '@tarojs/taro'
 import { useState } from 'react'
 import { Icon } from '../../components'
 import { submitFeedback } from '../../services/api'
+import { useAppStore } from '../../store'
+import { restartGuide } from '../../components/OnboardingGuide/progress'
 import './index.scss'
 
 export default function Help() {
@@ -38,12 +40,17 @@ export default function Help() {
       </View>
 
       <View className="support-card quick-help-card">
-        <View className="card-icon"><Icon name="messages-square" size={22} color="#4D6BFE" /></View>
+        <View className="card-icon"><Icon name="messages-square" size={22} color="#2A64F0" /></View>
         <View className="card-copy">
           <Text className="card-title">处理事故</Text>
           <Text className="card-description">从底部“处理”进入对话，按提示讲清事故经过并整理材料</Text>
         </View>
       </View>
+
+      <Button className="guide-replay-button" onClick={() => {
+        restartGuide()
+        Taro.switchTab({ url: useAppStore.getState().currentCase ? '/pages/agent/index' : '/pages/case/index' })
+      }}><Text>重新查看新人指引</Text><Text>→</Text></Button>
 
       <View className="support-section">
         <Text className="section-title">提交反馈</Text>

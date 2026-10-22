@@ -7,9 +7,10 @@
 .journey-steps { display: flex; margin-top: 32rpx; border-top: 1rpx solid #44628E; }
 .journey-step { flex: 1; min-width: 0; min-height: 96rpx; padding-top: 16rpx; display: flex; flex-direction: column; gap: 8rpx; color: #C3D6F7; font-size: 22rpx; }
 .journey-step.current { color: #fff; border-top: 4rpx solid #fff; font-weight: 600; }
-.journey-number { display: block; font-size: 24rpx; }
+.journey-node { display: block; font-size: 24rpx; line-height: 1.5; }
+.journey-step-label { display: block; }
 .journey-step:active { opacity: .7; }
-.journey-step:focus-visible, [role='button']:focus-visible, button:focus-visible, input:focus-visible { outline: 4rpx solid #4D6BFE; outline-offset: 4rpx; }
+.journey-step:focus-visible, [role='button']:focus-visible, button:focus-visible, input:focus-visible { outline: 4rpx solid #2A64F0; outline-offset: 4rpx; }
 .auth-error-panel { margin: 16rpx 0; padding: 20rpx 24rpx; border: 1rpx solid #EAC2C2; background: #FDEBEC; border-radius: $radius-md; color: #912727; }
 .auth-error-title { display: block; font-size: 28rpx; font-weight: 600; }
 .auth-retry { min-height: 76rpx; padding: 0 20rpx; margin-top: 12rpx; display: flex; align-items: center; justify-content: center; color: $color-brand-primary; background: #fff; border-radius: $radius-md; font-size: 28rpx; font-weight: 600; }
@@ -51,6 +52,7 @@
 .report-page .export-button.disabled { opacity: .5; }
 
 .profile-page { box-sizing: border-box; }
-.profile-page .user-card { background: #002FA7; color: #fff; padding: 40rpx 32rpx; border-radius: $radius-xl; box-shadow: none; }
-.profile-page .user-name, .profile-page .user-caption { color: #fff; }
+.profile-page .user-card { background: $color-bg-elevated; color: $color-text-primary; padding: 40rpx 32rpx; border-radius: $radius-xl; box-shadow: none; }
+.profile-page .user-name { color: $color-text-primary; }
+.profile-page .user-caption { color: $color-text-secondary; }
 .profile-page .auth-retry { color: #000000; }

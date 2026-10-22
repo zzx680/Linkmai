@@ -98,7 +98,8 @@ if ! pm2 startOrReload "$PM2_CONFIG" --update-env; then
   exit 1
 fi
 
-if ! curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 2 "$HEALTH_URL" >/dev/null; then
+if ! curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 2 "$HEALTH_URL" >/dev/null \
+  || ! bash "$CURRENT_LINK/server/scripts/smoke-production.sh" "${HEALTH_URL%/api/health}"; then
   echo "健康检查失败，开始代码回滚"
   rollback_code
   rm -rf "$RELEASE_DIR"

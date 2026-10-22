@@ -64,6 +64,57 @@ test('a payment racing with close cannot create a replacement before confirmatio
   assert.equal(order.status, 'created')
 })
 
+test('a failed create must not close an unexpired order when WeChat says NOTPAY', async () => {
+  const { user, item, order, provider } = await fixture()
+  await db.updatePaymentOrderStatus(order.id, 'closed')
+  let createdOrderNo = ''
+  const close = mock.method(paymentProvider, 'closeOrder', async () => { throw new Error('must not close an active order') })
+  mock.method(paymentProvider, 'createOrder', async (input) => {
+    createdOrderNo = input.orderNo
+    throw new Error('provider timeout after creating the order')
+  })
+  mock.method(paymentProvider, 'queryOrder', async (orderNo) => ({ ...provider, orderNo, tradeState: 'NOTPAY' }))
+  await assert.rejects(createCasePaymentOrder(user.id, item.id, user.openid), /PAYMENT_CONFIRMATION_PENDING/)
+  const recovered = await db.findPaymentOrderByOrderNo(createdOrderNo)
+  assert.equal(recovered?.status, 'created')
+  assert.equal(close.mock.callCount(), 0)
+  assert.equal((await db.getCaseEntitlement(user.id, item.id))?.status, 'pending')
+})
+
+test('an uncertain provider response keeps the order pending instead of allowing a second order', async () => {
+  const { user, item, order } = await fixture()
+  await db.updatePaymentOrderStatus(order.id, 'closed')
+  let createdOrderNo = ''
+  mock.method(paymentProvider, 'createOrder', async (input) => {
+    createdOrderNo = input.orderNo
+    throw new Error('provider timeout')
+  })
+  mock.method(paymentProvider, 'queryOrder', async () => { throw new Error('PAYMENT_PROVIDER_ERROR') })
+  await assert.rejects(createCasePaymentOrder(user.id, item.id, user.openid), /PAYMENT_CONFIRMATION_PENDING/)
+  const recovered = await db.findPaymentOrderByOrderNo(createdOrderNo)
+  assert.equal(recovered?.status, 'created')
+  await assert.rejects(createCasePaymentOrder(user.id, item.id, user.openid), /PAYMENT_CONFIRMATION_PENDING/)
+  assert.equal((await db.findPendingPaymentOrder(user.id, item.id))?.orderNo, createdOrderNo)
+})
+
+test('the same recovery path closes a genuinely expired NOTPAY order', async () => {
+  const { user, item, provider, order } = await fixture()
+  await db.updatePaymentOrderStatus(order.id, 'closed')
+  let createdOrderNo = ''
+  const close = mock.method(paymentProvider, 'closeOrder', async () => undefined)
+  mock.method(paymentProvider, 'createOrder', async (input) => {
+    createdOrderNo = input.orderNo
+    const created = await db.findPaymentOrderByOrderNo(input.orderNo)
+    created!.expiresAt = new Date(Date.now() - 1000)
+    throw new Error('provider timeout')
+  })
+  mock.method(paymentProvider, 'queryOrder', async (orderNo) => ({ ...provider, orderNo, tradeState: 'NOTPAY' }))
+  await assert.rejects(createCasePaymentOrder(user.id, item.id, user.openid), /provider timeout/)
+  assert.equal((await db.findPaymentOrderByOrderNo(createdOrderNo))?.status, 'closed')
+  assert.equal(close.mock.callCount(), 1)
+  assert.equal((await db.getCaseEntitlement(user.id, item.id))?.status, 'unpaid')
+})
+
 test('replaying a terminal idempotency key cannot re-open or submit the closed order', async () => {
   const { user, item, order, provider } = await fixture()
   order.idempotencyKey = 'same-key'

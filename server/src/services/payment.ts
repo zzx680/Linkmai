@@ -76,6 +76,9 @@ async function recoverCreateOrderFailure(order: PaymentOrder, originalError: unk
       throw new Error('ALREADY_PAID')
     }
     if (providerOrder.tradeState === 'NOTPAY') {
+      // A failed create request may race with another request that is still
+      // using this order. Only close after the server-side expiry has passed.
+      if (order.expiresAt.getTime() > Date.now()) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       await closeExpiredOrder(order)
       throw originalError
     }
@@ -89,10 +92,13 @@ async function recoverCreateOrderFailure(order: PaymentOrder, originalError: unk
     }
     throw new Error('PAYMENT_CONFIRMATION_PENDING')
   } catch (recoveryError) {
-    if ((recoveryError as Error).message === 'PAYMENT_ORDER_NOT_FOUND') {
+    const code = (recoveryError as Error).message
+    if (code === 'PAYMENT_ORDER_NOT_FOUND') {
+      if (order.expiresAt.getTime() > Date.now()) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       await db.updatePaymentOrderStatus(order.id, 'failed')
       throw originalError
     }
+    if (code === 'PAYMENT_PROVIDER_ERROR') throw new Error('PAYMENT_CONFIRMATION_PENDING')
     throw recoveryError
   }
 }
@@ -108,6 +114,7 @@ async function reconcilePaymentOrder(order: PaymentOrder): Promise<PaymentOrder>
       return (await db.updatePaymentOrderStatus(order.id, 'failed')) || order
     }
     if (order.status === 'paid') return order
+    if ((error as Error).message === 'PAYMENT_PROVIDER_ERROR') throw new Error('PAYMENT_CONFIRMATION_PENDING')
     throw error
   }
 
@@ -145,6 +152,8 @@ function paymentOrderResponse(order: PaymentOrder, entitlement: Awaited<ReturnTy
     amountCents: order.amountCents,
     currency: order.currency,
     paidAt: order.paidAt || null,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
     expiresAt: order.expiresAt,
     entitlement,
   }

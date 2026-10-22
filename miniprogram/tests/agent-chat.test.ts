@@ -25,6 +25,7 @@ function loadChat(h5 = false) {
       if (id === '../../config/env') return { IS_H5: h5 }
       if (id === './labels') return labels
       if (id === '../Icon') return { __esModule: true, default: () => React.createElement('img', { alt: '' }) }
+      if (id === '../ThinkingOrb') return { __esModule: true, default: () => React.createElement('div', { role: 'status', 'aria-label': '灵迈助手正在整理案件信息' }) }
       if (id.endsWith('.scss')) return {}
       return localRequire(id)
     },
@@ -49,7 +50,15 @@ test('native messages retain literal user content and image attachments', () => 
   assert.equal(node.props.content[0].data[0].fileType, 'image')
   assert.equal(node.props.content[1].type, 'text')
   assert.equal(node.props.content[1].data, '<script>hello</script>\n第二行')
-  assert.equal(AgentChatMessage({ pending: true }).props.status, 'pending')
+})
+
+test('pending replies use the shared thinking orb in native and H5 without rendering empty messages', () => {
+  for (const h5 of [false, true]) {
+    const html = renderToStaticMarkup(loadChat(h5).AgentChatMessage({ pending: true }))
+    assert.match(html, /role="status"/)
+    assert.match(html, /正在整理案件信息/)
+    assert.doesNotMatch(html, /t-chat-message|chat-preview-content/)
+  }
 })
 
 test('native sender bridges TDesign detail events and avoids unsupported stop/upload workflows', () => {
@@ -102,13 +111,39 @@ test('H5 preview escapes content and handles multiline and IME input without acc
   assert.deepEqual(sent, ['事故经过'])
 })
 
-test('description shortcut fills an empty composer without overwriting a draft', () => {
+test('dictation shortcut starts speech input without overwriting a draft or sending a message', () => {
   const { AgentChatSender } = loadChat(true)
   const changes: string[] = []
-  const props = { value: '', sending: false, uploading: false, onChange: (value: string) => changes.push(value), onSend() {}, onKeyboardHeightChange() {}, onAttach() {} }
+  let dictated = 0, sent = 0
+  const props = { value: '', sending: false, uploading: false, onChange: (value: string) => changes.push(value), onSend() { sent++ }, onKeyboardHeightChange() {}, onAttach() {}, onDictate() { dictated++ } }
   find(AgentChatSender(props), 'button', 'composer-prompt')!.props.onClick()
   find(AgentChatSender({ ...props, value: '我在路口被追尾' }), 'button', 'composer-prompt')!.props.onClick()
-  assert.deepEqual(changes, ['我想描述一下事故经过', '我在路口被追尾'])
+  assert.equal(dictated, 2)
+  assert.equal(sent, 0)
+  assert.deepEqual(changes, [])
+  const html = renderToStaticMarkup(AgentChatSender(props))
+  assert.ok(html.includes('口述经过'))
+  assert.ok(!html.includes('描述经过'))
+})
+
+test('dictation blocks upload and send while listening or transcribing in native and H5 senders', () => {
+  for (const h5 of [false, true]) for (const speechState of ['authorizing', 'listening', 'transcribing']) {
+    const { AgentChatSender } = loadChat(h5)
+    let sent = 0, stopped = 0, cancelled = 0
+    const node = AgentChatSender({ value: '已有草稿', sending: false, uploading: false, speechState,
+      onChange() {}, onSend() { sent++ }, onKeyboardHeightChange() {}, onAttach() {}, onDictate() {},
+      onSpeechStop() { stopped++ }, onSpeechCancel() { cancelled++ }
+    })
+    assert.equal(find(node, 'button', 'composer-upload')!.props.disabled, true)
+    assert.equal(find(node, 'button', 'composer-prompt')!.props.disabled, true)
+    assert.equal(find(node, 'button', 'speech-finish')!.props.disabled, speechState !== 'listening')
+    find(node, 'button', 'speech-cancel')!.props.onClick()
+    assert.equal(cancelled, 1)
+    if (speechState === 'listening') { find(node, 'button', 'speech-finish')!.props.onClick(); assert.equal(stopped, 1) }
+    if (h5) find(node, 'button', 'chat-preview-send')!.props.onClick()
+    else find(node, 't-chat-sender')!.props.onSend({ detail: { value: '不应发送' } })
+    assert.equal(sent, 0)
+  }
 })
 
 test('saved shortcut codes display in Chinese in both native and H5 messages', () => {

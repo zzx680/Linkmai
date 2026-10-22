@@ -90,3 +90,20 @@ export function getHomeStepDetail(action: HomeNextStep, materialCount: number): 
       return { action, badge: '账户登录', title: '登录后保存案件进度', description: '登录后可创建案件，并在不同设备上继续查看材料和处理进度', cta: '登录后开始', progress: 0 }
   }
 }
+
+export function getJourneyStep(action: HomeNextStep): number {
+  switch (action) {
+    case 'confirm_materials':
+      return 1
+    case 'view_processing':
+    case 'view_payment_status':
+    case 'view_refund_status':
+    case 'unlock_full_plan':
+    case 'continue_case':
+      return 2
+    case 'view_report':
+      return 3
+    default:
+      return 0
+  }
+}

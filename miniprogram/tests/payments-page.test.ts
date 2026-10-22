@@ -55,11 +55,13 @@ function renderPage(options: {
     require(id: string) {
       if (id === '@tarojs/components') return { View: 'div', Text: 'span' }
       if (id === '@tarojs/taro') return { switchTab() {}, navigateTo() {} }
+      if (id === './Avatar') return { default: () => null, __esModule: true }
       return pageRequire(id)
     },
   }, { filename: journeyPath })
   const mocks: Record<string, unknown> = {
     '../../components/CaseJourney': journeyModule.exports,
+    './OrderHistory': { __esModule: true, default: () => React.createElement('section', null, '全部交易记录') },
     '@tarojs/components': { View: 'div', Text: 'span' },
     '@tarojs/taro': { useDidShow() {} },
     '../../services/api': { getCurrentCase: async () => state.currentCase },
@@ -91,6 +93,8 @@ describe('payment page rendering', () => {
   it('renders the login and missing-case states', () => {
     assert.match(renderPage({ loggedIn: false, hasCase: false }), /登录后查看付费权益/)
     assert.match(renderPage({ hasCase: false }), /暂无可查看的付费权益/)
+    assert.match(renderPage({ hasCase: false }), /全部交易记录/)
+    assert.doesNotMatch(renderPage({ loggedIn: false }), /全部交易记录/)
   })
 
   it('renders unpaid, pending, paid and refunded actions', () => {

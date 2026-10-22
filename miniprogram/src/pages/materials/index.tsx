@@ -111,7 +111,7 @@ export default function Materials() {
       </View>
 
       <View className="notice-card">
-        <Icon name="circle-check" size={24} color="#4D6BFE" />
+        <Icon name="circle-check" size={24} color="#2A64F0" />
         <View className="notice-content">
           <Text className="notice-title">先确认，再进入分析</Text>
           <Text className="notice-text">识别结果来自图片内容，低置信度字段请结合原件核对 确认信息不会自动构成法律结论</Text>
@@ -131,7 +131,7 @@ export default function Materials() {
               className={`type-card ${selectedType === item.type ? 'selected' : ''}`}
               onClick={() => setSelectedType(item.type)}
             >
-              <Icon name={item.icon} size={32} color={selectedType === item.type ? '#4D6BFE' : '#8E8E93'} />
+              <Icon name={item.icon} size={32} color={selectedType === item.type ? '#2A64F0' : '#8E8E93'} />
               <Text className="type-label">{item.label}</Text>
               <Text className="type-description">{item.description}</Text>
             </View>
@@ -141,7 +141,7 @@ export default function Materials() {
 
       <View className="upload-panel" onClick={chooseAndProcess}>
         <View className="upload-icon">
-          <Icon name="plus" size={32} color="#4D6BFE" />
+          <Icon name="plus" size={32} color="#2A64F0" />
         </View>
         <View className="upload-copy">
           <Text className="upload-title">上传{getTypeInfo(selectedType).label}</Text>
@@ -184,7 +184,7 @@ export default function Materials() {
                   <Image src={material.imageUrl} className="material-thumbnail" mode="aspectFill" />
                   <View className="material-info">
                     <View className="material-title-row">
-                      <Icon name={typeInfo.icon} size={20} color="#4D6BFE" />
+                      <Icon name={typeInfo.icon} size={20} color="#2A64F0" />
                       <Text className="material-title">{typeInfo.label}</Text>
                     </View>
                     <Text className="material-meta">{fields.length} 个可识别字段 · {new Date(material.createdAt).toLocaleDateString('zh-CN')}</Text>

@@ -32,7 +32,8 @@ describe('profile support pages', () => {
   })
 
   it('uses the shorter retry label', () => {
-    assert.match(caseSource, /authRetryable \? '重新连接' : '微信登录并开始'/)
+    assert.match(caseSource, /actionLabel=\{isAuthenticating \? '正在连接微信账户' : authRetryable \? '重新连接并开始' : '微信登录并开始'\}/)
+    assert.match(caseSource, /onAction=\{handlePrimaryAction\}/)
     assert.doesNotMatch(caseSource, /重新连接微信账户/)
   })
 })

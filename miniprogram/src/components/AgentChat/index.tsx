@@ -1,8 +1,10 @@
 import { Button, Image, Slot, Text, View } from '@tarojs/components'
 import { IS_H5 } from '../../config/env'
 import Icon from '../Icon'
+import ThinkingOrb from '../ThinkingOrb'
 import type { Message } from '../../services/api'
 import { getChatMessageText } from './labels'
+import type { SpeechState } from '../../services/speech/session'
 import './index.scss'
 
 interface ChatMessageProps {
@@ -13,6 +15,7 @@ interface ChatMessageProps {
 // The mini program uses TDesign's native components; H5 keeps a lightweight
 // preview with the same content and callbacks, without a second chat runtime.
 export function AgentChatMessage({ message, pending = false }: ChatMessageProps) {
+  if (pending) return <ThinkingOrb />
   const role = message?.role === 'user' ? 'user' : 'assistant'
   const text = getChatMessageText(message?.content || '', message?.role || 'assistant')
   if (!IS_H5) {
@@ -32,7 +35,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
         placement={role === 'user' ? 'right' : 'left'}
         name={role === 'assistant' ? '灵迈助手' : ''}
         variant="base"
-        status={pending ? 'pending' : 'complete'}
+        status="complete"
         animation="dots"
         content={content}
       />
@@ -43,7 +46,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
       {role === 'assistant' && <Text className="chat-preview-name">灵迈助手</Text>}
       <View className="chat-preview-content">
         {message?.images?.map(url => <Image key={url} src={url} mode="aspectFill" className="chat-preview-image" />)}
-        <Text selectable>{pending ? '正在整理案件信息…' : text}</Text>
+        <Text selectable>{text}</Text>
       </View>
     </View>
   )
@@ -57,31 +60,50 @@ interface ChatSenderProps {
   onSend: (value: string) => void
   onKeyboardHeightChange: (height: number) => void
   onAttach: () => void
+  onDictate?: () => void
+  speechState?: SpeechState
+  speechText?: string
+  speechSeconds?: number
+  onSpeechStop?: () => void
+  onSpeechCancel?: () => void
 }
 
-export function AgentChatSender({ value, sending, onChange, onSend, onKeyboardHeightChange, onAttach, uploading }: ChatSenderProps) {
+export function AgentChatSender({ value, sending, onChange, onSend, onKeyboardHeightChange, onAttach, uploading, onDictate, speechState = 'idle', speechText = '', speechSeconds = 0, onSpeechStop, onSpeechCancel }: ChatSenderProps) {
+  const speaking = speechState !== 'idle'
   const send = (text: string) => {
-    if (!sending && !uploading && text.trim()) onSend(text.trim())
+    if (!sending && !uploading && !speaking && text.trim()) onSend(text.trim())
   }
   const tools = (
     <View className="composer-tools">
-      <Button className="composer-prompt" disabled={sending || uploading} onClick={() => onChange(value.trim() || '我想描述一下事故经过')}>
-        <Icon name="messages-square" size={16} color="#000000" /><Text>描述经过</Text>
+      <Button id="guide-describe" className="composer-prompt" aria-label="口述经过" disabled={sending || uploading || speaking || !onDictate} onClick={onDictate}>
+        <Icon name="mic" size={16} color="#000000" /><Text>口述经过</Text>
       </Button>
-      <Button className="composer-upload" disabled={sending || uploading} onClick={onAttach}>
-        <Icon name="plus" size={17} color="#4D6BFE" /><Text>{uploading ? '识别中…' : '上传材料'}</Text>
+      <Button id="guide-upload" className="composer-upload" disabled={sending || uploading || speaking} onClick={onAttach}>
+        <Icon name="plus" size={17} color="#2A64F0" /><Text>{uploading ? '识别中…' : '上传材料'}</Text>
       </Button>
     </View>
   )
   return (
     <View className={`agent-chat-composer${sending ? ' is-sending' : ''}`}>
+      {speaking && <View className="speech-panel" role="status" aria-live="polite">
+        <View className="speech-panel-heading">
+          <View className={`speech-wave${speechState === 'listening' ? ' is-listening' : ''}`}><View /><View /><View /><View /><View /></View>
+          <Text className="speech-status">{speechState === 'authorizing' ? '准备语音输入' : speechState === 'listening' ? '正在听，你可以开始说了' : '正在转成文字'}</Text>
+          {speechState === 'listening' && <Text className="speech-time">{speechSeconds}s / 60s</Text>}
+        </View>
+        <Text className="speech-transcript">{speechText || (speechState === 'listening' ? '请清晰说出事故经过' : '请稍候')}</Text>
+        <View className="speech-actions">
+          <Button className="speech-cancel" onClick={onSpeechCancel}>取消</Button>
+          <Button className="speech-finish" disabled={speechState !== 'listening'} onClick={onSpeechStop}>{speechState === 'transcribing' ? '转文字中…' : '说完了'}</Button>
+        </View>
+      </View>}
       {IS_H5 ? (
         <View className="chat-preview-sender">
           <textarea
             aria-label="事故信息"
             placeholder="把事故情况告诉灵迈"
             value={value}
-            disabled={uploading}
+            disabled={uploading || speaking}
             rows={2}
             onChange={event => onChange(event.target.value)}
             onKeyDown={event => {
@@ -93,7 +115,7 @@ export function AgentChatSender({ value, sending, onChange, onSend, onKeyboardHe
           />
           <View className="composer-footer">
             {tools}
-            <Button className="chat-preview-send" aria-label="发送消息" disabled={sending || uploading || !value.trim()} onClick={() => send(value)}>
+            <Button className="chat-preview-send" aria-label="发送消息" disabled={sending || uploading || speaking || !value.trim()} onClick={() => send(value)}>
               <Icon name="arrow-up" size={20} color="#FFFFFF" />
             </Button>
           </View>
@@ -101,7 +123,7 @@ export function AgentChatSender({ value, sending, onChange, onSend, onKeyboardHe
       ) : (
         <t-chat-sender
           value={value}
-          disabled={uploading}
+          disabled={uploading || speaking}
           placeholder="把事故情况告诉灵迈"
           render-presets={[{ name: 'send', type: 'icon' }]}
           textarea-props={{ autosize: { minHeight: 48, maxHeight: 120 } }}

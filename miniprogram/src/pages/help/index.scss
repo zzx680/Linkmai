@@ -94,6 +94,20 @@
   display: block;
 }
 
+.guide-replay-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20rpx 0 0;
+  padding: 24rpx 30rpx;
+  border-radius: $radius-xl;
+  background: $color-bg-elevated;
+  color: $color-brand-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  &::after { border: 0; }
+}
+
 .feedback-label {
   display: block;
   color: $color-text-primary;

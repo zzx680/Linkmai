@@ -7,6 +7,35 @@
   background: $color-bg-base;
 }
 
+.order-center { margin-bottom: 48rpx; }
+.order-center-heading { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin: 0 4rpx 24rpx; }
+.order-center-title { display: block; font-size: 44rpx; font-weight: 650; color: #111827; letter-spacing: -1rpx; }
+.order-center-subtitle { display: block; margin-top: 10rpx; font-size: 24rpx; line-height: 1.6; color: $color-text-secondary; }
+.order-record, .order-notice { padding: 30rpx; margin-bottom: 20rpx; border-radius: $radius-xl; background: #fff; border: 1rpx solid $color-border-light; }
+.order-record-heading, .order-record-body { display: flex; justify-content: space-between; align-items: center; gap: 20rpx; }
+.order-record-heading { padding-bottom: 22rpx; border-bottom: 1rpx solid $color-border-light; }
+.order-service { color: #111827; font-size: 28rpx; font-weight: 600; }
+.order-status { flex-shrink: 0; font-size: 24rpx; color: $color-text-secondary; }
+.order-status-paid { color: #057A55; }
+.order-status-created, .order-status-pending { color: $color-brand-primary; }
+.order-record-body { padding-top: 24rpx; align-items: flex-start; }
+.order-record-copy { flex: 1; min-width: 0; }
+.order-number { display: block; font-size: 22rpx; line-height: 1.7; word-break: break-all; color: $color-text-secondary; }
+.order-date { display: block; margin-top: 8rpx; color: $color-text-tertiary; font-size: 22rpx; }
+.order-amount { flex-shrink: 0; color: #111827; font-size: 34rpx; font-weight: 600; }
+.order-text-button, .order-detail-toggle, .order-more-button { margin: 0; padding: 12rpx 0; min-height: 72rpx; border: 0; background: transparent; color: $color-brand-primary; font-size: 26rpx; line-height: 1.8; }
+.order-text-button::after, .order-detail-toggle::after, .order-more-button::after { border: 0; }
+.order-text-button { flex-shrink: 0; }
+.order-detail-toggle { margin: 12rpx 0 -12rpx auto; text-align: right; }
+.order-more-button { width: 100%; background: #fff; border-radius: $radius-xl; }
+.order-detail { margin-top: 24rpx; padding-top: 20rpx; border-top: 1rpx solid $color-border-light; }
+.order-detail > view { display: flex; justify-content: space-between; gap: 28rpx; padding: 10rpx 0; color: $color-text-secondary; font-size: 24rpx; }
+.order-detail > view > text:first-child { flex-shrink: 0; }
+.order-detail > view > text:last-child { text-align: right; word-break: break-all; }
+.order-support { display: block; margin-top: 20rpx; color: $color-text-secondary; font-size: 23rpx; line-height: 1.7; word-break: break-all; }
+.order-end { display: block; text-align: center; color: $color-text-tertiary; font-size: 23rpx; padding: 8rpx; }
+.case-payment-panel.centered-page { min-height: 36vh; }
+
 .centered-page {
   display: flex;
   align-items: center;
@@ -50,7 +79,7 @@
   border: 1rpx solid $color-brand-dark;
   border-radius: $radius-xl;
   background: $color-brand-dark;
-  box-shadow: 0 20rpx 48rpx rgba(77, 107, 254, 0.18);
+  box-shadow: 0 20rpx 48rpx rgba(42, 100, 240, 0.18);
 }
 
 .plan-card-paid {
@@ -156,8 +185,8 @@
   margin-top: 28rpx;
   padding: 22rpx 26rpx;
   border-radius: $radius-lg;
-  color: #4D6BFE;
-  background: #EEF1FF;
+  color: #2A64F0;
+  background: #EEF3FE;
   font-size: $font-size-sm;
   line-height: $line-height-normal;
 }
@@ -193,7 +222,7 @@
 .primary-button {
   color: #FFFFFF;
   background: $color-brand-primary;
-  box-shadow: 0 14rpx 30rpx rgba(77, 107, 254, 0.2);
+  box-shadow: 0 14rpx 30rpx rgba(42, 100, 240, 0.2);
 }
 
 .secondary-button {
@@ -297,7 +326,7 @@
   width: 70rpx;
   height: 70rpx;
   border-radius: 22rpx;
-  background: #EEF1FF;
+  background: #EEF3FE;
 }
 
 .empty-card,
@@ -315,7 +344,7 @@
   height: 96rpx;
   margin: 0 auto 28rpx;
   border-radius: $radius-full;
-  background: #EEF1FF;
+  background: #EEF3FE;
 }
 
 .empty-title {

@@ -544,6 +544,13 @@ export const memoryDB = {
     return entitlement
   },
 
+  async listPaymentOrders(userId: string, limit: number, offset: number): Promise<PaymentOrder[]> {
+    return [...paymentOrders.values()]
+      .filter(order => order.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id))
+      .slice(offset, offset + limit)
+  },
+
   async findPaymentOrderById(userId: string, orderId: string): Promise<PaymentOrder | null> {
     const order = paymentOrders.get(orderId)
     return order && order.userId === userId ? order : null
@@ -590,7 +597,10 @@ export const memoryDB = {
     order.status = status
     order.updatedAt = new Date()
     const entitlement = entitlements.get(order.caseId)
-    if (entitlement && entitlement.status === 'pending') {
+    const hasOtherActiveOrder = [...paymentOrders.values()].some(other =>
+      other.id !== order.id && other.caseId === order.caseId && ['created', 'pending'].includes(other.status)
+    )
+    if (entitlement && entitlement.status === 'pending' && !hasOtherActiveOrder) {
       entitlement.status = 'unpaid'
       entitlement.updatedAt = new Date()
     }

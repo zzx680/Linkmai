@@ -187,7 +187,7 @@ export default function CaseDetail() {
           <View className="materials-tab">
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="file-text" size={20} color="#4D6BFE" />
+                <Icon name="file-text" size={20} color="#2A64F0" />
                 <Text className="section-title-text">交警认定书</Text>
               </View>
               <View className="material-grid">
@@ -205,7 +205,7 @@ export default function CaseDetail() {
 
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="hospital" size={20} color="#4D6BFE" />
+                <Icon name="hospital" size={20} color="#2A64F0" />
                 <Text className="section-title-text">医疗材料</Text>
               </View>
               <View className="material-grid">
@@ -223,7 +223,7 @@ export default function CaseDetail() {
 
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="car-front" size={20} color="#4D6BFE" />
+                <Icon name="car-front" size={20} color="#2A64F0" />
                 <Text className="section-title-text">车损材料</Text>
               </View>
               <View className="material-grid">
@@ -241,7 +241,7 @@ export default function CaseDetail() {
 
             <Card className="material-section">
               <View className="section-title">
-                <Icon name="camera" size={20} color="#4D6BFE" />
+                <Icon name="camera" size={20} color="#2A64F0" />
                 <Text className="section-title-text">现场照片</Text>
               </View>
               <View className="material-grid">

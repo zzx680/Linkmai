@@ -1,4 +1,7 @@
+import { voiceInputConfig } from '../config/voice-input'
+
 export default defineAppConfig({
+  ...voiceInputConfig(),
   pages: [
     'pages/case/index',
     'pages/agent/index',
@@ -20,7 +23,7 @@ export default defineAppConfig({
   tabBar: {
     custom: true,
     color: '#8E8E93',
-    selectedColor: '#4D6BFE',
+    selectedColor: '#2A64F0',
     backgroundColor: '#FFFFFF',
     borderStyle: 'white',
     list: [

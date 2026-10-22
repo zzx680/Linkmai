@@ -1,5 +1,6 @@
 import path from 'path'
 import { resolveApiBase } from './api-base'
+import { voiceInputConfig } from './voice-input'
 
 const isH5 = process.env.TARO_ENV === 'h5'
 const isProduction = process.env.NODE_ENV === 'production'
@@ -24,10 +25,14 @@ const config = {
   ],
   defineConstants: {
     __API_BASE__: JSON.stringify(apiBase),
-    __IS_H5__: JSON.stringify(isH5)
+    __IS_H5__: JSON.stringify(isH5),
+    __VOICE_INPUT_ENABLED__: JSON.stringify(Boolean(voiceInputConfig().plugins))
   },
   copy: {
     patterns: [{
+      from: path.resolve(__dirname, '../src/components/ThinkingOrb/LICENSE'),
+      to: path.resolve(__dirname, '..', outputRoot, 'licenses/thinking-orbs.txt')
+    }, {
       from: path.resolve(__dirname, '../node_modules/tdesign-miniprogram/LICENSE'),
       to: path.resolve(__dirname, '..', outputRoot, 'licenses/tdesign-miniprogram.txt')
     }],

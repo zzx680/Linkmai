@@ -53,7 +53,7 @@ export default function Privacy() {
         content: kind === 'export_data'
           ? '提交后将由运营人员核验并处理，可在本页查看进度和回复。请勿通过反馈发送完整身份证或银行卡信息。'
           : '这是人工核验申请，不会立即删除数据或自动退款。处理可能影响案件访问；依法保留的交易记录将在回复中说明。是否提交？',
-        confirmText: '提交申请', confirmColor: '#4D6BFE'
+        confirmText: '提交申请', confirmColor: '#2A64F0'
       })
       if (!result.confirm || useAppStore.getState().token !== session) return
       setSubmitting(kind)
@@ -78,7 +78,7 @@ export default function Privacy() {
   const revoke = async () => {
     const userId = useAppStore.getState().user?.id
     if (!userId) return
-    const result = await Taro.showModal({ title: '撤回后续资料处理授权', content: '撤回后，再次发送事故描述、上传识别材料或生成报告时会重新征求同意。已发起的处理和已保存的数据不会自动删除；如需清除资料，请另行申请删除。', confirmText: '撤回授权', confirmColor: '#4D6BFE' })
+    const result = await Taro.showModal({ title: '撤回后续资料处理授权', content: '撤回后，再次发送事故描述、上传识别材料或生成报告时会重新征求同意。已发起的处理和已保存的数据不会自动删除；如需清除资料，请另行申请删除。', confirmText: '撤回授权', confirmColor: '#2A64F0' })
     if (!result.confirm || useAppStore.getState().user?.id !== userId) return
     revokeCaseDataConsent(userId)
     Taro.showToast({ title: '已撤回后续处理授权', icon: 'none' })

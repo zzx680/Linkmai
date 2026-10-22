@@ -223,6 +223,8 @@ export interface PaymentOrder {
   amountCents?: number
   currency?: string
   paidAt?: string | null
+  createdAt?: string
+  updatedAt?: string
   entitlement?: CaseEntitlement
 }
 
@@ -241,6 +243,24 @@ export interface PaymentOrderResponse {
   }
   expiresAt?: string
   entitlement?: CaseEntitlement
+}
+
+export interface PaymentOrderRecord extends PaymentOrder {
+  orderNo: string
+  amountCents: number
+  currency: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PaymentOrderList {
+  orders: PaymentOrderRecord[]
+  hasMore: boolean
+  nextOffset: number
+}
+
+export async function listPaymentOrders(offset = 0): Promise<PaymentOrderList> {
+  return request<PaymentOrderList>({ url: `/payment-orders?limit=20&offset=${offset}` })
 }
 
 export async function getCurrentCase(): Promise<Case | null> {

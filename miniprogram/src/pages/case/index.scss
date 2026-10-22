@@ -65,6 +65,27 @@
   color: $color-text-primary;
 }
 
+.case-page .case-journey-compact {
+  padding: 28rpx 32rpx 32rpx;
+}
+
+.case-page .journey-identity {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin: 0 -32rpx 24rpx;
+  padding: 0 32rpx 24rpx;
+  border-bottom: 1rpx solid #E5E5EA;
+}
+
+.case-page .journey-identity-label {
+  min-width: 0;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
+}
+
 .case-page .auth-error-panel,
 .case-page .ui-skeleton-case-wrapper {
   @include health-card;
@@ -95,6 +116,102 @@
 .case-page .journey-step.current {
   border-color: $color-brand-primary;
   color: $color-brand-primary;
+}
+
+.case-page .case-journey-compact .journey-progress {
+  position: relative;
+  padding-top: 4rpx;
+}
+
+.case-page .case-journey-compact .journey-track {
+  position: absolute;
+  top: 20rpx;
+  right: 12.5%;
+  left: 12.5%;
+  height: 8rpx;
+  overflow: hidden;
+  border-radius: $radius-full;
+  background: $color-border-light;
+}
+
+.case-page .case-journey-compact .journey-track-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: $color-brand-primary;
+  transition: width $transition-base;
+}
+
+.case-page .case-journey-compact .journey-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 0;
+  border: 0;
+}
+
+.case-page .case-journey-compact .journey-step {
+  align-items: center;
+  min-height: 92rpx;
+  padding: 0;
+  gap: 10rpx;
+  border: 0;
+  color: $color-text-tertiary;
+  font-size: 21rpx;
+  text-align: center;
+}
+
+.case-page .case-journey-compact .journey-node {
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40rpx;
+  height: 40rpx;
+  box-sizing: border-box;
+  border: 4rpx solid $color-border-medium;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: $color-text-tertiary;
+  font-family: $font-family-mono;
+  font-size: 17rpx;
+  line-height: 1;
+}
+
+.case-page .case-journey-compact .journey-step.completed .journey-node,
+.case-page .case-journey-compact .journey-step.current .journey-node {
+  border-color: $color-brand-primary;
+  background: $color-brand-primary;
+  color: #FFFFFF;
+}
+
+.case-page .case-journey-compact .journey-step.current .journey-node {
+  box-shadow: 0 0 0 7rpx rgba(42, 100, 240, .16);
+}
+
+.case-page .case-journey-compact .journey-step.current .journey-step-label,
+.case-page .case-journey-compact .journey-step.completed .journey-step-label {
+  color: $color-brand-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.case-page .journey-start-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  margin-top: 24rpx;
+  padding: 0 24rpx;
+  border: 0;
+  border-radius: 24rpx;
+  background: $color-brand-primary;
+  color: #FFFFFF;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+}
+
+.case-page .journey-start-action::after {
+  border: 0;
 }
 
 .load-error-note,
@@ -254,7 +371,8 @@
   }
 }
 
-.summary-section .section-label {
+.summary-section .section-label,
+.quick-section .section-label {
   color: #000000;
 }
 
@@ -358,19 +476,6 @@
 .welcome-title-line { display: block; }
 .welcome-title-blue { display: block; color: $color-brand-primary; }
 .welcome-description { display: block; margin-top: 24rpx; color: $color-text-secondary; font-size: 30rpx; line-height: 1.75; }
-.welcome-process { @include health-card; padding: 32rpx; }
-.welcome-section-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx; justify-content: space-between; font-size: 32rpx; font-weight: 600; }
-.welcome-section-heading { margin: 0 -32rpx; padding: 0 32rpx 24rpx; border-bottom: 1rpx solid #E5E5EA; }
-.welcome-section-caption { font-size: 22rpx; color: $color-text-secondary; font-weight: 400; }
-.welcome-process-row { display: flex; gap: 24rpx; padding-top: 32rpx; }
-.welcome-process-number { flex: none; font-size: 26rpx; color: $color-brand-primary; line-height: 1.5; font-family: $font-family-mono; }
-.welcome-process-copy { min-width: 0; display: flex; flex-direction: column; gap: 8rpx; }
-.welcome-process-title { display: block; font-size: 34rpx; font-weight: 600; line-height: 1.4; }
-.welcome-process-detail { display: block; font-size: 22rpx; color: $color-text-secondary; line-height: 1.65; }
-.welcome-start { margin-top: 32rpx; }
-.welcome-login { @include health-card; display: flex; justify-content: center; align-items: center; min-height: 104rpx; margin: 0; border-radius: 28rpx; color: $color-brand-primary; font-size: 32rpx; font-weight: 600; }
-.welcome-login[disabled] { background: #FFFFFF; color: $color-text-tertiary; }
-.welcome-login::after { border: 0; }
 .welcome-privacy { display: block; margin-top: 16rpx; font-size: 22rpx; line-height: 1.6; color: $color-text-secondary; text-align: center; }
 .welcome-privacy-link { padding: 20rpx 0; color: $color-brand-primary; font-size: $font-size-xs; text-align: center; }
 .welcome-boundary { display: flex; flex-direction: column; gap: 8rpx; margin-top: 40rpx; padding-top: 24rpx; border-top: 1rpx solid $color-border-light; color: $color-text-secondary; font-size: 24rpx; line-height: 1.65; }

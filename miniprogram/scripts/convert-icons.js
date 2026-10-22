@@ -14,7 +14,7 @@ const names = [
   'check', 'chevron-right', 'circle-check', 'circle-help', 'clock-3',
   'contact-round', 'credit-card', 'file-text', 'files', 'folder', 'folder-open',
   'hospital', 'house', 'id-card', 'inbox', 'info', 'loader-circle', 'lock-keyhole',
-  'messages-square', 'plus', 'route', 'scale', 'settings', 'shield-check',
+  'messages-square', 'mic', 'plus', 'route', 'scale', 'settings', 'shield-check',
   'triangle-alert', 'undo-2', 'user-round', 'x',
 ]
 const variants = new Map(names.map(name => [name, new Set(['#6B7280', '#8E8E93'])]))
@@ -87,7 +87,7 @@ async function convertIcons() {
   for (const [tab, name] of Object.entries(tabs)) {
     for (const active of [false, true]) {
       const base = `${tab}${active ? '-active' : ''}`
-      const svg = svgFor(name, active ? '#4D6BFE' : '#9CA3AF')
+      const svg = svgFor(name, active ? '#2A64F0' : '#9CA3AF')
       fs.writeFileSync(path.join(iconsDir, `${base}.svg`), svg)
       await sharp(Buffer.from(svg)).resize(96, 96).png().toFile(path.join(iconsDir, `${base}.png`))
     }

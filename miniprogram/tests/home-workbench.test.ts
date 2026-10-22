@@ -3,10 +3,11 @@ import { describe, it } from 'node:test'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import type { Case, Material } from '../src/services/api'
-import { getCaseNextStep, getHomeMode, getHomeStepDetail } from '../src/pages/case/home-state'
+import { getCaseNextStep, getHomeMode, getHomeStepDetail, getJourneyStep } from '../src/pages/case/home-state'
 
 const casePageSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.tsx'), 'utf8')
 const caseStylesSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.scss'), 'utf8')
+const journeySource = readFileSync(path.resolve(__dirname, '../src/components/CaseJourney.tsx'), 'utf8')
 
 function makeCase(overrides: Partial<Case> = {}): Case {
   return {
@@ -47,14 +48,14 @@ describe('home workbench state', () => {
     assert.equal(getHomeMode({ isLoggedIn: true, isLoadingCase: false, caseLoadError: null, currentCase: makeCase() }), 'case')
   })
 
-  it('places the welcome before the signed-in identity row and journey sections', () => {
-    const identityIndex = casePageSource.indexOf('identity-topline')
+  it('places the signed-in identity inside the journey card after the welcome', () => {
     const welcomeIndex = casePageSource.indexOf('home-welcome')
-    const journeyIndex = casePageSource.indexOf('<CaseJourney')
+    const journeyIndex = casePageSource.indexOf('<CaseJourney active={getJourneyStep(nextStep)}')
 
     assert.ok(welcomeIndex >= 0)
-    assert.ok(identityIndex > welcomeIndex)
-    assert.ok(journeyIndex > identityIndex)
+    assert.ok(journeyIndex > welcomeIndex)
+    assert.match(casePageSource, /identityLabel=\{`\$\{nickname\}的案件工作台`\} identityAvatar=\{user\?\.avatar\}/)
+    assert.match(caseStylesSource, /\.journey-identity[\s\S]*border-bottom: 1rpx solid #E5E5EA;/)
     assert.match(casePageSource, /Hello👋/)
     assert.match(casePageSource, /欢迎使用灵迈/)
     assert.doesNotMatch(casePageSource, /从一份材料开始整理案件/)
@@ -62,6 +63,21 @@ describe('home workbench state', () => {
 
   it('keeps the current journey step visually identifiable', () => {
     assert.match(caseStylesSource, /\.case-page \.journey-step\.current \{[\s\S]*border-color: \$color-brand-primary;[\s\S]*color: \$color-brand-primary;/)
+  })
+
+  it('uses one state-aligned journey on signed-in and login pages', () => {
+    assert.equal((casePageSource.match(/<CaseJourney/g) || []).length, 2)
+    assert.match(casePageSource, /<CaseJourney active=\{0\} compact[\s\S]*actionId="guide-login"[\s\S]*onAction=\{handlePrimaryAction\}/)
+    assert.match(casePageSource, /<CaseJourney active=\{getJourneyStep\(nextStep\)\} compact[^>]*actionLabel="开始处理"/)
+    assert.match(casePageSource, /identityLabel="登录后使用案件工作台"/)
+    assert.match(journeySource, /journey-node"><Text>\{index < currentStep \? '✓' : index \+ 1\}<\/Text>/)
+    assert.doesNotMatch(journeySource, /padStart\(/)
+    assert.equal(getJourneyStep('continue_materials'), 0)
+    assert.equal(getJourneyStep('confirm_materials'), 1)
+    assert.equal(getJourneyStep('view_processing'), 2)
+    assert.equal(getJourneyStep('unlock_full_plan'), 2)
+    assert.equal(getJourneyStep('continue_case'), 2)
+    assert.equal(getJourneyStep('view_report'), 3)
   })
 
   it('maps collection and confirmation stages to material actions', () => {

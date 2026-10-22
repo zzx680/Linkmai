@@ -55,26 +55,3 @@ export async function createConversation(): Promise<string> {
 
   return response.data?.data?.id || response.data?.id
 }
-
-export function startVoiceRecording(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const recorderManager = Taro.getRecorderManager()
-
-    recorderManager.onStop((res) => {
-      resolve(res.tempFilePath)
-    })
-
-    recorderManager.onError((err) => {
-      reject(err)
-    })
-
-    recorderManager.start({
-      duration: 60000,
-      format: 'mp3'
-    })
-  })
-}
-
-export function voiceToText(_filePath: string): Promise<string> {
-  return Promise.reject(new Error('当前版本暂不支持语音识别'))
-}

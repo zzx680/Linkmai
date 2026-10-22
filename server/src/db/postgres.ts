@@ -836,6 +836,14 @@ export const db = {
     return toEntitlement(row)
   },
 
+  async listPaymentOrders(userId: string, limit: number, offset: number) {
+    const result = await pool.query(
+      'SELECT * FROM payment_orders WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT $2 OFFSET $3',
+      [userId, limit, offset]
+    )
+    return result.rows.map(row => toPaymentOrder(row)!)
+  },
+
   async findPaymentOrderById(userId: string, orderId: string) {
     const result = await pool.query('SELECT * FROM payment_orders WHERE id = $1 AND user_id = $2', [orderId, userId])
     return toPaymentOrder(result.rows[0])

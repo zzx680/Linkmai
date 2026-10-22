@@ -9,6 +9,9 @@ import { IS_H5 } from '../../config/env'
 import brandLogo from '../../assets/brand/linkmai-chat.png'
 import { AgentChatMessage, AgentChatSender } from '../../components/AgentChat'
 import { getQuickReplyLabel, getQuickReplySelection } from '../../components/AgentChat/labels'
+import OnboardingGuide from '../../components/OnboardingGuide'
+import { completeGuideSteps } from '../../components/OnboardingGuide/progress'
+import { useSpeechInput } from '../../hooks/useSpeechInput'
 import './index.scss'
 
 const stageLabels: Record<string, string> = {
@@ -38,6 +41,7 @@ function getMaterialLabel(type: string) {
 
 export default function Agent() {
   const {
+    user,
     currentCase,
     messages,
     materials,
@@ -69,9 +73,10 @@ export default function Agent() {
     inputRevision.current += 1
     setInputText(value)
   }
+  const speech = useSpeechInput({ userId: user?.id, caseId: currentCase?.id, value: inputText, onChange: handleInputChange })
 
   const handleSend = async (quickReply?: QuickReply, value = inputText) => {
-    if (!currentCase || isAiTyping || isUploadingMaterial) return
+    if (!currentCase || isAiTyping || isUploadingMaterial || speech.state !== 'idle') return
     const selection = quickReply ? getQuickReplySelection(quickReply) : { text: value.trim(), action: undefined }
     if (selection.action === 'upload') {
       handleChooseImage()
@@ -88,6 +93,7 @@ export default function Agent() {
     if (!quickReply) setInputText('')
     try {
       await sendMessage(text, action)
+      completeGuideSteps(['login', 'create-case', 'describe'])
     } catch (error: unknown) {
       if (!quickReply && inputRevision.current === draftRevision) setInputText(text)
       Taro.showToast({ title: (error as Error).message || '发送失败', icon: 'none' })
@@ -95,7 +101,7 @@ export default function Agent() {
   }
 
   const handleChooseImage = async () => {
-    if (!currentCase || isUploadingMaterial || isAiTyping) return
+    if (!currentCase || isUploadingMaterial || isAiTyping || speech.state !== 'idle') return
     try {
       const typeChoice = await Taro.showActionSheet({
         itemList: agentMaterialTypes.map(item => item.label)
@@ -111,6 +117,7 @@ export default function Agent() {
       Taro.showLoading({ title: '上传并识别中' })
       const uploaded = await uploadImage(result.tempFilePaths[0])
       await processMaterial(selectedType, uploaded.artifactId)
+      completeGuideSteps(['login', 'create-case', 'describe', 'upload'])
       Taro.showToast({ title: '识别完成，请核对', icon: 'success' })
       Taro.navigateTo({ url: `/pages/materials/index?caseId=${currentCase?.id || ''}` })
     } catch (error: unknown) {
@@ -252,9 +259,19 @@ export default function Agent() {
             onKeyboardHeightChange={height => setKeyboardHeight(Number.isFinite(height) ? Math.max(0, height) : 0)}
             onAttach={handleChooseImage}
             uploading={isUploadingMaterial}
+            onDictate={speech.start}
+            speechState={speech.state}
+            speechText={speech.partial}
+            speechSeconds={speech.seconds}
+            onSpeechStop={speech.stop}
+            onSpeechCancel={speech.cancel}
           />
         </View>
       )}
+      <OnboardingGuide enabled={Boolean(currentCase) && !isAiTyping && !isUploadingMaterial && speech.state === 'idle' && keyboardHeight === 0} steps={[
+        { id: 'describe', target: 'guide-describe', number: '02 / 03', title: '把事故经过说给灵迈', description: '点击「口述经过」说出时间、地点和经过，转成文字后核对再发送', nextLabel: '下一步', targetLabel: '口述经过', onTarget: speech.start },
+        { id: 'upload', target: 'guide-upload', number: '03 / 03', title: '有材料，也可以直接上传', description: '从这里上传认定书、现场照片或医疗记录，识别后再逐项核对', nextLabel: '开始使用', targetLabel: '上传事故材料', onTarget: handleChooseImage }
+      ]} />
     </View>
   )
 }

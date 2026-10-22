@@ -61,6 +61,7 @@ app.get('/api/health', async (req, res) => {
   res.status(databaseOk ? 200 : 503).json({
     status: databaseOk ? 'ok' : 'error',
     database: databaseOk ? 'ok' : 'unavailable',
+    features: { paymentOrderHistory: true, contextualAgent: true },
     timestamp: new Date().toISOString(),
   })
 })
