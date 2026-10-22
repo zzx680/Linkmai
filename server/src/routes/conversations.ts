@@ -84,6 +84,24 @@ router.post('/current/messages', async (req, res) => {
         return newState
       },
     })
+    const confirmedFacts = turn.agentState.collectedFacts.filter((fact: any) => fact.confirmed)
+    if (confirmedFacts.length) {
+      await db.persistConfirmedFacts(
+        req.userId!,
+        caseData.id,
+        confirmedFacts.map((fact: any) => ({
+          key: fact.key,
+          label: fact.label,
+          value: fact.value,
+          source: fact.materialId ? `material:${fact.materialId}` : fact.source,
+          sourceType: fact.materialId ? 'material' : 'conversation',
+          sourceId: fact.materialId || turn.agentState.stage,
+          confidence: fact.confidence,
+        })),
+        'conversation_confirmation',
+        'conversation'
+      )
+    }
     res.json({ success: true, data: { message: turn.assistantText, quickReplies: turn.quickReplies, agentState: turn.agentState, conversationState: turn.agentState.stage } })
   } catch (err) {
     console.error('发送消息错误:', safeError(err))

@@ -4,6 +4,20 @@ import { config } from '../config'
 import { randomBytes } from 'crypto'
 import { materialSnapshot } from '../services/material-snapshot'
 import { PrivacyRequest, PrivacyRequestKind } from './privacy'
+import {
+  AgentRun,
+  AgentRunInput,
+  AgentRunUpdate,
+  CaseFact,
+  CaseRevision,
+  ConfirmedCaseFactInput,
+  confirmedFieldsChanged,
+  normalizeConfirmedFacts,
+  runKey,
+  terminalRunStatuses,
+  validateRunTransition,
+  validateRunUpdate,
+} from './harness'
 
 export interface User {
   id: string
@@ -29,6 +43,7 @@ export interface Case {
   compensation?: string
   hasReport: boolean
   isActive: boolean
+  inputRevision: number
   createdAt: Date
   updatedAt: Date
 }
@@ -144,7 +159,11 @@ const messages = new Map<string, Message>()
 const artifacts = new Map<string, Artifact>()
 const feedbacks = new Map<string, Feedback>()
 const privacyRequests = new Map<string, PrivacyRequest>()
-const reports = new Map<string, { id: string; caseId: string; content: any; createdAt: Date }>()
+const reports = new Map<string, { id: string; caseId: string; content: any; inputRevision?: number; agentRunId?: string; createdAt: Date }>()
+const caseFacts = new Map<string, Map<string, CaseFact>>()
+const caseRevisions = new Map<string, CaseRevision[]>()
+const agentRuns = new Map<string, AgentRun>()
+const agentRunIdsByKey = new Map<string, string>()
 const entitlements = new Map<string, CaseEntitlement>()
 const paymentOrders = new Map<string, PaymentOrder>()
 const paymentOrderByNo = new Map<string, string>()
@@ -256,6 +275,7 @@ export const memoryDB = {
       materialCount: 0,
       hasReport: false,
       isActive: true,
+      inputRevision: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -323,6 +343,141 @@ export const memoryDB = {
     return [...feedbacks.values()]
       .filter(feedback => feedback.userId === userId)
       .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+  },
+
+  async getCaseFacts(caseId: string): Promise<CaseFact[]> {
+    return [...(caseFacts.get(caseId)?.values() || [])].sort((a, b) => a.key.localeCompare(b.key))
+  },
+
+  async getCaseRevisions(caseId: string): Promise<CaseRevision[]> {
+    return [...(caseRevisions.get(caseId) || [])]
+  },
+
+  async persistConfirmedFacts(
+    userId: string,
+    caseId: string,
+    facts: ConfirmedCaseFactInput[],
+    reasonCode = 'conversation_confirmation',
+    changedEntityType = 'conversation',
+    changedEntityId?: string
+  ): Promise<{ inputRevision: number; changed: boolean; facts: CaseFact[] }> {
+    const currentCase = cases.get(caseId)
+    if (!currentCase || currentCase.userId !== userId) throw new Error('CASE_NOT_FOUND')
+    const normalized = normalizeConfirmedFacts(facts)
+    const existing = caseFacts.get(caseId) || new Map<string, CaseFact>()
+    const changed = normalized.some(fact => {
+      const previous = existing.get(fact.key)
+      return !previous || previous.value !== fact.value
+    })
+    if (!changed) return { inputRevision: currentCase.inputRevision, changed: false, facts: [...existing.values()] }
+
+    currentCase.inputRevision += 1
+    currentCase.hasReport = false
+    currentCase.status = 'collecting'
+    currentCase.statusLabel = '案件信息已更新，需重新分析'
+    currentCase.updatedAt = new Date()
+    const now = new Date()
+    for (const fact of normalized) {
+      const previous = existing.get(fact.key)
+      if (previous?.value === fact.value) continue
+      existing.set(fact.key, {
+        ...fact,
+        id: previous?.id || `fact_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+        caseId,
+        confirmationStatus: 'confirmed',
+        revision: currentCase.inputRevision,
+        confirmedAt: now,
+        createdAt: previous?.createdAt || now,
+        updatedAt: now,
+      })
+    }
+    caseFacts.set(caseId, existing)
+    const revision: CaseRevision = {
+      id: `revision_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      caseId,
+      inputRevision: currentCase.inputRevision,
+      reasonCode,
+      changedEntityType,
+      changedEntityId,
+      createdAt: now,
+    }
+    caseRevisions.set(caseId, [...(caseRevisions.get(caseId) || []), revision])
+    return { inputRevision: currentCase.inputRevision, changed: true, facts: [...existing.values()] }
+  },
+
+  async createAgentRun(input: AgentRunInput): Promise<{ run: AgentRun; created: boolean }> {
+    const currentCase = cases.get(input.caseId)
+    if (!currentCase) throw new Error('CASE_NOT_FOUND')
+    if (input.inputRevision !== currentCase.inputRevision) throw new Error('STALE_INPUT_REVISION')
+    const key = runKey(input)
+    const existingId = agentRunIdsByKey.get(key)
+    if (existingId) return { run: agentRuns.get(existingId)!, created: false }
+    const now = new Date()
+    const run: AgentRun = {
+      ...input,
+      id: `run_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      idempotencyKey: key,
+      status: 'queued',
+      createdAt: now,
+      updatedAt: now,
+    }
+    agentRuns.set(run.id, run)
+    agentRunIdsByKey.set(key, run.id)
+    return { run, created: true }
+  },
+
+  async findAgentRun(runId: string): Promise<AgentRun | null> {
+    return agentRuns.get(runId) || null
+  },
+
+  async updateAgentRun(runId: string, update: AgentRunUpdate): Promise<AgentRun | null> {
+    validateRunUpdate(update)
+    const run = agentRuns.get(runId)
+    if (!run) return null
+    validateRunTransition(run.status, update.status)
+    const now = new Date()
+    run.status = update.status
+    run.output = update.output
+    run.safeErrorCode = update.safeErrorCode
+    if (update.status === 'running') run.startedAt = run.startedAt || now
+    if (terminalRunStatuses.includes(update.status)) run.completedAt = now
+    run.updatedAt = now
+    return run
+  },
+
+  async publishRunReport(runId: string, content: any) {
+    const run = agentRuns.get(runId)
+    if (!run) throw new Error('AGENT_RUN_NOT_FOUND')
+    if (run.status !== 'running') throw new Error('AGENT_RUN_NOT_RUNNING')
+    const currentCase = cases.get(run.caseId)
+    if (!currentCase) throw new Error('CASE_NOT_FOUND')
+    if (currentCase.inputRevision !== run.inputRevision) {
+      run.status = 'stale'
+      run.safeErrorCode = 'STALE_INPUT_REVISION'
+      run.completedAt = new Date()
+      run.updatedAt = run.completedAt
+      throw new Error('STALE_INPUT_REVISION')
+    }
+    const existing = [...reports.values()].find(report => report.agentRunId === runId)
+    if (existing) return existing
+    const report = {
+      id: `report_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      caseId: run.caseId,
+      content,
+      inputRevision: run.inputRevision,
+      agentRunId: run.id,
+      createdAt: new Date(),
+    }
+    reports.set(run.caseId, report)
+    run.status = 'succeeded'
+    run.output = content
+    run.completedAt = report.createdAt
+    run.updatedAt = report.createdAt
+    currentCase.hasReport = true
+    currentCase.status = 'ready'
+    currentCase.statusLabel = '报告已完成'
+    currentCase.updatedAt = report.createdAt
+    return report
   },
 
   // Conversations
@@ -466,7 +621,8 @@ export const memoryDB = {
     const artifact = artifacts.get(artifactId)
     if (!caseData || caseData.userId !== userId || !artifact || artifact.caseId !== caseId || artifact.status !== 'processed') return null
     const metadata = { ...artifact.metadata, fields, rawText: rawText ?? artifact.metadata?.rawText, confirmed: true, confirmedAt: new Date().toISOString() }
-    const changed = !artifact.metadata?.confirmed || JSON.stringify(artifact.metadata?.fields) !== JSON.stringify(fields) || (rawText !== undefined && rawText !== artifact.metadata?.rawText)
+    const changed = confirmedFieldsChanged(artifact.metadata, fields)
+      || (rawText !== undefined && rawText !== artifact.metadata?.rawText)
     const updated = { ...artifact, metadata, updatedAt: new Date() }
     artifacts.set(artifactId, updated)
     if (changed) {
@@ -476,8 +632,18 @@ export const memoryDB = {
         hasReport: false,
         status: 'collecting',
         statusLabel: '材料已更新，需重新分析',
+        inputRevision: caseData.inputRevision + 1,
         updatedAt: new Date(),
       })
+      caseRevisions.set(caseId, [...(caseRevisions.get(caseId) || []), {
+        id: `revision_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+        caseId,
+        inputRevision: caseData.inputRevision + 1,
+        reasonCode: 'material_confirmation',
+        changedEntityType: 'artifact',
+        changedEntityId: artifactId,
+        createdAt: new Date(),
+      }])
     }
     return updated
   },

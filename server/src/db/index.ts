@@ -22,6 +22,61 @@ export interface User {
   updated_at: Date
 }
 
+export type AgentRunStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'stale' | 'cancelled'
+
+export interface CaseFact {
+  id: string
+  caseId: string
+  key: string
+  label: string
+  value: string
+  source: string
+  sourceType: string
+  sourceId: string
+  confidence?: string
+  confirmationStatus: 'confirmed'
+  revision: number
+  confirmedAt: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ConfirmedCaseFactInput {
+  key: string
+  label: string
+  value: string
+  source: string
+  sourceType?: string
+  sourceId?: string
+  confidence?: string
+}
+
+export interface AgentRun {
+  id: string
+  caseId: string
+  task: string
+  inputRevision: number
+  skillVersion: string
+  idempotencyKey: string
+  status: AgentRunStatus
+  output?: Record<string, unknown>
+  safeErrorCode?: string
+  startedAt?: Date | null
+  completedAt?: Date | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CaseRevision {
+  id: string
+  caseId: string
+  inputRevision: number
+  reasonCode: string
+  changedEntityType?: string
+  changedEntityId?: string
+  createdAt: Date
+}
+
 export interface Case {
   id: string
   user_id: string
@@ -35,6 +90,7 @@ export interface Case {
   compensation?: string
   has_report: boolean
   is_active: boolean
+  input_revision?: number
   created_at: Date
   updated_at: Date
 }
