@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro'
 import { getApiBase } from '../config/env'
-import { readReportEnvelope, ReportContract, ReportEnvelope } from './report-contract'
+import { readReportEnvelope, ReportContract, ReportEnvelope, ReportGenerationResult } from './report-contract'
 
 const API_BASE = getApiBase()
 
@@ -472,13 +472,26 @@ export type ReportResponse = ReportEnvelope<ReportData>
 export async function generateReport(
   caseId: string,
   facts: Array<{ label: string; value: string; confirmed: boolean }>
-): Promise<ReportData> {
-  const result = await request<ReportResponse>({
+): Promise<ReportGenerationResult<ReportData>> {
+  return request<ReportGenerationResult<ReportData>>({
     url: '/reports/generate',
     method: 'POST',
     data: { caseId, facts }
   })
-  return readReportEnvelope(result)
+}
+
+export interface ReportRun {
+  runId: string
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'stale' | 'cancelled'
+  safeErrorCode?: string
+}
+
+export async function getLatestReportRun(caseId: string): Promise<ReportRun | null> {
+  return request({ url: `/reports/${caseId}/runs/latest` })
+}
+
+export async function getReportRun(caseId: string, runId: string): Promise<ReportRun> {
+  return request({ url: `/reports/${caseId}/runs/${runId}` })
 }
 
 export async function getReport(caseId: string): Promise<ReportData> {

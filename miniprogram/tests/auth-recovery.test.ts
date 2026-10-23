@@ -19,6 +19,10 @@ function setup(token: string | null = 'saved-token') {
   let session: () => Promise<unknown> = async () => ({ id: 'user-1' })
   let currentCase: unknown = null
   let consent = true
+  let run: any = null
+  let report: any = null
+  let queryRun = async () => run
+  const reportCalls = { generate: 0 }
   const api = {
     UnauthorizedError,
     getToken: () => token,
@@ -29,6 +33,10 @@ function setup(token: string | null = 'saved-token') {
     getSession: () => session(),
     login: async () => { counters.exchange++; return { token: 'new-token', user: { id: 'user-1' } } },
     getCurrentCase: async () => currentCase,
+    getLatestReportRun: () => queryRun(),
+    getReportRun: () => queryRun(),
+    getReport: async () => report,
+    generateReport: async () => { reportCalls.generate++; return run },
     getMaterials: async () => [],
     getConversationHistory: async () => ({ messages: [] }),
     sendMessage: async () => { counters.messages++; return { message: 'reply' } },
@@ -44,8 +52,71 @@ function setup(token: string | null = 'saved-token') {
       return requireFromSource(id)
     },
   }, { filename: source })
-  return { store: module.exports.useAppStore, counters, setSession: (value: typeof session) => { session = value }, setCurrentCase: (value: unknown) => { currentCase = value }, setConsent: (value: boolean) => { consent = value }, UnauthorizedError, token: () => token }
+  return { store: module.exports.useAppStore, reportCalls, setRun: (value: any) => { run = value }, setReport: (value: any) => { report = value }, setRunQuery: (value: typeof queryRun) => { queryRun = value }, counters, setSession: (value: typeof session) => { session = value }, setCurrentCase: (value: unknown) => { currentCase = value }, setConsent: (value: boolean) => { consent = value }, UnauthorizedError, token: () => token }
 }
+
+describe('report run recovery', () => {
+  it('restores a server run into a fresh store without generating again', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case', hasReport: false })
+    test.setRun({ runId: 'run', status: 'running' })
+    await test.store.getState().checkLoginStatus()
+    assert.equal(test.store.getState().reportRunId, 'run')
+    assert.equal(test.store.getState().isGeneratingReport, true)
+    await test.store.getState().generateReport()
+    assert.equal(test.reportCalls.generate, 0)
+    test.setRun({ runId: 'run', status: 'succeeded' })
+    test.setReport({ caseId: 'case', analysis: 'finished' })
+    await test.store.getState().refreshReportRun()
+    assert.equal(test.store.getState().currentReport.analysis, 'finished')
+    assert.equal(test.store.getState().currentCase.hasReport, true)
+    assert.equal(test.store.getState().isGeneratingReport, false)
+    assert.equal(test.store.getState().reportRunId, null)
+  })
+
+  it('keeps a run refreshable across network errors and terminal failure', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case', hasReport: false })
+    test.setRun({ runId: 'run', status: 'queued' })
+    await test.store.getState().loadCurrentCase()
+    test.setRunQuery(async () => { throw new Error('offline') })
+    await assert.rejects(test.store.getState().refreshReportRun(), /offline/)
+    assert.equal(test.store.getState().reportRunId, 'run')
+    assert.equal(test.store.getState().isGeneratingReport, false)
+    test.setRunQuery(async () => ({ runId: 'run', status: 'failed', safeErrorCode: 'PAYMENT_REQUIRED' }))
+    assert.equal(await test.store.getState().refreshReportRun(), false)
+    assert.match(test.store.getState().reportRunError, /权益/)
+    assert.equal(test.reportCalls.generate, 0)
+  })
+
+  it('discards a delayed run response after logout and return to the same case', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case', hasReport: false })
+    await test.store.getState().loadCurrentCase()
+    let resolve!: (value: any) => void
+    test.setRunQuery(() => new Promise(done => { resolve = done }))
+    const pending = test.store.getState().refreshReportRun()
+    test.store.getState().logout()
+    test.setRunQuery(async () => ({ runId: 'new-run', status: 'queued' }))
+    await test.store.getState().loadCurrentCase()
+    resolve({ runId: 'old-run', status: 'running' })
+    await pending
+    assert.equal(test.store.getState().reportRunId, 'new-run')
+  })
+
+  it('retries reading a succeeded run when its report is not available yet', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case', hasReport: false })
+    test.setRun({ runId: 'run', status: 'running' })
+    await test.store.getState().loadCurrentCase()
+    test.setRun({ runId: 'run', status: 'succeeded' })
+    await assert.rejects(test.store.getState().refreshReportRun(), /报告暂不可用/)
+    assert.equal(test.store.getState().reportRunId, 'run')
+    test.setReport({ caseId: 'case', analysis: 'ready' })
+    await test.store.getState().refreshReportRun()
+    assert.equal(test.store.getState().currentReport.analysis, 'ready')
+  })
+})
 
 describe('authentication recovery', () => {
   it('does not contact WeChat or create an account when the login notice is declined', async () => {

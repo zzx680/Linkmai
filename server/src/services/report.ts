@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { safeError } from '../utils/safe-error'
 import { analyzeWithDeepSeek } from './deepseek'
 import { CollectedFact } from './agent'
@@ -83,10 +84,12 @@ function parseReportResponse(response: string): {
     }
 
     const jsonStr = jsonMatch[1] || jsonMatch[0]
-    const data = JSON.parse(jsonStr)
-    if (!data || typeof data.analysis !== 'string' || !data.analysis.trim() || typeof data.liability !== 'string' || typeof data.compensation !== 'string' || !Array.isArray(data.recommendations) || data.recommendations.some((item: unknown) => typeof item !== 'string')) {
-      throw new Error('AI 返回的报告结构无效')
-    }
+    const data = z.object({
+      analysis: z.string().trim().min(1).max(20000),
+      liability: z.string().trim().min(1).max(10000),
+      compensation: z.string().trim().min(1).max(10000),
+      recommendations: z.array(z.string().trim().min(1).max(2000)).min(1).max(20),
+    }).strict().parse(JSON.parse(jsonStr))
 
     return {
       analysis: data.analysis,

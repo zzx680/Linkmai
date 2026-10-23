@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { test, beforeEach, afterEach } from 'node:test'
 import { canGenerateReport, generateNextQuestion, processUserMessage, type AgentState } from '../src/services/agent'
 import { localMessageFacts, parseLanguageResult } from '../src/services/agent-language'
 import axios from 'axios'
 import { mock } from 'node:test'
 import { config } from '../src/config'
+
+let provider: ReturnType<typeof mock.method>
+beforeEach(() => {
+  provider = mock.method(axios, 'post', async () => { throw new Error('offline test provider') })
+})
+afterEach(() => { provider.mock.restore() })
 
 function empty(): AgentState { return { stage: 'collecting', collectedFacts: [] } }
 async function complete() {

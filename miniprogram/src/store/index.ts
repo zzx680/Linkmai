@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import * as api from '../services/api'
 import Taro from '@tarojs/taro'
 import { CaseRequestContext, CaseRequestGuard } from './request-guard'
+import { isPendingReport } from '../services/report-contract'
 import { ensureAccountConsent, ensureCaseDataConsent } from '../utils/privacy-consent'
 
 interface AppState {
@@ -21,6 +22,10 @@ interface AppState {
   uploadingFiles: Map<string, number>
   currentReport: api.ReportData | null
   isGeneratingReport: boolean
+  reportRunId: string | null
+  reportRunStatus: api.ReportRun['status'] | null
+  reportRunError: string | null
+  refreshReportRun: () => Promise<boolean>
 
   login: (code: string) => Promise<void>
   logout: () => void
@@ -61,7 +66,10 @@ function createInitialState(token: string | null = null) {
   materials: [] as api.Material[],
   uploadingFiles: new Map<string, number>(),
   currentReport: null as api.ReportData | null,
-  isGeneratingReport: false
+  isGeneratingReport: false,
+  reportRunId: null as string | null,
+  reportRunStatus: null as api.ReportRun['status'] | null,
+  reportRunError: null as string | null
   }
 }
 
@@ -219,6 +227,10 @@ export const useAppStore = create<AppState>((set, get) => ({
           materials: [],
           messages: [],
           currentReport: null,
+          reportRunId: null,
+          reportRunStatus: null,
+          reportRunError: null,
+          isGeneratingReport: false,
           conversationState: 'collecting'
         })
         return
@@ -230,11 +242,19 @@ export const useAppStore = create<AppState>((set, get) => ({
         currentCase,
         isLoadingCase: false,
         caseLoadError: null,
+        reportRunId: null,
+        reportRunStatus: null,
+        reportRunError: null,
+        isGeneratingReport: false,
         ...(!currentCase.hasReport ? { currentReport: null } : {}),
         ...(isDifferentCase ? {
           materials: [],
           messages: [],
           currentReport: null,
+          reportRunId: null,
+          reportRunStatus: null,
+          reportRunError: null,
+          isGeneratingReport: false,
           conversationState: 'collecting' as api.ConversationState
         } : {})
       })
@@ -256,6 +276,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       if (reportResult.status === 'fulfilled') patch.currentReport = reportResult.value
       set(patch)
+      await get().refreshReportRun().catch(() => undefined)
     } catch (error) {
       if (requestEpoch !== requestGuard.getSnapshot().epoch) return
       requestGuard.invalidate()
@@ -280,6 +301,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         materials: [],
         messages: [],
         currentReport: null,
+        reportRunId: null,
+        reportRunStatus: null,
+        reportRunError: null,
+        isGeneratingReport: false,
         conversationState: 'collecting',
         isAiTyping: false
       })
@@ -454,6 +479,43 @@ export const useAppStore = create<AppState>((set, get) => ({
     await get().loadCurrentCase()
   },
 
+  refreshReportRun: async () => {
+    const currentCase = get().currentCase
+    if (!currentCase) return false
+    const context = requestGuard.capture(currentCase.id)
+    const previousRunId = get().reportRunId
+    const wasGenerating = get().isGeneratingReport
+    try {
+      const run = previousRunId
+        ? await api.getReportRun(currentCase.id, previousRunId)
+        : await api.getLatestReportRun(currentCase.id)
+      if (isStale(context) || get().reportRunId !== previousRunId) return false
+      if (!run) {
+        if (wasGenerating || get().isGeneratingReport) return true
+        if (currentCase.hasReport && !get().currentReport) await get().loadReport(currentCase.id)
+        if (isStale(context)) return false
+        set({ reportRunId: null, reportRunStatus: null, reportRunError: null, isGeneratingReport: false })
+        return false
+      }
+      if (run.status === 'succeeded') {
+        const report = await api.getReport(currentCase.id)
+        if (isStale(context) || get().reportRunId !== previousRunId) return false
+        if (!report || (report.caseId && report.caseId !== currentCase.id)) throw new Error('报告暂不可用')
+        set({ currentReport: report, reportRunId: null, reportRunStatus: null, reportRunError: null, isGeneratingReport: false,
+          currentCase: { ...get().currentCase!, hasReport: true } })
+        return false
+      }
+      const pending = run.status === 'queued' || run.status === 'running'
+      set({ reportRunId: run.runId, reportRunStatus: run.status, isGeneratingReport: pending,
+        reportRunError: pending ? null : run.status === 'stale' ? '案件信息已更新，请核对后重新生成' : run.safeErrorCode === 'PAYMENT_REQUIRED' ? '案件权益已变更，请查看付费记录' : '本次分析未完成，请更新案件信息后重新生成' })
+      return pending
+    } catch (error) {
+      if (isStale(context) || get().reportRunId !== previousRunId) return false
+      set({ isGeneratingReport: false, reportRunError: '进度暂时无法查询，请刷新进度；不会重复生成报告' })
+      throw error
+    }
+  },
+
   generateReport: async () => {
     const currentCase = get().currentCase
     if (!currentCase) {
@@ -470,24 +532,29 @@ export const useAppStore = create<AppState>((set, get) => ({
       }))
     )
 
-    if (facts.length === 0) {
-      Taro.showToast({ title: '请先确认至少一份材料', icon: 'none' })
+    if (get().reportRunId) {
+      await get().refreshReportRun()
       return
     }
+    if (get().isGeneratingReport) return
 
     const context = requestGuard.capture(currentCase.id)
     const userId = get().user?.id
     if (!userId || !await ensureCaseDataConsent(userId)) throw new Error('尚未同意案件资料处理，可查看隐私说明后再试')
     if (isStale(context)) throw new Error('案件已切换，请重新生成')
-    set({ isGeneratingReport: true })
+    set({ isGeneratingReport: true, reportRunError: null })
     try {
-      const report = await api.generateReport(currentCase.id, facts)
-      if (isStale(context)) {
-        set(state => state.currentCase?.id === currentCase.id ? { isGeneratingReport: false } : {})
+      const result = await api.generateReport(currentCase.id, facts)
+      if (isStale(context)) return
+      if (isPendingReport(result)) {
+        set({ reportRunId: result.runId, reportRunStatus: result.status, isGeneratingReport: true, currentReport: null })
         return
       }
+      const report = 'report' in result ? result.report : result
       set(state => ({
         currentReport: report,
+        reportRunId: null,
+        reportRunStatus: null,
         isGeneratingReport: false,
         currentCase: state.currentCase ? { ...state.currentCase, hasReport: true } : null
       }))

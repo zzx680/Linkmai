@@ -4,6 +4,7 @@ import { db } from '../db'
 import { generateReport } from '../services/report'
 import { CollectedFact } from '../services/agent'
 import { requirePaidEntitlement } from '../services/payment'
+import { materialSnapshot } from '../services/material-snapshot'
 
 const router = Router()
 
@@ -58,17 +59,25 @@ router.post('/generate', async (req, res) => {
     })
 
     const storedFacts = await db.getCaseFacts(currentCase.id)
-    const facts: CollectedFact[] = storedFacts.length
-      ? storedFacts.map(fact => ({
-          key: fact.key,
-          label: fact.label,
-          value: fact.value,
-          source: fact.source,
-          confidence: (fact.confidence || 'medium') as CollectedFact['confidence'],
-          confirmed: true,
-          materialId: fact.sourceType === 'material' ? fact.sourceId : undefined,
-        }))
-      : artifactFacts
+    const facts: CollectedFact[] = [
+      ...storedFacts.filter(fact => fact.sourceType !== 'material').map(fact => ({
+        key: fact.key,
+        label: fact.label,
+        value: fact.value,
+        source: fact.source,
+        confidence: (fact.confidence || 'medium') as CollectedFact['confidence'],
+        confirmed: true,
+      })),
+      ...artifactFacts,
+    ]
+    const valuesByKey = new Map<string, string>()
+    for (const fact of facts) {
+      const previous = valuesByKey.get(fact.key)
+      if (previous !== undefined && previous !== fact.value) {
+        return res.status(409).json({ success: false, error: '已确认的信息存在冲突，请核对事故信息与材料后重新生成', code: 'FACT_CONFLICT' })
+      }
+      valuesByKey.set(fact.key, fact.value)
+    }
 
     if (facts.length === 0) {
       return res.status(400).json({ success: false, error: '请先确认事故信息或至少一份材料' })
@@ -83,6 +92,9 @@ router.post('/generate', async (req, res) => {
     })
     const run = runResult.run
     if (!run) throw new Error('AGENT_RUN_NOT_CREATED')
+    if (!runResult.created && (run.status === 'queued' || run.status === 'running')) {
+      return res.status(202).json({ success: true, data: { runId: run.id, status: run.status } })
+    }
     if (!runResult.created && run.status === 'succeeded') {
       const existing = await db.getReportByCase(currentCase.id)
       if (existing?.agentRunId === run.id) {
@@ -92,7 +104,14 @@ router.post('/generate', async (req, res) => {
     if (!runResult.created && run.status === 'running') {
       return res.status(202).json({ success: true, data: { runId: run.id, status: run.status } })
     }
-    if (run.status === 'queued') await db.updateAgentRun(run.id, { status: 'running' })
+    const claimedRun = await db.claimAgentRun(run.id)
+    if (!claimedRun) {
+      const latestRun = await db.findAgentRun(run.id)
+      if (latestRun?.status === 'queued' || latestRun?.status === 'running') {
+        return res.status(202).json({ success: true, data: { runId: run.id, status: latestRun.status } })
+      }
+      return res.status(409).json({ success: false, error: '本次分析未完成，请更新信息后重试', data: { runId: run.id, status: latestRun?.status } })
+    }
     if (!['queued', 'running'].includes(run.status)) {
       return res.status(409).json({ success: false, error: '当前输入版本的报告任务不可重试，请先更新案件信息' })
     }
@@ -100,12 +119,12 @@ router.post('/generate', async (req, res) => {
     try {
       const report = await generateReport(facts, currentCase.id)
       await requirePaidEntitlement(userId, currentCase.id)
-      await db.publishRunReport(run.id, report)
+      await db.publishRunReport(run.id, report, { userId, materialSnapshot: materialSnapshot(artifacts) })
       res.json({ success: true, data: { report } })
     } catch (generationError: any) {
       const latestRun = await db.findAgentRun(run.id)
       if (latestRun?.status === 'running') {
-        const code = generationError.message === 'PAYMENT_REQUIRED' ? 'PAYMENT_REQUIRED' : 'REPORT_GENERATION_FAILED'
+        const code = generationError.message === 'PAYMENT_REQUIRED' ? 'PAYMENT_REQUIRED' : generationError.message === 'REPORT_STALE' ? 'REPORT_STALE' : 'REPORT_GENERATION_FAILED'
         await db.updateAgentRun(latestRun.id, { status: 'failed', safeErrorCode: code })
       }
       throw generationError
@@ -127,6 +146,37 @@ router.post('/generate', async (req, res) => {
  * GET /api/reports/:caseId
  * 获取案件的报告
  */
+router.get('/:caseId/runs/latest', async (req, res) => {
+  try {
+    const userId = req.userId
+    if (!userId) return res.status(401).json({ success: false, error: '未认证' })
+    const currentCase = await db.findCaseById(userId, req.params.caseId)
+    if (!currentCase) return res.status(404).json({ success: false, error: '未找到案件' })
+    const run = await db.findLatestReportRun(currentCase.id, currentCase.inputRevision ?? 0)
+    return res.json({ success: true, data: run ? { runId: run.id, status: run.status, inputRevision: run.inputRevision, safeErrorCode: run.safeErrorCode } : null })
+  } catch (error) {
+    console.error('分析任务恢复失败:', safeError(error))
+    return res.status(500).json({ success: false, error: '分析状态暂不可用' })
+  }
+})
+
+router.get('/:caseId/runs/:runId', async (req, res) => {
+  try {
+    const userId = req.userId
+    if (!userId) return res.status(401).json({ success: false, error: '未认证' })
+    const { caseId, runId } = req.params
+    const currentCase = await db.findCaseById(userId, caseId)
+    if (!currentCase) return res.status(404).json({ success: false, error: '未找到案件' })
+    const run = await db.findAgentRun(runId)
+    if (!run || run.caseId !== caseId) return res.status(404).json({ success: false, error: '未找到分析记录' })
+    const status = run.inputRevision !== (currentCase.inputRevision || 0) ? 'stale' : run.status
+    return res.json({ success: true, data: { runId: run.id, status, inputRevision: run.inputRevision, safeErrorCode: run.safeErrorCode } })
+  } catch (error) {
+    console.error('分析状态查询失败:', safeError(error))
+    return res.status(500).json({ success: false, error: '分析状态暂不可用' })
+  }
+})
+
 router.get('/:caseId', async (req, res) => {
   try {
     const userId = req.userId
@@ -163,6 +213,12 @@ router.get('/:caseId', async (req, res) => {
       throw paymentError
     }
 
+    const artifacts = await db.getArtifactsByCase(caseId)
+    const snapshot = report.inputSnapshot?.materialSnapshot
+    if ((report.inputRevision !== undefined && report.inputRevision !== caseData.inputRevision)
+      || (snapshot && snapshot !== materialSnapshot(artifacts))) {
+      return res.status(409).json({ success: false, error: '案件信息已更新，请重新生成报告' })
+    }
     res.json({ success: true, data: { report: report.content } })
   } catch (err: any) {
     console.error('报告查询失败:', safeError(err))

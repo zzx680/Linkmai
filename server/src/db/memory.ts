@@ -159,11 +159,30 @@ const messages = new Map<string, Message>()
 const artifacts = new Map<string, Artifact>()
 const feedbacks = new Map<string, Feedback>()
 const privacyRequests = new Map<string, PrivacyRequest>()
-const reports = new Map<string, { id: string; caseId: string; content: any; inputRevision?: number; agentRunId?: string; createdAt: Date }>()
+const reports = new Map<string, { id: string; caseId: string; content: any; inputRevision?: number; agentRunId?: string; inputSnapshot?: { materialSnapshot: string }; createdAt: Date }>()
 const caseFacts = new Map<string, Map<string, CaseFact>>()
 const caseRevisions = new Map<string, CaseRevision[]>()
 const agentRuns = new Map<string, AgentRun>()
 const agentRunIdsByKey = new Map<string, string>()
+const runEvents = new Map<string, Array<{ status: AgentRun['status']; safeErrorCode?: string; createdAt: Date }>>()
+function recordRunEvent(run: AgentRun): void {
+  const events = runEvents.get(run.id) || []
+  if (events[events.length - 1]?.status === run.status) return
+  events.push({ status: run.status, safeErrorCode: run.safeErrorCode, createdAt: new Date() })
+  runEvents.set(run.id, events)
+}
+const runLocks = new Map<string, Promise<unknown>>()
+async function withRunLock<T>(runId: string, operation: () => Promise<T>): Promise<T> {
+  const previous = runLocks.get(runId) || Promise.resolve()
+  let release!: () => void
+  const current = new Promise<void>(resolve => { release = resolve })
+  runLocks.set(runId, current)
+  await previous
+  try { return await operation() } finally {
+    release()
+    if (runLocks.get(runId) === current) runLocks.delete(runId)
+  }
+}
 const entitlements = new Map<string, CaseEntitlement>()
 const paymentOrders = new Map<string, PaymentOrder>()
 const paymentOrderByNo = new Map<string, string>()
@@ -423,39 +442,71 @@ export const memoryDB = {
     }
     agentRuns.set(run.id, run)
     agentRunIdsByKey.set(key, run.id)
+    recordRunEvent(run)
     return { run, created: true }
+  },
+
+  async getRunEvents(userId: string, caseId: string, runId: string) {
+    const currentCase = cases.get(caseId)
+    const run = agentRuns.get(runId)
+    if (!currentCase || currentCase.userId !== userId || run?.caseId !== caseId) return null
+    return (runEvents.get(runId) || []).map(event => ({ ...event }))
+  },
+
+  async findLatestReportRun(caseId: string, inputRevision: number): Promise<AgentRun | null> {
+    return [...agentRuns.values()].filter(run => run.caseId === caseId && run.task === 'report' && run.inputRevision === inputRevision)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] || null
   },
 
   async findAgentRun(runId: string): Promise<AgentRun | null> {
     return agentRuns.get(runId) || null
   },
 
-  async updateAgentRun(runId: string, update: AgentRunUpdate): Promise<AgentRun | null> {
-    validateRunUpdate(update)
+  async claimAgentRun(runId: string): Promise<AgentRun | null> {
     const run = agentRuns.get(runId)
-    if (!run) return null
-    validateRunTransition(run.status, update.status)
-    const now = new Date()
-    run.status = update.status
-    run.output = update.output
-    run.safeErrorCode = update.safeErrorCode
-    if (update.status === 'running') run.startedAt = run.startedAt || now
-    if (terminalRunStatuses.includes(update.status)) run.completedAt = now
-    run.updatedAt = now
+    if (!run || run.status !== 'queued') return null
+    run.status = 'running'
+    run.startedAt = new Date()
+    run.updatedAt = run.startedAt
+    recordRunEvent(run)
     return run
   },
 
-  async publishRunReport(runId: string, content: any) {
-    const run = agentRuns.get(runId)
+  async updateAgentRun(runId: string, update: AgentRunUpdate): Promise<AgentRun | null> {
+    return withRunLock(runId, async () => {
+      validateRunUpdate(update)
+      const run = agentRuns.get(runId)
+      if (!run) return null
+      validateRunTransition(run.status, update.status)
+      const now = new Date()
+      run.status = update.status
+      run.output = update.output
+      run.safeErrorCode = update.safeErrorCode
+      if (update.status === 'running') run.startedAt = run.startedAt || now
+      if (terminalRunStatuses.includes(update.status)) run.completedAt = now
+      run.updatedAt = now
+      recordRunEvent(run)
+      return run
+    })
+  },
+
+  async publishRunReport(runId: string, content: any, input: { userId: string; materialSnapshot: string }) {
+    return withRunLock(runId, async () => {
+      const run = agentRuns.get(runId)
     if (!run) throw new Error('AGENT_RUN_NOT_FOUND')
     if (run.status !== 'running') throw new Error('AGENT_RUN_NOT_RUNNING')
     const currentCase = cases.get(run.caseId)
-    if (!currentCase) throw new Error('CASE_NOT_FOUND')
+    if (!currentCase || currentCase.userId !== input.userId) throw new Error('CASE_NOT_FOUND')
+    const entitlement = entitlements.get(run.caseId)
+    if (entitlement?.status !== 'paid') throw new Error('PAYMENT_REQUIRED')
+    const inputs = [...artifacts.values()].filter(item => item.caseId === run.caseId)
+    if (materialSnapshot(inputs) !== input.materialSnapshot) throw new Error('REPORT_STALE')
     if (currentCase.inputRevision !== run.inputRevision) {
       run.status = 'stale'
       run.safeErrorCode = 'STALE_INPUT_REVISION'
       run.completedAt = new Date()
       run.updatedAt = run.completedAt
+      recordRunEvent(run)
       throw new Error('STALE_INPUT_REVISION')
     }
     const existing = [...reports.values()].find(report => report.agentRunId === runId)
@@ -466,6 +517,7 @@ export const memoryDB = {
       content,
       inputRevision: run.inputRevision,
       agentRunId: run.id,
+      inputSnapshot: { materialSnapshot: input.materialSnapshot },
       createdAt: new Date(),
     }
     reports.set(run.caseId, report)
@@ -473,11 +525,13 @@ export const memoryDB = {
     run.output = content
     run.completedAt = report.createdAt
     run.updatedAt = report.createdAt
+    recordRunEvent(run)
     currentCase.hasReport = true
     currentCase.status = 'ready'
     currentCase.statusLabel = '报告已完成'
-    currentCase.updatedAt = report.createdAt
-    return report
+      currentCase.updatedAt = report.createdAt
+      return report
+    })
   },
 
   // Conversations

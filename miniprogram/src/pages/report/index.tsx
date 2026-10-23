@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from '@tarojs/components'
 import { useEffect, useState } from 'react'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow, useDidHide } from '@tarojs/taro'
 import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import CaseJourney from '../../components/CaseJourney'
@@ -16,16 +16,46 @@ export default function Report() {
     currentReport,
     materials,
     isGeneratingReport,
-    generateReport,
-    loadReport
+    reportRunId,
+    reportRunStatus,
+    reportRunError,
+    refreshReportRun,
+    generateReport
   } = useAppStore()
   const [error, setError] = useState('')
+  const refreshProgress = () => { setError(''); setPollCycle(value => value + 1) }
+
+  const [visible, setVisible] = useState(true)
+  const [pollCycle, setPollCycle] = useState(0)
+  useDidShow(() => { setVisible(true); setPollCycle(value => value + 1) })
+  useDidHide(() => setVisible(false))
 
   useEffect(() => {
-    if (currentCase?.hasReport && !currentReport) {
-      loadReport(currentCase.id).catch(() => setError('报告暂时无法加载'))
+    setError('')
+  }, [currentCase?.id])
+
+  useEffect(() => {
+    if (!visible || !currentCase || currentReport) return
+    let active = true
+    let timer: ReturnType<typeof setTimeout>
+    let attempts = 0
+    const caseId = currentCase.id
+    const poll = async () => {
+      if (!active || useAppStore.getState().currentCase?.id !== caseId) return
+      if (++attempts > 60) {
+        useAppStore.setState({ isGeneratingReport: false, reportRunError: '自动查询已暂停，请刷新进度查看最新状态' })
+        return
+      }
+      try {
+        const pending = await refreshReportRun()
+        if (active && pending) timer = setTimeout(poll, 1500)
+      } catch {
+        if (active) timer = setTimeout(poll, 3000)
+      }
     }
-  }, [currentCase?.id, currentCase?.hasReport])
+    void poll()
+    return () => { active = false; clearTimeout(timer) }
+  }, [currentCase?.id, reportRunId, currentReport, refreshReportRun, visible, pollCycle])
 
   const handleGenerate = async () => {
     setError('')
@@ -48,8 +78,8 @@ export default function Report() {
           <View className="generating-mark">
             <Icon name="loader-circle" size={48} color="#2A64F0" />
           </View>
-          <Text className="generating-title">正在整理案件分析</Text>
-          <Text className="generating-description">灵迈正在基于已确认的材料生成分析，请保持页面打开</Text>
+          <Text className="generating-title">{reportRunStatus === 'queued' ? '已排队，正在等待分析' : '正在整理案件分析'}</Text>
+          <Text className="generating-description">分析完成后会自动显示；你可以离开此页，之后再回来查看状态。</Text>
           <View className="generation-steps">
             <View className="generation-step active"><View className="step-dot" /><Text>核对已确认事实</Text></View>
             <View className="generation-step active"><View className="step-dot" /><Text>生成责任与赔偿分析</Text></View>
@@ -110,9 +140,9 @@ export default function Report() {
             <View className="preflight-row"><Text>可用事实字段</Text><Text className="row-value">{confirmedFieldsCount} 项</Text></View>
             <View className="preflight-row"><Text>材料状态</Text><Text className={`row-value ${confirmedFieldsCount ? 'ready' : 'warning'}`}>{confirmedFieldsCount ? '可以生成' : '需要核对'}</Text></View>
           </View>
-          {error && <Text className="error-text">{error}</Text>}
-          <View className={`generate-button ${confirmedFieldsCount === 0 ? 'disabled' : ''}`} onClick={confirmedFieldsCount ? handleGenerate : goMaterials}>
-            <Text>{confirmedFieldsCount ? '生成案件报告' : materials.length ? '先去核对材料' : '先去添加材料'}</Text>
+          {(error || reportRunError) && <Text className="error-text">{error || reportRunError}</Text>}
+          <View className={`generate-button ${!reportRunId && !reportRunError && confirmedFieldsCount === 0 ? 'disabled' : ''}`} onClick={reportRunId || reportRunError ? refreshProgress : confirmedFieldsCount ? handleGenerate : goMaterials}>
+            <Text>{reportRunId || reportRunError ? '刷新报告进度' : confirmedFieldsCount ? '生成案件报告' : materials.length ? '先去核对材料' : '先去添加材料'}</Text>
           </View>
         </View>
 

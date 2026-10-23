@@ -15,6 +15,7 @@ const requiredTables = [
   'feedback',
   'privacy_requests',
   'audit_logs',
+  'run_events',
 ]
 
 test('database migrations are ordered and contain staging tables', async () => {

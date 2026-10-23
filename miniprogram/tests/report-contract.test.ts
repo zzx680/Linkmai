@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { readReportEnvelope } from '../src/services/report-contract'
+import { isPendingReport, readReportEnvelope } from '../src/services/report-contract'
 
 const report = {
   caseId: 'case-1',
@@ -14,6 +14,12 @@ const report = {
 describe('report response contract', () => {
   it('reads the unified POST and GET { report } envelope', () => {
     assert.deepEqual(readReportEnvelope({ report }), report)
+  })
+
+  it('distinguishes queued and running responses from completed report data', () => {
+    assert.equal(isPendingReport({ runId: 'run-1', status: 'queued' }), true)
+    assert.equal(isPendingReport({ runId: 'run-1', status: 'running' }), true)
+    assert.equal(isPendingReport({ report }), false)
   })
 
   it('does not silently accept the former direct report body', () => {

@@ -444,8 +444,29 @@ export const db = {
     return { run: toAgentRun(existing.rows[0]), created: false }
   },
 
+  async getRunEvents(userId: string, caseId: string, runId: string) {
+    const owner = await pool.query('SELECT ar.id FROM agent_runs ar JOIN cases c ON c.id=ar.case_id WHERE ar.id=$1 AND ar.case_id=$2 AND c.user_id=$3', [runId, caseId, userId])
+    if (!owner.rows[0]) return null
+    const events = await pool.query('SELECT status,safe_error_code,created_at FROM run_events WHERE run_id=$1 ORDER BY id', [runId])
+    return events.rows.map(row => ({ status: row.status, safeErrorCode: row.safe_error_code || undefined, createdAt: row.created_at }))
+  },
+
+  async findLatestReportRun(caseId: string, inputRevision: number) {
+    const result = await pool.query("SELECT * FROM agent_runs WHERE case_id=$1 AND task='report' AND input_revision=$2 ORDER BY created_at DESC,id DESC LIMIT 1", [caseId, inputRevision])
+    return toAgentRun(result.rows[0])
+  },
+
   async findAgentRun(runId: string) {
     const result = await pool.query('SELECT * FROM agent_runs WHERE id=$1', [runId])
+    return toAgentRun(result.rows[0])
+  },
+
+  async claimAgentRun(runId: string) {
+    const result = await pool.query(
+      `UPDATE agent_runs SET status='running',started_at=NOW(),updated_at=NOW()
+       WHERE id=$1 AND status='queued' RETURNING *`,
+      [runId]
+    )
     return toAgentRun(result.rows[0])
   },
 
@@ -464,18 +485,23 @@ export const db = {
     return toAgentRun(result.rows[0])
   },
 
-  async publishRunReport(runId: string, content: any) {
+  async publishRunReport(runId: string, content: any, input: { userId: string; materialSnapshot: string }) {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
       const result = await client.query(
-        `SELECT ar.*,c.input_revision AS current_revision FROM agent_runs ar JOIN cases c ON c.id=ar.case_id
+        `SELECT ar.*,c.input_revision AS current_revision,c.user_id AS owner_id FROM agent_runs ar JOIN cases c ON c.id=ar.case_id
          WHERE ar.id=$1 FOR UPDATE OF ar,c`,
         [runId]
       )
       const row = result.rows[0]
       if (!row) throw new Error('AGENT_RUN_NOT_FOUND')
+      if (row.owner_id !== input.userId) throw new Error('CASE_NOT_FOUND')
       if (row.status !== 'running') throw new Error('AGENT_RUN_NOT_RUNNING')
+      const entitlement = await client.query('SELECT status FROM case_entitlements WHERE case_id=$1 AND user_id=$2 FOR UPDATE', [row.case_id, input.userId])
+      if (entitlement.rows[0]?.status !== 'paid') throw new Error('PAYMENT_REQUIRED')
+      const inputs = await client.query('SELECT * FROM artifacts WHERE case_id=$1', [row.case_id])
+      if (materialSnapshot(inputs.rows) !== input.materialSnapshot) throw new Error('REPORT_STALE')
       if (row.current_revision !== row.input_revision) {
         await client.query("UPDATE agent_runs SET status='stale',safe_error_code='STALE_INPUT_REVISION',completed_at=NOW(),updated_at=NOW() WHERE id=$1", [runId])
         await client.query('COMMIT')
@@ -487,7 +513,7 @@ export const db = {
         return { id: existing.rows[0].id, caseId: row.case_id, content: existing.rows[0].content, inputRevision: row.input_revision, agentRunId: runId, createdAt: existing.rows[0].created_at }
       }
       const id = generateId('report')
-      await client.query('INSERT INTO reports (id,case_id,content,input_revision,agent_run_id,created_at) VALUES ($1,$2,$3,$4,$5,NOW())', [id, row.case_id, JSON.stringify(content), row.input_revision, runId])
+      await client.query('INSERT INTO reports (id,case_id,content,input_revision,agent_run_id,input_snapshot,created_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())', [id, row.case_id, JSON.stringify(content), row.input_revision, runId, JSON.stringify({ materialSnapshot: input.materialSnapshot })])
       await client.query("UPDATE agent_runs SET status='succeeded',output=$1,completed_at=NOW(),updated_at=NOW() WHERE id=$2", [JSON.stringify(content), runId])
       await client.query("UPDATE cases SET has_report=TRUE,status='ready',status_label='报告已完成',updated_at=NOW() WHERE id=$1", [row.case_id])
       await client.query('COMMIT')

@@ -19,7 +19,8 @@ function render(page: string, state: Record<string, unknown>) {
     module, exports: module.exports,
     require(id: string) {
       if (id === '@tarojs/components') return { View: 'div', Text: 'span', Button: 'button', ScrollView: 'section' }
-      if (id === '@tarojs/taro' || id === '../../services/api' || id === '../../utils/privacy-consent' || id.endsWith('.scss')) return {}
+      if (id === '@tarojs/taro') return { useDidShow() {}, useDidHide() {} }
+      if (id === '../../services/api' || id === '../../utils/privacy-consent' || id.endsWith('.scss')) return {}
       if (id === '../../store') return { useAppStore: Object.assign(() => state, { getState: () => state }) }
       if (id === '../../content/privacy') return privacyContent
       if (id === '../../components') return { Icon: () => null }
