@@ -56,6 +56,48 @@ test('latest report run recovery is owned, revision-bound and excludes other tas
   assert.equal((await route('get', '/:caseId/runs/latest', { userId: user.id, params })).payload.data, null)
 })
 
+test('PostgreSQL createAgentRun reuses an existing run when either equivalent unique key conflicts', async () => {
+  const existing = {
+    id: 'run-existing', case_id: 'case', task: 'report', input_revision: 3,
+    skill_version: 'v1', idempotency_key: 'existing-key', status: 'queued',
+    output: null, safe_error_code: null, started_at: null, completed_at: null,
+    created_at: new Date(), updated_at: new Date(),
+  }
+  const calls: string[] = []
+  const query = mock.method(Pool.prototype, 'query', async (sql: string) => {
+    calls.push(sql)
+    if (sql.startsWith('SELECT input_revision')) return { rows: [{ input_revision: 3 }] }
+    if (sql.startsWith('INSERT INTO agent_runs')) return { rows: [] }
+    if (sql.startsWith('SELECT * FROM agent_runs')) return { rows: [existing] }
+    throw new Error(`unexpected query: ${sql}`)
+  })
+  try {
+    const result = await postgresDB.createAgentRun({ caseId: 'case', task: 'report', inputRevision: 3, skillVersion: 'v1' })
+    assert.equal(result.created, false)
+    assert.equal(result.run.id, 'run-existing')
+    assert.match(calls.find(sql => sql.startsWith('INSERT INTO agent_runs'))!, /ON CONFLICT DO NOTHING/)
+    assert.doesNotMatch(calls.find(sql => sql.startsWith('INSERT INTO agent_runs'))!, /ON CONFLICT \(idempotency_key\)/)
+  } finally { query.mock.restore() }
+})
+
+test('PostgreSQL updateAgentRun explicitly types reused status parameters', async () => {
+  const current = {
+    id: 'run', case_id: 'case', task: 'report', input_revision: 1,
+    skill_version: 'v1', idempotency_key: 'key', status: 'running',
+    output: null, safe_error_code: null, started_at: new Date(), completed_at: null,
+    created_at: new Date(), updated_at: new Date(),
+  }
+  const query = mock.method(Pool.prototype, 'query', async (sql: string) => {
+    if (sql.startsWith('SELECT * FROM agent_runs')) return { rows: [current] }
+    assert.match(sql, /status=\$1::varchar/)
+    assert.match(sql, /\$1::varchar=ANY\(\$4::varchar\[\]\)/)
+    return { rows: [{ ...current, status: 'failed', safe_error_code: 'REPORT_STALE' }] }
+  })
+  try {
+    assert.equal((await postgresDB.updateAgentRun('run', { status: 'failed', safeErrorCode: 'REPORT_STALE' }))?.status, 'failed')
+  } finally { query.mock.restore() }
+})
+
 test('PostgreSQL updateCase binds explicit case ID before owner and handles no match', async () => {
   const query = mock.method(Pool.prototype, 'query', async (sql: string, values: unknown[]) => {
     assert.match(sql, /id = \$3 AND user_id = \$4/)

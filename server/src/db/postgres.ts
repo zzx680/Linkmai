@@ -436,7 +436,7 @@ export const db = {
     const result = await pool.query(
       `INSERT INTO agent_runs (id,case_id,task,input_revision,skill_version,idempotency_key,status,created_at,updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,'queued',NOW(),NOW())
-       ON CONFLICT (idempotency_key) DO NOTHING RETURNING *`,
+       ON CONFLICT DO NOTHING RETURNING *`,
       [id, input.caseId, input.task, input.inputRevision, input.skillVersion, idempotencyKey]
     )
     if (result.rows[0]) return { run: toAgentRun(result.rows[0]), created: true }
@@ -476,9 +476,9 @@ export const db = {
     if (!current.rows[0]) return null
     validateRunTransition(current.rows[0].status, update.status)
     const result = await pool.query(
-      `UPDATE agent_runs SET status=$1,output=$2,safe_error_code=$3,
-       started_at=CASE WHEN $1='running' THEN COALESCE(started_at,NOW()) ELSE started_at END,
-       completed_at=CASE WHEN $1=ANY($4::text[]) THEN NOW() ELSE completed_at END,updated_at=NOW()
+      `UPDATE agent_runs SET status=$1::varchar,output=$2::jsonb,safe_error_code=$3::varchar,
+       started_at=CASE WHEN $1::varchar='running' THEN COALESCE(started_at,NOW()) ELSE started_at END,
+       completed_at=CASE WHEN $1::varchar=ANY($4::varchar[]) THEN NOW() ELSE completed_at END,updated_at=NOW()
        WHERE id=$5 RETURNING *`,
       [update.status, update.output ? JSON.stringify(update.output) : null, update.safeErrorCode || null, terminalRunStatuses, runId]
     )
