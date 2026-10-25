@@ -1,5 +1,5 @@
 import { Button, Text, View } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { useMemo, useState } from 'react'
 import { Icon, SkeletonCaseCard } from '../../components'
 import { IS_H5 } from '../../config/env'
@@ -11,9 +11,17 @@ import { getCaseNextStep, getHomeMode, getHomeStepDetail, getJourneyStep } from 
 import CaseJourney from '../../components/CaseJourney'
 import OnboardingGuide from '../../components/OnboardingGuide'
 import { completeGuideSteps } from '../../components/OnboardingGuide/progress'
+import shareCover from '../../assets/share/home-card.png'
 import './index.scss'
 
 export default function CasePage() {
+  // Always share the public entry and fixed artwork; never capture the workbench.
+  useShareAppMessage(() => ({
+    title: '灵迈交通事故处理agent',
+    path: '/pages/case/index',
+    imageUrl: shareCover
+  }))
+
   const {
     user,
     isLoggedIn,

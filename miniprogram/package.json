@@ -10,7 +10,8 @@
     "dev:weapp": "NODE_ENV=development taro build --type weapp --watch",
     "dev:h5": "NODE_ENV=development taro build --type h5 --watch",
     "start": "npm run dev:weapp",
-    "convert:icons": "node scripts/convert-icons.js"
+    "convert:icons": "node scripts/convert-icons.js",
+    "build:share": "node scripts/build-share-assets.cjs"
   },
   "dependencies": {
     "@tarojs/components": "4.0.7",

@@ -2,12 +2,15 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import sharp from 'sharp'
 import type { Case, Material } from '../src/services/api'
 import { getCaseNextStep, getHomeMode, getHomeStepDetail, getJourneyStep } from '../src/pages/case/home-state'
 
 const casePageSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.tsx'), 'utf8')
 const caseStylesSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.scss'), 'utf8')
 const journeySource = readFileSync(path.resolve(__dirname, '../src/components/CaseJourney.tsx'), 'utf8')
+const casePageConfigSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.config.ts'), 'utf8')
+const shareCoverPath = path.resolve(__dirname, '../src/assets/share/home-card.png')
 
 function makeCase(overrides: Partial<Case> = {}): Case {
   return {
@@ -40,6 +43,19 @@ function makeMaterial(confirmed = false): Material {
 }
 
 describe('home workbench state', () => {
+  it('shares only the fixed public entry with the branded card', async () => {
+    assert.match(casePageConfigSource, /enableShareAppMessage:\s*true/)
+    assert.doesNotMatch(casePageConfigSource, /enableShareTimeline/)
+    assert.match(casePageSource, /useShareAppMessage\(\(\) => \(\{[\s\S]*title: '灵迈交通事故处理agent'[\s\S]*path: '\/pages\/case\/index'[\s\S]*imageUrl: shareCover/)
+    assert.doesNotMatch(casePageSource, /useShareTimeline|shareTimeline/)
+
+    const shareBlock = casePageSource.slice(casePageSource.indexOf('  useShareAppMessage'), casePageSource.indexOf('  const {'))
+    assert.doesNotMatch(shareBlock, /caseId|currentCase|user\??\.|materials|entitlement|payment/)
+
+    const cover = await sharp(shareCoverPath).metadata()
+    assert.deepEqual([cover.width, cover.height], [1000, 800])
+  })
+
   it('distinguishes loading, login, empty and failed case states', () => {
     assert.equal(getHomeMode({ isLoggedIn: true, isLoadingCase: true, caseLoadError: null, currentCase: null }), 'loading')
     assert.equal(getHomeMode({ isLoggedIn: false, isLoadingCase: false, caseLoadError: null, currentCase: null }), 'logged_out')
