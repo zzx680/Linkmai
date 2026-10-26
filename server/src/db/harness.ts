@@ -81,6 +81,7 @@ export function confirmedFieldsChanged(previous: { confirmed?: boolean; fields?:
   return !previous?.confirmed || canonical(previous.fields) !== canonical(fields)
 }
 export function validateRunTransition(previous: AgentRunStatus, next: AgentRunStatus): void {
+  if (terminalRunStatuses.includes(previous)) throw new Error('INVALID_AGENT_RUN_TRANSITION')
   if (previous === next) return
   const allowed: Partial<Record<AgentRunStatus, AgentRunStatus[]>> = {
     queued: ['running', 'cancelled', 'stale'],

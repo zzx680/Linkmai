@@ -2,7 +2,7 @@ import { Button, Text, View } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import Avatar from './Avatar'
 
-const stages = ['描述事故', '核对材料', '解锁方案', '查看报告']
+const stages = ['描述事故', '整理材料', '解锁方案', '查看报告']
 
 export default function CaseJourney({
   active,

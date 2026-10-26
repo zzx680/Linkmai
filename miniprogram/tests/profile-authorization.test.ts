@@ -30,4 +30,11 @@ describe('WeChat profile authorization', () => {
     )
     assert.doesNotMatch(didShowBody, /chooseAvatar|openProfileEditor/)
   })
+
+  it('shows profile stats without navigating when tapped', () => {
+    const stats = profileSource.slice(profileSource.indexOf('<View className="stats-grid">'), profileSource.indexOf('{sections.map'))
+    assert.match(stats, /进行中案件/)
+    assert.match(stats, /已整理材料/)
+    assert.doesNotMatch(stats, /onClick|openTask/)
+  })
 })

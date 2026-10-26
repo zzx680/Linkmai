@@ -1,4 +1,63 @@
-# Staging 部署指南
+# 部署指南
+
+## 环境隔离与并行开发
+
+本地开发、staging 和 production 使用不同的小程序构建产物与 API 地址。日常改动使用本地小程序和本地后端；服务器联调及真机验收使用 staging；production 只承载正式版本。开发者工具可同时打开本地与 staging 两个项目，避免为了预览本地改动而切换服务器版本。
+
+| 环境 | 小程序构建目录 | API 地址 | 用途 |
+| --- | --- | --- | --- |
+| 本地 | `miniprogram/dist` | `http://localhost:8000/api` | 日常开发和模拟器预览 |
+| staging | `miniprogram/dist-staging` | `https://<staging-domain>/api` | 服务器联调和开发版真机验收 |
+| production | 正式构建使用 `miniprogram/dist` | `https://api.linkmai.com/api` | 正式版本 |
+
+### 本地开发
+
+在一个终端启动本地后端：
+
+```bash
+NODE_ENV=development DB_TYPE=memory PAYMENT_PROVIDER=mock ALLOW_MOCK_WECHAT_LOGIN=true PORT=8000 npm --prefix server run dev
+```
+
+本地后端使用内存数据库、mock 微信登录和 mock 支付，不连接 staging/production 数据库，也不会发起真实支付。`server/.env` 中其他外部服务配置仍可能生效；若需要联调 OCR、OSS 或模型 API，请配置专用测试凭据与资源，不要复用 production 资源。
+
+在另一个终端启动小程序监听构建：
+
+```bash
+TARO_APP_API_BASE=http://localhost:8000/api npm --prefix miniprogram run dev:weapp
+```
+
+在微信开发者工具中打开仓库根目录项目。根目录 `project.config.json` 的 `miniprogramRoot` 指向 `miniprogram/dist/`。开发者工具模拟器可访问本机 `localhost`；真机不能通过 `localhost` 访问开发电脑，真机联调应使用 staging HTTPS 域名。
+
+### staging 小程序
+
+先部署并验收 staging 后端，确认使用独立于 production 的数据库和支付配置，再构建 staging 小程序：
+
+```bash
+TARO_APP_API_BASE=https://<staging-domain>/api npm --prefix miniprogram run build:weapp:staging
+```
+
+在微信开发者工具中将 `miniprogram/dist-staging` 作为另一个小程序项目导入，并与仓库根目录的本地项目分别打开。两个项目的输出目录互相独立：本地监听更新 `miniprogram/dist`，staging 构建输出到 `miniprogram/dist-staging`。如导入时需要生成项目设置，将其保留在被 Git 忽略的 `dist-staging` 目录，不要改写根目录 `project.config.json`。
+
+staging API 域名必须配置为微信小程序 request/uploadFile 合法域名。真机测试应使用 HTTPS staging API，不要通过关闭合法域名校验来代替配置。
+
+### production 小程序
+
+正式构建显式指定 production API：
+
+```bash
+TARO_APP_API_BASE=https://api.linkmai.com/api npm --prefix miniprogram run build:weapp
+```
+
+本地和 staging 小程序包不得连接 production API；测试账号、材料、案件和支付操作不得写入正式环境。本地代码和本地构建不会自动修改服务器，只有执行后端部署脚本才会更新服务器；小程序上传微信是独立操作。`miniprogram/dist` 同时是本地和 production 构建输出目录，不要在本地监听构建运行时执行 production 构建；正式构建应在 staging 验收通过后单独执行，并在确认后再上传。
+
+## 测试与发布顺序
+
+- 所有正式发布先部署到 staging 并完成验证，通过后再发布 production，不跳过测试环境。
+- 本地构建和单元测试通过不等于 staging 验收通过；小程序应连接 staging API 验证本次改动涉及的页面与接口，涉及微信支付等能力时应进行真机验证。
+- production 部署使用 staging 验收通过的同一代码版本；如果代码之后有变化，应重新验证受影响的功能。
+- 执行前确认目标环境、API 地址、服务进程及数据库，避免把测试改动或数据写入 production。
+- 后端部署与小程序上传微信是独立操作，按用户明确的发布范围执行；修改文档、本地编译或测试不代表授权部署正式环境或上传微信。
+- 汇报时明确区分本地已修改、staging 已部署并验证、production 已部署，以及小程序已上传等状态。
 
 ## 架构
 

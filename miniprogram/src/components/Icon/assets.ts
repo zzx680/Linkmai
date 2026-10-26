@@ -58,6 +58,7 @@ import icon55 from '../../assets/icons/lucide/folder-2a64f0.png'
 import icon56 from '../../assets/icons/lucide/folder-6b7280.png'
 import icon57 from '../../assets/icons/lucide/folder-8e8e93.png'
 import icon58 from '../../assets/icons/lucide/folder-open-000000.png'
+import folderOpenBlue from '../../assets/icons/lucide/folder-open-2a64f0.png'
 import icon59 from '../../assets/icons/lucide/folder-open-34c759.png'
 import icon60 from '../../assets/icons/lucide/folder-open-6b7280.png'
 import icon61 from '../../assets/icons/lucide/folder-open-8e8e93.png'
@@ -222,6 +223,7 @@ export const iconAssets: Record<string, Record<string, string>> = {
   },
   'folder-open': {
     '#000000': icon58,
+    '#2A64F0': folderOpenBlue,
     '#34C759': icon59,
     '#6B7280': icon60,
     '#8E8E93': icon61,

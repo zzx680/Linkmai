@@ -129,6 +129,57 @@ test('run trace records only safe lifecycle fields and requires ownership', asyn
   assert.equal(await memoryDB.getRunEvents(user.id, 'other-case', run.id), null)
 })
 
+test('memory publication and failure updates serialize in either order', async () => {
+  for (const publishFirst of [true, false]) {
+    const user = await memoryDB.createUser(`run-race-${Math.random()}`)
+    const caseData = await memoryDB.createCase(user.id, 'Run race')
+    const { run } = await memoryDB.createAgentRun({ caseId: caseData.id, task: 'report', inputRevision: 0, skillVersion: 'race' })
+    await memoryDB.claimAgentRun(run.id)
+    const entitlement = await memoryDB.getOrCreateCaseEntitlement(user.id, caseData.id)
+    entitlement.status = 'paid'
+    const publish = () => memoryDB.publishRunReport(run.id, { analysis: 'original' }, { userId: user.id, materialSnapshot: materialSnapshot([]) })
+    const fail = () => memoryDB.updateAgentRun(run.id, { status: 'failed', safeErrorCode: 'REPORT_GENERATION_FAILED' })
+    const results = await Promise.allSettled(publishFirst ? [publish(), fail()] : [fail(), publish()])
+    assert.equal(results[0].status, 'fulfilled')
+    assert.equal(results[1].status, 'rejected')
+    assert.equal((await memoryDB.findAgentRun(run.id))?.status, publishFirst ? 'succeeded' : 'failed')
+    assert.equal(Boolean(await memoryDB.getReportByCase(caseData.id)), publishFirst)
+    assert.deepEqual((await memoryDB.getRunEvents(user.id, caseData.id, run.id))?.map(event => event.status), ['queued', 'running', publishFirst ? 'succeeded' : 'failed'])
+  }
+})
+
+for (const status of ['succeeded', 'failed', 'stale', 'cancelled'] as const) {
+  test(`memory preserves the entire ${status} run after every subsequent update`, async () => {
+    const user = await memoryDB.createUser(`terminal-${Math.random()}`)
+    const caseData = await memoryDB.createCase(user.id, 'Immutable terminal')
+    const { run } = await memoryDB.createAgentRun({ caseId: caseData.id, task: 'report', inputRevision: 0, skillVersion: 'terminal' })
+    await memoryDB.claimAgentRun(run.id)
+    await memoryDB.updateAgentRun(run.id, { status, output: { original: true } })
+    const before = JSON.stringify(await memoryDB.findAgentRun(run.id))
+    const eventsBefore = JSON.stringify(await memoryDB.getRunEvents(user.id, caseData.id, run.id))
+    for (const next of ['queued', 'running', 'succeeded', 'failed', 'stale', 'cancelled'] as const) {
+      await assert.rejects(memoryDB.updateAgentRun(run.id, { status: next, output: { overwritten: true }, safeErrorCode: 'LATE_FAILURE' }), /INVALID_AGENT_RUN_TRANSITION/)
+    }
+    assert.equal(JSON.stringify(await memoryDB.findAgentRun(run.id)), before)
+    assert.equal(JSON.stringify(await memoryDB.getRunEvents(user.id, caseData.id, run.id)), eventsBefore)
+  })
+}
+
+test('memory revision changes serialize with creation and stale creation records no run event', async () => {
+  const user = await memoryDB.createUser(`revision-race-${Math.random()}`)
+  const caseData = await memoryDB.createCase(user.id, 'Revision race')
+  const input = { caseId: caseData.id, task: 'report', inputRevision: 0, skillVersion: 'revision-race' }
+  const change = memoryDB.persistConfirmedFacts(user.id, caseData.id, [{ key: 'location', label: '地点', value: '杭州', source: 'user_text' }])
+  const results = await Promise.allSettled([change, memoryDB.createAgentRun(input)])
+  assert.equal(results[0].status, 'fulfilled')
+  assert.equal(results[1].status, 'rejected')
+  if (results[1].status === 'rejected') assert.match(results[1].reason.message, /STALE_INPUT_REVISION/)
+  assert.equal(await memoryDB.findLatestReportRun(caseData.id, 0), null)
+  const current = await memoryDB.createAgentRun({ ...input, inputRevision: 1 })
+  assert.equal(current.created, true)
+  assert.deepEqual((await memoryDB.getRunEvents(user.id, caseData.id, current.run.id))?.map(event => event.status), ['queued'])
+})
+
 test('successful run publishes one revision-bound report', async () => {
   const user = await memoryDB.createUser(`harness-report-user-${Date.now()}`)
   const caseData = await memoryDB.createCase(user.id, 'Harness report')

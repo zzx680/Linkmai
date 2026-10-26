@@ -10,6 +10,9 @@
   min-height: 100vh;
   box-sizing: border-box;
   padding: 48rpx 32rpx 190rpx;
+  // The floating tab bar includes the device safe area in its fixed height.
+  padding-bottom: calc(190rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(190rpx + env(safe-area-inset-bottom));
   background-color: #F2F2F7;
   background-image:
     radial-gradient(ellipse at 100% 4%, rgba(169, 207, 255, .6), rgba(169, 207, 255, 0) 58%),
@@ -276,6 +279,16 @@
   font-weight: $font-weight-semibold;
 }
 
+.workbench-card-continue_materials {
+  .workbench-card-header { gap: 12rpx; }
+  .workbench-icon {
+    width: 28rpx;
+    height: $font-size-sm * $line-height-normal;
+    border-radius: 0;
+  }
+  .status-pill { padding: 0; }
+}
+
 .workbench-card-view-report .status-pill,
 .workbench-card-continue-case .status-pill {
   background: #FFFFFF;
@@ -306,7 +319,6 @@
 .progress-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 32rpx;
   color: $color-text-secondary;
   font-size: $font-size-xs;
 }
@@ -357,23 +369,28 @@
   opacity: .6;
 }
 
-.summary-section,
-.quick-section {
+.summary-section {
   @include health-card;
   margin-top: 40rpx;
   padding: 32rpx;
 
   .section-label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
     margin: 0 -32rpx;
     padding: 0 32rpx 24rpx;
     border-bottom: 1rpx solid #E5E5EA;
   }
 }
 
+.workbench-card-continue_materials .status-pill,
 .summary-section .section-label,
-.quick-section .section-label {
+.case-page .home-card-label {
   color: #000000;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
 }
 
 .case-summary {
@@ -409,40 +426,24 @@
   font-size: $font-size-xs;
 }
 
-.summary-link {
+.summary-plan-status {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-  margin-top: 16rpx;
-  padding: 22rpx 0 0;
-  border-top: 1rpx solid #E5E5EA;
-  color: $color-brand-primary;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-medium;
-}
-
-.quick-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16rpx;
-  margin-top: 16rpx;
-}
-
-.quick-item {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12rpx;
-  min-height: 136rpx;
-  padding: 16rpx 8rpx;
-  border: 1rpx solid transparent;
-  border-radius: 32rpx;
-  color: $color-text-primary;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-  text-align: center;
+  gap: 6rpx;
+
+  .summary-value { color: $color-brand-primary; }
+}
+
+.summary-plan-pressed {
+  opacity: .65;
+}
+
+.summary-progress {
+  box-sizing: border-box;
+  margin-top: 16rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #E5E5EA;
 }
 
 .loading-page .skeleton-identity {

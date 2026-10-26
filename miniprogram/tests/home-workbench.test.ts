@@ -2,6 +2,10 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { createRequire } from 'node:module'
+import vm from 'node:vm'
+import React from 'react'
+import ts from 'typescript'
 import sharp from 'sharp'
 import type { Case, Material } from '../src/services/api'
 import { getCaseNextStep, getHomeMode, getHomeStepDetail, getJourneyStep } from '../src/pages/case/home-state'
@@ -11,6 +15,53 @@ const caseStylesSource = readFileSync(path.resolve(__dirname, '../src/pages/case
 const journeySource = readFileSync(path.resolve(__dirname, '../src/components/CaseJourney.tsx'), 'utf8')
 const casePageConfigSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.config.ts'), 'utf8')
 const shareCoverPath = path.resolve(__dirname, '../src/assets/share/home-card.png')
+
+function clickHomePrimaryAction(currentCase: Case, target = 'primary') {
+  const pagePath = path.resolve(__dirname, '../src/pages/case/index.tsx')
+  const localRequire = createRequire(pagePath)
+  const navigations: string[] = []
+  const state = {
+    user: { nickname: '测试用户' }, isLoggedIn: true,
+    currentCase, materials: [], conversationState: 'collecting',
+  }
+  const mocks: Record<string, unknown> = {
+    react: { useMemo: (factory: () => unknown) => factory(), useState: (initial: unknown) => [initial, () => {}] },
+    '@tarojs/components': { View: 'div', Text: 'span', Button: 'button' },
+    '@tarojs/taro': {
+      useDidShow() {}, useShareAppMessage() {},
+      navigateTo: ({ url }: { url: string }) => navigations.push(url),
+      switchTab: ({ url }: { url: string }) => navigations.push(url),
+    },
+    '../../store': { useAppStore: () => state },
+    '../../hooks/useCasePayment': { useCasePayment: () => ({ isPaying: false }) },
+    '../../components': { Icon: () => null },
+    '../../components/CaseJourney': { __esModule: true, default: () => null },
+    '../../components/OnboardingGuide': { __esModule: true, default: () => null },
+    '../../components/OnboardingGuide/progress': {},
+    '../../custom-tab-bar/navigation': {},
+    '../../config/env': { IS_H5: false },
+  }
+  const module = { exports: {} as { default: () => React.ReactElement } }
+  vm.runInNewContext(ts.transpileModule(casePageSource, {
+    compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
+  }).outputText, {
+    module, exports: module.exports,
+    require(id: string) {
+      if (Object.hasOwn(mocks, id)) return mocks[id]
+      if (/\.(scss|png)$/.test(id)) return {}
+      return localRequire(id)
+    },
+  }, { filename: pagePath })
+  function findPrimary(node: React.ReactNode): React.ReactElement<any> | undefined {
+    if (!React.isValidElement<any>(node)) return
+    if (target === 'primary' ? node.props.id === 'guide-create-case' : node.props.className === 'summary-item summary-plan') return node
+    return React.Children.toArray(node.props.children).map(findPrimary).find(Boolean)
+  }
+  const button = findPrimary(module.exports.default())
+  assert.ok(button, 'home primary action must be rendered')
+  button.props.onClick()
+  return navigations
+}
 
 function makeCase(overrides: Partial<Case> = {}): Case {
   return {
@@ -102,6 +153,13 @@ describe('home workbench state', () => {
     assert.equal(getCaseNextStep({ currentCase: makeCase(), materials: [makeMaterial()], conversationState: 'confirming' }), 'confirm_materials')
   })
 
+  it('opens the current case materials from continue-upload and confirmation actions', () => {
+    assert.deepEqual(clickHomePrimaryAction(makeCase()), ['/pages/materials/index?caseId=case-1'])
+    assert.deepEqual(clickHomePrimaryAction(makeCase({ id: 'case-2', nextAction: 'continue_materials' })), ['/pages/materials/index?caseId=case-2'])
+    assert.deepEqual(clickHomePrimaryAction(makeCase({ nextAction: 'confirm_materials' })), ['/pages/materials/index?caseId=case-1'])
+    assert.deepEqual(clickHomePrimaryAction(makeCase({ entitlement: { status: 'refunded', amountCents: 4990, currency: 'CNY' } })), ['/pages/payments/index'])
+  })
+
   it('does not offer payment while the case is processing', () => {
     assert.equal(getCaseNextStep({ currentCase: makeCase({ status: 'processing', nextAction: 'unlock_full_plan' }), materials: [makeMaterial(true)], conversationState: 'ready' }), 'view_processing')
     assert.equal(getCaseNextStep({ currentCase: makeCase(), materials: [makeMaterial(true)], conversationState: 'analyzing' }), 'view_processing')
@@ -112,6 +170,11 @@ describe('home workbench state', () => {
     assert.equal(getCaseNextStep({ currentCase: makeCase({ entitlement: { status: 'pending', amountCents: 4990, currency: 'CNY' } }), materials: [makeMaterial(true)], conversationState: 'ready' }), 'view_payment_status')
     assert.equal(getCaseNextStep({ currentCase: makeCase({ entitlement: { status: 'paid', amountCents: 4990, currency: 'CNY' } }), materials: [makeMaterial(true)], conversationState: 'ready' }), 'continue_case')
     assert.equal(getCaseNextStep({ currentCase: makeCase({ hasReport: true, entitlement: { status: 'paid', amountCents: 4990, currency: 'CNY' } }), materials: [makeMaterial(true)], conversationState: 'ready' }), 'view_report')
+  })
+
+  it('opens materials from the processing summary and reports only after generation', () => {
+    assert.deepEqual(clickHomePrimaryAction(makeCase(), 'summary'), ['/pages/materials/index?caseId=case-1'])
+    assert.deepEqual(clickHomePrimaryAction(makeCase({ hasReport: true }), 'summary'), ['/pages/report/index?caseId=case-1'])
   })
 
   it('falls back to viewing an unknown active case rather than creating or charging', () => {

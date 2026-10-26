@@ -61,6 +61,11 @@ export default function CasePage() {
     Taro.navigateTo({ url: `/pages/materials/index?caseId=${currentCase.id}` })
   }
 
+  const goToReport = () => {
+    if (!currentCase) return
+    Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })
+  }
+
   const handleCreateCase = async () => {
     if (isCreating) return
     setIsCreating(true)
@@ -106,10 +111,10 @@ export default function CasePage() {
       return
     }
     if (nextStep === 'view_report') {
-      Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })
+      goToReport()
       return
     }
-    if (nextStep === 'confirm_materials') {
+    if (nextStep === 'continue_materials' || nextStep === 'confirm_materials') {
       goToMaterials()
       return
     }
@@ -178,9 +183,9 @@ export default function CasePage() {
 
       <View className={`workbench-card workbench-card-stacked${hasCase ? ` workbench-card-${nextStep}` : ''}`}>
         <View className="workbench-card-header">
-          <View className="workbench-icon"><Icon name={isLoggedOut ? 'user-round' : isEmpty ? 'file-text' : nextStep === 'view_report' ? 'circle-check' : 'route'} size={26} color="#2A64F0" /></View>
+          <View className="workbench-icon"><Icon name={isLoggedOut ? 'user-round' : isEmpty ? 'file-text' : nextStep === 'continue_materials' ? 'folder-open' : nextStep === 'view_report' ? 'circle-check' : 'route'} size={nextStep === 'continue_materials' ? 14 : 26} color={nextStep === 'continue_materials' ? '#000000' : '#2A64F0'} /></View>
           <View className="workbench-heading">
-            <View className="status-pill"><Text>{isLoggedOut ? '账户登录' : isEmpty ? '新建案件' : detail.badge}</Text></View>
+            <View className="status-pill"><Text className={nextStep === 'continue_materials' ? 'home-card-label' : undefined}>{isLoggedOut ? '账户登录' : isEmpty ? '新建案件' : detail.badge}</Text></View>
           </View>
         </View>
         <Text className="workbench-title workbench-standalone-title">{isLoggedOut ? '登录后开始处理事故' : isEmpty ? '创建你的第一个案件' : detail.title}</Text>
@@ -189,16 +194,6 @@ export default function CasePage() {
           : isEmpty
             ? '描述经过，上传材料，核对信息'
             : detail.description}</Text>
-
-        {hasCase && (
-          <>
-            <View className="progress-row">
-              <Text>案件进度</Text>
-              <Text>{detail.progress}%</Text>
-            </View>
-            <View className="progress-track"><View className="progress-value" style={{ width: `${detail.progress}%` }} /></View>
-          </>
-        )}
 
         {hasCase && nextStep === 'unlock_full_plan' && (
           <View className="payment-note"><Icon name="shield-check" size={18} color="#2A64F0" /><Text>一次付费，仅解锁当前案件；后续更新不再收费</Text></View>
@@ -214,26 +209,21 @@ export default function CasePage() {
       </View>
 
       {hasCase && (
-        <>
-          <View className="summary-section">
-            <Text className="section-label">案件摘要</Text>
-            <View className="case-summary">
-              <View className="summary-item"><Text className="summary-value">{materials.length || currentCase?.materialCount || 0}</Text><Text className="summary-label">材料份数</Text></View>
-              <View className="summary-item"><Text className="summary-value">{confirmedCount}</Text><Text className="summary-label">已确认材料</Text></View>
-              <View className="summary-item"><Text className="summary-value">{currentCase?.hasReport ? '已生成' : '处理中'}</Text><Text className="summary-label">完整方案</Text></View>
-            </View>
-            <View className="summary-link" onClick={goToMaterials}><Text>查看材料与已整理信息</Text><Icon name="chevron-right" size={18} color="#2A64F0" /></View>
-          </View>
-
-          <View className="quick-section">
-            <Text className="section-label">快捷入口</Text>
-            <View className="quick-grid">
-              <View className="quick-item" onClick={() => Taro.switchTab({ url: '/pages/agent/index' })}><Icon name="messages-square" size={20} color="#AF52DE" /><Text>处理案件</Text></View>
-              <View className="quick-item" onClick={goToMaterials}><Icon name="folder-open" size={20} color="#34C759" /><Text>材料与证据</Text></View>
-              <View className="quick-item" onClick={() => Taro.navigateTo({ url: '/pages/payments/index' })}><Icon name="credit-card" size={20} color="#FF9500" /><Text>案件权益</Text></View>
+        <View className="summary-section">
+          <View className="section-label"><Icon name="file-text" size={14} color="#000000" /><Text className="home-card-label">案件摘要</Text></View>
+          <View className="case-summary">
+            <View className="summary-item"><Text className="summary-value">{materials.length || currentCase?.materialCount || 0}</Text><Text className="summary-label">材料份数</Text></View>
+            <View className="summary-item"><Text className="summary-value">{confirmedCount}</Text><Text className="summary-label">已确认材料</Text></View>
+            <View className="summary-item summary-plan" onClick={currentCase?.hasReport ? goToReport : goToMaterials} role="button" hoverClass="summary-plan-pressed">
+              <View className="summary-plan-status"><Text className="summary-value">{currentCase?.hasReport ? '已生成' : '处理中'}</Text><Icon name="chevron-right" size={14} color="#2A64F0" /></View>
+              <Text className="summary-label">完整方案</Text>
             </View>
           </View>
-        </>
+          <View className="summary-progress">
+            <View className="progress-row"><Text>案件进度</Text><Text>{detail.progress}%</Text></View>
+            <View className="progress-track"><View className="progress-value" style={{ width: `${detail.progress}%` }} /></View>
+          </View>
+        </View>
       )}
       <OnboardingGuide enabled={isEmpty && !isCreating && !isAuthenticating && !authError} scrollPage steps={[
         { id: 'create-case', target: 'guide-create-case', number: '01 / 03', title: '从第一个案件开始', description: '点击这里创建案件，接下来就可以描述经过、整理事故材料', nextLabel: '知道了', targetLabel: '创建第一个案件', onTarget: handlePrimaryAction }

@@ -181,6 +181,9 @@ export async function createCasePaymentOrder(userId: string, caseId: string, ope
     if (['created', 'pending'].includes(reconciled.status)) {
       if (reconciled.expiresAt.getTime() <= Date.now()) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       if (!reconciled.prepayId) throw new Error('PAYMENT_CONFIRMATION_PENDING')
+      // The active provider order has an immutable amount; keep the case entitlement
+      // aligned so a refreshed client does not repeatedly reject the same order.
+      await db.syncPendingEntitlementAmount(userId, caseId, reconciled.amountCents, reconciled.currency)
       return {
         alreadyPaid: false as const,
         orderId: reconciled.id,

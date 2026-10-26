@@ -58,8 +58,10 @@
 }
 
 .user-name {
+  position: relative;
+  left: 2rpx;
   color: $color-text-primary;
-  font-size: $font-size-lg;
+  font-size: $font-size-xl;
   font-weight: $font-weight-bold;
 }
 

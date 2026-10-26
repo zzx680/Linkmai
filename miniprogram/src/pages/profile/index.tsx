@@ -239,11 +239,11 @@ export default function Profile() {
 
       {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text><Button className="auth-retry" loading={isAuthenticating} disabled={isAuthenticating} onClick={() => openTask('login')}>重新连接</Button></View>}
       <View className="stats-grid">
-        <View className="stat-card" onClick={() => openTask('case')}>
+        <View className="stat-card">
           <Text className="stat-value">{caseCount}</Text>
           <Text className="stat-label">进行中案件</Text>
         </View>
-        <View className="stat-card" onClick={() => openTask('materials')}>
+        <View className="stat-card">
           <Text className="stat-value">{materialCount}</Text>
           <Text className="stat-label">已整理材料</Text>
         </View>

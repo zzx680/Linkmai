@@ -145,6 +145,8 @@ test('new and reused prepay responses expose the actual immutable order amount',
   const first = await createCasePaymentOrder(user.id, item.id, user.openid)
   assert.equal(first.amountCents, config.payment.amountCents)
   assert.equal(first.currency, 'CNY')
+  const entitlement = await db.getCaseEntitlement(user.id, item.id)
+  entitlement!.amountCents = first.amountCents! + 1000
   mock.method(paymentProvider, 'queryOrder', async () => ({
     orderNo: first.orderNo!, tradeState: 'NOTPAY', amountCents: first.amountCents!, currency: 'CNY', appId: 'wx-app', mchId: '1234567890',
   }))
@@ -152,6 +154,7 @@ test('new and reused prepay responses expose the actual immutable order amount',
   assert.equal(reused.orderId, first.orderId)
   assert.equal(reused.amountCents, first.amountCents)
   assert.equal(reused.currency, first.currency)
+  assert.equal((await db.getCaseEntitlement(user.id, item.id))?.amountCents, first.amountCents)
 })
 
 test('partial refunds and REFUND query state keep access; verified full refund revokes it', async () => {
