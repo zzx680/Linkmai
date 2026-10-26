@@ -62,7 +62,7 @@ function renderPage(options: {
   const mocks: Record<string, unknown> = {
     '../../components/CaseJourney': journeyModule.exports,
     './OrderHistory': { __esModule: true, default: () => React.createElement('section', null, '全部交易记录') },
-    '@tarojs/components': { View: 'div', Text: 'span' },
+    '@tarojs/components': { View: 'div', Text: 'span', Button: 'button', Image: 'img' },
     '@tarojs/taro': { useDidShow() {} },
     '../../services/api': { getCurrentCase: async () => state.currentCase },
     '../../components': { Icon: () => null },
@@ -76,6 +76,7 @@ function renderPage(options: {
     '../../utils/payment': paymentUtils,
     '../../config/env': { IS_H5: false },
     './index.scss': {},
+    '../../assets/brand/linkmai-chat.png': 'brand.png',
   }
   const module = { exports: {} as { default: React.ComponentType } }
   vm.runInNewContext(compiledPage, {
@@ -93,8 +94,8 @@ describe('payment page rendering', () => {
   it('renders the login and missing-case states', () => {
     assert.match(renderPage({ loggedIn: false, hasCase: false }), /登录后查看付费权益/)
     assert.match(renderPage({ hasCase: false }), /暂无可查看的付费权益/)
-    assert.match(renderPage({ hasCase: false }), /全部交易记录/)
-    assert.doesNotMatch(renderPage({ loggedIn: false }), /全部交易记录/)
+    assert.match(renderPage({ hasCase: false }), /查看订单记录/)
+    assert.doesNotMatch(renderPage({ loggedIn: false }), /查看订单记录/)
   })
 
   it('renders unpaid, pending, paid and refunded actions', () => {
@@ -119,7 +120,7 @@ describe('payment page rendering', () => {
     } })
     assert.match(html, /完整事故处理报告/)
     assert.match(html, /补充材料后更新分析/)
-    assert.doesNotMatch(html, /赔偿项目与金额估算|分步骤处理方案/)
+    assert.doesNotMatch(html, /赔偿项目与依据|分步骤处理方案/)
   })
 
   it('does not advertise unavailable document generation, even with legacy entitlements', () => {

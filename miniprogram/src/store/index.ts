@@ -498,6 +498,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         return false
       }
       if (run.status === 'succeeded') {
+        if (run.confirmationRequired) {
+          set({ reportRunId: null, reportRunStatus: null, reportRunError: null, isGeneratingReport: false })
+          return false
+        }
         const report = await api.getReport(currentCase.id)
         if (isStale(context) || get().reportRunId !== previousRunId) return false
         if (!report || (report.caseId && report.caseId !== currentCase.id)) throw new Error('报告暂不可用')
@@ -547,7 +551,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const result = await api.generateReport(currentCase.id, facts)
       if (isStale(context)) return
       if (isPendingReport(result)) {
-        set({ reportRunId: result.runId, reportRunStatus: result.status, isGeneratingReport: true, currentReport: null })
+        set({ reportRunId: result.runId, reportRunStatus: result.status, isGeneratingReport: ['queued','running'].includes(result.status), currentReport: null })
         return
       }
       const report = 'report' in result ? result.report : result

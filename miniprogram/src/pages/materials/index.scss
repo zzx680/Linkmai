@@ -11,19 +11,11 @@
   @include flex-between;
   gap: $space-3;
   align-items: flex-start;
-  margin-bottom: $space-6;
+  margin-bottom: 0;
+  padding-bottom: $space-6;
+  border-bottom: 1rpx solid $color-border-light;
 
   > view, > taro-view-core { min-width: 0; }
-
-  .eyebrow {
-    display: block;
-    color: $color-brand-primary;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-semibold;
-    letter-spacing: 1rpx;
-    margin-bottom: $space-2;
-    text-transform: uppercase;
-  }
 
   .page-title {
     display: block;
@@ -45,48 +37,10 @@
   }
 }
 
-.notice-card {
-  display: flex;
-  gap: $space-3;
-  padding: $space-4;
-  margin-bottom: $space-8;
-  background: $color-success-bg;
-  border-radius: $radius-lg;
-
-  .notice-icon {
-    width: 40rpx;
-    height: 40rpx;
-    @include flex-center;
-    border-radius: 50%;
-    color: $color-text-inverse;
-    background: $color-success;
-    font-size: $font-size-sm;
-    flex-shrink: 0;
-  }
-
-  .notice-content {
-    flex: 1;
-
-    .notice-title {
-      display: block;
-      color: $color-success;
-      font-size: $font-size-sm;
-      font-weight: $font-weight-semibold;
-      margin-bottom: $space-1;
-    }
-
-    .notice-text {
-      display: block;
-      color: $color-text-secondary;
-      font-size: $font-size-xs;
-      line-height: $line-height-relaxed;
-    }
-  }
-}
-
 .section-heading {
   @include flex-between;
   align-items: flex-end;
+  margin-top: $space-6;
   margin-bottom: $space-3;
 
   .section-title {
@@ -235,7 +189,9 @@
 }
 
 .materials-heading {
-  margin-top: $space-2;
+  margin-top: $space-8;
+  padding-top: $space-6;
+  border-top: 1rpx solid $color-border-light;
 }
 
 .empty-card {

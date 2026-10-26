@@ -25,7 +25,7 @@ function loadChat(h5 = false) {
       if (id === '../../config/env') return { IS_H5: h5 }
       if (id === './labels') return labels
       if (id === '../Icon') return { __esModule: true, default: () => React.createElement('img', { alt: '' }) }
-      if (id === '../ThinkingOrb') return { __esModule: true, default: () => React.createElement('div', { role: 'status', 'aria-label': '灵迈助手正在整理案件信息' }) }
+      if (id === '../ThinkingOrb') return { __esModule: true, default: () => React.createElement('div', { role: 'status', 'aria-label': '正在整理案件信息' }) }
       if (id.endsWith('.scss')) return {}
       return localRequire(id)
     },
@@ -50,6 +50,13 @@ test('native messages retain literal user content and image attachments', () => 
   assert.equal(node.props.content[0].data[0].fileType, 'image')
   assert.equal(node.props.content[1].type, 'text')
   assert.equal(node.props.content[1].data, '<script>hello</script>\n第二行')
+})
+
+test('chat messages do not render an assistant name label', () => {
+  const native = loadChat().AgentChatMessage({ message: { role: 'assistant', content: '已收到' } })
+  assert.equal(native.props.name, '')
+  const h5 = renderToStaticMarkup(loadChat(true).AgentChatMessage({ message: { role: 'assistant', content: '已收到' } }))
+  assert.doesNotMatch(h5, /灵迈助手/)
 })
 
 test('pending replies use the shared thinking orb in native and H5 without rendering empty messages', () => {

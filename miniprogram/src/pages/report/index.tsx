@@ -4,6 +4,8 @@ import Taro, { useDidShow, useDidHide } from '@tarojs/taro'
 import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import CaseJourney from '../../components/CaseJourney'
+import CaseWorkflow from '../../components/CaseWorkflow'
+import { workflowApi } from '../../services/workflow'
 import './index.scss'
 
 function splitParagraphs(value?: string) {
@@ -23,6 +25,8 @@ export default function Report() {
     generateReport
   } = useAppStore()
   const [error, setError] = useState('')
+  const [harnessEnabled, setHarnessEnabled] = useState(false)
+  useEffect(() => { let active = true; void workflowApi.enabled().then(enabled => { if (active) setHarnessEnabled(enabled) }).catch(() => undefined); return () => { active = false } }, [])
   const refreshProgress = () => { setError(''); setPollCycle(value => value + 1) }
 
   const [visible, setVisible] = useState(true)
@@ -35,7 +39,7 @@ export default function Report() {
   }, [currentCase?.id])
 
   useEffect(() => {
-    if (!visible || !currentCase || currentReport) return
+    if (harnessEnabled || !visible || !currentCase || currentReport) return
     let active = true
     let timer: ReturnType<typeof setTimeout>
     let attempts = 0
@@ -55,7 +59,7 @@ export default function Report() {
     }
     void poll()
     return () => { active = false; clearTimeout(timer) }
-  }, [currentCase?.id, reportRunId, currentReport, refreshReportRun, visible, pollCycle])
+  }, [currentCase?.id, reportRunId, currentReport, refreshReportRun, visible, pollCycle, harnessEnabled])
 
   const handleGenerate = async () => {
     setError('')
@@ -70,6 +74,8 @@ export default function Report() {
   const goHome = () => Taro.switchTab({ url: '/pages/case/index' })
   const confirmedMaterials = materials.filter(material => material.confirmed)
   const confirmedFieldsCount = confirmedMaterials.reduce((total, material) => total + material.fields.length, 0)
+
+  if (harnessEnabled && currentCase && currentCase.entitlement?.status === 'paid') return <CaseWorkflow key={currentCase.id} caseId={currentCase.id} />
 
   if (isGeneratingReport) {
     return (

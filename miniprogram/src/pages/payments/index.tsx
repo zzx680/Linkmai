@@ -1,4 +1,4 @@
-import { Text, View } from '@tarojs/components'
+import { Button, Image, Text, View } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useEffect, useRef, useState } from 'react'
 import { getCurrentCase } from '../../services/api'
@@ -8,11 +8,12 @@ import { useAppStore } from '../../store'
 import { entitlementLabel, formatPaymentPrice } from '../../utils/payment'
 import { IS_H5 } from '../../config/env'
 import OrderHistory from './OrderHistory'
+import brandMark from '../../assets/brand/linkmai-chat.png'
 import './index.scss'
 
 const FEATURE_DETAILS = {
   fullReport: { icon: 'chart-no-axes-combined', title: '完整事故处理报告', description: '汇总责任、材料与关键结论' },
-  compensationEstimate: { icon: 'scale', title: '赔偿项目与金额估算', description: '梳理可主张项目和计算依据' },
+  compensationEstimate: { icon: 'scale', title: '赔偿项目与依据', description: '梳理相关项目、凭证和规则参考' },
   actionPlan: { icon: 'route', title: '分步骤处理方案', description: '按当前进展给出下一步行动建议' },
   rerunAfterMaterialUpdate: { icon: 'loader-circle', title: '补充材料后更新分析', description: '材料变化后重新整理完整方案' }
 } as const
@@ -117,17 +118,16 @@ function CasePaymentPanel() {
   return (
     <View className="case-payment-panel">
       <View className="payments-header">
-        <Text className="payments-eyebrow">当前案件权益</Text>
-        <Text className="payments-title">解锁完整处理方案</Text>
-        <Text className="payments-description">一次付费，获得当前案件从分析到行动的完整支持</Text>
+        <View className="membership-emblem"><Image className="membership-logo" src={brandMark} mode="aspectFit" /></View>
+        <Text className="payments-eyebrow">灵迈 · 案件方案</Text>
+        <Text className="payments-title">让下一步，更有依据</Text>
+        <Text className="payments-description">整理事故信息，找到清晰的处理方向</Text>
       </View>
 
       <View className={`plan-card plan-card-${status}`}>
-        <View className="plan-glow plan-glow-one" />
-        <View className="plan-glow plan-glow-two" />
         <View className="plan-card-content">
           <View className="plan-topline">
-            <Text className="plan-kicker">当前案件</Text>
+            <Text className="plan-kicker">单次案件方案</Text>
             <View className="status-pill">
               <Icon name={isPaid ? 'check' : isRefunded ? 'undo-2' : 'clock-3'} size={14} color="#111827" />
               <Text>{entitlementLabel(status)}</Text>
@@ -139,7 +139,7 @@ function CasePaymentPanel() {
               <Text className="plan-price-label">一次性解锁</Text>
               <Text className="plan-price">{price || '金额待确认'}</Text>
             </View>
-            <View className="plan-mark"><Icon name="shield-check" size={28} color="#FFFFFF" /></View>
+            <View className="plan-mark"><Icon name={isPaid ? 'circle-check' : 'shield-check'} size={30} color="#FFFFFF" /></View>
           </View>
           <Text className="plan-caption">仅限当前案件 · 不自动续费</Text>
         </View>
@@ -156,18 +156,8 @@ function CasePaymentPanel() {
         </View>
       )}
 
-      <View className="action-panel">
-        {canPay && <View className={`primary-button${isPaying ? ' button-disabled' : ''}`} onClick={handlePayment}><Text>{isPaying ? '正在准备支付...' : `解锁当前案件 · ${price}`}</Text></View>}
-        {isPending && <>
-          {price && <View className={`primary-button${isPaying || isLoading ? ' button-disabled' : ''}`} onClick={() => { if (!isPaying && !isLoading) handlePayment() }}><Text>{isPaying ? '正在核对原订单...' : `继续支付 · ${price}`}</Text></View>}
-          <View className={`secondary-button${isPaying || isLoading ? ' button-disabled' : ''}`} onClick={refresh}><Text>{isPaying || isLoading ? '正在确认...' : '刷新支付结果'}</Text></View>
-        </>}
-        {isPaid && <View className="primary-button" onClick={goNext}><Text>{currentCase.hasReport ? '查看完整方案' : '继续处理案件'}</Text></View>}
-        {(isRefunded || !price) && <View className="secondary-button" onClick={refresh}><Text>重新加载</Text></View>}
-      </View>
-
       {features.length > 0 && <View className="features-section">
-        <Text className="section-title">完整方案包含</Text>
+        <View className="benefits-heading"><View className="benefits-heading-line" /><Text className="section-title">完整方案包含</Text><View className="benefits-heading-line" /></View>
         <View className="benefits-card">
           {features.map(feature => (
             <View className="benefit-item" key={feature.title}>
@@ -176,6 +166,7 @@ function CasePaymentPanel() {
                 <Text className="benefit-title">{feature.title}</Text>
                 <Text className="benefit-description">{feature.description}</Text>
               </View>
+              <View className="benefit-check"><Text>✓</Text></View>
             </View>
           ))}
         </View>
@@ -188,14 +179,34 @@ function CasePaymentPanel() {
           <Text className="explanation-text">一次付费仅解锁当前案件，不会自动续费，也不会为其他案件自动扣款。</Text>
         </View>
       </View>
+      <Text className="payment-disclaimer">AI 辅助整理与分析，不替代专业法律意见</Text>
+      <View className="action-panel payment-dock">
+        {canPay && <Button className={`primary-button${isPaying ? ' button-disabled' : ''}`} disabled={isPaying} onClick={handlePayment}><Text>{isPaying ? '正在准备支付...' : `解锁当前案件 · ${price}`}</Text></Button>}
+        {isPending && <>
+          {price && <Button className={`primary-button${isPaying || isLoading ? ' button-disabled' : ''}`} disabled={isPaying || isLoading} onClick={() => { if (!isPaying && !isLoading) handlePayment() }}><Text>{isPaying ? '正在核对原订单...' : `继续支付 · ${price}`}</Text></Button>}
+          <Button className={`secondary-button${isPaying || isLoading ? ' button-disabled' : ''}`} disabled={isPaying || isLoading} onClick={refresh}><Text>{isPaying || isLoading ? '正在确认...' : '刷新支付结果'}</Text></Button>
+        </>}
+        {isPaid && <Button className="primary-button" onClick={goNext}><Text>{currentCase.hasReport ? '查看完整方案' : '继续处理案件'}</Text></Button>}
+        {(isRefunded || !price) && <Button className="secondary-button" onClick={refresh}><Text>重新加载</Text></Button>}
+        <Text className="payment-dock-caption">按案件一次付费 · 不自动续费</Text>
+      </View>
+
     </View>
   )
 }
 
 export default function PaymentsPage() {
   const { isLoggedIn, token } = useAppStore()
+  const [historyOpen, setHistoryOpen] = useState(false)
+  useEffect(() => { setHistoryOpen(false) }, [token])
   return <View className="payments-page">
-    {isLoggedIn && <OrderHistory key={token} />}
     <CasePaymentPanel />
+    {isLoggedIn && <View className="payment-history">
+      <Button className="history-toggle" aria-expanded={historyOpen} onClick={() => setHistoryOpen(!historyOpen)}>
+        <Text>{historyOpen ? '收起订单记录' : '查看订单记录'}</Text>
+        <Icon name="chevron-right" size={14} color="#6B7280" className={historyOpen ? 'history-chevron history-chevron-open' : 'history-chevron'} />
+      </Button>
+      {historyOpen && <OrderHistory key={token} />}
+    </View>}
   </View>
 }

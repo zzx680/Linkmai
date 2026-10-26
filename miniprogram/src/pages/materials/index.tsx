@@ -101,19 +101,10 @@ export default function Materials() {
     <View className="materials-page">
       <View className="page-header">
         <View>
-          <Text className="eyebrow">{currentCase ? `案件 #${currentCase.id.slice(0, 8)}` : '材料工作区'}</Text>
           <Text className="page-title">案件材料</Text>
-          <Text className="page-description">上传、核对并确认 AI 将用于分析的事实材料</Text>
+          <Text className="page-description">识别结果来自图片内容，低置信度字段请结合原件核对。确认信息不会自动构成法律结论。</Text>
         </View>
         <View className="count-badge"><Text>{materials.length} 份</Text></View>
-      </View>
-
-      <View className="notice-card">
-        <Icon name="circle-check" size={24} color="#2A64F0" />
-        <View className="notice-content">
-          <Text className="notice-title">先确认，再进入分析</Text>
-          <Text className="notice-text">识别结果来自图片内容，低置信度字段请结合原件核对 确认信息不会自动构成法律结论</Text>
-        </View>
       </View>
 
       <View className="section-heading">

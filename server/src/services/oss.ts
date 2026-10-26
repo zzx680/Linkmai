@@ -124,10 +124,10 @@ function getMimeType(fileType: FileType): string {
 /**
  * 生成临时访问签名 URL（1小时有效）
  */
-export async function getSignedUrl(objectName: string): Promise<string> {
+export async function getSignedUrl(objectName: string, expires = 3600): Promise<string> {
   const client = getClient()
   return client.signatureUrl(objectName, {
-    expires: 3600,
+    expires,
   })
 }
 

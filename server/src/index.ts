@@ -16,6 +16,10 @@ import { materialsRouter } from './routes/materials'
 import paymentOrderRoutes, { casePaymentRouter, paymentNotificationHandler, testPaymentRouter } from './routes/payments'
 import { config, validateRuntimeConfig } from './config'
 import { createRateLimiter, requestContext, securityHeaders } from './middleware/security'
+import path from 'node:path'
+import { caseWorkflowRouter, reviewRouter, harnessEnabled } from './harness/routes'
+import { startHarnessWorker } from './harness/worker'
+import { reviewerSecret } from './harness/auth'
 
 // 环境变量由入口导入 dotenv/config
 
@@ -28,12 +32,12 @@ app.use(requestContext)
 app.use(securityHeaders)
 
 // 中间件
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || config.corsOrigins.includes(origin)) return callback(null, true)
-    callback(new Error('CORS_ORIGIN_NOT_ALLOWED'))
-  },
-  credentials: true,
+app.use(cors<Request>((req, callback) => {
+  const origin = req.get('origin')
+  // The review desk is served by this backend and posts back to the same origin.
+  const sameOrigin = origin === `${req.protocol}://${req.get('host')}`
+  const allowed = !origin || sameOrigin || config.corsOrigins.includes(origin)
+  callback(allowed ? null : new Error('CORS_ORIGIN_NOT_ALLOWED'), { origin: true, credentials: true })
 }))
 
 // Public, signature-verified payment callback must receive the untouched body.
@@ -61,7 +65,7 @@ app.get('/api/health', async (req, res) => {
   res.status(databaseOk ? 200 : 503).json({
     status: databaseOk ? 'ok' : 'error',
     database: databaseOk ? 'ok' : 'unavailable',
-    features: { paymentOrderHistory: true, contextualAgent: true },
+    features: { paymentOrderHistory: true, contextualAgent: true, caseHarness: process.env.HARNESS_ENABLED === 'true' },
     timestamp: new Date().toISOString(),
   })
 })
@@ -83,9 +87,12 @@ app.use('/api/privacy', authMiddleware, createRateLimiter({ windowMs: 60_000, ma
 app.use('/api/reports', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 10 }), reportRoutes)
 app.use('/api/materials', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 20 }), materialsRouter)
 app.use('/api/upload', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 30 }), uploadRoutes)
+app.use('/api/workflow', authMiddleware, createRateLimiter({ windowMs: 60_000, max: 90 }), caseWorkflowRouter)
+app.use('/api/review', createRateLimiter({ windowMs: 60_000, max: 90 }), reviewRouter)
+app.use('/review', harnessEnabled, express.static(path.resolve(__dirname, '../public/review')))
 
 // 错误处理
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof multer.MulterError) {
     const message = err.code === 'LIMIT_FILE_SIZE' ? '文件大小超过限制' : '上传参数无效'
     return res.status(400).json({ error: 'InvalidUpload', message })
@@ -111,19 +118,27 @@ app.use((req, res) => {
 // 启动服务
 async function start() {
   validateRuntimeConfig()
+  if (process.env.HARNESS_ENABLED === 'true') reviewerSecret()
   const databaseOk = await db.ping()
   if (!databaseOk) {
     throw new Error('数据库连接失败')
   }
 
   console.log('✅ 数据库连接成功')
-  app.listen(PORT, config.host, () => {
+  const stopWorker = startHarnessWorker()
+  const server = app.listen(PORT, config.host, () => {
     console.log(`✅ 灵迈后端服务启动成功`)
     console.log(`📡 监听地址: ${config.host}:${PORT}`)
     console.log(`🌍 环境: ${process.env.NODE_ENV}`)
     console.log(`💾 数据库: ${process.env.DB_TYPE || 'memory'}`)
     console.log(`🪣 OSS Bucket: ${process.env.ALIYUN_OSS_BUCKET || '未配置'}`)
   })
+  const shutdown = () => {
+    stopWorker()
+    server.close()
+  }
+  process.once('SIGTERM', shutdown)
+  process.once('SIGINT', shutdown)
 }
 
 start().catch((err) => {

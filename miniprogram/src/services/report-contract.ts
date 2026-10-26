@@ -13,13 +13,14 @@ export interface ReportEnvelope<T extends ReportContract = ReportContract> {
 
 export interface PendingReport {
   runId: string
-  status: 'queued' | 'running'
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'stale' | 'cancelled'
+  confirmationRequired?: boolean
 }
 
 export type ReportGenerationResult<T extends ReportContract = ReportContract> = ReportEnvelope<T> | PendingReport
 
 export function isPendingReport(result: ReportGenerationResult): result is PendingReport {
-  return 'runId' in result && (result.status === 'queued' || result.status === 'running')
+  return 'runId' in result && (result.confirmationRequired === true || result.status === 'queued' || result.status === 'running')
 }
 
 export function readReportEnvelope<T extends ReportContract>(result: ReportEnvelope<T>): T {

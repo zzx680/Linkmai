@@ -8,8 +8,8 @@ import { z } from 'zod'
  */
 const GetPresignRequestSchema = z.object({
   filename: z.string().min(1).max(255),
-  fileType: z.nativeEnum(FileType),
-  caseId: z.string().uuid(),
+  fileType: z.enum(FileType),
+  caseId: z.uuid(),
 })
 
 /**
@@ -45,7 +45,7 @@ export async function getPresignUrl(req: Request, res: Response) {
       return res.status(400).json({
         error: 'ValidationError',
         message: '参数格式错误',
-        details: error.errors,
+        details: error.issues,
       })
     }
 
@@ -72,7 +72,7 @@ export async function confirmUpload(req: Request, res: Response) {
       })
     }
 
-    const { objectKey, caseId, fileType } = req.body
+    const { objectKey } = req.body
 
     // TODO: 创建 Artifact 记录
     // TODO: 触发异步处理任务（OCR/分类）

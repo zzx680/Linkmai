@@ -67,8 +67,7 @@ export default function ThinkingOrb() {
     return () => { disposed = true; stop(); clearTimeout(retry) }
   }, [canvasId, visible])
 
-  return <View className="thinking-indicator" role="status" aria-live="polite" aria-label="灵迈助手正在整理案件信息">
-    <Text className="thinking-name">灵迈助手</Text>
+  return <View className="thinking-indicator" role="status" aria-live="polite" aria-label="正在整理案件信息">
     <View className="thinking-row">
       <View className="thinking-orb" aria-hidden="true">
         {IS_H5 ? <canvas className="thinking-canvas" ref={webCanvas} /> : <Canvas id={canvasId} type="2d" className="thinking-canvas" />}

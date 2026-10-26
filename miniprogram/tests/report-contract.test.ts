@@ -20,6 +20,7 @@ describe('report response contract', () => {
     assert.equal(isPendingReport({ runId: 'run-1', status: 'queued' }), true)
     assert.equal(isPendingReport({ runId: 'run-1', status: 'running' }), true)
     assert.equal(isPendingReport({ report }), false)
+    assert.equal(isPendingReport({ runId: 'bundle-1', status: 'succeeded', confirmationRequired: true }), true)
   })
 
   it('does not silently accept the former direct report body', () => {

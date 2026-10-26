@@ -24,6 +24,8 @@ function render(page: string, state: Record<string, unknown>) {
       if (id === '../../store') return { useAppStore: Object.assign(() => state, { getState: () => state }) }
       if (id === '../../content/privacy') return privacyContent
       if (id === '../../components') return { Icon: () => null }
+      if (id === '../../services/workflow') return { workflowApi: { enabled: async () => false } }
+      if (id === '../../components/CaseWorkflow') return { default: () => null, __esModule: true }
       if (id === '../../components/CaseJourney') return { default: () => null, __esModule: true }
       return localRequire(id)
     }

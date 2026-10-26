@@ -33,7 +33,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
         chat-id={message?.id || 'pending'}
         role={role}
         placement={role === 'user' ? 'right' : 'left'}
-        name={role === 'assistant' ? '灵迈助手' : ''}
+        name=""
         variant="base"
         status="complete"
         animation="dots"
@@ -43,7 +43,6 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
   }
   return (
     <View className={`chat-preview-message chat-preview-message-${role}`}>
-      {role === 'assistant' && <Text className="chat-preview-name">灵迈助手</Text>}
       <View className="chat-preview-content">
         {message?.images?.map(url => <Image key={url} src={url} mode="aspectFill" className="chat-preview-image" />)}
         <Text selectable>{text}</Text>

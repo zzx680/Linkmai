@@ -32,17 +32,6 @@
 .materials-page .field-input { min-height: 88rpx; font-size: 32rpx; }
 .materials-page .text-action { min-height: 96rpx; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
 
-.payments-page .payments-header { display: none; }
-.payments-page .plan-card { min-height: 320rpx; background: #fff; border: 1rpx solid $color-border-light; box-shadow: none; }
-.payments-page .plan-title, .payments-page .plan-price, .payments-page .plan-currency, .payments-page .plan-name { color: $color-text-primary; }
-.payments-page .plan-subtitle, .payments-page .plan-description, .payments-page .plan-unit, .payments-page .plan-footnote, .payments-page .plan-kicker, .payments-page .plan-price-label, .payments-page .plan-caption { color: $color-text-secondary; }
-.payments-page .status-pill { color: $color-brand-primary; background: $color-brand-light; }
-.payments-page .plan-mark { background: $color-brand-primary; border: 0; backdrop-filter: none; }
-.payments-page .plan-price-row { margin-top: 32rpx; }
-.payments-page .benefits-section { padding: 32rpx 0; margin-top: 32rpx; border-top: 1rpx solid $color-border-medium; }
-.payments-page .benefit-icon { background: $color-brand-light; border-radius: $radius-md; }
-.payments-page .benefit-item { padding: 24rpx 0; border-bottom: 1rpx solid $color-border-light; }
-
 .report-page .report-scroll { height: auto; }
 .report-page .page-header { padding-bottom: 24rpx; border-bottom: 1rpx solid $color-border-medium; }
 .report-page .report-section { border-radius: 0; border: 0; border-top: 1rpx solid $color-border-light; box-shadow: none; padding: 32rpx 0; background: transparent; }

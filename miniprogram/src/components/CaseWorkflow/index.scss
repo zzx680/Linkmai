@@ -1,0 +1,27 @@
+@use '../../styles/design-tokens.scss' as *;
+.case-workflow {
+  padding: 40rpx 32rpx 96rpx; background: $color-bg-base; color: $color-text-primary;
+  .workflow-heading { margin: 8rpx 0 40rpx; }
+  .workflow-eyebrow { display: block; color: $color-brand-primary; font-size: 24rpx; letter-spacing: 3rpx; }
+  .workflow-title { display: block; font-size: 44rpx; font-weight: 600; margin: 14rpx 0 20rpx; }
+  .workflow-description, .workflow-muted { display: block; color: $color-text-secondary; font-size: 25rpx; line-height: 1.8; }
+  .workflow-version { display: block; color: $color-brand-primary; font-size: 24rpx; margin-top: 24rpx; }
+  .workflow-card { background: #fff; border-radius: 24rpx; padding: 32rpx; margin-bottom: 24rpx; border: 1rpx solid $color-border-light; }
+  .workflow-card-title { display: block; font-size: 32rpx; font-weight: 600; margin-bottom: 24rpx; }
+  .workflow-picker, .workflow-input { min-height: 80rpx; padding: 16rpx; box-sizing: border-box; background: #f5f7fa; border-radius: 12rpx; margin-bottom: 16rpx; font-size: 26rpx; line-height: 1.6; }
+  .workflow-input { width: 100%; height: 88rpx; }
+  .workflow-button { display: flex; justify-content: center; align-items: center; min-height: 84rpx; padding: 12rpx 20rpx; margin-top: 24rpx; border-radius: 16rpx; background: $color-brand-primary; color: #fff; font-size: 27rpx; line-height: 1.6; }
+  .workflow-button.secondary { background: $color-brand-light; color: $color-brand-primary; }
+  .is-busy { opacity: .6; }
+  .workflow-row { padding: 22rpx 0; border-bottom: 1rpx solid $color-border-light; }
+  .workflow-label { display: block; font-size: 24rpx; color: $color-text-secondary; margin-bottom: 10rpx; }
+  .workflow-body { display: block; font-size: 27rpx; line-height: 1.9; margin-bottom: 12rpx; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .workflow-actions { display: flex; gap: 40rpx; color: $color-brand-primary; margin-top: 16rpx; }
+  .workflow-conflict, .workflow-review { padding: 24rpx; margin-top: 20rpx; border-radius: 16rpx; background: #f5f7fa; }
+  .workflow-choice { display: block; padding: 20rpx 0; color: $color-brand-primary; }
+  .workflow-error { display: block; padding: 24rpx; margin-bottom: 24rpx; border-radius: 16rpx; background: #fff2ec; color: #954620; line-height: 1.7; }
+  .workflow-total { display: block; margin-top: 28rpx; font-size: 32rpx; font-weight: 600; }
+  .workflow-document { padding-top: 40rpx; margin-top: 32rpx; border-top: 1rpx solid $color-border-light; }
+  .workflow-document-title { display: block; font-size: 30rpx; font-weight: 600; margin-bottom: 16rpx; }
+  .workflow-section-title { display: block; font-weight: 600; margin: 24rpx 0 14rpx; }
+}

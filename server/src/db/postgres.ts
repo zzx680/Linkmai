@@ -74,19 +74,6 @@ function toEntitlement(row: any) {
   }
 }
 
-function toConversation(row: any) {
-  if (!row) return null
-  return {
-    id: row.id,
-    userId: row.user_id,
-    caseId: row.case_id,
-    status: row.status,
-    agentState: row.agent_state,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }
-}
-
 function toAgentRun(row: any) {
   if (!row) return null
   return {
@@ -1053,7 +1040,7 @@ export const db = {
     }
   },
 
-  async upsertLegalCorpus(documents: LegalDocument[], sections: LegalSection[]): Promise<void> {
+  async upsertLegalCorpus(documents: LegalDocument[], sections: LegalSection[], options?: { insertOnly?: boolean }): Promise<void> {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
@@ -1063,12 +1050,12 @@ export const db = {
              id,title,authority,document_type,document_number,jurisdiction,publish_date,effective_from,effective_to,
              status,review_status,source_url,source_hash,version,supersedes_id,updated_at
            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,NOW())
-           ON CONFLICT (id) DO UPDATE SET
+           ON CONFLICT (id) ${options?.insertOnly ? 'DO NOTHING' : `DO UPDATE SET
              title=EXCLUDED.title,authority=EXCLUDED.authority,document_type=EXCLUDED.document_type,
              document_number=EXCLUDED.document_number,jurisdiction=EXCLUDED.jurisdiction,publish_date=EXCLUDED.publish_date,
              effective_from=EXCLUDED.effective_from,effective_to=EXCLUDED.effective_to,status=EXCLUDED.status,
              review_status=EXCLUDED.review_status,source_url=EXCLUDED.source_url,source_hash=EXCLUDED.source_hash,
-             version=EXCLUDED.version,supersedes_id=EXCLUDED.supersedes_id,updated_at=NOW()`,
+             version=EXCLUDED.version,supersedes_id=EXCLUDED.supersedes_id,updated_at=NOW()`}`,
           [document.id, document.title, document.authority, document.documentType, document.documentNumber || null,
             document.jurisdiction, document.publishDate || null, document.effectiveFrom, document.effectiveTo || null,
             document.status, document.reviewStatus, document.sourceUrl, document.sourceHash, document.version, document.supersedesId || null]
@@ -1078,9 +1065,9 @@ export const db = {
         await client.query(
           `INSERT INTO legal_sections (id,document_id,legal_ref_id,article_number,content,keywords,content_hash,search_vector,updated_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,to_tsvector('simple', $8),NOW())
-           ON CONFLICT (legal_ref_id) DO UPDATE SET
+           ON CONFLICT (legal_ref_id) ${options?.insertOnly ? 'DO NOTHING' : `DO UPDATE SET
              document_id=EXCLUDED.document_id,article_number=EXCLUDED.article_number,content=EXCLUDED.content,
-             keywords=EXCLUDED.keywords,content_hash=EXCLUDED.content_hash,search_vector=EXCLUDED.search_vector,updated_at=NOW()`,
+             keywords=EXCLUDED.keywords,content_hash=EXCLUDED.content_hash,search_vector=EXCLUDED.search_vector,updated_at=NOW()`}`,
           [section.id, section.documentId, section.legalRefId, section.articleNumber, section.content, section.keywords, section.contentHash,
             `${section.articleNumber} ${section.content} ${section.keywords.join(' ')}`]
         )
@@ -1116,9 +1103,9 @@ export const db = {
     return rankLegalReferences(result.rows.map(row => toLegalReference(row)), input)
   },
 
-  async getLegalReferences(legalRefIds: string[]): Promise<LegalReference[]> {
+  async getLegalReferences(legalRefIds: string[], connection: Pool | PoolClient = pool): Promise<LegalReference[]> {
     if (legalRefIds.length === 0) return []
-    const result = await pool.query(
+    const result = await connection.query(
       `SELECT d.*,s.id AS section_id,s.legal_ref_id,s.article_number,s.content,s.keywords,s.content_hash
        FROM legal_sections s JOIN legal_documents d ON d.id=s.document_id
        WHERE s.legal_ref_id=ANY($1::text[])`,

@@ -30,6 +30,11 @@ export function ensureCaseDataConsent(userId: string) {
 export function revokeCaseDataConsent(userId: string) {
   Taro.removeStorageSync(caseDataKey(userId))
   Taro.removeStorageSync(`linkmai.privacy.speech.${userId}`)
+  Taro.removeStorageSync(`linkmai.privacy.review.${userId}`)
+}
+
+export function ensureReviewConsent(userId: string) {
+  return ask(`linkmai.privacy.review.${userId}`, '提交人工复核', '确认后，指定的内部审核律师可查看本案件草稿、相关事实和必要的原始材料，可能涉及身份、医疗等敏感信息。请确认有权提供这些资料。目标处理时间为两天，超时需人工跟进，不会自动批准或向外部机构提交。审核属于辅助服务，涉及就医或法定期限请及时联系相关机构。')
 }
 
 export function ensureSpeechConsent(userId: string) {

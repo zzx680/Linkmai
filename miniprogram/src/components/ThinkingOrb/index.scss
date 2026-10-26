@@ -1,7 +1,6 @@
 @use '../../styles/design-tokens.scss' as *;
 
 .thinking-indicator { padding: 0; }
-.thinking-name { display: block; margin-bottom: 12rpx; color: $color-text-tertiary; font-size: 22rpx; }
 .thinking-row { display: flex; align-items: center; gap: 20rpx; min-height: 64px; }
 .thinking-orb { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
 .thinking-canvas { display: block; width: 64px; height: 64px; }

@@ -7,6 +7,7 @@ import { ensureCoreTrafficLegalCorpus } from '../services/legal-corpus'
 import { CollectedFact } from '../services/agent'
 import { requirePaidEntitlement } from '../services/payment'
 import { materialSnapshot } from '../services/material-snapshot'
+import { harness } from '../harness/service'
 
 const router = Router()
 
@@ -27,6 +28,10 @@ router.post('/generate', async (req, res) => {
     const currentCase = await db.findCaseById(userId, caseId)
     if (!currentCase) {
       return res.status(404).json({ success: false, error: '未找到活跃案件' })
+    }
+    if (process.env.HARNESS_ENABLED === 'true') {
+      const run = await harness.enqueue(userId, currentCase.id)
+      return res.status(202).json({ success: true, data: { ...run, confirmationRequired: true } })
     }
 
     try {
@@ -147,6 +152,9 @@ router.post('/generate', async (req, res) => {
     if (err.message === 'PAYMENT_REQUIRED') {
       return res.status(402).json({ error: 'PAYMENT_REQUIRED', message: '案件权益已变更，请查看付费记录' })
     }
+    if (process.env.HARNESS_ENABLED === 'true' && ['ACCIDENT_DATE_REQUIRED','JURISDICTION_REQUIRED','FACTS_REQUIRED','FACT_CONFLICT','CALCULATOR_NOT_APPROVED'].includes(err.message)) {
+      return res.status(409).json({ success: false, error: '请在案件文书页面补齐并确认信息，计算规则需经审核启用', code: err.message })
+    }
     if (err.message === 'REPORT_STALE' || err.message === 'STALE_INPUT_REVISION') return res.status(409).json({ success: false, error: '材料或案件信息已更新，请重新生成报告' })
     if (err.message === 'LEGAL_ACCIDENT_DATE_REQUIRED') return res.status(400).json({ success: false, error: '请先确认格式为 YYYY-MM-DD 的事故日期' })
     if (err.message.startsWith('LEGAL_') || err.message.startsWith('INVALID_LEGAL_') || err.message.startsWith('UNSUPPORTED_')) {
@@ -170,6 +178,11 @@ router.get('/:caseId/runs/latest', async (req, res) => {
     if (!userId) return res.status(401).json({ success: false, error: '未认证' })
     const currentCase = await db.findCaseById(userId, req.params.caseId)
     if (!currentCase) return res.status(404).json({ success: false, error: '未找到案件' })
+    if (process.env.HARNESS_ENABLED === 'true') {
+      const workspace = await harness.get(userId, currentCase.id)
+      const run = workspace.runs.filter(r => r.inputRevision === workspace.revision).slice(-1)[0]
+      return res.json({ success: true, data: run ? { runId: run.id, status: run.status, safeErrorCode: run.safeErrorCode, confirmationRequired: true } : null })
+    }
     const run = await db.findLatestReportRun(currentCase.id, currentCase.inputRevision ?? 0)
     return res.json({ success: true, data: run ? { runId: run.id, status: run.status, inputRevision: run.inputRevision, safeErrorCode: run.safeErrorCode } : null })
   } catch (error) {
@@ -185,6 +198,11 @@ router.get('/:caseId/runs/:runId', async (req, res) => {
     const { caseId, runId } = req.params
     const currentCase = await db.findCaseById(userId, caseId)
     if (!currentCase) return res.status(404).json({ success: false, error: '未找到案件' })
+    if (process.env.HARNESS_ENABLED === 'true') {
+      const run = (await harness.get(userId, caseId)).runs.find(r => r.id === runId)
+      if (!run) return res.status(404).json({ success: false, error: '未找到分析记录' })
+      return res.json({ success: true, data: { runId: run.id, status: run.status, safeErrorCode: run.safeErrorCode, confirmationRequired: true } })
+    }
     const run = await db.findAgentRun(runId)
     if (!run || run.caseId !== caseId) return res.status(404).json({ success: false, error: '未找到分析记录' })
     const status = run.inputRevision !== (currentCase.inputRevision || 0) ? 'stale' : run.status
@@ -207,6 +225,18 @@ router.get('/:caseId', async (req, res) => {
     const caseData = await db.findCaseById(userId, caseId)
     if (!caseData) {
       return res.status(404).json({ success: false, error: '未找到案件' })
+    }
+    if (process.env.HARNESS_ENABLED === 'true') {
+      const workspace = await harness.get(userId, caseId)
+      const document = workspace.documents.filter(item => item.type === 'case_report' && item.status === 'approved')
+        .sort((a,b) => b.version - a.version)[0]
+      if (!document) return res.status(409).json({ success: false, error: '请在案件文书中确认草稿并完成必要审核' })
+      const approved = await harness.approved(userId, caseId, document.id)
+      return res.json({ success: true, data: { report: {
+        caseId, analysis: approved.sections[0].paragraphs.join('\n'), liability: '本系统不自动认定事故责任。',
+        compensation: approved.sections.slice(1).flatMap(section => section.paragraphs).join('\n'),
+        recommendations: ['请查看案件文书中的行动计划'], generatedAt: approved.createdAt,
+      } } })
     }
 
     if (!caseData.hasReport) return res.status(409).json({ success: false, error: '材料已更新，请重新生成报告' })

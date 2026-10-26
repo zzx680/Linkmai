@@ -76,3 +76,18 @@ test('speech processing requires separate account-specific consent and is cleare
   assert.equal(await test.api.ensureSpeechConsent('third'), false)
   assert.equal(test.storage.has('linkmai.privacy.speech.third'), false)
 })
+
+test('human review consent is separate, account specific and revoked with case consent', async () => {
+  const test = fixture()
+  await test.api.ensureCaseDataConsent('first')
+  test.choose(false)
+  assert.equal(await test.api.ensureReviewConsent('first'), false)
+  assert.equal(test.storage.has('linkmai.privacy.review.first'), false)
+  test.choose(true)
+  await test.api.ensureReviewConsent('first')
+  await test.api.ensureReviewConsent('first')
+  assert.equal(test.storage.get('linkmai.privacy.review.first'), PRIVACY_VERSION)
+  assert.equal(test.storage.has('linkmai.privacy.review.second'), false)
+  test.api.revokeCaseDataConsent('first')
+  assert.equal(test.storage.has('linkmai.privacy.review.first'), false)
+})

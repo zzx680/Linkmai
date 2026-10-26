@@ -216,6 +216,28 @@ async function withConversationLock<T>(caseId: string, operation: () => Promise<
 }
 
 export const memoryDB = {
+  async syncHarnessReportState(userId: string, caseId: string, ready: boolean) {
+    const item = cases.get(caseId)
+    if (!item || item.userId !== userId) throw new Error('CASE_NOT_FOUND')
+    item.hasReport = ready
+    if (ready) { item.status = 'ready'; item.statusLabel = '报告已复核' }
+    else if (item.status === 'ready') { item.status = 'collecting'; item.statusLabel = '等待核对与复核' }
+  },
+  // Atomic memory counterpart of the case-row transaction used by the new Harness.
+  async advanceHarnessRevision(userId: string, caseId: string, expected: number, next: number) {
+    const item = cases.get(caseId)
+    if (!item || item.userId !== userId) throw new Error('CASE_NOT_FOUND')
+    if (item.inputRevision !== expected || next <= expected) throw new Error('INPUT_STALE')
+    item.inputRevision = next
+    item.hasReport = false
+    item.status = 'collecting'
+    item.statusLabel = '案件信息已更新'
+    item.updatedAt = new Date()
+    caseRevisions.set(caseId, [...(caseRevisions.get(caseId) || []), {
+      id: `revision_${randomBytes(16).toString('hex')}`, caseId, inputRevision: next,
+      reasonCode: 'harness_input_change', createdAt: new Date(),
+    }])
+  },
   // Users
   async createUser(openid: string): Promise<User> {
     const id = `user_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -275,7 +297,7 @@ export const memoryDB = {
         existingCase.isActive = false
         existingCase.updatedAt = new Date()
       }
-      for (const [id, order] of paymentOrders) {
+      for (const [, order] of paymentOrders) {
         if (order.caseId === existingCaseId && ['created', 'pending'].includes(order.status)) {
           order.status = 'closed'
           order.updatedAt = new Date()
@@ -724,12 +746,19 @@ export const memoryDB = {
     cases.set(caseId, { ...caseData, hasReport: true, status: 'ready', statusLabel: '报告已完成', liability: content.liability, compensation: content.compensation, updatedAt: new Date() })
   },
 
-  async upsertLegalCorpus(documents: LegalDocument[], sections: LegalSection[]): Promise<void> {
-    for (const document of documents) legalDocuments.set(document.id, { ...document })
+  async upsertLegalCorpus(documents: LegalDocument[], sections: LegalSection[], options?: { insertOnly?: boolean }): Promise<void> {
+    for (const document of documents) if (!options?.insertOnly || !legalDocuments.has(document.id)) legalDocuments.set(document.id, { ...document })
     for (const section of sections) {
       if (!legalDocuments.has(section.documentId)) throw new Error('LEGAL_DOCUMENT_NOT_FOUND')
-      legalSections.set(section.legalRefId, { ...section, keywords: [...section.keywords] })
+      if (!options?.insertOnly || !legalSections.has(section.legalRefId)) legalSections.set(section.legalRefId, { ...section, keywords: [...section.keywords] })
     }
+  },
+
+  async updateLegalPolicy(documentId: string, approved: boolean, active: boolean) {
+    const document = legalDocuments.get(documentId)
+    if (!document) throw new Error('LEGAL_DOCUMENT_NOT_FOUND')
+    document.reviewStatus = approved ? 'approved' : 'rejected'
+    document.status = active ? 'active' : 'repealed'
   },
 
   async searchLegalReferences(input: LegalSearchInput): Promise<LegalReference[]> {

@@ -67,7 +67,6 @@
 .composer-upload { border-color: rgba($color-brand-primary, .15); background: rgba($color-brand-primary, .08); color: $color-brand-primary; }
 
 .chat-preview-message { display: flex; flex-direction: column; align-items: flex-start; }
-.chat-preview-name { color: $color-text-tertiary; font-size: 22rpx; margin-bottom: 12rpx; }
 .chat-preview-content { max-width: 100%; color: $color-text-primary; font-size: 30rpx; line-height: 1.72; white-space: pre-wrap; overflow-wrap: anywhere; }
 .chat-preview-message-user {
   align-items: flex-end;

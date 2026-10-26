@@ -43,7 +43,7 @@ export class UnauthorizedError extends ApiError {
   constructor(message: string) { super(message, 401) }
 }
 
-async function request<T>(config: RequestConfig): Promise<T> {
+export async function request<T>(config: RequestConfig): Promise<T> {
   const token = getToken()
   try {
     const response = await Taro.request({
@@ -482,6 +482,7 @@ export async function generateReport(
 
 export interface ReportRun {
   runId: string
+  confirmationRequired?: boolean
   status: 'queued' | 'running' | 'succeeded' | 'failed' | 'stale' | 'cancelled'
   safeErrorCode?: string
 }
