@@ -1,7 +1,9 @@
 import { safeError } from '../utils/safe-error'
 import { Router } from 'express'
 import { db } from '../db'
-import { generateReport } from '../services/report'
+import { generateReport, CASE_REPORT_SKILL_VERSION } from '../services/report'
+import { buildLegalSearchInput } from '../services/legal-retrieval'
+import { ensureCoreTrafficLegalCorpus } from '../services/legal-corpus'
 import { CollectedFact } from '../services/agent'
 import { requirePaidEntitlement } from '../services/payment'
 import { materialSnapshot } from '../services/material-snapshot'
@@ -83,12 +85,17 @@ router.post('/generate', async (req, res) => {
       return res.status(400).json({ success: false, error: '请先确认事故信息或至少一份材料' })
     }
 
+    await ensureCoreTrafficLegalCorpus()
+    const legalSearch = buildLegalSearchInput(facts)
+    const legalReferences = await db.searchLegalReferences(legalSearch)
+    if (legalReferences.length === 0) throw new Error('LEGAL_REFERENCE_REQUIRED')
+
     const inputRevision = currentCase.inputRevision ?? 0
     const runResult = await db.createAgentRun({
       caseId: currentCase.id,
       task: 'report',
       inputRevision,
-      skillVersion: 'traffic-report-v1',
+      skillVersion: CASE_REPORT_SKILL_VERSION,
     })
     const run = runResult.run
     if (!run) throw new Error('AGENT_RUN_NOT_CREATED')
@@ -101,9 +108,6 @@ router.post('/generate', async (req, res) => {
         return res.json({ success: true, data: { report: existing!.content } })
       }
     }
-    if (!runResult.created && run.status === 'running') {
-      return res.status(202).json({ success: true, data: { runId: run.id, status: run.status } })
-    }
     const claimedRun = await db.claimAgentRun(run.id)
     if (!claimedRun) {
       const latestRun = await db.findAgentRun(run.id)
@@ -112,19 +116,29 @@ router.post('/generate', async (req, res) => {
       }
       return res.status(409).json({ success: false, error: '本次分析未完成，请更新信息后重试', data: { runId: run.id, status: latestRun?.status } })
     }
-    if (!['queued', 'running'].includes(run.status)) {
+    if (!['queued', 'running', 'failed'].includes(run.status)) {
       return res.status(409).json({ success: false, error: '当前输入版本的报告任务不可重试，请先更新案件信息' })
     }
 
     try {
-      const report = await generateReport(facts, currentCase.id)
+      const report = await generateReport({
+        facts,
+        caseId: currentCase.id,
+        accidentDate: legalSearch.accidentDate,
+        legalReferences,
+      })
       await requirePaidEntitlement(userId, currentCase.id)
       await db.publishRunReport(run.id, report, { userId, materialSnapshot: materialSnapshot(artifacts) })
       res.json({ success: true, data: { report } })
     } catch (generationError: any) {
       const latestRun = await db.findAgentRun(run.id)
       if (latestRun?.status === 'running') {
-        const code = generationError.message === 'PAYMENT_REQUIRED' ? 'PAYMENT_REQUIRED' : generationError.message === 'REPORT_STALE' ? 'REPORT_STALE' : 'REPORT_GENERATION_FAILED'
+        const legalFailure = generationError.message.startsWith('LEGAL_') || generationError.message.startsWith('INVALID_LEGAL_') || generationError.message.startsWith('UNSUPPORTED_')
+        const code = generationError.message === 'PAYMENT_REQUIRED'
+          ? 'PAYMENT_REQUIRED'
+          : generationError.message === 'REPORT_STALE'
+            ? 'REPORT_STALE'
+            : legalFailure ? 'LEGAL_VALIDATION_FAILED' : 'REPORT_GENERATION_FAILED'
         await db.updateAgentRun(latestRun.id, { status: 'failed', safeErrorCode: code })
       }
       throw generationError
@@ -134,6 +148,10 @@ router.post('/generate', async (req, res) => {
       return res.status(402).json({ error: 'PAYMENT_REQUIRED', message: '案件权益已变更，请查看付费记录' })
     }
     if (err.message === 'REPORT_STALE' || err.message === 'STALE_INPUT_REVISION') return res.status(409).json({ success: false, error: '材料或案件信息已更新，请重新生成报告' })
+    if (err.message === 'LEGAL_ACCIDENT_DATE_REQUIRED') return res.status(400).json({ success: false, error: '请先确认格式为 YYYY-MM-DD 的事故日期' })
+    if (err.message.startsWith('LEGAL_') || err.message.startsWith('INVALID_LEGAL_') || err.message.startsWith('UNSUPPORTED_')) {
+      return res.status(422).json({ success: false, error: '暂未找到足够且可核验的法律依据，请补充信息后重试' })
+    }
     console.error('报告生成失败:', safeError(err))
     res.status(500).json({
       success: false,

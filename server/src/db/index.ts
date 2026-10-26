@@ -2,6 +2,7 @@
 import { config } from '../config'
 import { memoryDB } from './memory'
 import { db as postgresDB } from './postgres'
+export type { LegalCitation, LegalDocument, LegalReference, LegalSearchInput, LegalSection } from '../legal/types'
 
 if (config.database.type !== 'memory' && config.database.type !== 'postgres') {
   throw new Error(`不支持的数据库类型: ${config.database.type}`)

@@ -4,6 +4,8 @@ import { config } from '../config'
 import { randomBytes } from 'crypto'
 import { materialSnapshot } from '../services/material-snapshot'
 import { PrivacyRequest, PrivacyRequestKind } from './privacy'
+import { LegalDocument, LegalReference, LegalSearchInput, LegalSection } from '../legal/types'
+import { rankLegalReferences } from '../services/legal-retrieval'
 import {
   AgentRun,
   AgentRunInput,
@@ -165,6 +167,8 @@ const caseRevisions = new Map<string, CaseRevision[]>()
 const agentRuns = new Map<string, AgentRun>()
 const agentRunIdsByKey = new Map<string, string>()
 const runEvents = new Map<string, Array<{ status: AgentRun['status']; safeErrorCode?: string; createdAt: Date }>>()
+const legalDocuments = new Map<string, LegalDocument>()
+const legalSections = new Map<string, LegalSection>()
 function recordRunEvent(run: AgentRun): void {
   const events = runEvents.get(run.id) || []
   if (events[events.length - 1]?.status === run.status) return
@@ -463,13 +467,18 @@ export const memoryDB = {
   },
 
   async claimAgentRun(runId: string): Promise<AgentRun | null> {
-    const run = agentRuns.get(runId)
-    if (!run || run.status !== 'queued') return null
-    run.status = 'running'
-    run.startedAt = new Date()
-    run.updatedAt = run.startedAt
-    recordRunEvent(run)
-    return run
+    return withRunLock(runId, async () => {
+      const run = agentRuns.get(runId)
+      if (!run || !['queued', 'failed'].includes(run.status)) return null
+      run.status = 'running'
+      run.output = undefined
+      run.safeErrorCode = undefined
+      run.completedAt = null
+      run.startedAt = new Date()
+      run.updatedAt = run.startedAt
+      recordRunEvent(run)
+      return run
+    })
   },
 
   async updateAgentRun(runId: string, update: AgentRunUpdate): Promise<AgentRun | null> {
@@ -715,6 +724,30 @@ export const memoryDB = {
     cases.set(caseId, { ...caseData, hasReport: true, status: 'ready', statusLabel: '报告已完成', liability: content.liability, compensation: content.compensation, updatedAt: new Date() })
   },
 
+  async upsertLegalCorpus(documents: LegalDocument[], sections: LegalSection[]): Promise<void> {
+    for (const document of documents) legalDocuments.set(document.id, { ...document })
+    for (const section of sections) {
+      if (!legalDocuments.has(section.documentId)) throw new Error('LEGAL_DOCUMENT_NOT_FOUND')
+      legalSections.set(section.legalRefId, { ...section, keywords: [...section.keywords] })
+    }
+  },
+
+  async searchLegalReferences(input: LegalSearchInput): Promise<LegalReference[]> {
+    const references = [...legalSections.values()].flatMap(section => {
+      const document = legalDocuments.get(section.documentId)
+      return document ? [{ ...document, ...section, keywords: [...section.keywords], score: 0 }] : []
+    })
+    return rankLegalReferences(references, input)
+  },
+
+  async getLegalReferences(legalRefIds: string[]): Promise<LegalReference[]> {
+    return legalRefIds.flatMap(legalRefId => {
+      const section = legalSections.get(legalRefId)
+      const document = section && legalDocuments.get(section.documentId)
+      return section && document ? [{ ...document, ...section, keywords: [...section.keywords], score: 0 }] : []
+    })
+  },
+
   // Reports
   async createReport(
     caseId: string,
@@ -741,6 +774,15 @@ export const memoryDB = {
     const caseData = cases.get(caseId)
     if (!caseData || caseData.userId !== userId) return null
     return entitlements.get(caseId) || null
+  },
+
+  async syncPendingEntitlementAmount(userId: string, caseId: string, amountCents: number, currency: string): Promise<void> {
+    const entitlement = entitlements.get(caseId)
+    if (!entitlement || entitlement.userId !== userId || !['unpaid', 'pending'].includes(entitlement.status)) return
+    entitlement.status = 'pending'
+    entitlement.amountCents = amountCents
+    entitlement.currency = currency
+    entitlement.updatedAt = new Date()
   },
 
   async getOrCreateCaseEntitlement(userId: string, caseId: string): Promise<CaseEntitlement> {

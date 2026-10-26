@@ -4,6 +4,8 @@ import { Pool, PoolClient } from 'pg'
 import { config } from '../config'
 import { materialSnapshot } from '../services/material-snapshot'
 import { PrivacyRequestKind, toPrivacyRequest } from './privacy'
+import { LegalDocument, LegalReference, LegalSearchInput, LegalSection } from '../legal/types'
+import { rankLegalReferences } from '../services/legal-retrieval'
 import {
   AgentRunInput,
   AgentRunUpdate,
@@ -105,6 +107,40 @@ function toAgentRun(row: any) {
 }
 
 // 用户操作
+function postgresDate(value: unknown): string | undefined {
+  if (!value) return undefined
+  if (value instanceof Date) return value.toISOString().slice(0, 10)
+  const text = String(value)
+  return /^\d{4}-\d{2}-\d{2}/.test(text) ? text.slice(0, 10) : undefined
+}
+
+function toLegalReference(row: any): LegalReference {
+  return {
+    id: row.section_id,
+    documentId: row.id,
+    legalRefId: row.legal_ref_id,
+    articleNumber: row.article_number,
+    content: row.content,
+    keywords: row.keywords || [],
+    contentHash: row.content_hash,
+    title: row.title,
+    authority: row.authority,
+    documentType: row.document_type,
+    documentNumber: row.document_number || undefined,
+    jurisdiction: row.jurisdiction,
+    publishDate: postgresDate(row.publish_date),
+    effectiveFrom: postgresDate(row.effective_from)!,
+    effectiveTo: postgresDate(row.effective_to),
+    status: row.status,
+    reviewStatus: row.review_status,
+    sourceUrl: row.source_url,
+    sourceHash: row.source_hash,
+    version: row.version,
+    supersedesId: row.supersedes_id || undefined,
+    score: 0,
+  }
+}
+
 export const db = {
   // Users
   async createUser(openid: string) {
@@ -428,20 +464,31 @@ export const db = {
   },
 
   async createAgentRun(input: AgentRunInput) {
-    const caseResult = await pool.query('SELECT input_revision FROM cases WHERE id=$1', [input.caseId])
-    if (!caseResult.rows[0]) throw new Error('CASE_NOT_FOUND')
-    if (caseResult.rows[0].input_revision !== input.inputRevision) throw new Error('STALE_INPUT_REVISION')
-    const idempotencyKey = runKey(input)
-    const id = generateId('run')
-    const result = await pool.query(
-      `INSERT INTO agent_runs (id,case_id,task,input_revision,skill_version,idempotency_key,status,created_at,updated_at)
-       VALUES ($1,$2,$3,$4,$5,$6,'queued',NOW(),NOW())
-       ON CONFLICT DO NOTHING RETURNING *`,
-      [id, input.caseId, input.task, input.inputRevision, input.skillVersion, idempotencyKey]
-    )
-    if (result.rows[0]) return { run: toAgentRun(result.rows[0]), created: true }
-    const existing = await pool.query('SELECT * FROM agent_runs WHERE idempotency_key=$1', [idempotencyKey])
-    return { run: toAgentRun(existing.rows[0]), created: false }
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const caseResult = await client.query('SELECT input_revision FROM cases WHERE id=$1 FOR UPDATE', [input.caseId])
+      if (!caseResult.rows[0]) throw new Error('CASE_NOT_FOUND')
+      if (caseResult.rows[0].input_revision !== input.inputRevision) throw new Error('STALE_INPUT_REVISION')
+      const idempotencyKey = runKey(input)
+      const id = generateId('run')
+      const result = await client.query(
+        `INSERT INTO agent_runs (id,case_id,task,input_revision,skill_version,idempotency_key,status,created_at,updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,'queued',NOW(),NOW())
+         ON CONFLICT DO NOTHING RETURNING *`,
+        [id, input.caseId, input.task, input.inputRevision, input.skillVersion, idempotencyKey]
+      )
+      const run = result.rows[0]
+        || (await client.query('SELECT * FROM agent_runs WHERE idempotency_key=$1', [idempotencyKey])).rows[0]
+      if (!run) throw new Error('AGENT_RUN_NOT_CREATED')
+      await client.query('COMMIT')
+      return { run: toAgentRun(run), created: Boolean(result.rows[0]) }
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
   },
 
   async getRunEvents(userId: string, caseId: string, runId: string) {
@@ -463,8 +510,8 @@ export const db = {
 
   async claimAgentRun(runId: string) {
     const result = await pool.query(
-      `UPDATE agent_runs SET status='running',started_at=NOW(),updated_at=NOW()
-       WHERE id=$1 AND status='queued' RETURNING *`,
+      `UPDATE agent_runs SET status='running',output=NULL,safe_error_code=NULL,completed_at=NULL,started_at=NOW(),updated_at=NOW()
+       WHERE id=$1 AND status IN ('queued','failed') RETURNING *`,
       [runId]
     )
     return toAgentRun(result.rows[0])
@@ -472,17 +519,32 @@ export const db = {
 
   async updateAgentRun(runId: string, update: AgentRunUpdate) {
     validateRunUpdate(update)
-    const current = await pool.query('SELECT * FROM agent_runs WHERE id=$1', [runId])
-    if (!current.rows[0]) return null
-    validateRunTransition(current.rows[0].status, update.status)
-    const result = await pool.query(
-      `UPDATE agent_runs SET status=$1::varchar,output=$2::jsonb,safe_error_code=$3::varchar,
-       started_at=CASE WHEN $1::varchar='running' THEN COALESCE(started_at,NOW()) ELSE started_at END,
-       completed_at=CASE WHEN $1::varchar=ANY($4::varchar[]) THEN NOW() ELSE completed_at END,updated_at=NOW()
-       WHERE id=$5 RETURNING *`,
-      [update.status, update.output ? JSON.stringify(update.output) : null, update.safeErrorCode || null, terminalRunStatuses, runId]
-    )
-    return toAgentRun(result.rows[0])
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const current = await client.query('SELECT * FROM agent_runs WHERE id=$1 FOR UPDATE', [runId])
+      const currentRun = current.rows[0]
+      if (!currentRun) {
+        await client.query('COMMIT')
+        return null
+      }
+      validateRunTransition(currentRun.status, update.status)
+      const result = await client.query(
+        `UPDATE agent_runs SET status=$1::varchar,output=$2::jsonb,safe_error_code=$3::varchar,
+         started_at=CASE WHEN $1::varchar='running' THEN COALESCE(started_at,NOW()) ELSE started_at END,
+         completed_at=CASE WHEN $1::varchar=ANY($4::varchar[]) THEN NOW() ELSE completed_at END,updated_at=NOW()
+         WHERE id=$5 AND status=$6 RETURNING *`,
+        [update.status, update.output ? JSON.stringify(update.output) : null, update.safeErrorCode || null, terminalRunStatuses, runId, currentRun.status]
+      )
+      if (!result.rows[0]) throw new Error('AGENT_RUN_CONCURRENT_UPDATE')
+      await client.query('COMMIT')
+      return toAgentRun(result.rows[0])
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
   },
 
   async publishRunReport(runId: string, content: any, input: { userId: string; materialSnapshot: string }) {
@@ -991,6 +1053,84 @@ export const db = {
     }
   },
 
+  async upsertLegalCorpus(documents: LegalDocument[], sections: LegalSection[]): Promise<void> {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      for (const document of documents) {
+        await client.query(
+          `INSERT INTO legal_documents (
+             id,title,authority,document_type,document_number,jurisdiction,publish_date,effective_from,effective_to,
+             status,review_status,source_url,source_hash,version,supersedes_id,updated_at
+           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,NOW())
+           ON CONFLICT (id) DO UPDATE SET
+             title=EXCLUDED.title,authority=EXCLUDED.authority,document_type=EXCLUDED.document_type,
+             document_number=EXCLUDED.document_number,jurisdiction=EXCLUDED.jurisdiction,publish_date=EXCLUDED.publish_date,
+             effective_from=EXCLUDED.effective_from,effective_to=EXCLUDED.effective_to,status=EXCLUDED.status,
+             review_status=EXCLUDED.review_status,source_url=EXCLUDED.source_url,source_hash=EXCLUDED.source_hash,
+             version=EXCLUDED.version,supersedes_id=EXCLUDED.supersedes_id,updated_at=NOW()`,
+          [document.id, document.title, document.authority, document.documentType, document.documentNumber || null,
+            document.jurisdiction, document.publishDate || null, document.effectiveFrom, document.effectiveTo || null,
+            document.status, document.reviewStatus, document.sourceUrl, document.sourceHash, document.version, document.supersedesId || null]
+        )
+      }
+      for (const section of sections) {
+        await client.query(
+          `INSERT INTO legal_sections (id,document_id,legal_ref_id,article_number,content,keywords,content_hash,search_vector,updated_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,to_tsvector('simple', $8),NOW())
+           ON CONFLICT (legal_ref_id) DO UPDATE SET
+             document_id=EXCLUDED.document_id,article_number=EXCLUDED.article_number,content=EXCLUDED.content,
+             keywords=EXCLUDED.keywords,content_hash=EXCLUDED.content_hash,search_vector=EXCLUDED.search_vector,updated_at=NOW()`,
+          [section.id, section.documentId, section.legalRefId, section.articleNumber, section.content, section.keywords, section.contentHash,
+            `${section.articleNumber} ${section.content} ${section.keywords.join(' ')}`]
+        )
+      }
+      await client.query('COMMIT')
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
+  },
+
+  async searchLegalReferences(input: LegalSearchInput): Promise<LegalReference[]> {
+    const terms = input.query.split(/\s+/).filter(Boolean)
+    const result = await pool.query(
+      `SELECT d.*,s.id AS section_id,s.legal_ref_id,s.article_number,s.content,s.keywords,s.content_hash
+       FROM legal_sections s JOIN legal_documents d ON d.id=s.document_id
+       WHERE d.review_status='approved' AND d.status='active'
+         AND d.effective_from <= $1::date AND (d.effective_to IS NULL OR d.effective_to >= $1::date)
+         AND (d.jurisdiction='CN' OR d.jurisdiction=$2)
+         AND (
+           cardinality($3::text[]) = 0
+           OR s.article_number = ANY($3::text[])
+           OR d.title ILIKE ANY($4::text[])
+           OR s.content ILIKE ANY($4::text[])
+           OR s.keywords && $5::text[]
+           OR s.search_vector @@ plainto_tsquery('simple', $6)
+         )
+       LIMIT 100`,
+      [input.accidentDate, input.jurisdiction || 'CN', input.articleNumbers || [], terms.map(term => `%${term}%`), terms, input.query]
+    )
+    return rankLegalReferences(result.rows.map(row => toLegalReference(row)), input)
+  },
+
+  async getLegalReferences(legalRefIds: string[]): Promise<LegalReference[]> {
+    if (legalRefIds.length === 0) return []
+    const result = await pool.query(
+      `SELECT d.*,s.id AS section_id,s.legal_ref_id,s.article_number,s.content,s.keywords,s.content_hash
+       FROM legal_sections s JOIN legal_documents d ON d.id=s.document_id
+       WHERE s.legal_ref_id=ANY($1::text[])`,
+      [legalRefIds]
+    )
+    const byId = new Map(result.rows.map(row => {
+      const reference = toLegalReference(row)
+      return [reference.legalRefId, reference]
+    }))
+    return legalRefIds.flatMap(id => byId.get(id) || [])
+  },
+
   // Reports
   async createReport(caseId: string, content: any, options?: {
     modelVersion?: string
@@ -1043,6 +1183,14 @@ export const db = {
       [caseId, userId]
     )
     return toEntitlement(result.rows[0])
+  },
+
+  async syncPendingEntitlementAmount(userId: string, caseId: string, amountCents: number, currency: string) {
+    await pool.query(
+      `UPDATE case_entitlements SET status = 'pending', amount_cents = $3, currency = $4, updated_at = NOW()
+       WHERE case_id = $1 AND user_id = $2 AND status IN ('unpaid', 'pending')`,
+      [caseId, userId, amountCents, currency]
+    )
   },
 
   async getOrCreateCaseEntitlement(userId: string, caseId: string) {

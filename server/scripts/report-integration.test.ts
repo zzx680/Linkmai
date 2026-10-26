@@ -4,10 +4,10 @@ import { Pool } from 'pg'
 import { db as postgresDB } from '../src/db/postgres'
 import { memoryDB } from '../src/db/memory'
 import { materialSnapshot } from '../src/services/material-snapshot'
-let generate: (facts: unknown[], caseId: string) => Promise<unknown> = async (_facts, caseId) => ({ ...content, caseId })
+let generate: (context: { facts: any[]; caseId?: string; accidentDate: string; legalReferences: any[] }) => Promise<unknown> = async context => ({ ...content, caseId: context.caseId })
 let checkPayment: () => Promise<unknown> = async () => undefined
 for (const [path, exports] of [
-  ['../src/services/report', { generateReport: (facts: unknown[], caseId: string) => generate(facts, caseId) }],
+  ['../src/services/report', { CASE_REPORT_SKILL_VERSION: 'traffic-report-v3', generateReport: (context: any) => generate(context) }],
   ['../src/services/payment', { requirePaidEntitlement: () => checkPayment() }],
 ] as const) {
   const id = require.resolve(path)
@@ -20,6 +20,7 @@ async function fixture() {
   const first = await memoryDB.createCase(user.id, { title: 'A' })
   const artifact = await memoryDB.createArtifact({ caseId: first.id, name: 'medical', type: 'medical_record', ossUrl: 'https://owned.invalid/image', ossKey: 'owned', fileSize: 1, mimeType: 'image/png', status: 'processed', metadata: { fields: [] } })
   await memoryDB.confirmArtifact(user.id, first.id, artifact.id, [{ key: 'injury', label: '伤情', value: '骨折' }])
+  await memoryDB.persistConfirmedFacts(user.id, first.id, [{ key: 'accident_date', label: '事故日期', value: '2026-10-22', source: 'user_text' }])
   const entitlement = await memoryDB.getOrCreateCaseEntitlement(user.id, first.id)
   entitlement.status = 'paid'
   const second = await memoryDB.createCase(user.id, { title: 'B' })
@@ -64,17 +65,24 @@ test('PostgreSQL createAgentRun reuses an existing run when either equivalent un
     created_at: new Date(), updated_at: new Date(),
   }
   const calls: string[] = []
-  const query = mock.method(Pool.prototype, 'query', async (sql: string) => {
+  const query = mock.method(Pool.prototype, 'connect', async () => ({ query: async (sql: string) => {
     calls.push(sql)
-    if (sql.startsWith('SELECT input_revision')) return { rows: [{ input_revision: 3 }] }
+    if (sql.startsWith('SELECT input_revision')) {
+      assert.match(sql, /FOR UPDATE$/)
+      return { rows: [{ input_revision: 3 }] }
+    }
     if (sql.startsWith('INSERT INTO agent_runs')) return { rows: [] }
     if (sql.startsWith('SELECT * FROM agent_runs')) return { rows: [existing] }
+    if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') return { rows: [] }
     throw new Error(`unexpected query: ${sql}`)
-  })
+  }, release() {} }))
   try {
     const result = await postgresDB.createAgentRun({ caseId: 'case', task: 'report', inputRevision: 3, skillVersion: 'v1' })
     assert.equal(result.created, false)
     assert.equal(result.run.id, 'run-existing')
+    assert.equal(calls[0], 'BEGIN')
+    assert.equal(calls.at(-1), 'COMMIT')
+    assert.ok(calls.findIndex(sql => sql.includes('FOR UPDATE')) < calls.findIndex(sql => sql.startsWith('INSERT')))
     assert.match(calls.find(sql => sql.startsWith('INSERT INTO agent_runs'))!, /ON CONFLICT DO NOTHING/)
     assert.doesNotMatch(calls.find(sql => sql.startsWith('INSERT INTO agent_runs'))!, /ON CONFLICT \(idempotency_key\)/)
   } finally { query.mock.restore() }
@@ -87,16 +95,70 @@ test('PostgreSQL updateAgentRun explicitly types reused status parameters', asyn
     output: null, safe_error_code: null, started_at: new Date(), completed_at: null,
     created_at: new Date(), updated_at: new Date(),
   }
-  const query = mock.method(Pool.prototype, 'query', async (sql: string) => {
-    if (sql.startsWith('SELECT * FROM agent_runs')) return { rows: [current] }
+  const calls: string[] = []
+  const query = mock.method(Pool.prototype, 'connect', async () => ({ query: async (sql: string, values?: unknown[]) => {
+    calls.push(sql)
+    if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') return { rows: [] }
+    if (sql.startsWith('SELECT * FROM agent_runs')) {
+      assert.match(sql, /FOR UPDATE$/)
+      return { rows: [current] }
+    }
     assert.match(sql, /status=\$1::varchar/)
     assert.match(sql, /\$1::varchar=ANY\(\$4::varchar\[\]\)/)
+    assert.match(sql, /WHERE id=\$5 AND status=\$6 RETURNING/)
+    assert.equal(values?.[5], 'running')
     return { rows: [{ ...current, status: 'failed', safe_error_code: 'REPORT_STALE' }] }
-  })
+  }, release() {} }))
   try {
     assert.equal((await postgresDB.updateAgentRun('run', { status: 'failed', safeErrorCode: 'REPORT_STALE' }))?.status, 'failed')
+    assert.equal(calls[0], 'BEGIN')
+    assert.equal(calls.at(-1), 'COMMIT')
   } finally { query.mock.restore() }
 })
+
+test('PostgreSQL creation rejects a changed case revision before inserting a run', async () => {
+  const calls: string[] = []
+  let released = false
+  const connect = mock.method(Pool.prototype, 'connect', async () => ({
+    query: async (sql: string) => {
+      calls.push(sql)
+      if (sql.startsWith('SELECT input_revision')) {
+        assert.match(sql, /FOR UPDATE$/)
+        return { rows: [{ input_revision: 4 }] }
+      }
+      return { rows: [] }
+    },
+    release() { released = true },
+  }))
+  try {
+    await assert.rejects(postgresDB.createAgentRun({ caseId: 'case', task: 'report', inputRevision: 3, skillVersion: 'v1' }), /STALE_INPUT_REVISION/)
+    assert.deepEqual(calls, ['BEGIN', 'SELECT input_revision FROM cases WHERE id=$1 FOR UPDATE', 'ROLLBACK'])
+    assert.equal(released, true)
+  } finally { connect.mock.restore() }
+})
+
+for (const status of ['succeeded', 'failed', 'stale', 'cancelled'] as const) {
+  test(`PostgreSQL rejects every update of a ${status} run, including the same status`, async () => {
+    const calls: string[] = []
+    const connect = mock.method(Pool.prototype, 'connect', async () => ({
+      query: async (sql: string) => {
+        calls.push(sql)
+        if (sql.startsWith('SELECT * FROM agent_runs')) {
+          assert.match(sql, /FOR UPDATE$/)
+          return { rows: [{ id: 'run', status }] }
+        }
+        return { rows: [] }
+      }, release() {},
+    }))
+    try {
+      for (const next of ['queued', 'running', 'succeeded', 'failed', 'stale', 'cancelled'] as const) {
+        await assert.rejects(postgresDB.updateAgentRun('run', { status: next, output: { overwritten: true } }), /INVALID_AGENT_RUN_TRANSITION/)
+      }
+      assert.equal(calls.filter(sql => sql === 'ROLLBACK').length, 6)
+      assert.equal(calls.some(sql => sql.startsWith('UPDATE')), false)
+    } finally { connect.mock.restore() }
+  })
+}
 
 test('PostgreSQL updateCase binds explicit case ID before owner and handles no match', async () => {
   const query = mock.method(Pool.prototype, 'query', async (sql: string, values: unknown[]) => {
@@ -143,11 +205,23 @@ test('PostgreSQL publication locks owner, validates snapshot and rolls back stal
   } finally { connect.mock.restore() }
 })
 
+test('missing exact accident date is rejected before an AgentRun is created', async () => {
+  const user = await memoryDB.createUser(`report-no-date-${Math.random()}`)
+  const currentCase = await memoryDB.createCase(user.id, { title: 'No date' })
+  await memoryDB.persistConfirmedFacts(user.id, currentCase.id, [{ key: 'location', label: '地点', value: '杭州', source: 'user_text' }])
+  const entitlement = await memoryDB.getOrCreateCaseEntitlement(user.id, currentCase.id)
+  entitlement.status = 'paid'
+  const result = await route('post', '/generate', { userId: user.id, body: { caseId: currentCase.id } })
+  assert.equal(result.status, 400)
+  assert.match(result.payload.error, /YYYY-MM-DD/)
+  assert.equal(await memoryDB.findLatestReportRun(currentCase.id, currentCase.inputRevision), null)
+})
+
 test('POST and GET reports use the same wrapper and stale GET is rejected', async () => {
   const { user, first, artifact } = await fixture()
   const previous = generate
   try {
-    generate = async (_facts, caseId) => ({ ...content, caseId })
+    generate = async context => ({ ...content, caseId: context.caseId })
     const generated = await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })
     assert.equal(generated.status, 200)
     assert.equal(generated.payload.data.report.caseId, first.id)
@@ -155,9 +229,9 @@ test('POST and GET reports use the same wrapper and stale GET is rejected', asyn
     assert.deepEqual(retrieved.payload.data, generated.payload.data)
     await memoryDB.confirmArtifact(user.id, first.id, artifact.id, [{ key: 'injury', label: '伤情', value: '变化' }])
     assert.equal((await route('get', '/:caseId', { userId: user.id, params: { caseId: first.id } })).status, 409)
-    generate = async (_facts, caseId) => {
+    generate = async context => {
       await memoryDB.confirmArtifact(user.id, first.id, artifact.id, [{ key: 'injury', label: '伤情', value: '再次变化' }])
-      return { ...content, caseId }
+      return { ...content, caseId: context.caseId }
     }
     assert.equal((await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })).status, 409)
   } finally { generate = previous }
@@ -213,7 +287,7 @@ test('run status queries enforce case ownership and do not expose model output',
   assert.equal('output' in result.payload.data, false)
   assert.equal((await route('get', '/:caseId/runs/:runId', { userId: 'other-user', params: { caseId: first.id, runId: run.id } })).status, 404)
   assert.equal((await route('get', '/:caseId/runs/:runId', { userId: user.id, params: { caseId: second.id, runId: run.id } })).status, 404)
-  await memoryDB.persistConfirmedFacts(user.id, first.id, [{ key: 'accident_date', label: '事故日期', value: '2026-10-22', source: 'user_text' }])
+  await memoryDB.persistConfirmedFacts(user.id, first.id, [{ key: 'accident_date', label: '事故日期', value: '2026-10-23', source: 'user_text' }])
   const stale = await route('get', '/:caseId/runs/:runId', { userId: user.id, params: { caseId: first.id, runId: run.id } })
   assert.equal(stale.payload.data.status, 'stale')
 })
@@ -223,9 +297,12 @@ test('report inputs include both conversation facts and confirmed materials', as
   await memoryDB.persistConfirmedFacts(user.id, first.id, [{ key: 'accident_date', label: '事故日期', value: '2026-10-22', source: 'user_text' }])
   const previous = generate
   try {
-    generate = async (facts, caseId) => {
-      assert.deepEqual(facts.map((fact: any) => fact.key).sort(), ['accident_date', 'injury'])
-      return { ...content, caseId }
+    generate = async context => {
+      assert.deepEqual(context.facts.map((fact: any) => fact.key).sort(), ['accident_date', 'injury'])
+      assert.equal(context.caseId, first.id)
+      assert.equal(context.accidentDate, '2026-10-22')
+      assert.ok(context.legalReferences.length > 0)
+      return { ...content, caseId: context.caseId }
     }
     assert.equal((await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })).status, 200)
   } finally { generate = previous }
@@ -237,7 +314,7 @@ test('conflicting confirmed sources block report generation before a model call'
   const previous = generate
   let calls = 0
   try {
-    generate = async (_facts, caseId) => { calls += 1; return { ...content, caseId } }
+    generate = async context => { calls += 1; return { ...content, caseId: context.caseId } }
     const result = await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })
     assert.equal(result.status, 409)
     assert.equal(result.payload.code, 'FACT_CONFLICT')
@@ -252,10 +329,10 @@ test('concurrent report requests call the model only once', async () => {
   const blocked = new Promise<void>(resolve => { release = resolve })
   let calls = 0
   try {
-    generate = async (_facts, caseId) => {
+    generate = async context => {
       calls += 1
       await blocked
-      return { ...content, caseId }
+      return { ...content, caseId: context.caseId }
     }
     const requests = Array.from({ length: 8 }, () => route('post', '/generate', { userId: user.id, body: { caseId: first.id } }))
     await new Promise(resolve => setImmediate(resolve))
@@ -267,13 +344,37 @@ test('concurrent report requests call the model only once', async () => {
   } finally { release(); generate = previous }
 })
 
+test('a failed report run can retry successfully on the same input revision', async () => {
+  const { user, first } = await fixture()
+  const previous = generate
+  let calls = 0
+  try {
+    generate = async context => {
+      calls += 1
+      if (calls === 1) throw new Error('temporary model failure')
+      return { ...content, caseId: context.caseId }
+    }
+    const failed = await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })
+    assert.equal(failed.status, 500)
+    const currentCase = await memoryDB.findCaseById(user.id, first.id)
+    const failedRun = await memoryDB.findLatestReportRun(first.id, currentCase!.inputRevision)
+    assert.equal(failedRun?.status, 'failed')
+    const retried = await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })
+    assert.equal(retried.status, 200)
+    const succeededRun = await memoryDB.findLatestReportRun(first.id, currentCase!.inputRevision)
+    assert.equal(succeededRun?.id, failedRun?.id)
+    assert.equal(succeededRun?.status, 'succeeded')
+    assert.equal(calls, 2)
+  } finally { generate = previous }
+})
+
 test('a refund completed during generation prevents returning the paid report', async () => {
   const { user, first } = await fixture()
   const previous = generate
   try {
-    generate = async (_facts, caseId) => {
+    generate = async context => {
       checkPayment = async () => { throw new Error('PAYMENT_REQUIRED') }
-      return { ...content, caseId }
+      return { ...content, caseId: context.caseId }
     }
     const result = await route('post', '/generate', { userId: user.id, body: { caseId: first.id } })
     assert.equal(result.status, 402)
