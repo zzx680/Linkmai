@@ -18,6 +18,15 @@ const names = [
   'triangle-alert', 'undo-2', 'user-round', 'x',
 ]
 const variants = new Map(names.map(name => [name, new Set(['#6B7280', '#8E8E93'])]))
+const manifestPath = path.join(sourceRoot, 'components/Icon/assets.ts')
+// Keep existing variants used by dynamic palettes that static scanning cannot resolve.
+if (fs.existsSync(manifestPath)) {
+  const manifest = fs.readFileSync(manifestPath, 'utf8')
+  for (const [, name, body] of manifest.matchAll(/  '([^']+)': \{([\s\S]*?)\n  \},/g)) {
+    if (!variants.has(name)) continue
+    for (const [, color] of body.matchAll(/'(#[0-9a-f]{6})':/gi)) variants.get(name).add(color.toUpperCase())
+  }
+}
 
 function filesIn(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
@@ -40,6 +49,14 @@ for (const file of filesIn(sourceRoot).filter(file => file.endsWith('.tsx'))) {
   const source = ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const pageNames = stringsIn(source).filter(name => variants.has(name))
   function visit(node) {
+    // Resolve fixed colors declared alongside dynamic icon names (e.g. material types).
+    if (ts.isObjectLiteralExpression(node)) {
+      const props = Object.fromEntries(node.properties.filter(ts.isPropertyAssignment).map(prop => [prop.name.getText(source), prop.initializer]))
+      if (props.icon && props.color && ts.isStringLiteral(props.icon) && ts.isStringLiteral(props.color)
+        && variants.has(props.icon.text) && /^#[0-9a-f]{6}$/i.test(props.color.text)) {
+        variants.get(props.icon.text).add(props.color.text.toUpperCase())
+      }
+    }
     if ((ts.isJsxSelfClosingElement(node) || ts.isJsxOpeningElement(node)) && node.tagName.getText(source) === 'Icon') {
       const props = Object.fromEntries(node.attributes.properties.filter(ts.isJsxAttribute).map(prop => [prop.name.getText(source), prop.initializer]))
       const literalNames = props.name ? stringsIn(props.name).filter(name => variants.has(name)) : []

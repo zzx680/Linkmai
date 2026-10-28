@@ -8,127 +8,138 @@ import icon5 from '../../assets/icons/lucide/arrow-up-ffffff.png'
 import icon6 from '../../assets/icons/lucide/bell-6b7280.png'
 import icon7 from '../../assets/icons/lucide/bell-8e8e93.png'
 import icon8 from '../../assets/icons/lucide/camera-000000.png'
-import icon9 from '../../assets/icons/lucide/camera-2a64f0.png'
-import icon10 from '../../assets/icons/lucide/camera-6b7280.png'
-import icon11 from '../../assets/icons/lucide/camera-8e8e93.png'
-import icon12 from '../../assets/icons/lucide/car-front-2a64f0.png'
-import icon13 from '../../assets/icons/lucide/car-front-6b7280.png'
-import icon14 from '../../assets/icons/lucide/car-front-8e8e93.png'
-import icon15 from '../../assets/icons/lucide/chart-no-axes-combined-000000.png'
-import icon16 from '../../assets/icons/lucide/chart-no-axes-combined-111827.png'
-import icon17 from '../../assets/icons/lucide/chart-no-axes-combined-6b7280.png'
-import icon18 from '../../assets/icons/lucide/chart-no-axes-combined-8e8e93.png'
-import icon19 from '../../assets/icons/lucide/check-111827.png'
-import icon20 from '../../assets/icons/lucide/check-6b7280.png'
-import icon21 from '../../assets/icons/lucide/check-8e8e93.png'
-import icon22 from '../../assets/icons/lucide/chevron-right-000000.png'
-import icon23 from '../../assets/icons/lucide/chevron-right-2a64f0.png'
-import icon24 from '../../assets/icons/lucide/chevron-right-6b7280.png'
-import icon25 from '../../assets/icons/lucide/chevron-right-8e8e93.png'
-import icon26 from '../../assets/icons/lucide/circle-check-057a55.png'
-import icon27 from '../../assets/icons/lucide/circle-check-059669.png'
-import icon28 from '../../assets/icons/lucide/circle-check-111827.png'
-import icon29 from '../../assets/icons/lucide/circle-check-2a64f0.png'
-import icon30 from '../../assets/icons/lucide/circle-check-6b7280.png'
-import icon31 from '../../assets/icons/lucide/circle-check-8e8e93.png'
-import icon32 from '../../assets/icons/lucide/circle-help-000000.png'
-import icon33 from '../../assets/icons/lucide/circle-help-6b7280.png'
-import icon34 from '../../assets/icons/lucide/circle-help-8e8e93.png'
-import icon35 from '../../assets/icons/lucide/clock-3-057a55.png'
-import icon36 from '../../assets/icons/lucide/clock-3-111827.png'
-import icon37 from '../../assets/icons/lucide/clock-3-2a64f0.png'
-import icon38 from '../../assets/icons/lucide/clock-3-6b7280.png'
-import icon39 from '../../assets/icons/lucide/clock-3-8e8e93.png'
-import icon40 from '../../assets/icons/lucide/contact-round-2a64f0.png'
-import icon41 from '../../assets/icons/lucide/contact-round-6b7280.png'
-import icon42 from '../../assets/icons/lucide/contact-round-8e8e93.png'
-import icon43 from '../../assets/icons/lucide/credit-card-000000.png'
-import icon44 from '../../assets/icons/lucide/credit-card-6b7280.png'
-import icon45 from '../../assets/icons/lucide/credit-card-8e8e93.png'
-import icon46 from '../../assets/icons/lucide/credit-card-ff9500.png'
-import icon47 from '../../assets/icons/lucide/file-text-000000.png'
-import icon48 from '../../assets/icons/lucide/file-text-111827.png'
-import icon49 from '../../assets/icons/lucide/file-text-2a64f0.png'
-import icon50 from '../../assets/icons/lucide/file-text-6b7280.png'
-import icon51 from '../../assets/icons/lucide/file-text-8e8e93.png'
-import icon52 from '../../assets/icons/lucide/files-000000.png'
-import icon53 from '../../assets/icons/lucide/files-6b7280.png'
-import icon54 from '../../assets/icons/lucide/files-8e8e93.png'
-import icon55 from '../../assets/icons/lucide/folder-2a64f0.png'
-import icon56 from '../../assets/icons/lucide/folder-6b7280.png'
-import icon57 from '../../assets/icons/lucide/folder-8e8e93.png'
-import icon58 from '../../assets/icons/lucide/folder-open-000000.png'
-import folderOpenBlue from '../../assets/icons/lucide/folder-open-2a64f0.png'
-import icon59 from '../../assets/icons/lucide/folder-open-34c759.png'
-import icon60 from '../../assets/icons/lucide/folder-open-6b7280.png'
-import icon61 from '../../assets/icons/lucide/folder-open-8e8e93.png'
-import icon62 from '../../assets/icons/lucide/hospital-2a64f0.png'
-import icon63 from '../../assets/icons/lucide/hospital-6b7280.png'
-import icon64 from '../../assets/icons/lucide/hospital-8e8e93.png'
-import icon65 from '../../assets/icons/lucide/house-6b7280.png'
-import icon66 from '../../assets/icons/lucide/house-8e8e93.png'
-import icon67 from '../../assets/icons/lucide/id-card-2a64f0.png'
-import icon68 from '../../assets/icons/lucide/id-card-6b7280.png'
-import icon69 from '../../assets/icons/lucide/id-card-8e8e93.png'
-import icon70 from '../../assets/icons/lucide/inbox-2a64f0.png'
-import icon71 from '../../assets/icons/lucide/inbox-6b7280.png'
-import icon72 from '../../assets/icons/lucide/inbox-8e8e93.png'
-import icon73 from '../../assets/icons/lucide/info-000000.png'
-import icon74 from '../../assets/icons/lucide/info-057a55.png'
-import icon75 from '../../assets/icons/lucide/info-111827.png'
-import icon76 from '../../assets/icons/lucide/info-2a64f0.png'
-import icon77 from '../../assets/icons/lucide/info-6b7280.png'
-import icon78 from '../../assets/icons/lucide/info-8e8e93.png'
-import icon79 from '../../assets/icons/lucide/loader-circle-111827.png'
-import icon80 from '../../assets/icons/lucide/loader-circle-2a64f0.png'
-import icon81 from '../../assets/icons/lucide/loader-circle-6b7280.png'
-import icon82 from '../../assets/icons/lucide/loader-circle-8e8e93.png'
-import icon83 from '../../assets/icons/lucide/lock-keyhole-111827.png'
-import icon84 from '../../assets/icons/lucide/lock-keyhole-2a64f0.png'
-import icon85 from '../../assets/icons/lucide/lock-keyhole-6b7280.png'
-import icon86 from '../../assets/icons/lucide/lock-keyhole-8e8e93.png'
-import icon87 from '../../assets/icons/lucide/messages-square-2a64f0.png'
-import icon88 from '../../assets/icons/lucide/messages-square-6b7280.png'
-import icon89 from '../../assets/icons/lucide/messages-square-8e8e93.png'
-import icon90 from '../../assets/icons/lucide/messages-square-af52de.png'
-import icon91 from '../../assets/icons/lucide/mic-000000.png'
-import icon92 from '../../assets/icons/lucide/mic-6b7280.png'
-import icon93 from '../../assets/icons/lucide/mic-8e8e93.png'
-import icon94 from '../../assets/icons/lucide/plus-2a64f0.png'
-import icon95 from '../../assets/icons/lucide/plus-6b7280.png'
-import icon96 from '../../assets/icons/lucide/plus-8e8e93.png'
-import icon97 from '../../assets/icons/lucide/route-111827.png'
-import icon98 from '../../assets/icons/lucide/route-2a64f0.png'
-import icon99 from '../../assets/icons/lucide/route-6b7280.png'
-import icon100 from '../../assets/icons/lucide/route-8e8e93.png'
-import icon101 from '../../assets/icons/lucide/scale-111827.png'
-import icon102 from '../../assets/icons/lucide/scale-2a64f0.png'
-import icon103 from '../../assets/icons/lucide/scale-6b7280.png'
-import icon104 from '../../assets/icons/lucide/scale-8e8e93.png'
-import icon105 from '../../assets/icons/lucide/settings-000000.png'
-import icon106 from '../../assets/icons/lucide/settings-6b7280.png'
-import icon107 from '../../assets/icons/lucide/settings-8e8e93.png'
-import icon108 from '../../assets/icons/lucide/shield-check-000000.png'
-import icon109 from '../../assets/icons/lucide/shield-check-111827.png'
-import icon110 from '../../assets/icons/lucide/shield-check-2a64f0.png'
-import icon111 from '../../assets/icons/lucide/shield-check-6b7280.png'
-import icon112 from '../../assets/icons/lucide/shield-check-8e8e93.png'
-import icon113 from '../../assets/icons/lucide/shield-check-ffffff.png'
-import icon114 from '../../assets/icons/lucide/triangle-alert-2a64f0.png'
-import icon115 from '../../assets/icons/lucide/triangle-alert-6b7280.png'
-import icon116 from '../../assets/icons/lucide/triangle-alert-8e8e93.png'
-import icon117 from '../../assets/icons/lucide/undo-2-057a55.png'
-import icon118 from '../../assets/icons/lucide/undo-2-111827.png'
-import icon119 from '../../assets/icons/lucide/undo-2-2a64f0.png'
-import icon120 from '../../assets/icons/lucide/undo-2-6b7280.png'
-import icon121 from '../../assets/icons/lucide/undo-2-8e8e93.png'
-import icon122 from '../../assets/icons/lucide/user-round-111827.png'
-import icon123 from '../../assets/icons/lucide/user-round-2a64f0.png'
-import icon124 from '../../assets/icons/lucide/user-round-6b7280.png'
-import icon125 from '../../assets/icons/lucide/user-round-8e8e93.png'
-import icon126 from '../../assets/icons/lucide/x-000000.png'
-import icon127 from '../../assets/icons/lucide/x-6b7280.png'
-import icon128 from '../../assets/icons/lucide/x-8e8e93.png'
+import icon9 from '../../assets/icons/lucide/camera-1698b5.png'
+import icon10 from '../../assets/icons/lucide/camera-2a64f0.png'
+import icon11 from '../../assets/icons/lucide/camera-6b7280.png'
+import icon12 from '../../assets/icons/lucide/camera-8e8e93.png'
+import icon13 from '../../assets/icons/lucide/car-front-159a78.png'
+import icon14 from '../../assets/icons/lucide/car-front-2a64f0.png'
+import icon15 from '../../assets/icons/lucide/car-front-6b7280.png'
+import icon16 from '../../assets/icons/lucide/car-front-8e8e93.png'
+import icon17 from '../../assets/icons/lucide/chart-no-axes-combined-000000.png'
+import icon18 from '../../assets/icons/lucide/chart-no-axes-combined-111827.png'
+import icon19 from '../../assets/icons/lucide/chart-no-axes-combined-6b7280.png'
+import icon20 from '../../assets/icons/lucide/chart-no-axes-combined-8e8e93.png'
+import icon21 from '../../assets/icons/lucide/check-111827.png'
+import icon22 from '../../assets/icons/lucide/check-6b7280.png'
+import icon23 from '../../assets/icons/lucide/check-8e8e93.png'
+import icon24 from '../../assets/icons/lucide/chevron-right-000000.png'
+import icon25 from '../../assets/icons/lucide/chevron-right-111827.png'
+import icon26 from '../../assets/icons/lucide/chevron-right-2a64f0.png'
+import icon27 from '../../assets/icons/lucide/chevron-right-6b7280.png'
+import icon28 from '../../assets/icons/lucide/chevron-right-8e8e93.png'
+import icon29 from '../../assets/icons/lucide/circle-check-000000.png'
+import icon30 from '../../assets/icons/lucide/circle-check-057a55.png'
+import icon31 from '../../assets/icons/lucide/circle-check-059669.png'
+import icon32 from '../../assets/icons/lucide/circle-check-111827.png'
+import icon33 from '../../assets/icons/lucide/circle-check-2a64f0.png'
+import icon34 from '../../assets/icons/lucide/circle-check-6b7280.png'
+import icon35 from '../../assets/icons/lucide/circle-check-8e8e93.png'
+import icon36 from '../../assets/icons/lucide/circle-check-ffffff.png'
+import icon37 from '../../assets/icons/lucide/circle-help-000000.png'
+import icon38 from '../../assets/icons/lucide/circle-help-6b7280.png'
+import icon39 from '../../assets/icons/lucide/circle-help-8e8e93.png'
+import icon40 from '../../assets/icons/lucide/clock-3-057a55.png'
+import icon41 from '../../assets/icons/lucide/clock-3-111827.png'
+import icon42 from '../../assets/icons/lucide/clock-3-2a64f0.png'
+import icon43 from '../../assets/icons/lucide/clock-3-6b7280.png'
+import icon44 from '../../assets/icons/lucide/clock-3-8e8e93.png'
+import icon45 from '../../assets/icons/lucide/contact-round-2a64f0.png'
+import icon46 from '../../assets/icons/lucide/contact-round-6b7280.png'
+import icon47 from '../../assets/icons/lucide/contact-round-8259c7.png'
+import icon48 from '../../assets/icons/lucide/contact-round-8e8e93.png'
+import icon49 from '../../assets/icons/lucide/credit-card-000000.png'
+import icon50 from '../../assets/icons/lucide/credit-card-6b7280.png'
+import icon51 from '../../assets/icons/lucide/credit-card-8e8e93.png'
+import icon52 from '../../assets/icons/lucide/credit-card-ff9500.png'
+import icon53 from '../../assets/icons/lucide/file-text-000000.png'
+import icon54 from '../../assets/icons/lucide/file-text-111827.png'
+import icon55 from '../../assets/icons/lucide/file-text-2a64f0.png'
+import icon56 from '../../assets/icons/lucide/file-text-6b7280.png'
+import icon57 from '../../assets/icons/lucide/file-text-8e8e93.png'
+import icon58 from '../../assets/icons/lucide/files-000000.png'
+import icon59 from '../../assets/icons/lucide/files-6b7280.png'
+import icon60 from '../../assets/icons/lucide/files-8e8e93.png'
+import icon61 from '../../assets/icons/lucide/folder-2a64f0.png'
+import icon62 from '../../assets/icons/lucide/folder-6b7280.png'
+import icon63 from '../../assets/icons/lucide/folder-8e8e93.png'
+import icon64 from '../../assets/icons/lucide/folder-b28a31.png'
+import icon65 from '../../assets/icons/lucide/folder-open-000000.png'
+import icon66 from '../../assets/icons/lucide/folder-open-2a64f0.png'
+import icon67 from '../../assets/icons/lucide/folder-open-34c759.png'
+import icon68 from '../../assets/icons/lucide/folder-open-6b7280.png'
+import icon69 from '../../assets/icons/lucide/folder-open-8e8e93.png'
+import icon70 from '../../assets/icons/lucide/hospital-2a64f0.png'
+import icon71 from '../../assets/icons/lucide/hospital-6b7280.png'
+import icon72 from '../../assets/icons/lucide/hospital-8e8e93.png'
+import icon73 from '../../assets/icons/lucide/hospital-df627b.png'
+import icon74 from '../../assets/icons/lucide/house-6b7280.png'
+import icon75 from '../../assets/icons/lucide/house-8e8e93.png'
+import icon76 from '../../assets/icons/lucide/id-card-2a64f0.png'
+import icon77 from '../../assets/icons/lucide/id-card-6b7280.png'
+import icon78 from '../../assets/icons/lucide/id-card-8e8e93.png'
+import icon79 from '../../assets/icons/lucide/id-card-d97706.png'
+import icon80 from '../../assets/icons/lucide/inbox-2a64f0.png'
+import icon81 from '../../assets/icons/lucide/inbox-6b7280.png'
+import icon82 from '../../assets/icons/lucide/inbox-8e8e93.png'
+import icon83 from '../../assets/icons/lucide/info-000000.png'
+import icon84 from '../../assets/icons/lucide/info-057a55.png'
+import icon85 from '../../assets/icons/lucide/info-111827.png'
+import icon86 from '../../assets/icons/lucide/info-2a64f0.png'
+import icon87 from '../../assets/icons/lucide/info-6b7280.png'
+import icon88 from '../../assets/icons/lucide/info-8e8e93.png'
+import icon89 from '../../assets/icons/lucide/loader-circle-111827.png'
+import icon90 from '../../assets/icons/lucide/loader-circle-2a64f0.png'
+import icon91 from '../../assets/icons/lucide/loader-circle-6b7280.png'
+import icon92 from '../../assets/icons/lucide/loader-circle-8e8e93.png'
+import icon93 from '../../assets/icons/lucide/lock-keyhole-111827.png'
+import icon94 from '../../assets/icons/lucide/lock-keyhole-2a64f0.png'
+import icon95 from '../../assets/icons/lucide/lock-keyhole-6b7280.png'
+import icon96 from '../../assets/icons/lucide/lock-keyhole-8e8e93.png'
+import icon97 from '../../assets/icons/lucide/messages-square-2a64f0.png'
+import icon98 from '../../assets/icons/lucide/messages-square-6b7280.png'
+import icon99 from '../../assets/icons/lucide/messages-square-8e8e93.png'
+import icon100 from '../../assets/icons/lucide/messages-square-af52de.png'
+import icon101 from '../../assets/icons/lucide/mic-000000.png'
+import icon102 from '../../assets/icons/lucide/mic-6b7280.png'
+import icon103 from '../../assets/icons/lucide/mic-8e8e93.png'
+import icon104 from '../../assets/icons/lucide/plus-2a64f0.png'
+import icon105 from '../../assets/icons/lucide/plus-6b7280.png'
+import icon106 from '../../assets/icons/lucide/plus-8e8e93.png'
+import icon107 from '../../assets/icons/lucide/route-000000.png'
+import icon108 from '../../assets/icons/lucide/route-111827.png'
+import icon109 from '../../assets/icons/lucide/route-2a64f0.png'
+import icon110 from '../../assets/icons/lucide/route-6b7280.png'
+import icon111 from '../../assets/icons/lucide/route-8e8e93.png'
+import icon112 from '../../assets/icons/lucide/scale-111827.png'
+import icon113 from '../../assets/icons/lucide/scale-2a64f0.png'
+import icon114 from '../../assets/icons/lucide/scale-6b7280.png'
+import icon115 from '../../assets/icons/lucide/scale-8e8e93.png'
+import icon116 from '../../assets/icons/lucide/settings-000000.png'
+import icon117 from '../../assets/icons/lucide/settings-6b7280.png'
+import icon118 from '../../assets/icons/lucide/settings-8e8e93.png'
+import icon119 from '../../assets/icons/lucide/shield-check-000000.png'
+import icon120 from '../../assets/icons/lucide/shield-check-111827.png'
+import icon121 from '../../assets/icons/lucide/shield-check-2a64f0.png'
+import icon122 from '../../assets/icons/lucide/shield-check-6b7280.png'
+import icon123 from '../../assets/icons/lucide/shield-check-8e8e93.png'
+import icon124 from '../../assets/icons/lucide/shield-check-ffffff.png'
+import icon125 from '../../assets/icons/lucide/triangle-alert-2a64f0.png'
+import icon126 from '../../assets/icons/lucide/triangle-alert-6b7280.png'
+import icon127 from '../../assets/icons/lucide/triangle-alert-8e8e93.png'
+import icon128 from '../../assets/icons/lucide/undo-2-057a55.png'
+import icon129 from '../../assets/icons/lucide/undo-2-111827.png'
+import icon130 from '../../assets/icons/lucide/undo-2-2a64f0.png'
+import icon131 from '../../assets/icons/lucide/undo-2-6b7280.png'
+import icon132 from '../../assets/icons/lucide/undo-2-8e8e93.png'
+import icon133 from '../../assets/icons/lucide/user-round-000000.png'
+import icon134 from '../../assets/icons/lucide/user-round-111827.png'
+import icon135 from '../../assets/icons/lucide/user-round-2a64f0.png'
+import icon136 from '../../assets/icons/lucide/user-round-6b7280.png'
+import icon137 from '../../assets/icons/lucide/user-round-8e8e93.png'
+import icon138 from '../../assets/icons/lucide/x-000000.png'
+import icon139 from '../../assets/icons/lucide/x-6b7280.png'
+import icon140 from '../../assets/icons/lucide/x-8e8e93.png'
 
 export const iconAssets: Record<string, Record<string, string>> = {
   'arrow-right': {
@@ -147,188 +158,199 @@ export const iconAssets: Record<string, Record<string, string>> = {
   },
   'camera': {
     '#000000': icon8,
-    '#2A64F0': icon9,
-    '#6B7280': icon10,
-    '#8E8E93': icon11,
+    '#1698B5': icon9,
+    '#2A64F0': icon10,
+    '#6B7280': icon11,
+    '#8E8E93': icon12,
   },
   'car-front': {
-    '#2A64F0': icon12,
-    '#6B7280': icon13,
-    '#8E8E93': icon14,
+    '#159A78': icon13,
+    '#2A64F0': icon14,
+    '#6B7280': icon15,
+    '#8E8E93': icon16,
   },
   'chart-no-axes-combined': {
-    '#000000': icon15,
-    '#111827': icon16,
-    '#6B7280': icon17,
-    '#8E8E93': icon18,
+    '#000000': icon17,
+    '#111827': icon18,
+    '#6B7280': icon19,
+    '#8E8E93': icon20,
   },
   'check': {
-    '#111827': icon19,
-    '#6B7280': icon20,
-    '#8E8E93': icon21,
+    '#111827': icon21,
+    '#6B7280': icon22,
+    '#8E8E93': icon23,
   },
   'chevron-right': {
-    '#000000': icon22,
-    '#2A64F0': icon23,
-    '#6B7280': icon24,
-    '#8E8E93': icon25,
+    '#000000': icon24,
+    '#111827': icon25,
+    '#2A64F0': icon26,
+    '#6B7280': icon27,
+    '#8E8E93': icon28,
   },
   'circle-check': {
-    '#057A55': icon26,
-    '#059669': icon27,
-    '#111827': icon28,
-    '#2A64F0': icon29,
-    '#6B7280': icon30,
-    '#8E8E93': icon31,
+    '#000000': icon29,
+    '#057A55': icon30,
+    '#059669': icon31,
+    '#111827': icon32,
+    '#2A64F0': icon33,
+    '#6B7280': icon34,
+    '#8E8E93': icon35,
+    '#FFFFFF': icon36,
   },
   'circle-help': {
-    '#000000': icon32,
-    '#6B7280': icon33,
-    '#8E8E93': icon34,
-  },
-  'clock-3': {
-    '#057A55': icon35,
-    '#111827': icon36,
-    '#2A64F0': icon37,
+    '#000000': icon37,
     '#6B7280': icon38,
     '#8E8E93': icon39,
   },
+  'clock-3': {
+    '#057A55': icon40,
+    '#111827': icon41,
+    '#2A64F0': icon42,
+    '#6B7280': icon43,
+    '#8E8E93': icon44,
+  },
   'contact-round': {
-    '#2A64F0': icon40,
-    '#6B7280': icon41,
-    '#8E8E93': icon42,
+    '#2A64F0': icon45,
+    '#6B7280': icon46,
+    '#8259C7': icon47,
+    '#8E8E93': icon48,
   },
   'credit-card': {
-    '#000000': icon43,
-    '#6B7280': icon44,
-    '#8E8E93': icon45,
-    '#FF9500': icon46,
-  },
-  'file-text': {
-    '#000000': icon47,
-    '#111827': icon48,
-    '#2A64F0': icon49,
+    '#000000': icon49,
     '#6B7280': icon50,
     '#8E8E93': icon51,
+    '#FF9500': icon52,
   },
-  'files': {
-    '#000000': icon52,
-    '#6B7280': icon53,
-    '#8E8E93': icon54,
-  },
-  'folder': {
+  'file-text': {
+    '#000000': icon53,
+    '#111827': icon54,
     '#2A64F0': icon55,
     '#6B7280': icon56,
     '#8E8E93': icon57,
   },
-  'folder-open': {
+  'files': {
     '#000000': icon58,
-    '#2A64F0': folderOpenBlue,
-    '#34C759': icon59,
-    '#6B7280': icon60,
-    '#8E8E93': icon61,
+    '#6B7280': icon59,
+    '#8E8E93': icon60,
   },
-  'hospital': {
-    '#2A64F0': icon62,
-    '#6B7280': icon63,
-    '#8E8E93': icon64,
+  'folder': {
+    '#2A64F0': icon61,
+    '#6B7280': icon62,
+    '#8E8E93': icon63,
+    '#B28A31': icon64,
   },
-  'house': {
-    '#6B7280': icon65,
-    '#8E8E93': icon66,
-  },
-  'id-card': {
-    '#2A64F0': icon67,
+  'folder-open': {
+    '#000000': icon65,
+    '#2A64F0': icon66,
+    '#34C759': icon67,
     '#6B7280': icon68,
     '#8E8E93': icon69,
   },
-  'inbox': {
+  'hospital': {
     '#2A64F0': icon70,
     '#6B7280': icon71,
     '#8E8E93': icon72,
+    '#DF627B': icon73,
   },
-  'info': {
-    '#000000': icon73,
-    '#057A55': icon74,
-    '#111827': icon75,
+  'house': {
+    '#6B7280': icon74,
+    '#8E8E93': icon75,
+  },
+  'id-card': {
     '#2A64F0': icon76,
     '#6B7280': icon77,
     '#8E8E93': icon78,
+    '#D97706': icon79,
   },
-  'loader-circle': {
-    '#111827': icon79,
+  'inbox': {
     '#2A64F0': icon80,
     '#6B7280': icon81,
     '#8E8E93': icon82,
   },
+  'info': {
+    '#000000': icon83,
+    '#057A55': icon84,
+    '#111827': icon85,
+    '#2A64F0': icon86,
+    '#6B7280': icon87,
+    '#8E8E93': icon88,
+  },
+  'loader-circle': {
+    '#111827': icon89,
+    '#2A64F0': icon90,
+    '#6B7280': icon91,
+    '#8E8E93': icon92,
+  },
   'lock-keyhole': {
-    '#111827': icon83,
-    '#2A64F0': icon84,
-    '#6B7280': icon85,
-    '#8E8E93': icon86,
-  },
-  'messages-square': {
-    '#2A64F0': icon87,
-    '#6B7280': icon88,
-    '#8E8E93': icon89,
-    '#AF52DE': icon90,
-  },
-  'mic': {
-    '#000000': icon91,
-    '#6B7280': icon92,
-    '#8E8E93': icon93,
-  },
-  'plus': {
+    '#111827': icon93,
     '#2A64F0': icon94,
     '#6B7280': icon95,
     '#8E8E93': icon96,
   },
+  'messages-square': {
+    '#2A64F0': icon97,
+    '#6B7280': icon98,
+    '#8E8E93': icon99,
+    '#AF52DE': icon100,
+  },
+  'mic': {
+    '#000000': icon101,
+    '#6B7280': icon102,
+    '#8E8E93': icon103,
+  },
+  'plus': {
+    '#2A64F0': icon104,
+    '#6B7280': icon105,
+    '#8E8E93': icon106,
+  },
   'route': {
-    '#111827': icon97,
-    '#2A64F0': icon98,
-    '#6B7280': icon99,
-    '#8E8E93': icon100,
+    '#000000': icon107,
+    '#111827': icon108,
+    '#2A64F0': icon109,
+    '#6B7280': icon110,
+    '#8E8E93': icon111,
   },
   'scale': {
-    '#111827': icon101,
-    '#2A64F0': icon102,
-    '#6B7280': icon103,
-    '#8E8E93': icon104,
+    '#111827': icon112,
+    '#2A64F0': icon113,
+    '#6B7280': icon114,
+    '#8E8E93': icon115,
   },
   'settings': {
-    '#000000': icon105,
-    '#6B7280': icon106,
-    '#8E8E93': icon107,
+    '#000000': icon116,
+    '#6B7280': icon117,
+    '#8E8E93': icon118,
   },
   'shield-check': {
-    '#000000': icon108,
-    '#111827': icon109,
-    '#2A64F0': icon110,
-    '#6B7280': icon111,
-    '#8E8E93': icon112,
-    '#FFFFFF': icon113,
+    '#000000': icon119,
+    '#111827': icon120,
+    '#2A64F0': icon121,
+    '#6B7280': icon122,
+    '#8E8E93': icon123,
+    '#FFFFFF': icon124,
   },
   'triangle-alert': {
-    '#2A64F0': icon114,
-    '#6B7280': icon115,
-    '#8E8E93': icon116,
+    '#2A64F0': icon125,
+    '#6B7280': icon126,
+    '#8E8E93': icon127,
   },
   'undo-2': {
-    '#057A55': icon117,
-    '#111827': icon118,
-    '#2A64F0': icon119,
-    '#6B7280': icon120,
-    '#8E8E93': icon121,
+    '#057A55': icon128,
+    '#111827': icon129,
+    '#2A64F0': icon130,
+    '#6B7280': icon131,
+    '#8E8E93': icon132,
   },
   'user-round': {
-    '#111827': icon122,
-    '#2A64F0': icon123,
-    '#6B7280': icon124,
-    '#8E8E93': icon125,
+    '#000000': icon133,
+    '#111827': icon134,
+    '#2A64F0': icon135,
+    '#6B7280': icon136,
+    '#8E8E93': icon137,
   },
   'x': {
-    '#000000': icon126,
-    '#6B7280': icon127,
-    '#8E8E93': icon128,
+    '#000000': icon138,
+    '#6B7280': icon139,
+    '#8E8E93': icon140,
   },
 }

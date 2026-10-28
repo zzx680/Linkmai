@@ -12,7 +12,7 @@ const compiled = ts.transpileModule(readFileSync(filename, 'utf8'), {
   compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
 }).outputText
 
-function setup(harness = false) {
+function setup(harness: boolean | 'reject' = false) {
   const effects: Array<() => (() => void) | undefined> = []
   const timers = new Map<number, () => Promise<void>>()
   let calls = 0
@@ -29,12 +29,13 @@ function setup(harness = false) {
     setTimeout: (fn: () => Promise<void>) => { timers.set(++timerId, fn); return timerId },
     clearTimeout: (id: number) => timers.delete(id),
     require(id: string) {
-      if (id === 'react') return { useState: () => [[ '', harness, true, 0 ][stateIndex++], () => {}], useEffect: (fn: any) => effects.push(fn) }
+      if (id === 'react') return { useState: () => [[ '', true, 0, harness === true ? 'enabled' : harness === false ? 'disabled' : 'unknown' ][stateIndex++], () => {}], useEffect: (fn: any) => effects.push(fn) }
       if (id === '@tarojs/taro') return { useDidShow() {}, useDidHide() {} }
       if (id === '@tarojs/components') return { View: 'div', Text: 'span', ScrollView: 'section' }
       if (id === '../../store') return { useAppStore: Object.assign(() => state, { getState: () => state, setState: (patch: any) => Object.assign(state, patch) }) }
+      if (id === '../../hooks/useReportNotification') return { useReportNotification: () => ({ enabled: false, subscriptionId: '', isSubscribing: false, subscribe: async () => false, clearSubscription() {} }) }
       if (id === '../../components') return { Icon: () => null }
-      if (id === '../../services/workflow') return { workflowApi: { enabled: async () => harness } }
+      if (id === '../../services/workflow') return { workflowApi: { enabled: () => harness === 'reject' ? Promise.reject(new Error('temporary')) : Promise.resolve(harness) } }
       if (id === '../../components/CaseWorkflow') return {}
       if (id === '../../components/CaseJourney' || id.endsWith('.scss')) return {}
       return localRequire(id)
@@ -71,6 +72,14 @@ test('leaving the report page cancels pending polling without losing the run', a
   fixture.effects[2]()
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(fixture.calls(), 2)
+})
+
+test('an unresolved workflow probe does not start legacy polling', async () => {
+  const fixture = setup('reject')
+  fixture.effects[2]()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(fixture.calls(), 0)
+  assert.equal(fixture.timers.size, 0)
 })
 
 test('new workflow owns polling when enabled and never requests a legacy report', async () => {

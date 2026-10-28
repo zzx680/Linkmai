@@ -44,7 +44,7 @@ interface AppState {
   setUploadProgress: (fileId: string, progress: number) => void
   addMaterial: (material: api.Material) => void
   confirmMaterial: (materialId: string, fields: api.MaterialField[]) => Promise<void>
-  generateReport: () => Promise<void>
+  generateReport: (notificationSubscriptionId?: string) => Promise<void>
   loadReport: (caseId: string) => Promise<void>
   reset: () => void
 }
@@ -520,7 +520,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  generateReport: async () => {
+  generateReport: async (notificationSubscriptionId) => {
     const currentCase = get().currentCase
     if (!currentCase) {
       Taro.showToast({ title: '请先创建案件', icon: 'none' })
@@ -548,7 +548,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (isStale(context)) throw new Error('案件已切换，请重新生成')
     set({ isGeneratingReport: true, reportRunError: null })
     try {
-      const result = await api.generateReport(currentCase.id, facts)
+      const result = await api.generateReport(currentCase.id, facts, notificationSubscriptionId)
       if (isStale(context)) return
       if (isPendingReport(result)) {
         set({ reportRunId: result.runId, reportRunStatus: result.status, isGeneratingReport: ['queued','running'].includes(result.status), currentReport: null })

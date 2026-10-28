@@ -76,6 +76,17 @@ test('worker idempotency, concurrent claim, crash recovery and fencing', async (
   assert.equal('leaseToken' in state.runs[0],false)
 })
 
+test('restored source facts reactivate their deterministic record', async () => {
+  const f = await fixture()
+  await service.get(f.userId, f.caseId)
+  await db.persistConfirmedFacts(f.userId, f.caseId, [{ key: 'accident_date', label: '事故日期', value: '2026-10-21', source: 'user_text' }])
+  await service.get(f.userId, f.caseId)
+  await db.persistConfirmedFacts(f.userId, f.caseId, [{ key: 'accident_date', label: '事故日期', value: '2026-10-20', source: 'user_text' }])
+  const workspace = await service.get(f.userId, f.caseId)
+  assert.equal(workspace.facts.find(fact => fact.key === 'accident_date' && fact.value === '2026-10-20')?.status, 'confirmed')
+  assert.equal((await service.calculate(f.userId, f.caseId)).accidentDate, '2026-10-20')
+})
+
 test('candidate facts stay excluded; conflicts need explicit resolution; ownership is checked', async () => {
   const f = await fixture()
   const candidate = await service.propose(f.userId,f.caseId,{key:'accident_date',label:'事故日期',value:'2026-10-21',evidenceRefs:[]})
@@ -186,9 +197,11 @@ test('bounded retries need an explicit new revision after exhaustion', async () 
   assert.equal((await service.get(f.userId,f.caseId)).runs[0].status,'failed')
   assert.equal(await service.claim(f.userId,f.caseId,'worker',now+40000),null)
   const before=(await service.get(f.userId,f.caseId)).revision
-  await service.retry(f.userId,f.caseId,run.runId)
+  const retried=await service.retry(f.userId,f.caseId,run.runId)
   assert.equal((await service.get(f.userId,f.caseId)).revision,before+1)
-  assert.notEqual((await service.enqueue(f.userId,f.caseId)).runId,run.runId)
+  assert.notEqual(retried.runId,run.runId)
+  assert.equal(retried.status,'queued')
+  assert.equal((await service.get(f.userId,f.caseId)).runs.filter(item=>item.inputRevision===before+1&&item.status==='queued').length,1)
 })
 
 test('seed loading cannot restore revoked legal sources', async () => {

@@ -60,7 +60,11 @@ function synchronize(state: Workspace, sources: Sources, control: Control) {
     const active = new Set(incoming.map(f => f.id))
     state.facts.filter(f => f.source !== 'user' && !active.has(f.id)).forEach(f => { f.status = 'rejected' })
     state.facts.filter(f => f.source === 'user' && f.evidenceRefs.some(ref => !state.evidence.some(e => e.id === ref && e.status === 'active'))).forEach(f => { f.status = 'proposed' })
-    for (const fact of incoming) if (!state.facts.some(f => f.id === fact.id)) state.facts.push(fact)
+    for (const fact of incoming) {
+      const existing = state.facts.find(item => item.id === fact.id)
+      if (existing) Object.assign(existing, fact)
+      else state.facts.push(fact)
+    }
     reconcileConflicts(state)
   }
   state.contextHash = contextHash(state, control)
@@ -72,6 +76,20 @@ function synchronize(state: Workspace, sources: Sources, control: Control) {
 }
 function changedInput(state: Workspace, control: Control, actor: string, entityId: string, code: string) {
   state.revision++; invalidate(state); state.contextHash = contextHash(state, control); audit(state, code, entityId, actor)
+}
+function queueRun(state: Workspace, sources: Sources, control: Control, userId: string, caseId: string, now: number) {
+  requirePaid(sources)
+  const ctx = ContextBuilder.build(state)
+  requireCalculator(control, ctx.accidentDate, ctx.jurisdiction)
+  const skill = SkillRegistry.get('case-bundle')
+  const key = fingerprint([caseId, state.revision, state.contextHash, skill.version])
+  const existing = state.runs.find(run => run.key === key)
+  if (existing) return { runId: existing.id, status: existing.status }
+  const run = { id: id(), inputRevision: state.revision, contextHash: state.contextHash, key, skillVersion: skill.version,
+    status: 'queued' as const, attemptCount: 0, documentIds: [], createdAt: timestamp(now), availableAt: timestamp(now), modelSnapshot: ModelRouter.snapshot() }
+  state.runs.push(run)
+  audit(state, 'RUN_QUEUED', run.id, userId, now)
+  return { runId: run.id, status: run.status }
 }
 function requirePaid(sources: Sources) { if (!sources.paid) throw new Error('PAYMENT_REQUIRED') }
 function refreshWorkflow(state: Workspace) {
@@ -169,18 +187,7 @@ export class HarnessService {
   }
   enqueue(userId: string, caseId: string, now = Date.now()) {
     if (process.env.HARNESS_PAUSED === 'true') throw new Error('WORKFLOW_PAUSED')
-    return this.command(userId, caseId, (state, sources, control) => {
-      requirePaid(sources)
-      const ctx = ContextBuilder.build(state)
-      requireCalculator(control, ctx.accidentDate, ctx.jurisdiction)
-      const skill = SkillRegistry.get('case-bundle')
-      const key = fingerprint([caseId, state.revision, state.contextHash, skill.version])
-      const existing = state.runs.find(run => run.key === key)
-      if (existing) return { runId: existing.id, status: existing.status }
-      const run = { id: id(), inputRevision: state.revision, contextHash: state.contextHash, key, skillVersion: skill.version,
-        status: 'queued' as const, attemptCount: 0, documentIds: [], createdAt: timestamp(now), availableAt: timestamp(now), modelSnapshot: ModelRouter.snapshot() }
-      state.runs.push(run); audit(state, 'RUN_QUEUED', run.id, userId, now); return { runId: run.id, status: run.status }
-    })
+    return this.command(userId, caseId, (state, sources, control) => queueRun(state, sources, control, userId, caseId, now))
   }
   claim(userId: string, caseId: string, worker: string, at?: number) {
     return this.command(userId, caseId, (state, sources) => {
@@ -266,12 +273,13 @@ export class HarnessService {
     })
   }
   retry(userId: string, caseId: string, runId: string) {
+    if (process.env.HARNESS_PAUSED === 'true') throw new Error('WORKFLOW_PAUSED')
     return this.command(userId, caseId, (state, sources, control) => {
       requirePaid(sources)
       const run = state.runs.find(r => r.id === runId && r.contextHash === state.contextHash && r.status === 'failed')
       if (!run) throw new Error('INVALID_RETRY_STATE')
       changedInput(state, control, userId, run.id, 'MANUAL_RETRY_REQUESTED')
-      return { inputRevision: state.revision }
+      return queueRun(state, sources, control, userId, caseId, Date.now())
     })
   }
   async reviewQueue(reviewerId: string) {

@@ -1,5 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '案件报告',
+  navigationBarTitleText: '',
   navigationBarBackgroundColor: '#FFFFFF',
   navigationBarTextStyle: 'black',
   enablePullDownRefresh: false

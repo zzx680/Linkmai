@@ -1,5 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '我的'
+  navigationBarTitleText: ''
 })
 
 function definePageConfig<T>(config: T): T {

@@ -9,6 +9,8 @@ import { entitlementLabel, formatPaymentPrice } from '../../utils/payment'
 import { IS_H5 } from '../../config/env'
 import OrderHistory from './OrderHistory'
 import brandMark from '../../assets/brand/linkmai-chat.png'
+import laurel from '../../assets/payments/laurel.png'
+import unlockSparkles from '../../assets/payments/unlock-sparkles.png'
 import './index.scss'
 
 const FEATURE_DETAILS = {
@@ -119,21 +121,18 @@ function CasePaymentPanel() {
     <View className="case-payment-panel">
       <View className="payments-header">
         <View className="membership-emblem"><Image className="membership-logo" src={brandMark} mode="aspectFit" /></View>
-        <Text className="payments-eyebrow">灵迈 · 案件方案</Text>
-        <Text className="payments-title">让下一步，更有依据</Text>
-        <Text className="payments-description">整理事故信息，找到清晰的处理方向</Text>
+        <View className="payments-brand"><Text className="payments-title">灵迈</Text><Text className="payments-pro">PRO</Text></View>
       </View>
 
       <View className={`plan-card plan-card-${status}`}>
         <View className="plan-card-content">
           <View className="plan-topline">
-            <Text className="plan-kicker">单次案件方案</Text>
+            <Text className="plan-kicker">单次案件解决方案</Text>
             <View className="status-pill">
               <Icon name={isPaid ? 'check' : isRefunded ? 'undo-2' : 'clock-3'} size={14} color="#111827" />
               <Text>{entitlementLabel(status)}</Text>
             </View>
           </View>
-          <Text className="plan-title">{currentCase.title || '交通事故案件'}</Text>
           <View className="plan-price-row">
             <View className="plan-price-copy">
               <Text className="plan-price-label">一次性解锁</Text>
@@ -157,7 +156,11 @@ function CasePaymentPanel() {
       )}
 
       {features.length > 0 && <View className="features-section">
-        <View className="benefits-heading"><View className="benefits-heading-line" /><Text className="section-title">完整方案包含</Text><View className="benefits-heading-line" /></View>
+        <View className="benefits-heading">
+          <Image className="benefits-laurel" src={laurel} mode="aspectFit" aria-hidden />
+          <Text className="section-title">完整方案包含</Text>
+          <Image className="benefits-laurel benefits-laurel-right" src={laurel} mode="aspectFit" aria-hidden />
+        </View>
         <View className="benefits-card">
           {features.map(feature => (
             <View className="benefit-item" key={feature.title}>
@@ -181,7 +184,10 @@ function CasePaymentPanel() {
       </View>
       <Text className="payment-disclaimer">AI 辅助整理与分析，不替代专业法律意见</Text>
       <View className="action-panel payment-dock">
-        {canPay && <Button className={`primary-button${isPaying ? ' button-disabled' : ''}`} disabled={isPaying} onClick={handlePayment}><Text>{isPaying ? '正在准备支付...' : `解锁当前案件 · ${price}`}</Text></Button>}
+        {canPay && <Button className={`primary-button${isPaying ? ' button-disabled' : ''}`} disabled={isPaying} onClick={handlePayment}>
+          <Image className="unlock-sparkles" src={unlockSparkles} mode="aspectFit" aria-hidden />
+          <Text>{isPaying ? '正在准备支付...' : '立即解锁'}</Text>
+        </Button>}
         {isPending && <>
           {price && <Button className={`primary-button${isPaying || isLoading ? ' button-disabled' : ''}`} disabled={isPaying || isLoading} onClick={() => { if (!isPaying && !isLoading) handlePayment() }}><Text>{isPaying ? '正在核对原订单...' : `继续支付 · ${price}`}</Text></Button>}
           <Button className={`secondary-button${isPaying || isLoading ? ' button-disabled' : ''}`} disabled={isPaying || isLoading} onClick={refresh}><Text>{isPaying || isLoading ? '正在确认...' : '刷新支付结果'}</Text></Button>

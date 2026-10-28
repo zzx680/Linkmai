@@ -1,5 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '处理案件',
+  navigationBarTitleText: '',
   disableScroll: true,
   usingComponents: process.env.TARO_ENV === 'h5' ? {} : {
     't-chat-message': 'tdesign-miniprogram/miniprogram_dist/chat-message/chat-message',

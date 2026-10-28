@@ -161,3 +161,16 @@ export interface PaymentOrder {
   updatedAt: Date
   expiresAt: Date
 }
+
+export interface ReportNotificationSubscription {
+  id: string
+  userId: string
+  caseId: string
+  runId?: string | null
+  templateId: string
+  status: 'awaiting_run' | 'pending' | 'sending' | 'sent' | 'failed'
+  expiresAt?: Date | null
+  errorCode?: string | null
+  createdAt: Date
+  sentAt?: Date | null
+}

@@ -11,6 +11,8 @@
   .workflow-picker, .workflow-input { min-height: 80rpx; padding: 16rpx; box-sizing: border-box; background: #f5f7fa; border-radius: 12rpx; margin-bottom: 16rpx; font-size: 26rpx; line-height: 1.6; }
   .workflow-input { width: 100%; height: 88rpx; }
   .workflow-button { display: flex; justify-content: center; align-items: center; min-height: 84rpx; padding: 12rpx 20rpx; margin-top: 24rpx; border-radius: 16rpx; background: $color-brand-primary; color: #fff; font-size: 27rpx; line-height: 1.6; }
+  .workflow-notification-button { display: flex; align-items: center; justify-content: center; min-height: 76rpx; margin: 24rpx 0 -12rpx; padding: 12rpx 18rpx; border: 1rpx solid $color-border-light; border-radius: 14rpx; color: $color-brand-primary; background: #fff; font-size: 25rpx; line-height: 1.5; }
+  .workflow-notification-button::after { border: 0; }
   .workflow-button.secondary { background: $color-brand-light; color: $color-brand-primary; }
   .is-busy { opacity: .6; }
   .workflow-row { padding: 22rpx 0; border-bottom: 1rpx solid $color-border-light; }

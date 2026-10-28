@@ -7,6 +7,8 @@ import { reviewerAuth, reviewerLogin, reviewAdmin, ReviewRequest } from './auth'
 import { createRateLimiter } from '../middleware/security'
 import { expenseDefinitions } from './calculator'
 import { legalContentHash } from '../legal/types'
+import { db } from '../db'
+import { deliverReportNotificationForRun, linkReportNotificationToRun } from '../services/report-notifications'
 
 export function harnessEnabled(_req: Request, res: Response, next: NextFunction) {
   if (process.env.HARNESS_ENABLED !== 'true') return res.status(503).json({ success: false, error: '案件计算与审核流程暂未启用' })
@@ -49,11 +51,25 @@ caseWorkflowRouter.post('/:caseId/facts', endpoint(req => harness.propose(user(r
 caseWorkflowRouter.post('/:caseId/facts/:factId/:decision', endpoint(req => harness.decideFact(user(req), param(req,'caseId'), param(req,'factId'), z.enum(['confirm','reject']).parse(req.params.decision))))
 caseWorkflowRouter.post('/:caseId/conflicts/:conflictId/resolve', endpoint(req => harness.resolve(user(req), param(req,'caseId'), param(req,'conflictId'), z.object({ factId: identifier }).strict().parse(req.body).factId)))
 caseWorkflowRouter.post('/:caseId/calculations', endpoint(req => harness.calculate(user(req), param(req,'caseId'))))
-caseWorkflowRouter.post('/:caseId/documents/drafts', endpoint(req => harness.enqueue(user(req), param(req,'caseId'))))
-caseWorkflowRouter.post('/:caseId/runs/:runId/retry', endpoint(async req => {
-  await harness.retry(user(req), param(req,'caseId'), param(req,'runId'))
-  return harness.enqueue(user(req), param(req,'caseId'))
+caseWorkflowRouter.post('/:caseId/documents/drafts', endpoint(async req => {
+  const userId = user(req)
+  const caseId = param(req,'caseId')
+  const run = await harness.enqueue(userId, caseId)
+  const subscriptionId = req.body?.notificationSubscriptionId
+  if (typeof subscriptionId === 'string' && subscriptionId.length <= 64) {
+    await linkReportNotificationToRun(subscriptionId, userId, caseId, run.runId)
+    try {
+      const workspace = await harness.get(userId, caseId)
+      if (workspace.runs.some(item => item.id === run.runId && item.status === 'succeeded')) {
+        await deliverReportNotificationForRun(run.runId)
+      }
+    } catch {
+      // The report run remains valid if optional notification reconciliation is unavailable.
+    }
+  }
+  return run
 }))
+caseWorkflowRouter.post('/:caseId/runs/:runId/retry', endpoint(req => harness.retry(user(req), param(req,'caseId'), param(req,'runId'))))
 caseWorkflowRouter.post('/:caseId/documents/:documentId/confirm', endpoint(req => {
   const input = z.object({ reviewConsentVersion: z.literal('review-v1').optional() }).strict().parse(req.body || {})
   return harness.confirm(user(req), param(req,'caseId'), param(req,'documentId'), input.reviewConsentVersion)

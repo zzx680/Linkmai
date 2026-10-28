@@ -47,6 +47,18 @@ export default function Help() {
         </View>
       </View>
 
+      <View className="support-section contact-support-section">
+        <Text className="section-title">联系客服</Text>
+        <View className="support-card contact-support-card">
+          <View className="card-icon"><Icon name="headset" size={22} color="#2A64F0" /></View>
+          <View className="card-copy">
+            <Text className="card-title">需要人工协助？</Text>
+            <Text className="card-description">通过微信客服会话咨询产品使用和订单问题</Text>
+            <Button className="contact-service-button" openType="contact" showMessageCard sendMessageTitle="灵迈使用咨询" sendMessagePath="pages/help/index">联系微信客服</Button>
+          </View>
+        </View>
+      </View>
+
       <Button className="guide-replay-button" onClick={() => {
         restartGuide()
         Taro.switchTab({ url: useAppStore.getState().currentCase ? '/pages/agent/index' : '/pages/case/index' })

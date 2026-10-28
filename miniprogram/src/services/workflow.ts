@@ -22,7 +22,10 @@ export const workflowApi = {
   decide: (caseId: string, factId: string, decision: 'confirm' | 'reject') => request({ url: `${base(caseId)}/facts/${encodeURIComponent(factId)}/${decision}`, method: 'POST' }),
   resolve: (caseId: string, conflictId: string, factId: string) => request({ url: `${base(caseId)}/conflicts/${encodeURIComponent(conflictId)}/resolve`, method: 'POST', data: { factId } }),
   calculate: (caseId: string) => request({ url: `${base(caseId)}/calculations`, method: 'POST' }),
-  generate: (caseId: string) => request({ url: `${base(caseId)}/documents/drafts`, method: 'POST' }),
+  generate: (caseId: string, notificationSubscriptionId?: string) => request({
+    url: `${base(caseId)}/documents/drafts`, method: 'POST',
+    data: notificationSubscriptionId ? { notificationSubscriptionId } : undefined,
+  }),
   retry: (caseId: string, runId: string) => request({ url: `${base(caseId)}/runs/${encodeURIComponent(runId)}/retry`, method: 'POST' }),
   confirm: (caseId: string, documentId: string) => request({ url: `${base(caseId)}/documents/${encodeURIComponent(documentId)}/confirm`, method: 'POST', data: { reviewConsentVersion: 'review-v1' } }),
   revise: (caseId: string, documentId: string) => request({ url: `${base(caseId)}/documents/${encodeURIComponent(documentId)}/revise`, method: 'POST' }),

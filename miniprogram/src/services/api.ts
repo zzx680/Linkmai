@@ -471,13 +471,22 @@ export type ReportResponse = ReportEnvelope<ReportData>
 
 export async function generateReport(
   caseId: string,
-  facts: Array<{ label: string; value: string; confirmed: boolean }>
+  facts: Array<{ label: string; value: string; confirmed: boolean }>,
+  notificationSubscriptionId?: string
 ): Promise<ReportGenerationResult<ReportData>> {
   return request<ReportGenerationResult<ReportData>>({
     url: '/reports/generate',
     method: 'POST',
-    data: { caseId, facts }
+    data: { caseId, facts, ...(notificationSubscriptionId ? { notificationSubscriptionId } : {}) }
   })
+}
+
+export async function getReportNotificationConfig(): Promise<{ enabled: boolean; templateId: string }> {
+  return request({ url: '/reports/notification-config' })
+}
+
+export async function createReportNotificationSubscription(caseId: string): Promise<{ subscriptionId: string }> {
+  return request({ url: '/reports/notification-subscriptions', method: 'POST', data: { caseId } })
 }
 
 export interface ReportRun {

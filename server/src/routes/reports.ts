@@ -8,8 +8,31 @@ import { CollectedFact } from '../services/agent'
 import { requirePaidEntitlement } from '../services/payment'
 import { materialSnapshot } from '../services/material-snapshot'
 import { harness } from '../harness/service'
+import { createReportNotificationSubscription, deliverReportNotificationForRun, linkReportNotificationToRun, reportNotificationConfig } from '../services/report-notifications'
 
 const router = Router()
+
+router.get('/notification-config', (_req, res) => {
+  res.json({ success: true, data: reportNotificationConfig() })
+})
+
+router.post('/notification-subscriptions', async (req, res) => {
+  const userId = req.userId
+  const caseId = req.body?.caseId
+  if (!userId) return res.status(401).json({ success: false, error: '未认证' })
+  if (typeof caseId !== 'string' || !caseId) return res.status(400).json({ success: false, error: '缺少案件编号' })
+  try {
+    if (!await db.findCaseById(userId, caseId)) return res.status(404).json({ success: false, error: '未找到案件' })
+    const data = await createReportNotificationSubscription(userId, caseId)
+    return res.json({ success: true, data })
+  } catch (error) {
+    if ((error as Error).message === 'REPORT_NOTIFICATION_DISABLED') {
+      return res.status(503).json({ success: false, error: '完成提醒暂未配置' })
+    }
+    console.error('案件提醒授权保存失败:', safeError(error))
+    return res.status(500).json({ success: false, error: '提醒授权暂未保存，请稍后重试' })
+  }
+})
 
 /**
  * POST /api/reports/generate
@@ -24,6 +47,8 @@ router.post('/generate', async (req, res) => {
     }
 
     const caseId = req.body.caseId
+    const notificationSubscriptionId = typeof req.body.notificationSubscriptionId === 'string'
+      && req.body.notificationSubscriptionId.length <= 64 ? req.body.notificationSubscriptionId : undefined
     if (typeof caseId !== 'string' || !caseId) return res.status(400).json({ success: false, error: '缺少案件编号' })
     const currentCase = await db.findCaseById(userId, caseId)
     if (!currentCase) {
@@ -31,6 +56,17 @@ router.post('/generate', async (req, res) => {
     }
     if (process.env.HARNESS_ENABLED === 'true') {
       const run = await harness.enqueue(userId, currentCase.id)
+      if (notificationSubscriptionId) {
+        await linkReportNotificationToRun(notificationSubscriptionId, userId, currentCase.id, run.runId)
+        try {
+          const workspace = await harness.get(userId, currentCase.id)
+          if (workspace.runs.some(item => item.id === run.runId && item.status === 'succeeded')) {
+            await deliverReportNotificationForRun(run.runId)
+          }
+        } catch {
+          // The report run remains valid if optional notification reconciliation is unavailable.
+        }
+      }
       return res.status(202).json({ success: true, data: { ...run, confirmationRequired: true } })
     }
 
@@ -105,11 +141,23 @@ router.post('/generate', async (req, res) => {
     const run = runResult.run
     if (!run) throw new Error('AGENT_RUN_NOT_CREATED')
     if (!runResult.created && (run.status === 'queued' || run.status === 'running')) {
+      if (notificationSubscriptionId) {
+        await linkReportNotificationToRun(notificationSubscriptionId, userId, currentCase.id, run.id)
+        try {
+          if ((await db.findAgentRun(run.id))?.status === 'succeeded') await deliverReportNotificationForRun(run.id)
+        } catch {
+          // The report run remains valid if optional notification reconciliation is unavailable.
+        }
+      }
       return res.status(202).json({ success: true, data: { runId: run.id, status: run.status } })
     }
     if (!runResult.created && run.status === 'succeeded') {
       const existing = await db.getReportByCase(currentCase.id)
       if (existing?.agentRunId === run.id) {
+        if (notificationSubscriptionId) {
+          await linkReportNotificationToRun(notificationSubscriptionId, userId, currentCase.id, run.id)
+        }
+        await deliverReportNotificationForRun(run.id)
         return res.json({ success: true, data: { report: existing!.content } })
       }
     }
@@ -117,6 +165,14 @@ router.post('/generate', async (req, res) => {
     if (!claimedRun) {
       const latestRun = await db.findAgentRun(run.id)
       if (latestRun?.status === 'queued' || latestRun?.status === 'running') {
+        if (notificationSubscriptionId) {
+          await linkReportNotificationToRun(notificationSubscriptionId, userId, currentCase.id, run.id)
+        }
+        try {
+          if ((await db.findAgentRun(run.id))?.status === 'succeeded') await deliverReportNotificationForRun(run.id)
+        } catch {
+          // The report run remains valid if optional notification reconciliation is unavailable.
+        }
         return res.status(202).json({ success: true, data: { runId: run.id, status: latestRun.status } })
       }
       return res.status(409).json({ success: false, error: '本次分析未完成，请更新信息后重试', data: { runId: run.id, status: latestRun?.status } })
@@ -134,6 +190,10 @@ router.post('/generate', async (req, res) => {
       })
       await requirePaidEntitlement(userId, currentCase.id)
       await db.publishRunReport(run.id, report, { userId, materialSnapshot: materialSnapshot(artifacts) })
+      if (notificationSubscriptionId) {
+        await linkReportNotificationToRun(notificationSubscriptionId, userId, currentCase.id, run.id)
+      }
+      await deliverReportNotificationForRun(run.id)
       res.json({ success: true, data: { report } })
     } catch (generationError: any) {
       const latestRun = await db.findAgentRun(run.id)

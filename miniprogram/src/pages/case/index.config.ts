@@ -1,5 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '灵迈',
+  navigationBarTitleText: '',
   enableShareAppMessage: true
 })
 

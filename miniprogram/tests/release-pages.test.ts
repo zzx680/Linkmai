@@ -21,9 +21,11 @@ function render(page: string, state: Record<string, unknown>) {
       if (id === '@tarojs/components') return { View: 'div', Text: 'span', Button: 'button', ScrollView: 'section' }
       if (id === '@tarojs/taro') return { useDidShow() {}, useDidHide() {} }
       if (id === '../../services/api' || id === '../../utils/privacy-consent' || id.endsWith('.scss')) return {}
+      if (id === '../../hooks/useReportNotification') return { useReportNotification: () => ({ enabled: false, subscriptionId: '', isSubscribing: false, subscribe: async () => false, clearSubscription() {} }) }
       if (id === '../../store') return { useAppStore: Object.assign(() => state, { getState: () => state }) }
       if (id === '../../content/privacy') return privacyContent
       if (id === '../../components') return { Icon: () => null }
+      if (id === '../../components/OnboardingGuide/progress') return { restartGuide() {} }
       if (id === '../../services/workflow') return { workflowApi: { enabled: async () => false } }
       if (id === '../../components/CaseWorkflow') return { default: () => null, __esModule: true }
       if (id === '../../components/CaseJourney') return { default: () => null, __esModule: true }
@@ -51,4 +53,11 @@ test('paid report shows confirmed source count without offering unavailable expo
   })
   assert.match(html, /已确认的 1 份材料/)
   assert.doesNotMatch(html, /导出 PDF|导出 Word/)
+})
+
+test('help page exposes the native WeChat customer service entry', () => {
+  const source = readFileSync(path.resolve(__dirname, '../src/pages/help/index.tsx'), 'utf8')
+  assert.match(source, /联系客服/)
+  assert.match(source, /联系微信客服/)
+  assert.match(source, /openType="contact"/)
 })

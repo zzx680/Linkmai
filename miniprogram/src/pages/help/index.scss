@@ -40,6 +40,22 @@
   margin-top: 48rpx;
 }
 
+.contact-support-section { margin-top: 32rpx; }
+.contact-support-card { align-items: flex-start; }
+.contact-service-button {
+  align-self: flex-start;
+  min-height: 68rpx;
+  margin: 18rpx 0 0;
+  padding: 12rpx 22rpx;
+  border: 0;
+  border-radius: $radius-md;
+  color: #fff;
+  background: $color-brand-primary;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+}
+.contact-service-button::after { border: 0; }
+
 .section-title {
   display: block;
   margin: 0 8rpx 20rpx;

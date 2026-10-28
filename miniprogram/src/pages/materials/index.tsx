@@ -6,14 +6,14 @@ import { MaterialField, MaterialType } from '../../services/api'
 import { Icon } from '../../components'
 import './index.scss'
 
-const materialTypes: Array<{ type: MaterialType; icon: string; label: string; description: string }> = [
-  { type: 'accident_report', icon: 'file-text', label: '交警认定书', description: '责任认定与事故经过' },
-  { type: 'id_card', icon: 'id-card', label: '身份证', description: '当事人身份信息' },
-  { type: 'vehicle_license', icon: 'car-front', label: '行驶证', description: '车辆与车主信息' },
-  { type: 'driver_license', icon: 'contact-round', label: '驾驶证', description: '驾驶资格信息' },
-  { type: 'medical_record', icon: 'hospital', label: '医疗记录', description: '诊断与治疗费用' },
-  { type: 'scene_photo', icon: 'camera', label: '现场照片', description: '车辆与现场损失' },
-  { type: 'other', icon: 'folder', label: '其他材料', description: '补充证明材料' }
+const materialTypes: Array<{ type: MaterialType; icon: string; color: string; label: string; description: string }> = [
+  { type: 'accident_report', icon: 'file-text', color: '#2A64F0', label: '交警认定书', description: '责任认定与事故经过' },
+  { type: 'id_card', icon: 'id-card', color: '#D97706', label: '身份证', description: '当事人身份信息' },
+  { type: 'vehicle_license', icon: 'car-front', color: '#159A78', label: '行驶证', description: '车辆与车主信息' },
+  { type: 'driver_license', icon: 'contact-round', color: '#8259C7', label: '驾驶证', description: '驾驶资格信息' },
+  { type: 'medical_record', icon: 'hospital', color: '#DF627B', label: '医疗记录', description: '诊断与治疗费用' },
+  { type: 'scene_photo', icon: 'camera', color: '#1698B5', label: '现场照片', description: '车辆与现场损失' },
+  { type: 'other', icon: 'folder', color: '#B28A31', label: '其他材料', description: '补充证明材料' }
 ]
 
 function getTypeInfo(type: string) {
@@ -100,11 +100,11 @@ export default function Materials() {
   return (
     <View className="materials-page">
       <View className="page-header">
-        <View>
+        <View className="materials-intro-heading">
           <Text className="page-title">案件材料</Text>
-          <Text className="page-description">识别结果来自图片内容，低置信度字段请结合原件核对。确认信息不会自动构成法律结论。</Text>
+          <View className="count-badge"><Text>{materials.length} 份</Text></View>
         </View>
-        <View className="count-badge"><Text>{materials.length} 份</Text></View>
+        <Text className="page-description">上传案件材料，核对识别信息。</Text>
       </View>
 
       <View className="section-heading">
@@ -120,7 +120,7 @@ export default function Materials() {
               className={`type-card ${selectedType === item.type ? 'selected' : ''}`}
               onClick={() => setSelectedType(item.type)}
             >
-              <Icon name={item.icon} size={32} color={selectedType === item.type ? '#2A64F0' : '#8E8E93'} />
+              <Icon name={item.icon} size={32} color={item.color} />
               <Text className="type-label">{item.label}</Text>
               <Text className="type-description">{item.description}</Text>
             </View>
@@ -173,7 +173,7 @@ export default function Materials() {
                   <Image src={material.imageUrl} className="material-thumbnail" mode="aspectFill" />
                   <View className="material-info">
                     <View className="material-title-row">
-                      <Icon name={typeInfo.icon} size={20} color="#2A64F0" />
+                      <Icon name={typeInfo.icon} size={20} color={typeInfo.color} />
                       <Text className="material-title">{typeInfo.label}</Text>
                     </View>
                     <Text className="material-meta">{fields.length} 个可识别字段 · {new Date(material.createdAt).toLocaleDateString('zh-CN')}</Text>

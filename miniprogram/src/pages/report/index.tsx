@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+import { Button, View, Text, ScrollView } from '@tarojs/components'
 import { useEffect, useState } from 'react'
 import Taro, { useDidShow, useDidHide } from '@tarojs/taro'
 import { useAppStore } from '../../store'
@@ -6,6 +6,7 @@ import { Icon } from '../../components'
 import CaseJourney from '../../components/CaseJourney'
 import CaseWorkflow from '../../components/CaseWorkflow'
 import { workflowApi } from '../../services/workflow'
+import { useReportNotification } from '../../hooks/useReportNotification'
 import './index.scss'
 
 function splitParagraphs(value?: string) {
@@ -25,12 +26,20 @@ export default function Report() {
     generateReport
   } = useAppStore()
   const [error, setError] = useState('')
-  const [harnessEnabled, setHarnessEnabled] = useState(false)
-  useEffect(() => { let active = true; void workflowApi.enabled().then(enabled => { if (active) setHarnessEnabled(enabled) }).catch(() => undefined); return () => { active = false } }, [])
-  const refreshProgress = () => { setError(''); setPollCycle(value => value + 1) }
-
   const [visible, setVisible] = useState(true)
   const [pollCycle, setPollCycle] = useState(0)
+  const [harnessStatus, setHarnessStatus] = useState<'unknown' | 'enabled' | 'disabled'>('unknown')
+  const reportNotification = useReportNotification(currentCase?.id)
+  useEffect(() => {
+    if (!visible) return
+    let active = true
+    void workflowApi.enabled()
+      .then(enabled => { if (active) setHarnessStatus(enabled ? 'enabled' : 'disabled') })
+      .catch(() => { if (active) setHarnessStatus('unknown') })
+    return () => { active = false }
+  }, [visible, pollCycle])
+  const refreshProgress = () => { setError(''); setPollCycle(value => value + 1) }
+
   useDidShow(() => { setVisible(true); setPollCycle(value => value + 1) })
   useDidHide(() => setVisible(false))
 
@@ -39,7 +48,7 @@ export default function Report() {
   }, [currentCase?.id])
 
   useEffect(() => {
-    if (harnessEnabled || !visible || !currentCase || currentReport) return
+    if (harnessStatus !== 'disabled' || !visible || !currentCase || currentReport) return
     let active = true
     let timer: ReturnType<typeof setTimeout>
     let attempts = 0
@@ -59,12 +68,13 @@ export default function Report() {
     }
     void poll()
     return () => { active = false; clearTimeout(timer) }
-  }, [currentCase?.id, reportRunId, currentReport, refreshReportRun, visible, pollCycle, harnessEnabled])
+  }, [currentCase?.id, reportRunId, currentReport, refreshReportRun, visible, pollCycle, harnessStatus])
 
   const handleGenerate = async () => {
     setError('')
     try {
-      await generateReport()
+      await generateReport(reportNotification.subscriptionId || undefined)
+      reportNotification.clearSubscription()
     } catch {
       setError('报告生成失败，请稍后重试')
     }
@@ -75,7 +85,9 @@ export default function Report() {
   const confirmedMaterials = materials.filter(material => material.confirmed)
   const confirmedFieldsCount = confirmedMaterials.reduce((total, material) => total + material.fields.length, 0)
 
-  if (harnessEnabled && currentCase && currentCase.entitlement?.status === 'paid') return <CaseWorkflow key={currentCase.id} caseId={currentCase.id} />
+  if (harnessStatus === 'enabled' && currentCase && currentCase.entitlement?.status === 'paid') return <CaseWorkflow key={currentCase.id} caseId={currentCase.id} />
+
+  if (harnessStatus === 'unknown' && currentCase?.entitlement?.status === 'paid' && !currentReport) { return <View className="report-page"><Text className="muted-text">正在连接案件工作流…</Text><Text className="workflow-choice" onClick={refreshProgress}>重新连接</Text></View> }
 
   if (isGeneratingReport) {
     return (
@@ -147,6 +159,9 @@ export default function Report() {
             <View className="preflight-row"><Text>材料状态</Text><Text className={`row-value ${confirmedFieldsCount ? 'ready' : 'warning'}`}>{confirmedFieldsCount ? '可以生成' : '需要核对'}</Text></View>
           </View>
           {(error || reportRunError) && <Text className="error-text">{error || reportRunError}</Text>}
+          {reportNotification.enabled && <Button className="report-notification-button" loading={reportNotification.isSubscribing} disabled={reportNotification.isSubscribing || Boolean(reportNotification.subscriptionId)} onClick={() => void reportNotification.subscribe()}>
+            {reportNotification.subscriptionId ? '已开启本次微信提醒' : '分析完成后微信提醒我'}
+          </Button>}
           <View className={`generate-button ${!reportRunId && !reportRunError && confirmedFieldsCount === 0 ? 'disabled' : ''}`} onClick={reportRunId || reportRunError ? refreshProgress : confirmedFieldsCount ? handleGenerate : goMaterials}>
             <Text>{reportRunId || reportRunError ? '刷新报告进度' : confirmedFieldsCount ? '生成案件报告' : materials.length ? '先去核对材料' : '先去添加材料'}</Text>
           </View>

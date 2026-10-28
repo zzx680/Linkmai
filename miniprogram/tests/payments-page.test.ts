@@ -77,6 +77,8 @@ function renderPage(options: {
     '../../config/env': { IS_H5: false },
     './index.scss': {},
     '../../assets/brand/linkmai-chat.png': 'brand.png',
+    '../../assets/payments/laurel.png': 'laurel.png',
+    '../../assets/payments/unlock-sparkles.png': 'unlock-sparkles.png',
   }
   const module = { exports: {} as { default: React.ComponentType } }
   vm.runInNewContext(compiledPage, {
@@ -91,6 +93,15 @@ function renderPage(options: {
 }
 
 describe('payment page rendering', () => {
+  it('shows the Pro identity and price without the redundant case title', () => {
+    const html = renderPage()
+    assert.match(html, /灵迈/)
+    assert.match(html, /PRO/)
+    assert.match(html, /单次案件解决方案/)
+    assert.match(html, /¥49.90/)
+    assert.doesNotMatch(html, /灵迈 · 案件方案|测试案件/)
+  })
+
   it('renders the login and missing-case states', () => {
     assert.match(renderPage({ loggedIn: false, hasCase: false }), /登录后查看付费权益/)
     assert.match(renderPage({ hasCase: false }), /暂无可查看的付费权益/)
@@ -99,18 +110,18 @@ describe('payment page rendering', () => {
   })
 
   it('renders unpaid, pending, paid and refunded actions', () => {
-    assert.match(renderPage(), /解锁当前案件 · ¥49.90/)
+    assert.match(renderPage(), /立即解锁/)
     assert.match(renderPage({ status: 'pending' }), /刷新支付结果/)
     assert.match(renderPage({ status: 'paid' }), /查看完整方案/)
     const refunded = renderPage({ status: 'refunded' })
     assert.match(refunded, /相关付费权益已失效/)
-    assert.doesNotMatch(refunded, /解锁当前案件 ·/)
+    assert.doesNotMatch(refunded, /立即解锁/)
   })
 
   it('does not offer payment without a valid price', () => {
     const html = renderPage({ amountCents: 0 })
     assert.match(html, /金额待确认/)
-    assert.doesNotMatch(html, /解锁当前案件 ·/)
+    assert.doesNotMatch(html, /立即解锁/)
   })
 
   it('filters paid benefits using server entitlements', () => {

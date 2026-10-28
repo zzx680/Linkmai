@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { harness } from './service'
 import { safeError } from '../utils/safe-error'
+import { deliverReportNotificationForRun } from '../services/report-notifications'
 
 export function startHarnessWorker(): () => void {
   if (process.env.HARNESS_ENABLED !== 'true') return () => undefined
@@ -15,7 +16,10 @@ export function startHarnessWorker(): () => void {
         if (stopped) break
         const claim = await harness.claim(item.userId, item.caseId, owner)
         if (!claim) continue
-        try { await harness.complete(item.userId, item.caseId, claim.run.id, claim.run.leaseToken!) }
+        try {
+          await harness.complete(item.userId, item.caseId, claim.run.id, claim.run.leaseToken!)
+          await deliverReportNotificationForRun(claim.run.id)
+        }
         catch (error) {
           await harness.fail(item.userId, item.caseId, claim.run.id, claim.run.leaseToken!).catch(() => undefined)
           console.error('Harness 任务未完成:', safeError(error))

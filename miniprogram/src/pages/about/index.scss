@@ -1,1 +1,67 @@
-@use '../help/index.scss';
+@use '../../styles/design-tokens.scss' as *;
+
+.about-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 64rpx 32rpx calc(64rpx + env(safe-area-inset-bottom));
+  background: $color-bg-base;
+}
+
+.about-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 0 64rpx;
+}
+
+.about-logo {
+  display: block;
+  width: 440rpx;
+  max-width: 100%;
+  height: 106rpx;
+}
+
+.about-card {
+  padding: 40rpx 36rpx;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-xl;
+  background: $color-bg-elevated;
+}
+
+.about-title {
+  display: block;
+  color: $color-text-primary;
+  font-size: 42rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.4;
+}
+
+.about-description {
+  display: block;
+  margin-top: 18rpx;
+  color: $color-text-secondary;
+  font-size: 28rpx;
+  line-height: 1.85;
+}
+
+.about-notice {
+  margin-top: 32rpx;
+  padding-top: 32rpx;
+  border-top: 1rpx solid $color-border-light;
+}
+
+.about-notice-title {
+  display: block;
+  color: $color-text-primary;
+  font-size: 29rpx;
+  font-weight: $font-weight-semibold;
+  line-height: 1.6;
+}
+
+.about-version {
+  margin-top: 36rpx;
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  line-height: 1.6;
+  text-align: center;
+}

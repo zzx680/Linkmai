@@ -31,6 +31,7 @@ project.config.json         # 微信开发者工具入口，指向 miniprogram/d
 - 对话由 DeepSeek 辅助理解自然描述，一次提取多个有原文依据的事故事实，先回应问题，再核对信息和追问缺项；确认、修改及页面操作仍由状态机控制。模型调用最多等待 6.5 秒，失败时退回本地规则。报告目前只使用**已确认的材料字段**，并非全部聊天内容。
 - 按案件一次性收费，金额由后端返回；默认配置为 4990 分。本案件补充材料后可重新分析。
 - 微信支付 API v3 已接入下单、查单、关单及签名校验后的回调处理；权益以服务端确认结果为准。
+- 报告页提供用户主动选择的单次微信订阅提醒；提醒仅在对应报告完成后发送，不用于营销。帮助页提供微信客服会话入口。
 - 材料确认发生变化会使旧报告失效；报告发布前会核对材料快照，避免发布过时结果。
 - **文书生成尚未实现**，不属于当前开放权益；`documentGeneration` 返回 `false`。
 - **PDF/Word 导出尚未实现**，已移除当前报告页的导出入口；`POST /api/reports/:caseId/export` 当前返回 501。
@@ -82,8 +83,24 @@ npm run dev:weapp
 | 上传图片、视频 | `POST /api/upload/image`、`POST /api/upload/video` |
 | 材料处理、确认、列表 | `POST /api/materials/process`、`POST /api/materials/confirm`、`GET /api/materials/:caseId` |
 | 生成、读取报告 | `POST /api/reports/generate`、`GET /api/reports/:caseId` |
+| 报告完成提醒配置、订阅 | `GET /api/reports/notification-config`、`POST /api/reports/notification-subscriptions` |
 
 报告生成和读取均返回 `{ success: true, data: { report } }`。
+
+## 微信提醒与客服配置
+
+报告完成提醒默认关闭。服务端需配置已有的 `WECHAT_APP_ID`、`WECHAT_APP_SECRET`，以及微信公众平台中已审核可用的单次订阅模板：
+
+```text
+WECHAT_REPORT_SUBSCRIBE_TEMPLATE_ID=<模板 ID>
+WECHAT_REPORT_SUBSCRIBE_TITLE_FIELD=thing1
+WECHAT_REPORT_SUBSCRIBE_STATUS_FIELD=thing2
+WECHAT_REPORT_SUBSCRIBE_TIME_FIELD=time3
+```
+
+字段变量名须替换为所选模板的实际标识；标题和状态字段应使用 `thing` 类型，完成时间字段应使用 `time` 类型，且三个字段标识互不重复。模板内容需与“事故分析已整理 / 请返回小程序核对 / 完成时间”对应。用户须在生成前主动授权，未授权或配置不完整不影响生成报告。部署前需构建服务端并应用数据库迁移；`0010_report_notifications.sql` 创建提醒授权记录。配置或迁移未就绪时，提醒不会正常启用。
+
+帮助页的“联系微信客服”使用小程序原生客服会话入口。还需在微信公众平台配置小程序客服账号及接待人员；本地构建无法验证平台侧会话配置。
 
 ## 验证
 

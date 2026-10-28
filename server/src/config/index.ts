@@ -40,6 +40,12 @@ export const config = {
     appId: process.env.WECHAT_APP_ID || '',
     appSecret: process.env.WECHAT_APP_SECRET || '',
     allowMockLogin: process.env.ALLOW_MOCK_WECHAT_LOGIN === 'true',
+    reportNotification: {
+      templateId: process.env.WECHAT_REPORT_SUBSCRIBE_TEMPLATE_ID || '',
+      titleField: process.env.WECHAT_REPORT_SUBSCRIBE_TITLE_FIELD || '',
+      statusField: process.env.WECHAT_REPORT_SUBSCRIBE_STATUS_FIELD || '',
+      timeField: process.env.WECHAT_REPORT_SUBSCRIBE_TIME_FIELD || '',
+    },
   },
   oss: {
     region: process.env.ALIYUN_OSS_REGION || 'oss-cn-hangzhou',

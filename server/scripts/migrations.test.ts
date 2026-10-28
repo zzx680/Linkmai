@@ -18,6 +18,7 @@ const requiredTables = [
   'run_events',
   'legal_documents',
   'legal_sections',
+  'report_notification_subscriptions',
 ]
 
 test('database migrations are ordered and contain staging tables', async () => {

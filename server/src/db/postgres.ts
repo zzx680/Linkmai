@@ -4,6 +4,7 @@ import { Pool, PoolClient } from 'pg'
 import { config } from '../config'
 import { materialSnapshot } from '../services/material-snapshot'
 import { PrivacyRequestKind, toPrivacyRequest } from './privacy'
+import type { ReportNotificationSubscription } from './index'
 import { LegalDocument, LegalReference, LegalSearchInput, LegalSection } from '../legal/types'
 import { rankLegalReferences } from '../services/legal-retrieval'
 import {
@@ -74,6 +75,15 @@ function toEntitlement(row: any) {
   }
 }
 
+function toReportNotificationSubscription(row: any): ReportNotificationSubscription | null {
+  if (!row) return null
+  return {
+    id: row.id, userId: row.user_id, caseId: row.case_id, runId: row.run_id,
+    templateId: row.template_id, status: row.status, expiresAt: row.expires_at,
+    errorCode: row.error_code, createdAt: row.created_at, sentAt: row.sent_at,
+  }
+}
+
 function toAgentRun(row: any) {
   if (!row) return null
   return {
@@ -129,6 +139,51 @@ function toLegalReference(row: any): LegalReference {
 }
 
 export const db = {
+  async createReportNotificationSubscription(userId: string, caseId: string, templateId: string) {
+    await pool.query("DELETE FROM report_notification_subscriptions WHERE status='awaiting_run' AND expires_at<=NOW()")
+    const result = await pool.query(
+      `INSERT INTO report_notification_subscriptions (id,user_id,case_id,template_id,status,expires_at)
+       SELECT $1,$2,c.id,$4,'awaiting_run',NOW() + INTERVAL '24 hours'
+       FROM cases c WHERE c.id=$3 AND c.user_id=$2 RETURNING *`,
+      [generateId('report_notice'), userId, caseId, templateId]
+    )
+    const subscription = toReportNotificationSubscription(result.rows[0])
+    if (!subscription) throw new Error('CASE_NOT_FOUND')
+    return subscription
+  },
+
+  async linkReportNotificationSubscription(id: string, userId: string, caseId: string, runId: string) {
+    const result = await pool.query(
+      `UPDATE report_notification_subscriptions SET run_id=$4,status='pending',expires_at=NULL
+       WHERE id=$1 AND user_id=$2 AND case_id=$3 AND status='awaiting_run' AND expires_at>NOW()
+       RETURNING id`, [id, userId, caseId, runId]
+    )
+    if (result.rows[0]) return true
+    const existing = await pool.query(
+      `SELECT id FROM report_notification_subscriptions WHERE id=$1 AND user_id=$2 AND case_id=$3
+       AND run_id=$4 AND status='pending'`, [id, userId, caseId, runId]
+    )
+    return Boolean(existing.rows[0])
+  },
+
+  async claimReportNotificationSubscription(runId: string) {
+    const result = await pool.query(
+      `UPDATE report_notification_subscriptions SET status='sending'
+       WHERE id=(SELECT id FROM report_notification_subscriptions WHERE run_id=$1 AND status='pending'
+         ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED)
+       RETURNING *`, [runId]
+    )
+    return toReportNotificationSubscription(result.rows[0])
+  },
+
+  async finishReportNotificationSubscription(id: string, status: 'sent' | 'failed', errorCode?: string) {
+    const result = await pool.query(
+      `UPDATE report_notification_subscriptions SET status=$2,error_code=$3,
+       sent_at=CASE WHEN $2='sent' THEN NOW() ELSE sent_at END
+       WHERE id=$1 AND status='sending' RETURNING *`, [id, status, errorCode || null]
+    )
+    return toReportNotificationSubscription(result.rows[0])
+  },
   // Users
   async createUser(openid: string) {
     const id = generateId('user')

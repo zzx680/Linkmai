@@ -129,6 +129,20 @@
   }
 }
 
+.report-notification-button {
+  width: 100%;
+  min-height: 78rpx;
+  margin: 20rpx 0 12rpx;
+  padding: 16rpx 20rpx;
+  border: 1rpx solid $color-border-light;
+  border-radius: $radius-md;
+  color: $color-brand-primary;
+  background: #fff;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+}
+.report-notification-button::after { border: 0; }
+
 .report-note,
 .scope-banner {
   display: flex;

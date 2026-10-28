@@ -4,6 +4,7 @@ import { config } from '../config'
 import { randomBytes } from 'crypto'
 import { materialSnapshot } from '../services/material-snapshot'
 import { PrivacyRequest, PrivacyRequestKind } from './privacy'
+import type { ReportNotificationSubscription } from './index'
 import { LegalDocument, LegalReference, LegalSearchInput, LegalSection } from '../legal/types'
 import { rankLegalReferences } from '../services/legal-retrieval'
 import {
@@ -162,6 +163,7 @@ const artifacts = new Map<string, Artifact>()
 const feedbacks = new Map<string, Feedback>()
 const privacyRequests = new Map<string, PrivacyRequest>()
 const reports = new Map<string, { id: string; caseId: string; content: any; inputRevision?: number; agentRunId?: string; inputSnapshot?: { materialSnapshot: string }; createdAt: Date }>()
+const reportNotificationSubscriptions = new Map<string, ReportNotificationSubscription>()
 const caseFacts = new Map<string, Map<string, CaseFact>>()
 const caseRevisions = new Map<string, CaseRevision[]>()
 const agentRuns = new Map<string, AgentRun>()
@@ -216,6 +218,49 @@ async function withConversationLock<T>(caseId: string, operation: () => Promise<
 }
 
 export const memoryDB = {
+  async createReportNotificationSubscription(userId: string, caseId: string, templateId: string) {
+    const currentCase = cases.get(caseId)
+    if (!currentCase || currentCase.userId !== userId) throw new Error('CASE_NOT_FOUND')
+    const now = new Date()
+    for (const [id, item] of reportNotificationSubscriptions) {
+      if (item.status === 'awaiting_run' && item.expiresAt && item.expiresAt <= now) reportNotificationSubscriptions.delete(id)
+    }
+    const subscription: ReportNotificationSubscription = {
+      id: `report_notice_${Date.now()}_${randomBytes(12).toString('hex')}`,
+      userId, caseId, templateId, status: 'awaiting_run',
+      expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000), createdAt: now,
+    }
+    reportNotificationSubscriptions.set(subscription.id, subscription)
+    return structuredClone(subscription)
+  },
+
+  async linkReportNotificationSubscription(id: string, userId: string, caseId: string, runId: string) {
+    const subscription = reportNotificationSubscriptions.get(id)
+    if (!subscription || subscription.userId !== userId || subscription.caseId !== caseId) return false
+    if (subscription.status === 'pending' && subscription.runId === runId) return true
+    if (subscription.status !== 'awaiting_run' || !subscription.expiresAt || subscription.expiresAt <= new Date()) return false
+    subscription.runId = runId
+    subscription.status = 'pending'
+    subscription.expiresAt = null
+    return true
+  },
+
+  async claimReportNotificationSubscription(runId: string) {
+    const subscription = [...reportNotificationSubscriptions.values()].find(item => item.runId === runId && item.status === 'pending')
+    if (!subscription) return null
+    subscription.status = 'sending'
+    return structuredClone(subscription)
+  },
+
+  async finishReportNotificationSubscription(id: string, status: 'sent' | 'failed', errorCode?: string) {
+    const subscription = reportNotificationSubscriptions.get(id)
+    if (!subscription || subscription.status !== 'sending') return null
+    subscription.status = status
+    subscription.errorCode = errorCode || null
+    if (status === 'sent') subscription.sentAt = new Date()
+    return structuredClone(subscription)
+  },
+
   async syncHarnessReportState(userId: string, caseId: string, ready: boolean) {
     const item = cases.get(caseId)
     if (!item || item.userId !== userId) throw new Error('CASE_NOT_FOUND')

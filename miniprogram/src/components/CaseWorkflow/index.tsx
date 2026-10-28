@@ -1,15 +1,16 @@
-import { View, Text, Input, Picker } from '@tarojs/components'
+import { Button, View, Text, Input, Picker } from '@tarojs/components'
 import { useEffect, useState } from 'react'
 import Taro, { useDidShow, useDidHide } from '@tarojs/taro'
 import { workflowApi, WorkflowWorkspace } from '../../services/workflow'
 import { useAppStore } from '../../store'
 import { ensureCaseDataConsent, ensureReviewConsent } from '../../utils/privacy-consent'
+import { useReportNotification } from '../../hooks/useReportNotification'
 import './index.scss'
 
 const fields = [
   ['accident_date','事故日期','日期格式：2026-10-27'], ['jurisdiction','事故地区','选择实际事故所在地'],
   ['injury_severity','伤情','none（无人伤）/ minor（轻微）/ serious（严重）/ unknown（未确定）'],
-  ['has_liability_document','是否已有事故认定书','yes / no'], ['risk_screened','已核对刑事、特殊主体与期限风险','核对无此风险填 yes；有或不明填 no'],
+  ['has_liability_document','是否已有事故认定书','yes / no'],
   ['claim_medical','是否主张医疗费','yes / no'], ['medical_expense_cents','医疗费（元）','填写已确认票据金额'],
   ['claim_lost_income','是否主张误工损失','yes / no'], ['lost_income_daily_cents','误工日收入（元）','按已确认收入证明填写'], ['lost_work_days','误工天数','填写整数天数'],
   ['claim_nursing','是否主张护理费','yes / no'], ['nursing_daily_cents','每日护理标准（元）','填写有依据的日标准'], ['nursing_days','护理天数','填写整数'], ['nursing_people','护理人数','填写 1–10'],
@@ -28,6 +29,7 @@ const documentTitles: Record<string,string> = { case_report:'事故分析报告'
 const yuan = (value: number) => `${Math.floor(value / 100)}.${String(value % 100).padStart(2,'0')}`
 
 export default function CaseWorkflow({ caseId }: { caseId: string }) {
+  const reportNotification = useReportNotification(caseId)
   const [workspace, setWorkspace] = useState<WorkflowWorkspace | null>(null)
   const [field, setField] = useState(0)
   const [value, setValue] = useState('')
@@ -51,7 +53,9 @@ export default function CaseWorkflow({ caseId }: { caseId: string }) {
         const result = await workflowApi.get(caseId)
         if (!active) return
         setWorkspace(result)
-        if (result.runs.some(run => ['queued','running'].includes(run.status)) && ++attempts < 60) timer = setTimeout(refresh, 2000)
+        const activeWork = result.runs.some(run => ['queued','running'].includes(run.status))
+          || result.reviews.some(review => ['pending','in_review'].includes(review.status))
+        if (activeWork && ++attempts < 60) timer = setTimeout(refresh, 2000)
       } catch (err) { if (active) setError(err instanceof Error ? err.message : '暂时无法加载案件文书') }
     }
     void refresh()
@@ -70,7 +74,7 @@ export default function CaseWorkflow({ caseId }: { caseId: string }) {
     finally { setBusy(false) }
   }
   const selectedKey = fields[field][0]
-  const options = selectedKey === 'injury_severity' ? injuryOptions : selectedKey.startsWith('claim_') || ['has_liability_document','risk_screened'].includes(selectedKey) ? yesNo : null
+  const options = selectedKey === 'injury_severity' ? injuryOptions : selectedKey.startsWith('claim_') || selectedKey === 'has_liability_document' ? yesNo : null
   const activeEvidence = workspace?.evidence.filter(item => item.status === 'active') || []
   const calculation = workspace?.calculations.find(item => item.contextHash === workspace.contextHash)
   const activeDocuments = workspace?.documents.filter(doc => !['stale','superseded'].includes(doc.status)) || []
@@ -80,7 +84,7 @@ export default function CaseWorkflow({ caseId }: { caseId: string }) {
       <Text className="workflow-version">案件版本 {workspace?.revision ?? '…'} · <Text onClick={() => setCycle(n => n + 1)}>刷新进度</Text></Text></View>
     {error && <Text className="workflow-error">{error}</Text>}
     {!workspace ? <Text>正在加载案件…</Text> : <>
-      <View className="workflow-card"><Text className="workflow-card-title">补充计算与核对信息</Text>
+      <View className="workflow-card"><Text className="workflow-card-title">补充计算与核对信息</Text><Text className="workflow-muted">刑事、特殊主体与期限风险由独立审核流程核对，用户输入不能替代该审核。</Text>
         <Picker mode="selector" range={fields.map(item => item[1])} value={field} onChange={e => { setField(Number(e.detail.value)); setValue('') }}><View className="workflow-picker">{fields[field][1]}　⌄</View></Picker>
         {selectedKey === 'accident_date' ? <Picker mode="date" value={value} onChange={e => setValue(e.detail.value)}><View className="workflow-picker">{value || '选择事故日期'}　⌄</View></Picker> : selectedKey === 'jurisdiction' ? <Picker mode="selector" range={regions.map(r => r[0])} onChange={e => setValue(regions[Number(e.detail.value)][1])}><View className="workflow-picker">{displayValue(selectedKey,value) || '选择事故所在地'}　⌄</View></Picker> : options ? <Picker mode="selector" range={options.map(o => o.label)} onChange={e => setValue(options[Number(e.detail.value)].value)}><View className="workflow-picker">{displayValue(selectedKey,value) || '请选择'}　⌄</View></Picker> : <Input className="workflow-input" value={value} placeholder={fields[field][2]} onInput={e => setValue(e.detail.value)} />}
         <Picker mode="selector" range={['用户陈述（待凭证复核）', ...activeEvidence.map(item => `材料字段：${title(item.fieldKey || '')}`)]} value={evidence} onChange={e => setEvidence(Number(e.detail.value))}>
@@ -112,7 +116,16 @@ export default function CaseWorkflow({ caseId }: { caseId: string }) {
       <View className="workflow-card"><Text className="workflow-card-title">文书与审核</Text>
         {workspace.runs.slice(-1).map(run => <Text key={run.id} className="workflow-label">{statuses[run.status]}{run.safeErrorCode ? ' · 请核对信息后重试' : ''}</Text>)}
         {workspace.runs.slice(-1).filter(run => run.status === 'failed').map(run => <Text key={run.id} className="workflow-choice" onClick={() => void act(() => workflowApi.retry(caseId,run.id))}>核对信息后重新运行</Text>)}
-        <View className="workflow-button" onClick={() => void act(() => workflowApi.generate(caseId))}><Text>生成报告、证据目录与行动计划</Text></View>
+        {reportNotification.enabled && <Button className="workflow-notification-button" loading={reportNotification.isSubscribing} disabled={reportNotification.isSubscribing || Boolean(reportNotification.subscriptionId)} onClick={() => void reportNotification.subscribe()}>
+          {reportNotification.subscriptionId ? '已开启本次微信提醒' : '分析完成后微信提醒我'}
+        </Button>}
+        <View className="workflow-button" onClick={() => {
+          const subscriptionId = reportNotification.subscriptionId
+          void act(async () => {
+            await workflowApi.generate(caseId, subscriptionId || undefined)
+            if (subscriptionId) reportNotification.clearSubscription()
+          })
+        }}><Text>生成报告、证据目录与行动计划</Text></View>
         {activeDocuments.map(doc => <View key={doc.id} className="workflow-document"><Text className="workflow-document-title">{documentTitles[doc.type]} · v{doc.version}</Text><Text className="workflow-label">{statuses[doc.status]}</Text>
           {doc.sections.map((section,index) => <View key={index}><Text className="workflow-section-title">{section.title}</Text>{section.paragraphs.map((paragraph,n) => <Text key={n} className="workflow-body">{paragraph}</Text>)}</View>)}
           {doc.status === 'draft' && !workspace.reviews.some(task => task.documentId === doc.id && task.status === 'returned') && <View className="workflow-button secondary" onClick={() => void act(async () => {
