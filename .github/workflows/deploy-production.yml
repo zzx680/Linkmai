@@ -1,0 +1,95 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linkmai-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out release
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          PROD_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$PROD_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$PROD_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+
+      - name: Create remote source directory
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+        run: |
+          ssh \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "$PROD_SSH_PORT" \
+            "$PROD_SSH_USER@$PROD_SSH_HOST" \
+            'sudo -n test -r /etc/linkmai/production.env &&
+             sudo -n test -S /root/.pm2/rpc.sock &&
+             sudo -n install -d -m 750 -o "$(id -un)" -g "$(id -gn)" /var/www/linkmai-production/source'
+
+      - name: Sync release source
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+        run: |
+          rsync -az --delete \
+            --exclude '.git/' \
+            --exclude '.claude/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude '*.pem' \
+            --exclude '*.key' \
+            --exclude 'api_v3_key' \
+            --exclude 'wechat_api_v3_key' \
+            --exclude '*-secrets' \
+            --exclude 'node_modules/' \
+            --exclude 'server/node_modules/' \
+            --exclude 'miniprogram/node_modules/' \
+            --exclude 'dist/' \
+            --exclude 'miniprogram/dist/' \
+            --exclude 'miniprogram/dist-h5/' \
+            -e "ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $PROD_SSH_PORT" \
+            ./ "$PROD_SSH_USER@$PROD_SSH_HOST:/var/www/linkmai-production/source/"
+
+      - name: Deploy release
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          RELEASE_ID: ${{ github.sha }}
+        run: |
+          ssh \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "$PROD_SSH_PORT" \
+            "$PROD_SSH_USER@$PROD_SSH_HOST" \
+            "sudo -n env \
+             PM2_HOME=/root/.pm2 \
+             RELEASE_ID=$RELEASE_ID \
+             SOURCE_ROOT=/var/www/linkmai-production/source \
+             LINKMAI_ENV_FILE=/etc/linkmai/production.env \
+             LINKMAI_HEALTH_URL=https://api.linkmai.com/api/health \
+             bash /var/www/linkmai-production/source/server/scripts/deploy-production.sh"

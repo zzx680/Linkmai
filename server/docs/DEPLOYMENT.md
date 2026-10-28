@@ -257,6 +257,22 @@ pm2 startup
 pm2 save
 ```
 
+## 5. GitHub Actions 正式发布
+
+`.github/workflows/deploy-production.yml` 会在 `main` 有新提交时创建生产部署，也可从 GitHub Actions 手动重新运行。该工作流使用 GitHub Environment `production`；在仓库 Settings → Environments 中为它设置 Required reviewers，正常流程审批后才读取部署密钥并连接 ECS。若开启 Allow administrators to bypass configured protection rules，管理员可以手动绕过审批。该工作流目前只发布 production，不会自动部署或验证 staging；批准前必须确认同一 Git SHA 已完成 staging 验收。
+
+在 `production` Environment 中设置以下 Secrets：
+
+- `PROD_SSH_HOST`：ECS 主机名或公网 IP。
+- `PROD_SSH_PORT`：SSH 端口。
+- `PROD_SSH_USER`：当前服务器使用 `admin`。该账号需要可非交互执行 `sudo -n`；`linkmai` 是无登录 shell 的应用运行账号，不作为 SSH 登录账号。
+- `PROD_SSH_PRIVATE_KEY`：仅用于 Actions 的部署私钥。
+- `PROD_SSH_KNOWN_HOSTS`：预先验证过的 ECS host key（known_hosts 格式）。
+
+工作流使用严格的 host key 校验，不会在运行中执行 `ssh-keyscan`。它只同步源码到 `/var/www/linkmai-production/source`，随后在 ECS 上执行 `server/scripts/deploy-production.sh`；生产环境文件和证书继续只保留在 `/etc/linkmai/production.env` 与 `/etc/linkmai/secrets/`。工作流以不可取消的串行队列运行，避免中断迁移或 release 切换。
+
+2026-10-28 只读核实：发布根目录归 root 所有，环境文件为 `root:linkmai` 且权限为 640；现有 PM2 daemon 由 root 管理，Node 应用以 `linkmai` 运行，`admin` 已有免密 sudo 权限。工作流据此用 sudo 创建归 SSH 登录账号所有的源码目录，再以 `sudo -n env PM2_HOME=/root/.pm2` 执行发布脚本，复用现有 PM2 daemon。不能直接以普通 `admin` 执行发布脚本，否则目录写入、环境文件读取和 `chown` 会失败；也不能使用 admin 自己的 PM2 daemon 管理正式进程。此工作流依赖现有的高权限部署账号，不是受限部署账号方案；本次没有修改服务器 sudo 配置。
+
 ## 6. 微信小程序 staging 构建
 
 使用 HTTPS staging API 构建：
