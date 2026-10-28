@@ -46,6 +46,7 @@ describe('payment presentation and recovery', () => {
   it('requires the order price and currency to match the amount shown before opening payment', () => {
     const entitlement: CaseEntitlement = { status: 'unpaid', amountCents: 4990, currency: 'CNY' }
     assert.equal(matchesPaymentAmount({ amountCents: 4990, currency: 'CNY' }, entitlement), true)
+    assert.equal(matchesPaymentAmount({ amountCents: '4990' as unknown as number, currency: 'CNY' }, entitlement), true)
     for (const order of [{}, { amountCents: 4990 }, { amountCents: 5990, currency: 'CNY' }, { amountCents: 4990, currency: 'USD' }]) {
       assert.equal(matchesPaymentAmount(order, entitlement), false)
     }

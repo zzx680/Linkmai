@@ -38,32 +38,18 @@ project.config.json         # 微信开发者工具入口，指向 miniprogram/d
 - 隐私页支持提交并查询数据导出、删除、注销的人工核验申请；申请入库不等于操作完成。运营处理与发布前待确认项见 [数据申请处理](server/docs/PRIVACY_REQUESTS.md)。
 - 本地测试与构建通过不代表真实微信支付、云数据库、OCR/AI 服务或微信真机联调已验收。
 
-## 本地开发
+## 开发与联调
 
-分别在 `server/` 和 `miniprogram/` 执行 `npm install`。后端配置从模板开始：
-
-```bash
-cd server
-cp .env.example .env
-```
-
-按环境配置微信登录、JWT、数据库、OSS、OCR、AI 服务及支付。配置项以 `server/src/config/index.ts` 和环境模板为准。`DB_TYPE=memory` 仅适合本地开发/测试，重启后数据丢失；staging/production 要求 PostgreSQL 和真实服务配置。
-
-分别在两个终端启动：
+默认后端部署到服务器 staging，在 Mac 本地终端构建连接该后端的小程序：
 
 ```bash
-# 终端一：后端
-cd server
-npm run dev
+npm --prefix miniprogram ci
+TARO_APP_API_BASE=https://staging-api.linkmai.com/api npm --prefix miniprogram run build:weapp:staging
 ```
 
-```bash
-# 终端二：小程序编译与监听
-cd miniprogram
-npm run dev:weapp
-```
+将 `miniprogram/dist-staging/` 作为独立项目导入微信开发者工具；根目录项目仍读取 `miniprogram/dist/`，不会随 staging 构建自动更新。该命令只编译客户端，不更新服务器。
 
-微信开发者工具导入**仓库根目录**，由 `project.config.json` 定位编译产物。前端默认 API 为 `http://localhost:8000/api`；真机需配置可访问的服务地址，生产构建必须设置 HTTPS `TARO_APP_API_BASE`。
+本地内存后端与 mock 登录/支付仅作可选调试，启动方式见[快速开始](QUICKSTART.md)。staging/production 要求 PostgreSQL 和真实服务配置，不使用 mock；配置项以 `server/src/config/index.ts` 和环境模板为准。
 
 ## 当前 API 入口
 
@@ -131,15 +117,14 @@ npm --prefix miniprogram run build:weapp:dev
 
 发布遵循 [部署指南](server/docs/DEPLOYMENT.md)：默认将后端部署到服务器 staging，客户端连接 staging API 完成前后端联调和相关功能验收；本地后端仅供可选调试，部署前仍需完成构建和相关自动检查。通过后将已验证的同一代码版本部署到 production，再重新构建连接正式 API 的小程序并复验后上传审核。涉及微信支付等能力时需真机验证。本地构建通过不等于 staging 验收通过；后端部署和小程序上传微信分别按用户明确的发布范围执行。
 
-后端构建后通过 `npm start` 启动；数据库迁移与 staging 部署步骤见 [部署指南](server/docs/DEPLOYMENT.md)。支付私钥和 API v3 密钥使用服务端文件或环境变量配置，不放入客户端或 Git。
+正式服务由既有 PM2 配置管理；`npm start` 仅运行已构建的入口，不能代替发布流程。数据库迁移与两环境部署步骤统一见 [部署指南](server/docs/DEPLOYMENT.md)。支付私钥和 API v3 密钥使用服务端文件或环境变量配置，不放入客户端或 Git。
 
-当前上线前基线见 [2026-10-19 审查记录](server/docs/PRE_RELEASE_REVIEW_2026-10-19.md)，含支付验收来源、修复、验证结果、依赖告警范围和先后端后客户端的发布顺序。
+当前部署缺口与文档核查见 [2026-10-28 核查记录](server/docs/DEPLOYMENT_AUDIT_2026-10-28.md)。[2026-10-19 审查记录](server/docs/PRE_RELEASE_REVIEW_2026-10-19.md)仅说明当时版本的检查，不作为最新版本上线批准。
 
-小程序生产构建示例（替换为实际服务域名）：
+同一 Git SHA 通过 staging 验收、配套正式后端部署检查通过后，构建正式小程序：
 
 ```bash
-cd miniprogram
-TARO_APP_API_BASE=https://your-api.example.com/api npm run build:weapp
+TARO_APP_API_BASE=https://api.linkmai.com/api npm --prefix miniprogram run build:weapp
 ```
 
 完成微信开发者工具和真机验证后，再上传并提交审核。历史交接文档用于了解背景，当前行为应结合代码和测试核实。

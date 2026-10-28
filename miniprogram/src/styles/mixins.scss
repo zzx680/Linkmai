@@ -43,7 +43,7 @@
   box-sizing: border-box;
   min-height: 100vh;
   background: $color-bg-base;
-  padding: $space-4;
+  padding: $page-top-space $page-gutter;
 }
 
 // 页面标题

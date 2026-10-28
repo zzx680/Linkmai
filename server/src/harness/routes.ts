@@ -7,7 +7,6 @@ import { reviewerAuth, reviewerLogin, reviewAdmin, ReviewRequest } from './auth'
 import { createRateLimiter } from '../middleware/security'
 import { expenseDefinitions } from './calculator'
 import { legalContentHash } from '../legal/types'
-import { db } from '../db'
 import { deliverReportNotificationForRun, linkReportNotificationToRun } from '../services/report-notifications'
 
 export function harnessEnabled(_req: Request, res: Response, next: NextFunction) {

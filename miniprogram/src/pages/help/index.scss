@@ -3,7 +3,7 @@
 .support-page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 56rpx 32rpx calc(72rpx + env(safe-area-inset-bottom));
+  padding: $page-top-space $page-gutter calc(72rpx + env(safe-area-inset-bottom));
   background: $color-bg-base;
 }
 
@@ -23,10 +23,10 @@
 .support-title {
   margin-top: 12rpx;
   color: $color-text-primary;
-  font-size: 56rpx;
+  font-size: $font-size-xl;
   font-weight: $font-weight-bold;
   line-height: 1.2;
-  letter-spacing: -2rpx;
+  letter-spacing: 0;
 }
 
 .support-description {
@@ -40,7 +40,7 @@
   margin-top: 48rpx;
 }
 
-.contact-support-section { margin-top: 32rpx; }
+.contact-support-section { margin-top: 0; }
 .contact-support-card { align-items: flex-start; }
 .contact-service-button {
   align-self: flex-start;

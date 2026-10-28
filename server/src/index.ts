@@ -1,4 +1,5 @@
 import { safeError } from './utils/safe-error'
+import { releaseInfo } from './utils/release'
 import 'dotenv/config'
 import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
@@ -65,6 +66,7 @@ app.get('/api/health', async (req, res) => {
   res.status(databaseOk ? 200 : 503).json({
     status: databaseOk ? 'ok' : 'error',
     database: databaseOk ? 'ok' : 'unavailable',
+    release: releaseInfo,
     features: { paymentOrderHistory: true, contextualAgent: true, caseHarness: process.env.HARNESS_ENABLED === 'true' },
     timestamp: new Date().toISOString(),
   })

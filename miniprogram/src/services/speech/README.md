@@ -9,13 +9,13 @@
 1. 当前项目 AppID 为 `wx38fafb051a96a529`。若更换小程序账号，先在对应后台添加并授权上述插件；未授权账号应使用下方关闭开关编译。
 2. 在平台「用户隐私保护指引」中按实际用途声明麦克风 / 录音信息用于语音转文字，核对插件隐私说明。本地隐私页已补充采集目的、处理方及使用选择，单独征求同意，拒绝不影响键盘输入。
 3. `config/voice-input.ts` 目前固定官方开源示例使用的 `0.3.3`。确认后台允许此版本；若平台要求其他版本，先更新配置并重新验收，不使用未经验证的版本号。
-4. 从仓库根目录编译：
+4. 先在 staging 验收，从 Mac 本地终端或 CI 的仓库根目录编译：
 
 ```bash
-TARO_APP_API_BASE=https://api.linkmai.com/api npm --prefix miniprogram run build:weapp
+TARO_APP_API_BASE=https://staging-api.linkmai.com/api npm --prefix miniprogram run build:weapp:staging
 ```
 
-构建会同时开启运行开关，在 `app.json` 声明插件及 `scope.record`。需要关闭时设置 `TARO_APP_VOICE_INPUT_ENABLED=false` 后重新编译，按钮点击会提示暂不可用并保留草稿；不要只改 app.json 或只改运行开关。编译产物默认写入开发者工具读取的 `dist/`，本地构建不会自动上传或发布。
+此命令输出到 `miniprogram/dist-staging/`，需作为独立项目导入开发者工具。构建会同时开启运行开关，在 `app.json` 声明插件及 `scope.record`。需要关闭时设置 `TARO_APP_VOICE_INPUT_ENABLED=false` 后重新编译，按钮点击会提示暂不可用并保留草稿；不要只改 app.json 或只改运行开关。同一版本验收后再按[部署指南](../../../../server/docs/DEPLOYMENT.md)构建连接正式 API 的 `miniprogram/dist/` 并上传，本地构建不会自动发布。
 
 官方依据：[插件文档](https://mp.weixin.qq.com/wxopen/plugindevdoc?appid=wx069ba97219f66d99&lang=zh_CN)、[腾讯面对面翻译示例](https://github.com/Tencent/Face2FaceTranslator)。
 

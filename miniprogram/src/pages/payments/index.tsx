@@ -140,7 +140,6 @@ function CasePaymentPanel() {
             </View>
             <View className="plan-mark"><Icon name={isPaid ? 'circle-check' : 'shield-check'} size={30} color="#FFFFFF" /></View>
           </View>
-          <Text className="plan-caption">仅限当前案件 · 不自动续费</Text>
         </View>
       </View>
 
@@ -175,14 +174,6 @@ function CasePaymentPanel() {
         </View>
       </View>}
 
-      <View className="explanation-card">
-        <View className="explanation-icon"><Icon name="lock-keyhole" size={18} color="#2A64F0" /></View>
-        <View className="explanation-copy">
-          <Text className="explanation-title">安心支付</Text>
-          <Text className="explanation-text">一次付费仅解锁当前案件，不会自动续费，也不会为其他案件自动扣款。</Text>
-        </View>
-      </View>
-      <Text className="payment-disclaimer">AI 辅助整理与分析，不替代专业法律意见</Text>
       <View className="action-panel payment-dock">
         {canPay && <Button className={`primary-button${isPaying ? ' button-disabled' : ''}`} disabled={isPaying} onClick={handlePayment}>
           <Image className="unlock-sparkles" src={unlockSparkles} mode="aspectFit" aria-hidden />
@@ -194,7 +185,6 @@ function CasePaymentPanel() {
         </>}
         {isPaid && <Button className="primary-button" onClick={goNext}><Text>{currentCase.hasReport ? '查看完整方案' : '继续处理案件'}</Text></Button>}
         {(isRefunded || !price) && <Button className="secondary-button" onClick={refresh}><Text>重新加载</Text></Button>}
-        <Text className="payment-dock-caption">按案件一次付费 · 不自动续费</Text>
       </View>
 
     </View>

@@ -1,195 +1,40 @@
-# OSS 集成使用指南
+# OSS 当前上传链路
 
-## 1. 配置 OSS
+环境配置见[云服务配置](ALIYUN_SETUP.md)，发布步骤见[部署指南](DEPLOYMENT.md)。本文件已移除旧的客户端长期凭据直传示例。
 
-### 创建 Bucket
+## 实际调用
 
-1. 登录阿里云 OSS 控制台：https://oss.console.aliyun.com/
-2. 点击"创建 Bucket"
-3. 配置：
-   - **Bucket 名称**：`linkmai-accident-files`（或其他全局唯一名称）
-   - **地域**：`华东1（杭州）`
-   - **读写权限**：**私有**
-   - **存储类型**：标准存储
-4. 创建后，记录 Bucket 名称
+当前 `server/src/index.ts` 挂载 `/api/upload`；上传路由使用登录鉴权、案件归属检查和服务端 OSS 上传：
 
-### 配置 CORS
-
-进入 Bucket → 权限管理 → 跨域设置 → 创建规则：
-
-- **来源**：`https://servicewechat.com`
-- **允许 Methods**：`GET`, `POST`, `PUT`, `HEAD`
-- **允许 Headers**：`*`
-- **暴露 Headers**：`ETag`, `x-oss-request-id`
-
-### 获取 AccessKey
-
-1. 右上角头像 → AccessKey 管理：https://ram.console.aliyun.com/manage/ak
-2. 点击"创建 AccessKey"
-3. **重要**：立即复制并保存 AccessKey ID 和 AccessKey Secret
-
-### 填入配置
-
-编辑 `/Users/charlie/灵迈/server/.env`，填入你的配置：
-
-```bash
-ALIYUN_OSS_REGION=oss-cn-hangzhou
-ALIYUN_OSS_BUCKET=linkmai-accident-files  # 你的 Bucket 名称
-ALIYUN_ACCESS_KEY_ID=LTAI...              # 你的 AccessKey ID
-ALIYUN_ACCESS_KEY_SECRET=...              # 你的 AccessKey Secret
+```text
+小程序选择材料
+  → 带登录凭证上传到目标后端
+  → 后端检查文件和案件归属
+  → 后端写入私有 OSS 对象并保存材料记录
+  → 返回材料 ID、对象 key 和有时效的签名访问地址
 ```
 
----
+| 接口 | 格式与限制 |
+| --- | --- |
+| `POST /api/upload/image` | multipart 字段 `file`；有效 JPG/PNG/WEBP，最多 10 MiB |
+| `POST /api/upload/video` | multipart 字段 `file`；有效 MP4/MOV，最多 50 MiB |
 
-## 2. 启动服务
+接口要求 Bearer token 和用户已有案件；可提供 `caseId`，未提供时使用当前案件。材料识别与字段确认是后续业务步骤，上传成功不等于 OCR、确认或报告生成成功。
 
-```bash
-cd /Users/charlie/灵迈/server
+旧 `/api/files/presign`、`/api/files/confirm` 没有在当前服务入口挂载；不要按旧文档调用，也不要把底层 `getUploadCredentials()` 函数视为已开放 API。客户端不得取得服务端 AccessKey Secret。
 
-# 安装依赖
-npm install
+## 服务端配置与访问
 
-# 启动开发服务器
-npm run dev
-```
+使用 `ALIYUN_OSS_REGION`、`ALIYUN_OSS_BUCKET`、`ALIYUN_OSS_ACCESS_KEY_ID`、`ALIYUN_OSS_ACCESS_KEY_SECRET`，不使用旧的无 `OSS_` 前缀变量。凭据仅放目标服务器环境文件；Bucket 和写入对象保持私有。
 
----
+代码中的 `getSignedUrl()` 默认有效期为一小时；具体场景可传更短期限，律师审核材料链接使用单独的五分钟授权。签名 URL 是临时访问凭证，不应写入公开回复、日志或作为永久权限凭据。后端生成链接前仍需完成用户/案件或审核任务授权。
 
-## 3. API 使用示例
+## staging 验收
 
-### 获取上传凭证
+1. 小程序显式连接 staging API，使用专用测试账号和合成材料；当前共享 Bucket 的清理仅限明确标识的测试对象。
+2. 检查未登录和跨用户案件访问被拒绝，合法文件可上传，超限或错误格式被拒绝。
+3. 检查私有对象不能匿名直接访问，经授权签名可读取；不要通过公开 Bucket 修复显示问题。
+4. 检查 OCR、材料确认与报告后续链路；签名过期后重新授权，不保存长期公开链接。
+5. 验证 Nginx 的 multipart 大小限制；视频 50 MiB 文件还需请求边界开销，当前 staging 模板的 `50m` 需要调整后验证。
 
-```bash
-curl -X POST http://localhost:8000/api/files/presign \
-  -H "Content-Type: application/json" \
-  -d '{
-    "filename": "accident-photo.jpg",
-    "fileType": "scene-photo",
-    "caseId": "550e8400-e29b-41d4-a716-446655440000"
-  }'
-```
-
-响应：
-
-```json
-{
-  "success": true,
-  "data": {
-    "objectKey": "cases/mock-user-id/550e8400.../scene-photo/1234567890-abc123.jpg",
-    "region": "oss-cn-hangzhou",
-    "bucket": "linkmai-accident-files",
-    "accessKeyId": "LTAI...",
-    "accessKeySecret": "...",
-    "expiration": 1735123456789
-  }
-}
-```
-
-### 前端直传示例（Taro）
-
-```typescript
-import Taro from '@tarojs/taro'
-import OSS from 'ali-oss'
-
-async function uploadFile(filePath: string) {
-  // 1. 获取上传凭证
-  const { data } = await Taro.request({
-    url: 'https://api.linkmai.com/api/files/presign',
-    method: 'POST',
-    data: {
-      filename: 'accident-photo.jpg',
-      fileType: 'scene-photo',
-      caseId: currentCaseId,
-    },
-  })
-
-  // 2. 创建 OSS 客户端
-  const client = new OSS({
-    region: data.region,
-    accessKeyId: data.accessKeyId,
-    accessKeySecret: data.accessKeySecret,
-    bucket: data.bucket,
-  })
-
-  // 3. 读取文件并上传
-  const fs = Taro.getFileSystemManager()
-  const fileData = fs.readFileSync(filePath)
-
-  await client.put(data.objectKey, fileData)
-
-  // 4. 通知后端上传完成
-  await Taro.request({
-    url: 'https://api.linkmai.com/api/files/confirm',
-    method: 'POST',
-    data: {
-      objectKey: data.objectKey,
-      caseId: currentCaseId,
-      fileType: 'scene-photo',
-    },
-  })
-}
-```
-
----
-
-## 4. 文件类型
-
-`FileType` 枚举定义在 `src/services/oss.ts`：
-
-- `police-report` - 交警认定书
-- `medical` - 医疗材料
-- `invoice` - 费用票据
-- `vehicle-damage` - 车损材料
-- `scene-photo` - 现场照片
-- `dashcam` - 行车记录仪
-- `other` - 其他
-
----
-
-## 5. 服务端函数
-
-### `getUploadCredentials()`
-
-返回上传凭证（MVP 阶段返回主账号凭证，生产环境应使用 STS）
-
-### `getSignedUrl()`
-
-生成临时下载链接（1 小时有效）
-
-### `uploadFile()`
-
-后端直接上传文件（用于生成报告等场景）
-
-### `deleteFile()` / `deleteFiles()`
-
-删除单个或批量文件
-
-### `fileExists()`
-
-检查文件是否存在
-
-### `getFileMeta()`
-
-获取文件元信息（大小、类型、修改时间）
-
----
-
-## 6. 安全建议
-
-- ✅ Bucket 设置为"私有"
-- ✅ 通过签名 URL 访问文件
-- ✅ 生产环境使用 STS 临时凭证
-- ✅ `.env` 文件已在 `.gitignore` 中
-- ❌ 不要将 AccessKey 提交到 Git
-- ❌ 不要设置 Bucket 为"公共读"
-
----
-
-## 7. 下一步
-
-配置完成后，你可以：
-
-1. 测试健康检查：`curl http://localhost:8000/api/health`
-2. 测试获取上传凭证（见上文 API 示例）
-3. 开始实现前端上传组件
-4. 集成 OCR 和文件分类服务
+以上验收不修改正式价格，不自动创建付款，也不整体清理共享存储。

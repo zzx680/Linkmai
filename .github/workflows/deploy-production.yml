@@ -1,95 +1,170 @@
-name: Deploy production
+name: Deploy staging then production
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Reserve staging until production approval finishes. Never cancel a deploy.
 concurrency:
-  group: linkmai-production
+  group: linkmai-release-pipeline
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy to production
+  checks:
+    name: Build and test release
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
-    timeout-minutes: 45
-
+    timeout-minutes: 30
+    outputs:
+      sha: ${{ steps.release.outputs.sha }}
+      release_id: ${{ steps.release.outputs.release_id }}
     steps:
-      - name: Check out release
-        uses: actions/checkout@v4
-
-      - name: Configure SSH
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            miniprogram/package-lock.json
+      - name: Record immutable release identity
+        id: release
         env:
-          PROD_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
-          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          RELEASE_SHA: ${{ github.sha }}
+          RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "$PROD_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          printf '%s\n' "$PROD_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
-
-      - name: Create remote source directory
+          printf 'sha=%s\nrelease_id=%s\n' "$RELEASE_SHA" "$RELEASE_ID" >> "$GITHUB_OUTPUT"
+      - run: npm --prefix server ci
+      - run: npm --prefix miniprogram ci
+      - run: npm --prefix server run build
+      - run: npm --prefix server run lint
+      - name: Test backend and mini-program
         env:
-          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
-          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
-          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          DOTENV_CONFIG_PATH: /dev/null
+          NODE_ENV: test
+          DB_TYPE: memory
         run: |
-          ssh \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            -p "$PROD_SSH_PORT" \
-            "$PROD_SSH_USER@$PROD_SSH_HOST" \
-            'sudo -n test -r /etc/linkmai/production.env &&
-             sudo -n test -S /root/.pm2/rpc.sock &&
-             sudo -n install -d -m 750 -o "$(id -un)" -g "$(id -gn)" /var/www/linkmai-production/source'
-
-      - name: Sync release source
+          npm --prefix server test
+          ./miniprogram/node_modules/.bin/tsc --noEmit -p miniprogram/tsconfig.json
+          ./server/node_modules/.bin/tsx --test miniprogram/tests/*.test.ts
+      - name: Build staging mini-program
         env:
-          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
-          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
-          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
-        run: |
-          rsync -az --delete \
-            --exclude '.git/' \
-            --exclude '.claude/' \
-            --exclude '.env' \
-            --exclude '.env.*' \
-            --exclude '*.pem' \
-            --exclude '*.key' \
-            --exclude 'api_v3_key' \
-            --exclude 'wechat_api_v3_key' \
-            --exclude '*-secrets' \
-            --exclude 'node_modules/' \
-            --exclude 'server/node_modules/' \
-            --exclude 'miniprogram/node_modules/' \
-            --exclude 'dist/' \
-            --exclude 'miniprogram/dist/' \
-            --exclude 'miniprogram/dist-h5/' \
-            -e "ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p $PROD_SSH_PORT" \
-            ./ "$PROD_SSH_USER@$PROD_SSH_HOST:/var/www/linkmai-production/source/"
-
-      - name: Deploy release
+          TARO_APP_API_BASE: https://staging-api.linkmai.com/api
+        run: npm --prefix miniprogram run build:weapp:staging
+      - name: Archive exact source and acceptance metadata
         env:
-          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
-          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
-          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
-          RELEASE_ID: ${{ github.sha }}
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+          RELEASE_ID: ${{ steps.release.outputs.release_id }}
         run: |
-          ssh \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            -p "$PROD_SSH_PORT" \
-            "$PROD_SSH_USER@$PROD_SSH_HOST" \
-            "sudo -n env \
-             PM2_HOME=/root/.pm2 \
-             RELEASE_ID=$RELEASE_ID \
-             SOURCE_ROOT=/var/www/linkmai-production/source \
-             LINKMAI_ENV_FILE=/etc/linkmai/production.env \
-             LINKMAI_HEALTH_URL=https://api.linkmai.com/api/health \
-             bash /var/www/linkmai-production/source/server/scripts/deploy-production.sh"
+          git archive --format=tar HEAD > release-source.tar
+          node -e 'require("fs").writeFileSync("release.json", JSON.stringify({sha: process.env.RELEASE_SHA, releaseId: process.env.RELEASE_ID}, null, 2))'
+          sha256sum release-source.tar > release-source.tar.sha256
+          node miniprogram/scripts/package-release.cjs staging
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-${{ steps.release.outputs.release_id }}
+          path: |
+            release-source.tar
+            release-source.tar.sha256
+            release.json
+          retention-days: 14
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weapp-staging-${{ steps.release.outputs.release_id }}
+          path: miniprogram/dist-staging/
+          retention-days: 14
+          if-no-files-found: error
+
+  staging:
+    name: Deploy staging for device acceptance
+    needs: checks
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging-api.linkmai.com/api/health
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.checks.outputs.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: source-${{ needs.checks.outputs.release_id }}
+          path: release-artifact
+      - name: Deploy verified staging source
+        env:
+          DEPLOY_TARGET: staging
+          RELEASE_SHA: ${{ needs.checks.outputs.sha }}
+          RELEASE_ID: ${{ needs.checks.outputs.release_id }}
+          DEPLOY_SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          DEPLOY_SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
+          DEPLOY_SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+        run: bash server/scripts/ci-deploy.sh
+      - name: Record staging acceptance instructions
+        env:
+          RELEASE_SHA: ${{ needs.checks.outputs.sha }}
+          RELEASE_ID: ${{ needs.checks.outputs.release_id }}
+        run: |
+          {
+            printf '### Staging ready for acceptance\n\nSHA: %s\n\nRelease: %s\n\n' "$RELEASE_SHA" "$RELEASE_ID"
+            printf 'Download weapp-staging-%s from this run; test that package against staging.\n\n' "$RELEASE_ID"
+            printf 'Before approving production, record device/business results, payment amount, migration backup and compatibility in the run or linked acceptance record. Approval confirms this exact SHA.\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  production:
+    name: Approve accepted SHA and deploy production
+    needs: [checks, staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.linkmai.com/api/health
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.checks.outputs.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: source-${{ needs.checks.outputs.release_id }}
+          path: release-artifact
+      - name: Verify accepted staging and deploy the same source
+        env:
+          DEPLOY_TARGET: production
+          RELEASE_SHA: ${{ needs.checks.outputs.sha }}
+          RELEASE_ID: ${{ needs.checks.outputs.release_id }}
+          STAGING_RELEASE_ID: ${{ needs.checks.outputs.release_id }}
+          DEPLOY_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          DEPLOY_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          DEPLOY_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+        run: bash server/scripts/ci-deploy.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: miniprogram/package-lock.json
+      - run: npm --prefix miniprogram ci
+      - name: Build production mini-program from accepted SHA
+        env:
+          TARO_APP_API_BASE: https://api.linkmai.com/api
+          RELEASE_SHA: ${{ needs.checks.outputs.sha }}
+          RELEASE_ID: ${{ needs.checks.outputs.release_id }}
+        run: |
+          npm --prefix miniprogram run build:weapp
+          node miniprogram/scripts/package-release.cjs production
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weapp-production-${{ needs.checks.outputs.release_id }}
+          path: miniprogram/dist/
+          retention-days: 14
+          if-no-files-found: error

@@ -125,7 +125,7 @@ export default function CasePage() {
     return (
       <View className="case-page welcome-page">
         <View className="welcome-intro">
-          <Text className="welcome-title">Hello👋<Text className="welcome-title-line">欢迎使用灵迈</Text></Text>
+          <Text className="welcome-title">欢迎使用灵迈 👋</Text>
         </View>
         <CaseJourney active={0} compact identityLabel="登录后使用案件工作台" actionId="guide-login" actionLabel={isAuthenticating ? '正在连接微信账户' : authRetryable ? '重新连接并开始' : '微信登录并开始'} onAction={handlePrimaryAction} actionLoading={isAuthenticating} />
         {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text></View>}
@@ -166,12 +166,11 @@ export default function CasePage() {
     <View className="case-page">
       <View className="identity-block">
         <View className="home-welcome">
-          <Text className="home-welcome-hello">Hello👋</Text>
-          <Text className="home-welcome-title">欢迎使用灵迈</Text>
+          <Text className="home-welcome-title">欢迎使用灵迈 👋</Text>
         </View>
       </View>
 
-      <CaseJourney active={getJourneyStep(nextStep)} compact identityLabel={`${nickname}的案件工作台`} identityAvatar={user?.avatar} actionLabel="开始处理" />
+      <CaseJourney active={getJourneyStep(nextStep)} compact identityLabel={`${nickname}的案件工作台`} identityAvatar={user?.avatar} />
       {authError && <View className="auth-error-panel"><Text className="auth-error-title">暂未连接到你的账户</Text><Button loading={isAuthenticating} disabled={isAuthenticating} onClick={() => retryAuth()} className="auth-retry">重新连接</Button></View>}
 
       {mode === 'load_error' && (
@@ -218,10 +217,6 @@ export default function CasePage() {
               <View className="summary-plan-status"><Text className="summary-value">{currentCase?.hasReport ? '已生成' : '处理中'}</Text><Icon name="chevron-right" size={14} color="#2A64F0" /></View>
               <Text className="summary-label">完整方案</Text>
             </View>
-          </View>
-          <View className="summary-progress">
-            <View className="progress-row"><Text>案件进度</Text><Text>{detail.progress}%</Text></View>
-            <View className="progress-track"><View className="progress-value" style={{ width: `${detail.progress}%` }} /></View>
           </View>
         </View>
       )}

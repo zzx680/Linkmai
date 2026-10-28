@@ -36,4 +36,9 @@ describe('profile support pages', () => {
     assert.match(caseSource, /onAction=\{handlePrimaryAction\}/)
     assert.doesNotMatch(caseSource, /重新连接微信账户/)
   })
+
+  it('does not repeat non-interactive help or settings entry points', () => {
+    assert.doesNotMatch(helpSource, /quick-help-card|处理事故.*从底部“处理”进入对话/)
+    assert.doesNotMatch(profileSource, /profile-header-icon|name="settings"/)
+  })
 })

@@ -123,7 +123,6 @@ describe('home workbench state', () => {
     assert.ok(journeyIndex > welcomeIndex)
     assert.match(casePageSource, /identityLabel=\{`\$\{nickname\}的案件工作台`\} identityAvatar=\{user\?\.avatar\}/)
     assert.match(caseStylesSource, /\.journey-identity[\s\S]*border-bottom: 1rpx solid #E5E5EA;/)
-    assert.match(casePageSource, /Hello👋/)
     assert.match(casePageSource, /欢迎使用灵迈/)
     assert.doesNotMatch(casePageSource, /从一份材料开始整理案件/)
   })
@@ -135,7 +134,8 @@ describe('home workbench state', () => {
   it('uses one state-aligned journey on signed-in and login pages', () => {
     assert.equal((casePageSource.match(/<CaseJourney/g) || []).length, 2)
     assert.match(casePageSource, /<CaseJourney active=\{0\} compact[\s\S]*actionId="guide-login"[\s\S]*onAction=\{handlePrimaryAction\}/)
-    assert.match(casePageSource, /<CaseJourney active=\{getJourneyStep\(nextStep\)\} compact[^>]*actionLabel="开始处理"/)
+    assert.match(casePageSource, /<CaseJourney active=\{getJourneyStep\(nextStep\)\} compact[^>]*identityLabel=/)
+    assert.doesNotMatch(casePageSource, /actionLabel="开始处理"/)
     assert.match(casePageSource, /identityLabel="登录后使用案件工作台"/)
     assert.match(journeySource, /journey-node"><Text>\{index < currentStep \? '✓' : index \+ 1\}<\/Text>/)
     assert.doesNotMatch(journeySource, /padStart\(/)

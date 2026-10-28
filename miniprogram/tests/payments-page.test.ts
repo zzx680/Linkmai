@@ -118,6 +118,11 @@ describe('payment page rendering', () => {
     assert.doesNotMatch(refunded, /立即解锁/)
   })
 
+  it('omits the removed payment reassurance and legal footer', () => {
+    const html = renderPage()
+    assert.doesNotMatch(html, /安心支付|一次付费仅解锁当前案件|不自动续费|不替代专业法律意见|payment-disclaimer|explanation-card/)
+  })
+
   it('does not offer payment without a valid price', () => {
     const html = renderPage({ amountCents: 0 })
     assert.match(html, /金额待确认/)

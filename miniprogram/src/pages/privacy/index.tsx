@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../../components'
 import { useAppStore } from '../../store'
 import { getPrivacyRequests, submitPrivacyRequest, PrivacyRequest, PrivacyRequestKind } from '../../services/api'
-import { PRIVACY_VERSION, privacyOperator, privacySections, privacyRequestLabels, privacyStatusLabels } from '../../content/privacy'
+import { privacyOperator, privacySections, privacyRequestLabels, privacyStatusLabels } from '../../content/privacy'
 import { revokeCaseDataConsent } from '../../utils/privacy-consent'
 import './index.scss'
 
@@ -90,7 +90,6 @@ export default function Privacy() {
         <Text className="support-eyebrow">个人信息与账户</Text>
         <Text className="support-title">隐私与安全</Text>
         <Text className="support-description">了解资料如何用于案件整理，以及如何管理你的数据。</Text>
-        <Text className="privacy-version">更新日期与版本：{PRIVACY_VERSION}</Text>
       </View>
       <View className="privacy-summary">
         <Icon name="shield-check" size={24} color="#000000" />

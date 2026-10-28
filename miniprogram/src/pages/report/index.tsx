@@ -141,9 +141,8 @@ export default function Report() {
     return (
       <View className="report-page">
         <View className="page-header">
-          <Text className="eyebrow">案件报告</Text>
           <Text className="page-title">案件报告</Text>
-          <Text className="page-description">报告会把已确认的材料整理成可阅读、可复核的处理摘要</Text>
+          <Text className="page-description">材料整理完成后，可生成当前案件的处理摘要</Text>
         </View>
 
         <View className="preflight-card">
@@ -151,7 +150,7 @@ export default function Report() {
             <Icon name="circle-check" size={32} color="#2A64F0" />
           </View>
           <Text className="preflight-title">生成前检查</Text>
-          <Text className="preflight-description">只有已确认的材料字段会进入报告，所有结论都会保留对应材料依据，方便你随时核对</Text>
+          <Text className="preflight-description">只有已确认的材料字段会进入报告，所有结论都会保留对应材料依据</Text>
           <View className="preflight-list">
             <View className="preflight-row"><Text>已添加材料</Text><Text className="row-value">{materials.length} 份</Text></View>
             <View className="preflight-row"><Text>已确认材料</Text><Text className="row-value">{confirmedMaterials.length} 份</Text></View>
@@ -169,7 +168,7 @@ export default function Report() {
 
         <View className="report-note">
           <Icon name="info" size={20} color="#6B7280" />
-          <Text>报告会明确区分材料事实、AI 分析和行动建议，重要结论请回到原始材料核对。</Text>
+          <Text>报告区分材料事实、AI 分析和行动建议；重要结论请回到原始材料核对。</Text>
         </View>
       </View>
     )
@@ -181,7 +180,7 @@ export default function Report() {
 
   return (
     <View className="report-page">
-      <CaseJourney active={3} title="从已知事实，到下一步" description="逐项阅读分析，回到原始材料复核重要结论" />
+      <CaseJourney active={3} />
       <ScrollView className="report-scroll" scrollY showScrollbar={false}>
         <View className="page-header result-header">
           <View>

@@ -1,5 +1,8 @@
 # 2026-10-17 生产部署记录
 
+> 历史记录：以下状态、测试结果和命令仅对应记录时的版本，不代表当前已部署、已验收或允许上线。旧部署、初始化和回退命令不要直接执行；当前操作统一见[部署指南](DEPLOYMENT.md)。
+
+
 - 正式 API：`https://api.linkmai.com/api`。
 - Release：`/var/www/linkmai-production/releases/20261017-a6efcd45322f`。
 - 源码基线：`ec7f0aa` 加发布时工作区变更；完整文件校验清单在 release 的 `manifest.json`，未创建 Git 提交。

@@ -3,7 +3,6 @@
 
 .materials-page {
   @include page-container;
-  padding-top: 48rpx;
   padding-bottom: calc($space-8 + env(safe-area-inset-bottom));
 }
 
@@ -11,7 +10,7 @@
 .page-header {
   display: block;
   padding: 32rpx;
-  border-radius: 40rpx;
+  border-radius: $radius-xl;
   background: #FFFFFF;
   box-shadow: 0 12rpx 40rpx rgba(38, 48, 74, .045);
 
@@ -27,14 +26,6 @@
     display: block;
     @include page-title;
     margin-bottom: 0;
-  }
-
-  .page-description {
-    display: block;
-    color: $color-text-secondary;
-    font-size: $font-size-sm;
-    line-height: $line-height-relaxed;
-    max-width: 580rpx;
   }
 
   .count-badge {

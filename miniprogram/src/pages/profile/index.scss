@@ -2,7 +2,7 @@
 
 .profile-page {
   min-height: 100vh;
-  padding: 48rpx 32rpx 190rpx;
+  padding: $page-top-space $page-gutter 190rpx;
   background: $color-bg-base;
 }
 
@@ -25,14 +25,6 @@
   color: $color-text-primary;
   font-size: $font-size-xl;
   font-weight: $font-weight-bold;
-}
-
-.profile-header-icon {
-  width: 72rpx;
-  height: 72rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .user-card {

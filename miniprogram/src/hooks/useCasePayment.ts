@@ -50,6 +50,7 @@ export function useCasePayment() {
     const refreshCase = async () => {
       const latest = await getCurrentCase()
       if (isCurrent() && latest?.id === currentCase.id) useAppStore.setState({ currentCase: latest })
+      return latest
     }
     const poll = async (pending: PendingPayment) => {
       for (const delay of PAYMENT_POLL_DELAYS) {
@@ -90,9 +91,15 @@ export function useCasePayment() {
         }
         if (!result.orderId || !result.payment) throw new Error('支付参数未准备好，请稍后重试')
         if (!matchesPaymentAmount(result, currentCase.entitlement)) {
-          await refreshCase()
-          if (isCurrent()) Taro.showToast({ title: '支付金额已更新，请核对后重新支付', icon: 'none' })
-          return
+          // An older valid order can have an immutable amount that differs from
+          // the amount cached in the case. The server reconciles that amount;
+          // refresh before deciding whether it is safe to launch payment.
+          const latest = await refreshCase()
+          if (!isCurrent()) return
+          if (!latest || latest.id !== currentCase.id || !matchesPaymentAmount(result, latest.entitlement)) {
+            Taro.showToast({ title: '支付金额已更新，请核对后重新支付', icon: 'none' })
+            return
+          }
         }
         pending = { userId: owner, caseId: currentCase.id, orderId: result.orderId }
         Taro.setStorageSync(PENDING_PAYMENT_KEY, pending)

@@ -26,8 +26,11 @@ export function formatPaymentPrice(entitlement?: CaseEntitlement): string | null
 }
 
 export function matchesPaymentAmount(order: Pick<PaymentOrderResponse, 'amountCents' | 'currency'>, entitlement?: CaseEntitlement): boolean {
-  return !!formatPaymentPrice(entitlement)
-    && order.amountCents === entitlement!.amountCents && order.currency === entitlement!.currency
+  if (!formatPaymentPrice(entitlement)) return false
+  const orderAmount = Number(order.amountCents)
+  const entitlementAmount = Number(entitlement!.amountCents)
+  return Number.isSafeInteger(orderAmount) && Number.isSafeInteger(entitlementAmount)
+    && orderAmount === entitlementAmount && order.currency === entitlement!.currency
 }
 
 export function entitlementLabel(status?: CaseEntitlement['status']): string {

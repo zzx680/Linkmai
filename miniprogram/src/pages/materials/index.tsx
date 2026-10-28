@@ -104,7 +104,6 @@ export default function Materials() {
           <Text className="page-title">案件材料</Text>
           <View className="count-badge"><Text>{materials.length} 份</Text></View>
         </View>
-        <Text className="page-description">上传案件材料，核对识别信息。</Text>
       </View>
 
       <View className="section-heading">

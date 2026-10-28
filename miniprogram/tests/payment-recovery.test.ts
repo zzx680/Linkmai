@@ -10,7 +10,14 @@ const source = ts.transpileModule(readFileSync(path.resolve(__dirname, '../src/h
   compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS, esModuleInterop: true }
 }).outputText
 
-function fixture(options: { entitlement?: string; pending?: unknown; orderStatus?: string; error?: string } = {}) {
+function fixture(options: {
+  entitlement?: string
+  pending?: unknown
+  orderStatus?: string
+  error?: string
+  createResult?: unknown
+  refreshAmountCents?: number
+} = {}) {
   const calls: string[] = []
   const toasts: string[] = []
   let stored = options.pending
@@ -36,16 +43,25 @@ function fixture(options: { entitlement?: string; pending?: unknown; orderStatus
         })
       }
       if (id === '../services/api') return {
-        createPaymentOrder: async () => { calls.push('create-order'); throw new Error('Recovery must not create an order') },
+        createPaymentOrder: async () => {
+          calls.push('create-order')
+          if (options.createResult !== undefined) return options.createResult
+          throw new Error('Recovery must not create an order')
+        },
         getPaymentOrder: async () => {
           calls.push('check-order')
           if (options.error) throw new Error(options.error)
           return { orderId: 'order-1', caseId: 'case-1', status: options.orderStatus || 'paid' }
         },
-        getCurrentCase: async () => { calls.push('refresh-case'); return state.currentCase }
+        getCurrentCase: async () => {
+          calls.push('refresh-case')
+          if (options.refreshAmountCents !== undefined) state.currentCase.entitlement.amountCents = options.refreshAmountCents
+          return state.currentCase
+        }
       }
       if (id === '@tarojs/taro') return {
         getStorageSync: () => stored,
+        setStorageSync: (_key: string, value: unknown) => { stored = value },
         removeStorageSync: () => { calls.push('clear-pending'); stored = undefined },
         showToast: ({ title }: { title: string }) => toasts.push(title),
         requestPayment: async () => { calls.push('open-payment') }
@@ -88,4 +104,26 @@ test('a failed payment status check retains the order for retry and reports the 
   assert.deepEqual(f.calls, ['check-order'])
   assert.equal(f.pending(), pending)
   assert.deepEqual(f.toasts, ['连接超时，请检查网络后重试'])
+})
+
+test('an order amount changed by server reconciliation can continue with the same payment order', async () => {
+  const payment = { timeStamp: '1', nonceStr: 'n', package: 'prepay_id=p', signType: 'RSA', paySign: 's' }
+  const f = fixture({
+    createResult: { alreadyPaid: false, orderId: 'order-1', amountCents: 1, currency: 'CNY', payment },
+    refreshAmountCents: 1,
+    orderStatus: 'paid',
+  })
+  await f.api.handlePayment()
+  assert.deepEqual(f.calls, ['create-order', 'refresh-case', 'open-payment', 'check-order', 'clear-pending', 'refresh-case'])
+  assert.deepEqual(f.toasts, ['已解锁完整方案'])
+})
+
+test('a payment amount mismatch that is not reconciled never opens payment', async () => {
+  const payment = { timeStamp: '1', nonceStr: 'n', package: 'prepay_id=p', signType: 'RSA', paySign: 's' }
+  const f = fixture({
+    createResult: { alreadyPaid: false, orderId: 'order-1', amountCents: 1, currency: 'CNY', payment },
+  })
+  await f.api.handlePayment()
+  assert.deepEqual(f.calls, ['create-order', 'refresh-case'])
+  assert.deepEqual(f.toasts, ['支付金额已更新，请核对后重新支付'])
 })

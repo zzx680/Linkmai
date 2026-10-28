@@ -139,8 +139,8 @@ export default function Profile() {
     {
       title: '案件管理',
       items: [
-        { icon: 'file-text', label: '当前案件', key: 'case', value: currentCase ? '处理中' : '尚未创建' },
-        { icon: 'folder-open', label: '材料与证据', key: 'materials', value: `${materialCount} 份` },
+        { icon: 'file-text', label: '当前案件', key: 'case' },
+        { icon: 'folder-open', label: '材料与证据', key: 'materials' },
         { icon: 'chart-no-axes-combined', label: '事故报告', key: 'report', value: reportCount ? '可查看' : '未生成' }
       ]
     },
@@ -165,9 +165,6 @@ export default function Profile() {
       <View className="profile-header">
         <View>
           <Text className="profile-title">账户与案件</Text>
-        </View>
-        <View className="profile-header-icon" onClick={() => openTask('help')}>
-          <Icon name="settings" size={22} color="#000000" />
         </View>
       </View>
 

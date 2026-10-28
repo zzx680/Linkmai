@@ -39,14 +39,6 @@ export default function Help() {
         <Text className="support-description">你可以在处理页继续描述事故，也可以在这里留下产品使用反馈</Text>
       </View>
 
-      <View className="support-card quick-help-card">
-        <View className="card-icon"><Icon name="messages-square" size={22} color="#2A64F0" /></View>
-        <View className="card-copy">
-          <Text className="card-title">处理事故</Text>
-          <Text className="card-description">从底部“处理”进入对话，按提示讲清事故经过并整理材料</Text>
-        </View>
-      </View>
-
       <View className="support-section contact-support-section">
         <Text className="section-title">联系客服</Text>
         <View className="support-card contact-support-card">
