@@ -32,7 +32,7 @@ printf '%s\n' "$RELEASE_SHA" > "$source_dir/.release-source-sha"
 ssh_options=(-i "$ssh_dir/id_ed25519" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$ssh_dir/known_hosts" -o BatchMode=yes -o ConnectTimeout=15 -p "$DEPLOY_SSH_PORT")
 remote="$DEPLOY_SSH_USER@$DEPLOY_SSH_HOST"
 remote_source="/var/www/linkmai-$DEPLOY_TARGET/source/$RELEASE_ID"
-ssh "${ssh_options[@]}" "$remote" "sudo -n test -r /etc/linkmai/$DEPLOY_TARGET.env && sudo -n test -S /root/.pm2/rpc.sock && sudo -n install -d -m 750 -o '$DEPLOY_SSH_USER' /var/www/linkmai-$DEPLOY_TARGET/source && sudo -n mkdir '$remote_source' && sudo -n chown '$DEPLOY_SSH_USER' '$remote_source'"
+ssh "${ssh_options[@]}" "$remote" "sudo -n test -r /etc/linkmai/$DEPLOY_TARGET.env && sudo -n test -S /root/.pm2/rpc.sock && sudo -n install -d -m 750 -o '$DEPLOY_SSH_USER' /var/www/linkmai-$DEPLOY_TARGET/source && sudo -n rm -rf -- '$remote_source' && sudo -n mkdir '$remote_source' && sudo -n chown '$DEPLOY_SSH_USER' '$remote_source'"
 printf -v rsync_ssh '%q ' ssh "${ssh_options[@]}"
 rsync -az --delete \
   --exclude '.git/' --exclude '.claude/' --exclude '.codex/' --exclude '.agents/' \

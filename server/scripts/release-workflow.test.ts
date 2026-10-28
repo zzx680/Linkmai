@@ -29,6 +29,17 @@ test('release workflow requires checks and staging and preserves an approval bou
   }
 })
 
+test('release transport replaces only a retryable source directory before upload', () => {
+  const script = readFileSync(path.join(__dirname, 'ci-deploy.sh'), 'utf8')
+  const cleanup = "sudo -n rm -rf -- '$remote_source'"
+  const create = "sudo -n mkdir '$remote_source'"
+  assert.ok(script.includes('install -d -m 750 -o'))
+  assert.ok(script.includes(cleanup))
+  assert.ok(script.includes(create))
+  assert.ok(script.indexOf(cleanup) < script.indexOf(create))
+  assert.doesNotMatch(script, /rm -rf -- ['\"]?\$?APP_ROOT/)
+})
+
 test('workflow shell blocks and all release entrypoints have valid Bash syntax', () => {
   const temp = mkdtempSync(path.join(tmpdir(), 'linkmai-workflow-'))
   try {
