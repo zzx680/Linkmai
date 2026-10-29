@@ -48,13 +48,15 @@ test('both environment smoke entrypoints reject stale running SHA/release and ve
     for (const mode of ['staging', 'production']) {
       for (const [health, reviewStatus, expected] of [
         [goodHealth, '200', 0],
+        [{ ...goodHealth, features: { ...goodHealth.features, caseHarness: false } }, '200', 1],
+        [{ ...goodHealth, features: { paymentOrderHistory: true, contextualAgent: true } }, '200', 1],
         [{ ...goodHealth, release: { sha: 'b'.repeat(40), id: 'expected' } }, '200', 1],
         [{ ...goodHealth, release: { sha, id: 'old' } }, '200', 1],
         [{ ...goodHealth, database: 'unavailable' }, '200', 1],
         [goodHealth, '404', 1],
       ] as const) {
         const result = spawnSync('bash', [path.resolve(__dirname, 'smoke-' + mode + '.sh'), 'https://api.example.test'], {
-          env: { ...process.env, PATH: root + ':' + process.env.PATH, TASK_HEALTH_JSON: JSON.stringify(health), TASK_REVIEW_STATUS: reviewStatus, LINKMAI_EXPECTED_SHA: sha, LINKMAI_EXPECTED_RELEASE_ID: 'expected' },
+          env: { ...process.env, PATH: root + ':' + process.env.PATH, TASK_HEALTH_JSON: JSON.stringify(health), TASK_REVIEW_STATUS: reviewStatus, LINKMAI_EXPECT_REVIEW: 'true', LINKMAI_EXPECTED_SHA: sha, LINKMAI_EXPECTED_RELEASE_ID: 'expected' },
           encoding: 'utf8', timeout: 5000,
         })
         assert.equal(result.status, expected, result.stdout + result.stderr)

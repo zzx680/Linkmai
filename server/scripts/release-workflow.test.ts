@@ -40,6 +40,17 @@ test('release transport replaces only a retryable source directory before upload
   assert.doesNotMatch(script, /rm -rf -- ['\"]?\$?APP_ROOT/)
 })
 
+test('review activation remains server-local and protects the staged promotion path', () => {
+  const script = readFileSync(path.join(__dirname, 'ci-deploy.sh'), 'utf8')
+  assert.match(script, /openssl rand -hex 48/)
+  assert.match(script, /REVIEW_JWT_SECRET/)
+  assert.match(script, /HARNESS_ENABLED=true/)
+  assert.match(script, /location = \/review/)
+  assert.match(script, /sudo -n nginx -t/)
+  assert.match(script, /sudo -n systemctl reload nginx/)
+  assert.doesNotMatch(readFileSync(path.join(root, '.github/workflows/deploy-production.yml'), 'utf8'), /REVIEW_JWT_SECRET/)
+})
+
 test('workflow shell blocks and all release entrypoints have valid Bash syntax', () => {
   const temp = mkdtempSync(path.join(tmpdir(), 'linkmai-workflow-'))
   try {
