@@ -93,6 +93,16 @@ if ! sudo -n grep -q 'location = /review' "$NGINX_FILE"; then
 fi
 sudo -n systemctl reload nginx
 sudo -n env PM2_HOME=/root/.pm2 LINKMAI_CURRENT="/var/www/linkmai-$DEPLOY_TARGET/current/server" LINKMAI_ENV_FILE="$ENV_FILE" pm2 startOrReload "/var/www/linkmai-$DEPLOY_TARGET/current/server/ecosystem.$DEPLOY_TARGET.config.js" --update-env 9>&-
+for attempt in $(seq 1 15); do
+  if curl --fail --silent --show-error --max-time 5 "https://$([ "$DEPLOY_TARGET" = staging ] && printf staging-api || printf api).linkmai.com/api/health" >/dev/null; then
+    break
+  fi
+  if [ "$attempt" -eq 15 ]; then
+    echo '审核配置重载后健康检查超时' >&2
+    exit 1
+  fi
+  sleep 2
+done
 LINKMAI_EXPECT_REVIEW=true LINKMAI_EXPECTED_SHA="$RELEASE_SHA" LINKMAI_EXPECTED_RELEASE_ID="$RELEASE_ID" \
   bash "/var/www/linkmai-$DEPLOY_TARGET/current/server/scripts/smoke-$DEPLOY_TARGET.sh" "https://$([ "$DEPLOY_TARGET" = staging ] && printf staging-api || printf api).linkmai.com"
 REMOTE_ENABLE_REVIEW

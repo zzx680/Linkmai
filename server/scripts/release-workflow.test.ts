@@ -48,6 +48,9 @@ test('review activation remains server-local and protects the staged promotion p
   assert.match(script, /location = \/review/)
   assert.match(script, /sudo -n nginx -t/)
   assert.match(script, /sudo -n systemctl reload nginx/)
+  assert.match(script, /sleep 2/)
+  assert.match(script, /审核配置重载后健康检查超时/)
+  assert.match(script, /curl --fail --silent --show-error --max-time 5/)
   assert.doesNotMatch(readFileSync(path.join(root, '.github/workflows/deploy-production.yml'), 'utf8'), /REVIEW_JWT_SECRET/)
 })
 
