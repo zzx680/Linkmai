@@ -51,6 +51,8 @@ test('review activation remains server-local and protects the staged promotion p
   assert.match(script, /sleep 2/)
   assert.match(script, /审核配置重载后健康检查超时/)
   assert.match(script, /curl --fail --silent --show-error --max-time 5/)
+  assert.ok(script.includes(String.raw`proxy_set_header Host \\\$host`))
+  assert.ok(script.includes(String.raw`proxy_set_header X-Forwarded-Proto \\\$scheme`))
   assert.doesNotMatch(readFileSync(path.join(root, '.github/workflows/deploy-production.yml'), 'utf8'), /REVIEW_JWT_SECRET/)
 })
 

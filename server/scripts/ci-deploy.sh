@@ -84,7 +84,7 @@ sudo -n chmod 640 "$ENV_FILE"
 if ! sudo -n grep -q 'location = /review' "$NGINX_FILE"; then
   backup_nginx="$NGINX_FILE.bak-$(date -u +%Y%m%dT%H%M%SZ)-review"
   sudo -n cp -a "$NGINX_FILE" "$backup_nginx"
-  if ! sudo -n sed -i "/^[[:space:]]*location \/api\//i\\    location = /review {\\n        return 301 /review/;\\n    }\\n\\n    location /review/ {\\n        proxy_pass http://127.0.0.1:$APP_PORT;\\n        proxy_set_header Host \\$host;\\n        proxy_set_header X-Forwarded-Proto \\$scheme;\\n    }\\n" "$NGINX_FILE"; then
+  if ! sudo -n sed -i "/^[[:space:]]*location \/api\//i\\    location = /review {\\n        return 301 /review/;\\n    }\\n\\n    location /review/ {\\n        proxy_pass http://127.0.0.1:$APP_PORT;\\n        proxy_set_header Host \\\$host;\\n        proxy_set_header X-Forwarded-Proto \\\$scheme;\\n    }\\n" "$NGINX_FILE"; then
     exit 1
   fi
   if ! sudo -n nginx -t; then
