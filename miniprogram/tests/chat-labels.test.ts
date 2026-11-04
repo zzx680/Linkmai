@@ -1,15 +1,27 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { getChatMessageText, getQuickReplyLabel, getQuickReplySelection } from '../src/components/AgentChat/labels'
-import { processUserMessage, type AgentState } from '../../server/src/services/agent'
+import { processUserMessage as runTurn, type AgentState } from '../../server/src/services/agent'
+import type { MessageInterpreter } from '../../server/src/services/agent-language'
+
+// Every turn, including control actions, now gets a model-authored reply. Tests
+// inject a deterministic interpreter so CI needs no provider credentials.
+const modelReply = '已收到，请继续补充案件情况。'
+const testInterpreter: MessageInterpreter = async () => ({ facts: [], reply: modelReply, status: 'model' })
+
+async function processUserMessage(state: AgentState, text: string, action?: string) {
+  return runTurn(state, text, [], action, testInterpreter)
+}
 
 test('accident choices send Chinese text and still advance the backend state', async () => {
   for (const [value, label] of [['traffic_accident', '交通事故'], ['work_injury', '工伤事故'], ['personal_injury', '意外伤害']]) {
     const selection = getQuickReplySelection({ value, label })
     assert.equal(selection.text, label)
-    const next = await processUserMessage({ stage: 'collecting', collectedFacts: [] }, selection.text, [], selection.action)
-    assert.equal(next.collectedFacts[0].value, value)
-    assert.equal(next.nextQuestion, '事故发生在什么时间？')
+    const { agentState, assistantText } = await processUserMessage({ stage: 'collecting', collectedFacts: [] }, selection.text, selection.action)
+    assert.equal(agentState.collectedFacts[0].value, value)
+    // The unified model reply is surfaced to the conversation, not the old local question.
+    assert.equal(assistantText, modelReply)
+    assert.equal(agentState.nextQuestion, modelReply)
   }
 })
 
@@ -20,8 +32,8 @@ test('Chinese shortcut text preserves confirm, edit, finish and legacy control s
   for (const value of ['confirm', 'confirm:correct']) {
     const selection = getQuickReplySelection({ value, label: '信息正确' })
     assert.equal(selection.action, value)
-    const next = await processUserMessage(pending, selection.text, [], selection.action)
-    assert.equal(next.collectedFacts[0].confirmed, true)
+    const { agentState } = await processUserMessage(pending, selection.text, selection.action)
+    assert.equal(agentState.collectedFacts[0].confirmed, true)
   }
   for (const [value, label] of [
     ['edit', '修改信息'], ['confirm:edit', '需要修改'], ['finish', '结束收集'],
@@ -30,9 +42,9 @@ test('Chinese shortcut text preserves confirm, edit, finish and legacy control s
   ]) {
     const selection = getQuickReplySelection({ value, label })
     assert.deepEqual(selection, { text: label, action: value })
-    const next = await processUserMessage({ stage: 'collecting', collectedFacts: [] }, selection.text, [], selection.action)
-    assert.equal(next.collectedFacts.length, 0)
-    if (value === 'edit:accident_date') assert.equal(next.editingFactKey, 'accident_date')
+    const { agentState } = await processUserMessage({ stage: 'collecting', collectedFacts: [] }, selection.text, selection.action)
+    assert.equal(agentState.collectedFacts.length, 0)
+    if (value === 'edit:accident_date') assert.equal(agentState.editingFactKey, 'accident_date')
   }
 })
 
