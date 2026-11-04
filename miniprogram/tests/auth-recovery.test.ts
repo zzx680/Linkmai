@@ -15,6 +15,9 @@ const compiled = ts.transpileModule(readFileSync(source, 'utf8'), {
 
 function setup(token: string | null = 'saved-token') {
   class UnauthorizedError extends Error {}
+  class ApiError extends Error {
+    constructor(message: string, public statusCode: number, public code?: string) { super(message) }
+  }
   const counters = { login: 0, exchange: 0, cleared: 0, messages: 0 }
   let session: () => Promise<unknown> = async () => ({ id: 'user-1' })
   let currentCase: unknown = null
@@ -22,9 +25,13 @@ function setup(token: string | null = 'saved-token') {
   let run: any = null
   let report: any = null
   let queryRun = async () => run
+  let history: () => Promise<any> = async () => ({ messages: [] })
+  let send: (...args: any[]) => Promise<any> = async () => ({ message: 'reply' })
+  const sent: any[][] = []
   const reportCalls = { generate: 0 }
   const api = {
     UnauthorizedError,
+    ApiError,
     getToken: () => token,
     setToken: (value: string) => { token = value },
     clearToken: () => { token = null; counters.cleared++ },
@@ -38,8 +45,8 @@ function setup(token: string | null = 'saved-token') {
     getReport: async () => report,
     generateReport: async () => { reportCalls.generate++; return run },
     getMaterials: async () => [],
-    getConversationHistory: async () => ({ messages: [] }),
-    sendMessage: async () => { counters.messages++; return { message: 'reply' } },
+    getConversationHistory: () => history(),
+    sendMessage: async (...args: any[]) => { counters.messages++; sent.push(args); return send(...args) },
   }
   const module = { exports: {} as any }
   vm.runInNewContext(compiled, {
@@ -52,8 +59,53 @@ function setup(token: string | null = 'saved-token') {
       return requireFromSource(id)
     },
   }, { filename: source })
-  return { store: module.exports.useAppStore, reportCalls, setRun: (value: any) => { run = value }, setReport: (value: any) => { report = value }, setRunQuery: (value: typeof queryRun) => { queryRun = value }, counters, setSession: (value: typeof session) => { session = value }, setCurrentCase: (value: unknown) => { currentCase = value }, setConsent: (value: boolean) => { consent = value }, UnauthorizedError, token: () => token }
+  return { store: module.exports.useAppStore, sent, ApiError, setHistory: (value: typeof history) => { history = value }, setSend: (value: typeof send) => { send = value }, reportCalls, setRun: (value: any) => { run = value }, setReport: (value: any) => { report = value }, setRunQuery: (value: typeof queryRun) => { queryRun = value }, counters, setSession: (value: typeof session) => { session = value }, setCurrentCase: (value: unknown) => { currentCase = value }, setConsent: (value: boolean) => { consent = value }, UnauthorizedError, token: () => token }
 }
+
+describe('conversation readiness recovery', () => {
+  it('restores readiness and clears it when switching cases', async () => {
+    const test = setup()
+    const readiness = { canGenerate: false, confirmed: 2, pending: 1, missing: [{ label: '事故地点' }] }
+    test.setCurrentCase({ id: 'case-a' })
+    test.setHistory(async () => ({ messages: [], readiness }))
+    await test.store.getState().loadCurrentCase()
+    assert.equal(test.store.getState().readiness, readiness)
+    test.setCurrentCase({ id: 'case-b' })
+    test.setHistory(async () => ({ messages: [] }))
+    await test.store.getState().loadCurrentCase()
+    assert.equal(test.store.getState().readiness, null)
+  })
+
+  it('reuses the request ID after a timeout and reconciles replayed messages', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case' })
+    await test.store.getState().checkLoginStatus()
+    test.setSend(async () => { throw new Error('timeout') })
+    await assert.rejects(test.store.getState().sendMessage('hello'), /timeout/)
+    const messages = [{ id: 'server-user', role: 'user', content: 'hello' }, { id: 'server-assistant', role: 'assistant', content: 'reply' }]
+    test.setHistory(async () => ({ messages, readiness: { canGenerate: true } }))
+    test.setSend(async () => ({ message: 'reply', readiness: { canGenerate: true } }))
+    await test.store.getState().sendMessage('hello')
+    assert.equal(test.sent[0][4], test.sent[1][4])
+    assert.equal(test.store.getState().messages.length, 2)
+    assert.equal(test.store.getState().messages[0].id, 'server-user')
+    assert.equal(test.store.getState().readiness.canGenerate, true)
+  })
+
+  it('refreshes stale conversation state and starts a new request after a conflict', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case' })
+    await test.store.getState().checkLoginStatus()
+    test.setHistory(async () => ({ messages: [], readiness: { canGenerate: false } }))
+    test.setSend(async () => { throw new test.ApiError('stale', 409, 'CONVERSATION_STALE') })
+    await assert.rejects(test.store.getState().sendMessage('hello'), /stale/)
+    assert.equal(test.store.getState().readiness.canGenerate, false)
+    test.setSend(async () => ({ message: 'reply' }))
+    await test.store.getState().sendMessage('hello')
+    assert.notEqual(test.sent[0][4], test.sent[1][4])
+    assert.equal(test.store.getState().isAiTyping, false)
+  })
+})
 
 describe('report run recovery', () => {
   it('restores a server run into a fresh store without generating again', async () => {

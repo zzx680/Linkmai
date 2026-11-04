@@ -5,7 +5,6 @@ import { syncTabRoute } from '../../custom-tab-bar/navigation'
 import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import { MaterialType, QuickReply } from '../../services/api'
-import { IS_H5 } from '../../config/env'
 import brandLogo from '../../assets/brand/linkmai-chat.png'
 import { AgentChatMessage, AgentChatSender } from '../../components/AgentChat'
 import { getQuickReplyLabel, getQuickReplySelection } from '../../components/AgentChat/labels'
@@ -18,7 +17,7 @@ const stageLabels: Record<string, string> = {
   collecting: '收集信息',
   confirming: '待确认',
   analyzing: '分析中',
-  ready: '可以生成报告'
+  ready: '信息已整理'
 }
 
 const stageColors: Record<string, string> = {
@@ -46,6 +45,7 @@ export default function Agent() {
     messages,
     materials,
     conversationState,
+    readiness,
     isAiTyping,
     sendMessage,
     uploadImage,
@@ -62,7 +62,7 @@ export default function Agent() {
   useDidHide(() => setKeyboardHeight(0))
 
   useEffect(() => {
-    if (!IS_H5) loadMessages().catch(() => undefined)
+    loadMessages().catch(() => undefined)
   }, [loadMessages, currentCase?.id])
 
   const stage = currentCase ? conversationState : 'collecting'
@@ -83,7 +83,9 @@ export default function Agent() {
       return
     }
     if (selection.action === 'generate_report') {
-      Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })
+      if (readiness?.canGenerate || readiness?.reportExists) {
+        Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })
+      }
       return
     }
     const { text, action } = selection
@@ -155,6 +157,27 @@ export default function Agent() {
           <Text>材料 {materials.length}</Text>
         </Button>}
       </View>
+      {currentCase && (
+        <View className="report-readiness-card">
+          <View className="readiness-heading">
+            <Text className="readiness-title">报告准备</Text>
+            {readiness && (readiness.canGenerate || readiness.reportExists) && (
+              <Button className="readiness-action" disabled={isAiTyping} onClick={() => Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })}>
+                {readiness.reportExists ? '查看报告' : '生成报告'}
+              </Button>
+            )}
+          </View>
+          {readiness ? <>
+            <View className="readiness-counts">
+              <Text>已确认 {readiness.confirmed}</Text>
+              <Text>待确认 {readiness.pending}</Text>
+              <Text>待补充 {readiness.missing.length}</Text>
+            </View>
+            {readiness.reportStale && <Text className="readiness-warning">新增信息尚未纳入报告</Text>}
+            {readiness.missing.length > 0 && <Text className="readiness-missing">待补充：{readiness.missing.slice(0, 2).map(item => item.label).join('、')}</Text>}
+          </> : <Text className="readiness-missing">正在同步案件信息</Text>}
+        </View>
+      )}
 
       <ScrollView
         className={`workspace-container${!messages.length && !isAiTyping ? ' workspace-empty' : ''}`}
@@ -182,7 +205,7 @@ export default function Agent() {
                 <View className="context-progress">
                   <View className={`context-step ${materials.length ? 'complete' : 'active'}`}><Text>1</Text><Text>补充材料</Text></View>
                   <View className={`context-step ${conversationState === 'confirming' ? 'active' : ''}`}><Text>2</Text><Text>核对信息</Text></View>
-                  <View className={`context-step ${conversationState === 'ready' ? 'active' : ''}`}><Text>3</Text><Text>生成报告</Text></View>
+                  <View className={`context-step ${readiness?.canGenerate ? 'active' : ''}`}><Text>3</Text><Text>报告准备</Text></View>
                 </View>
                 <View className="context-actions">
                   <View className="quick-reply" onClick={() => Taro.navigateTo({ url: '/pages/materials/index' })}><Text>查看并核对材料</Text></View>
@@ -221,9 +244,9 @@ export default function Agent() {
                   {messages.map((msg, index) => (
                     <View key={msg.id} id={`msg-${index}`} className="chat-message-row">
                       <AgentChatMessage message={msg} />
-                      {msg.quickReplies && msg.quickReplies.length > 0 && (
+                      {index === messages.length - 1 && msg.role === 'assistant' && msg.quickReplies?.some(reply => !['generate_report', ...(stage === 'ready' ? ['edit', 'confirm:edit'] : [])].includes(reply.action || reply.value)) && (
                         <View className="quick-replies">
-                          {msg.quickReplies.map(reply => (
+                          {msg.quickReplies.filter(reply => !['generate_report', ...(stage === 'ready' ? ['edit', 'confirm:edit'] : [])].includes(reply.action || reply.value)).map(reply => (
                             <View
                               key={`${reply.action || 'message'}-${reply.value}`}
                               className="quick-reply"

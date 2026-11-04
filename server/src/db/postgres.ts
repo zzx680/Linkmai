@@ -1,5 +1,6 @@
 import { safeError } from '../utils/safe-error'
 import { randomBytes } from 'crypto'
+import { conversationHash, conversationMaterialHash, confirmedConversationFacts, type ConversationCommit, type ConversationTurnResult } from './conversation'
 import { Pool, PoolClient } from 'pg'
 import { config } from '../config'
 import { materialSnapshot } from '../services/material-snapshot'
@@ -750,6 +751,90 @@ export const db = {
     }
   },
 
+  async readConversationSnapshot(userId: string, caseId: string) {
+    if (!await this.findCaseById(userId, caseId)) throw new Error('CASE_NOT_FOUND')
+    await this.findOrCreateConversation(userId, caseId)
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ')
+      const caseResult = await client.query('SELECT * FROM cases WHERE id=$1 AND user_id=$2 FOR SHARE', [caseId, userId])
+      if (!caseResult.rows[0]) throw new Error('CASE_NOT_FOUND')
+      const row = caseResult.rows[0]
+      const caseData = {
+        id: row.id, userId: row.user_id, title: row.title, accidentType: row.accident_type, accidentDate: row.accident_date,
+        status: row.status, statusLabel: row.status_label, materialCount: row.material_count, liability: row.liability,
+        compensation: row.compensation, hasReport: row.has_report, isActive: row.is_active, inputRevision: row.input_revision,
+        createdAt: row.created_at, updatedAt: row.updated_at,
+      }
+      const conversationResult = await client.query(`SELECT * FROM conversations WHERE user_id=$1 AND case_id=$2 AND status='active' ORDER BY created_at DESC LIMIT 1 FOR SHARE`, [userId, caseId])
+      const conversation = conversationResult.rows[0]
+      if (!conversation) throw new Error('CONVERSATION_STALE')
+      const countResult = await client.query('SELECT COUNT(*)::int AS count FROM messages WHERE conversation_id=$1', [conversation.id])
+      const messagesResult = await client.query('SELECT * FROM (SELECT * FROM messages WHERE conversation_id=$1 ORDER BY created_at DESC,id DESC LIMIT 20) recent ORDER BY created_at ASC,id ASC', [conversation.id])
+      const artifactsResult = await client.query('SELECT * FROM artifacts WHERE case_id=$1 ORDER BY created_at ASC,id ASC', [caseId])
+      const factsResult = await client.query('SELECT * FROM case_facts WHERE case_id=$1 ORDER BY fact_key', [caseId])
+      const messages = messagesResult.rows.map(row => ({ id: row.id, conversationId: row.conversation_id, role: row.role, kind: row.kind, text: row.text || undefined, metadata: row.metadata || undefined, requestId: row.request_id || undefined, requestHash: row.request_hash || undefined, createdAt: row.created_at }))
+      const artifacts = artifactsResult.rows.map(row => ({ id: row.id, caseId: row.case_id, name: row.name, type: row.type, ossUrl: row.oss_url, ossKey: row.oss_key, fileSize: row.file_size, mimeType: row.mime_type, status: row.status, metadata: row.metadata || {}, createdAt: row.created_at, updatedAt: row.updated_at }))
+      const facts = factsResult.rows.map(row => ({ id: row.id, caseId: row.case_id, key: row.fact_key, label: row.label, value: row.value, source: row.source_type === 'material' ? `material:${row.source_id}` : row.source_type, sourceType: row.source_type, sourceId: row.source_id, confidence: row.confidence, confirmationStatus: row.confirmation_status, revision: row.revision, confirmedAt: row.confirmed_at, createdAt: row.created_at, updatedAt: row.updated_at }))
+      const agentState = conversation.agent_state || { stage: 'collecting', collectedFacts: [] }
+      const result = { conversationId: conversation.id, inputRevision: caseResult.rows[0].input_revision, stateHash: conversationHash(agentState), materialHash: conversationMaterialHash(artifacts), messageCount: countResult.rows[0].count, agentState, caseData, facts, artifacts, recentMessages: messages }
+      await client.query('COMMIT')
+      return result
+    } catch (error) { await client.query('ROLLBACK').catch(() => undefined); throw error } finally { client.release() }
+  },
+
+  async findConversationTurnResult(userId: string, caseId: string, requestId: string, requestHash: string): Promise<ConversationTurnResult | null> {
+    const result = await pool.query(`SELECT m.request_hash,m.metadata FROM messages m JOIN conversations c ON c.id=m.conversation_id WHERE c.user_id=$1 AND c.case_id=$2 AND c.status='active' AND m.role='assistant' AND m.request_id=$3 LIMIT 1`, [userId, caseId, requestId])
+    if (!result.rows[0]) return null
+    if (result.rows[0].request_hash !== requestHash) throw new Error('REQUEST_ID_CONFLICT')
+    return result.rows[0].metadata?.turnResult || null
+  },
+
+  async commitConversationTurn(input: ConversationCommit): Promise<ConversationTurnResult> {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const ownedCase = await client.query('SELECT * FROM cases WHERE id=$1 AND user_id=$2 FOR UPDATE', [input.caseId, input.userId])
+      if (!ownedCase.rows[0]) throw new Error('CASE_NOT_FOUND')
+      const existing = await client.query(`SELECT m.request_hash,m.metadata FROM messages m JOIN conversations c ON c.id=m.conversation_id WHERE c.user_id=$1 AND c.case_id=$2 AND m.role='assistant' AND m.request_id=$3 LIMIT 1`, [input.userId, input.caseId, input.requestId])
+      if (existing.rows[0]) {
+        if (existing.rows[0].request_hash !== input.requestHash) throw new Error('REQUEST_ID_CONFLICT')
+        await client.query('COMMIT')
+        return existing.rows[0].metadata.turnResult
+      }
+      const convResult = await client.query(`SELECT * FROM conversations WHERE id=$1 AND user_id=$2 AND case_id=$3 AND status='active' FOR UPDATE`, [input.expected.conversationId, input.userId, input.caseId])
+      if (!convResult.rows[0]) throw new Error('CONVERSATION_STALE')
+      const artifactsResult = await client.query('SELECT * FROM artifacts WHERE case_id=$1 ORDER BY created_at ASC,id ASC FOR UPDATE', [input.caseId])
+      const messagesResult = await client.query('SELECT COUNT(*)::int AS count FROM messages WHERE conversation_id=$1', [input.expected.conversationId])
+      const agentState = convResult.rows[0].agent_state || { stage: 'collecting', collectedFacts: [] }
+      if (ownedCase.rows[0].input_revision !== input.expected.inputRevision || conversationHash(agentState) !== input.expected.stateHash
+        || conversationMaterialHash(artifactsResult.rows.map(row => ({ id: row.id, type: row.type, status: row.status, metadata: row.metadata || {} }))) !== input.expected.materialHash
+        || messagesResult.rows[0].count !== input.expected.messageCount) throw new Error('CONVERSATION_STALE')
+      const facts = confirmedConversationFacts(input.agentState, input.expected.conversationId)
+      if (facts.length) {
+        const normalized = normalizeConfirmedFacts(facts)
+        const current = await client.query('SELECT * FROM case_facts WHERE case_id=$1', [input.caseId])
+        const existingFacts = new Map(current.rows.map(row => [row.fact_key, row]))
+        const changed = normalized.some(fact => existingFacts.get(fact.key)?.value !== fact.value)
+        if (changed) {
+          const revision = ownedCase.rows[0].input_revision + 1
+          for (const fact of normalized) {
+            const previous = existingFacts.get(fact.key)
+            if (previous?.value === fact.value) continue
+            await client.query(`INSERT INTO case_facts (id,case_id,fact_key,label,value,source_type,source_id,confidence,confirmation_status,revision,confirmed_at,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'confirmed',$9,NOW(),NOW(),NOW()) ON CONFLICT (case_id,fact_key) DO UPDATE SET label=EXCLUDED.label,value=EXCLUDED.value,source_type=EXCLUDED.source_type,source_id=EXCLUDED.source_id,confidence=EXCLUDED.confidence,revision=EXCLUDED.revision,confirmed_at=NOW(),updated_at=NOW()`, [previous?.id || generateId('fact'), input.caseId, fact.key, fact.label, fact.value, fact.sourceType, fact.sourceId, fact.confidence || null, revision])
+          }
+          await client.query('UPDATE cases SET input_revision=$1,has_report=FALSE,updated_at=NOW() WHERE id=$2', [revision, input.caseId])
+          await client.query(`INSERT INTO case_revisions (id,case_id,input_revision,reason_code,changed_entity_type,changed_entity_id,created_at) VALUES ($1,$2,$3,'conversation_confirmation','conversation',$4,NOW())`, [generateId('revision'), input.caseId, revision, input.expected.conversationId])
+        }
+      }
+      const result = structuredClone({ agentState: input.agentState, assistantText: input.assistantText, quickReplies: input.agentState.quickReplies || [] })
+      await client.query(`INSERT INTO messages (id,conversation_id,role,kind,text,metadata,request_id,request_hash,created_at) VALUES ($1,$2,'user','text',$3,$4,$5,$6,NOW())`, [generateId('msg'), input.expected.conversationId, input.text || null, input.metadata ? JSON.stringify(input.metadata) : null, null, null])
+      await client.query('UPDATE conversations SET agent_state=$1,updated_at=NOW() WHERE id=$2', [JSON.stringify(input.agentState), input.expected.conversationId])
+      await client.query(`INSERT INTO messages (id,conversation_id,role,kind,text,metadata,request_id,request_hash,created_at) VALUES ($1,$2,'assistant','text',$3,$4,$5,$6,NOW())`, [generateId('msg'), input.expected.conversationId, result.assistantText, JSON.stringify({ quickReplies: result.quickReplies, turnResult: result }), input.requestId, input.requestHash])
+      await client.query('COMMIT')
+      return result
+    } catch (error) { await client.query('ROLLBACK').catch(() => undefined); throw error } finally { client.release() }
+  },
   async processConversationTurn(input: {
     userId: string
     caseId: string

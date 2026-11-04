@@ -17,6 +17,7 @@ interface AppState {
   caseLoadError: string | null
   messages: api.Message[]
   conversationState: api.ConversationState
+  readiness: api.ReportReadiness | null
   isAiTyping: boolean
   materials: api.Material[]
   uploadingFiles: Map<string, number>
@@ -62,6 +63,7 @@ function createInitialState(token: string | null = null) {
   caseLoadError: null,
   messages: [] as api.Message[],
   conversationState: 'collecting' as api.ConversationState,
+  readiness: null as api.ReportReadiness | null,
   isAiTyping: false,
   materials: [] as api.Material[],
   uploadingFiles: new Map<string, number>(),
@@ -77,6 +79,7 @@ const initialState = createInitialState(api.getToken())
 let authRevision = 0
 let authPromise: Promise<boolean> | null = null
 let sendingCaseId: string | null = null
+const pendingConversationRequests = new Map<string, string>()
 
 /**
  * 会话内案件请求上下文。任何案件切换/创建都会 bump epoch，
@@ -85,6 +88,7 @@ let sendingCaseId: string | null = null
 const requestGuard = new CaseRequestGuard()
 
 function beginCaseSession(caseId: string | null): CaseRequestContext | null {
+  if (caseId !== requestGuard.getSnapshot().activeCaseId || !caseId) pendingConversationRequests.clear()
   return caseId ? requestGuard.activate(caseId) : (requestGuard.invalidate(), null)
 }
 
@@ -231,7 +235,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           reportRunStatus: null,
           reportRunError: null,
           isGeneratingReport: false,
-          conversationState: 'collecting'
+          conversationState: 'collecting',
+          readiness: null
         })
         return
       }
@@ -255,7 +260,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           reportRunStatus: null,
           reportRunError: null,
           isGeneratingReport: false,
-          conversationState: 'collecting' as api.ConversationState
+          conversationState: 'collecting' as api.ConversationState,
+          readiness: null
         } : {})
       })
 
@@ -270,9 +276,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (materialsResult.status === 'fulfilled') patch.materials = materialsResult.value
       if (historyResult.status === 'fulfilled') {
         patch.messages = historyResult.value.messages
-        patch.conversationState = historyResult.value.conversationState
-          || historyResult.value.agentState?.stage
-          || 'collecting'
+        patch.conversationState = historyResult.value.conversationState || historyResult.value.agentState?.stage || 'collecting'
+        patch.readiness = historyResult.value.readiness || null
       }
       if (reportResult.status === 'fulfilled') patch.currentReport = reportResult.value
       set(patch)
@@ -306,6 +311,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         reportRunError: null,
         isGeneratingReport: false,
         conversationState: 'collecting',
+        readiness: null,
         isAiTyping: false
       })
     } catch (error: unknown) {
@@ -330,7 +336,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (isStale(context)) return
       set({
         messages: history.messages,
-        conversationState: history.conversationState || history.agentState?.stage || 'collecting'
+        conversationState: history.conversationState || history.agentState?.stage || 'collecting',
+        readiness: history.readiness || null
       })
     } catch (error) {
       if (isStale(context)) return
@@ -355,8 +362,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       sendingCaseId = null
       throw error
     }
+    const requestKey = JSON.stringify([currentCase.id, content, action || null, artifactIds || []])
+    const retrying = pendingConversationRequests.has(requestKey)
+    const requestId = pendingConversationRequests.get(requestKey)
+      || `turn-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    pendingConversationRequests.set(requestKey, requestId)
     const temporaryMessage: api.Message = {
-      id: `temp-${Date.now()}`,
+      id: `temp-${requestId}`,
       role: 'user',
       content,
       timestamp: new Date().toISOString()
@@ -368,7 +380,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     }))
 
     try {
-      const response = await api.sendMessage(currentCase.id, content, action, artifactIds)
+      const response = await api.sendMessage(currentCase.id, content, action, artifactIds, requestId)
+      pendingConversationRequests.delete(requestKey)
       if (isStale(context)) return
       const assistantMessage: api.Message = {
         id: `assistant-${Date.now()}`,
@@ -380,9 +393,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       set(state => ({
         messages: [...state.messages.filter(message => message.id !== temporaryMessage.id), temporaryMessage, assistantMessage],
         conversationState: response.agentState?.stage || state.conversationState,
+        readiness: response.readiness || null,
         isAiTyping: false
       }))
+      if (retrying) await get().loadMessages().catch(() => undefined)
     } catch (error: unknown) {
+      if (error instanceof api.ApiError && error.statusCode > 0 && error.statusCode < 500) {
+        pendingConversationRequests.delete(requestKey)
+      }
       if (isStale(context)) {
         set(state => state.currentCase?.id === currentCase.id ? { isGeneratingReport: false } : {})
         return
@@ -391,6 +409,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         messages: state.messages.filter(message => message.id !== temporaryMessage.id),
         isAiTyping: false
       }))
+      if (error instanceof api.ApiError && error.statusCode === 409 && error.code === 'CONVERSATION_STALE') {
+        set({ readiness: null })
+        await get().loadMessages().catch(() => undefined)
+      }
       Taro.showToast({ title: (error as Error).message || '发送失败', icon: 'none' })
       throw error
     } finally {

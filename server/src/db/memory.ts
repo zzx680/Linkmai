@@ -1,5 +1,6 @@
 // 内存存储（MVP 临时方案，生产环境需替换为真实数据库）
 
+import { conversationHash, conversationMaterialHash, confirmedConversationFacts, type ConversationCommit, type ConversationTurnResult } from './conversation'
 import { config } from '../config'
 import { randomBytes } from 'crypto'
 import { materialSnapshot } from '../services/material-snapshot'
@@ -92,6 +93,8 @@ export interface Message {
   kind: string
   text?: string
   metadata?: any
+  requestId?: string
+  requestHash?: string
   createdAt: Date
 }
 
@@ -645,6 +648,79 @@ export const memoryDB = {
     return conversation
   },
 
+  async readConversationSnapshot(userId: string, caseId: string) {
+    return withConversationLock(caseId, async () => {
+      const caseData = cases.get(caseId)
+      if (!caseData || caseData.userId !== userId) throw new Error('CASE_NOT_FOUND')
+      const conversation = await this.findOrCreateConversation(userId, caseId)
+      const artifacts = await this.getArtifactsByCase(caseId)
+      const messages = await this.getMessages(conversation.id)
+      const agentState = structuredClone(conversation.agentState || { stage: 'collecting' as const, collectedFacts: [] })
+      return {
+        conversationId: conversation.id, inputRevision: caseData.inputRevision,
+        stateHash: conversationHash(agentState), materialHash: conversationMaterialHash(artifacts),
+        messageCount: messages.length, agentState, caseData: structuredClone(caseData),
+        facts: structuredClone(await this.getCaseFacts(caseId)), artifacts: structuredClone(artifacts),
+        recentMessages: structuredClone(messages.slice(-20)),
+      }
+    })
+  },
+
+  async findConversationTurnResult(userId: string, caseId: string, requestId: string, requestHash: string): Promise<ConversationTurnResult | null> {
+    const caseData = cases.get(caseId)
+    if (!caseData || caseData.userId !== userId) throw new Error('CASE_NOT_FOUND')
+    const conversation = [...conversations.values()].find(item => item.userId === userId && item.caseId === caseId && item.status === 'active')
+    if (!conversation) return null
+    const messages = await this.getMessages(conversation.id)
+    const assistant = messages.find(message => message.role === 'assistant' && message.requestId === requestId)
+    if (!assistant) return null
+    if (assistant.requestHash !== requestHash) throw new Error('REQUEST_ID_CONFLICT')
+    return assistant.metadata?.turnResult ? structuredClone(assistant.metadata.turnResult) : null
+  },
+
+  async commitConversationTurn(input: ConversationCommit): Promise<ConversationTurnResult> {
+    return withConversationLock(input.caseId, async () => {
+      const caseData = cases.get(input.caseId)
+      if (!caseData || caseData.userId !== input.userId) throw new Error('CASE_NOT_FOUND')
+      const conversation = await this.findOrCreateConversation(input.userId, input.caseId)
+      const existing = (await this.getMessages(conversation.id)).find(message => message.role === 'assistant' && message.requestId === input.requestId)
+      if (existing) {
+        if (existing.requestHash !== input.requestHash) throw new Error('REQUEST_ID_CONFLICT')
+        return structuredClone(existing.metadata?.turnResult)
+      }
+      const artifacts = await this.getArtifactsByCase(input.caseId)
+      const caseMessages = await this.getMessages(conversation.id)
+      if (conversation.id !== input.expected.conversationId || caseData.inputRevision !== input.expected.inputRevision
+        || conversationHash(conversation.agentState || { stage: 'collecting', collectedFacts: [] }) !== input.expected.stateHash
+        || conversationMaterialHash(artifacts) !== input.expected.materialHash || caseMessages.length !== input.expected.messageCount) {
+        throw new Error('CONVERSATION_STALE')
+      }
+      const beforeConversation = structuredClone(conversation)
+      const beforeFacts = structuredClone(await this.getCaseFacts(input.caseId))
+      const beforeRevisions = structuredClone(caseRevisions.get(input.caseId) || [])
+      const beforeCase = structuredClone(caseData)
+      const beforeMessages = structuredClone(caseMessages)
+      try {
+        const facts = confirmedConversationFacts(input.agentState, conversation.id)
+        if (facts.length) await this.persistConfirmedFacts(input.userId, input.caseId, facts, 'conversation_confirmation', 'conversation', conversation.id)
+        await this.createMessage(conversation.id, 'user', 'text', input.text, input.metadata, input.requestId, input.requestHash)
+        await this.updateConversationState(conversation.id, input.agentState)
+        const result = structuredClone({ agentState: input.agentState, assistantText: input.assistantText, quickReplies: input.agentState.quickReplies || [] })
+        await this.createMessage(conversation.id, 'assistant', 'text', result.assistantText, { quickReplies: result.quickReplies, turnResult: structuredClone(result) }, input.requestId, input.requestHash)
+        return result
+      } catch (error) {
+        conversations.set(conversation.id, beforeConversation)
+        caseFacts.set(input.caseId, new Map(beforeFacts.map(fact => [fact.key, fact])))
+        caseRevisions.set(input.caseId, beforeRevisions)
+        cases.set(input.caseId, beforeCase)
+        const newMessageIds = (messagesByConversation.get(conversation.id) || []).filter(id => !beforeMessages.some(previous => previous.id === id))
+        messagesByConversation.set(conversation.id, beforeMessages.map(message => message.id))
+        for (const id of newMessageIds) messages.delete(id)
+        throw error
+      }
+    })
+  },
+
   async updateConversationState(conversationId: string, agentState: AgentState): Promise<Conversation | null> {
     const conversation = conversations.get(conversationId)
     if (!conversation) return null
@@ -680,7 +756,9 @@ export const memoryDB = {
     role: string,
     kind: string,
     text?: string,
-    metadata?: any
+    metadata?: any,
+    requestId?: string,
+    requestHash?: string
   ): Promise<Message> {
     const id = `msg_${Date.now()}_${Math.random().toString(36).slice(2)}`
     const message: Message = {
@@ -690,6 +768,8 @@ export const memoryDB = {
       kind,
       text,
       metadata,
+      requestId,
+      requestHash,
       createdAt: new Date(),
     }
     messages.set(id, message)

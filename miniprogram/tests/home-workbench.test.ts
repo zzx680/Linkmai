@@ -172,8 +172,8 @@ describe('home workbench state', () => {
     assert.equal(getCaseNextStep({ currentCase: makeCase({ hasReport: true, entitlement: { status: 'paid', amountCents: 4990, currency: 'CNY' } }), materials: [makeMaterial(true)], conversationState: 'ready' }), 'view_report')
   })
 
-  it('opens materials from the processing summary and reports only after generation', () => {
-    assert.deepEqual(clickHomePrimaryAction(makeCase(), 'summary'), ['/pages/materials/index?caseId=case-1'])
+  it('opens payment from the processing summary and reports only after generation', () => {
+    assert.deepEqual(clickHomePrimaryAction(makeCase(), 'summary'), ['/pages/payments/index'])
     assert.deepEqual(clickHomePrimaryAction(makeCase({ hasReport: true }), 'summary'), ['/pages/report/index?caseId=case-1'])
   })
 

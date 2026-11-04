@@ -36,7 +36,7 @@ function expireSession(token: string | null) {
 }
 
 export class ApiError extends Error {
-  constructor(message: string, public readonly statusCode: number) { super(message) }
+  constructor(message: string, public readonly statusCode: number, public readonly code?: string) { super(message) }
 }
 
 export class UnauthorizedError extends ApiError {
@@ -64,8 +64,8 @@ export async function request<T>(config: RequestConfig): Promise<T> {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      const body = response.data as { message?: string; error?: string } | undefined
-      throw new ApiError(body?.message || body?.error || '请求失败', response.statusCode)
+      const body = response.data as { message?: string; error?: string; code?: string } | undefined
+      throw new ApiError(body?.message || body?.error || '请求失败', response.statusCode, body?.code)
     }
 
     const body = response.data as { data?: unknown } | undefined
@@ -310,16 +310,29 @@ export interface Message {
 
 export type ConversationState = 'collecting' | 'confirming' | 'analyzing' | 'ready'
 
+export interface ReportReadiness {
+  confirmed: number
+  pending: number
+  missing: Array<{ key: string; label: string }>
+  unknown?: string[]
+  factsReady: boolean
+  canGenerate: boolean
+  reportExists: boolean
+  reportStale: boolean
+}
+
 export interface ConversationHistory {
   messages: Message[]
   conversationState?: ConversationState
   agentState?: { stage: ConversationState; collectedFactsCount?: number }
+  readiness?: ReportReadiness
 }
 
 export interface SendMessageResponse {
   message: string
   quickReplies?: QuickReply[]
   agentState?: { stage: ConversationState; collectedFactsCount?: number }
+  readiness?: ReportReadiness
 }
 
 function normalizeMessage(message: unknown, index: number): Message {
@@ -356,12 +369,13 @@ export async function sendMessage(
   caseId: string,
   text: string,
   action?: string,
-  artifactIds?: string[]
+  artifactIds?: string[],
+  requestId?: string
 ): Promise<SendMessageResponse> {
   return request<SendMessageResponse>({
     url: '/conversations/current/messages',
     method: 'POST',
-    data: { caseId, text, action, artifactIds }
+    data: { caseId, text, action, artifactIds, requestId }
   })
 }
 

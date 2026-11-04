@@ -5,7 +5,54 @@ export const bundleSkill = Object.freeze({ id: 'case-bundle', version: 'case-bun
   templateVersion: 'case-documents-v1', allowedStates: ['collecting','confirming','analyzing','analysis_available','review_pending','ready'],
   maxAttempts: 3, leaseMs: 30_000, tools: ['confirmed-facts','approved-laws','calculate','validate-draft'],
   forbiddenActions: ['assign-liability','invent-amounts','external-submit'], confirmationRequired: true })
-export const SkillRegistry = { get: (name: string) => { if (name !== bundleSkill.id) throw new Error('UNKNOWN_SKILL'); return bundleSkill } }
+
+export interface CaseAgentSkill {
+  readonly id: 'case-intake' | 'material-check' | 'report-readiness' | 'report-explain'
+  readonly version: string
+  readonly description: string
+  readonly instructions: string
+  readonly tools: readonly string[]
+  readonly allowedActions: readonly string[]
+  readonly forbiddenActions: readonly string[]
+}
+
+export const caseAgentSkills: Record<CaseAgentSkill['id'], CaseAgentSkill> = {
+  'case-intake': Object.freeze({
+    id: 'case-intake', version: 'case-intake-v1', description: '整理事故事实、发现缺口，帮助用户准备报告',
+    instructions: '从用户叙述提取有原文依据的候选事实。结合案件已知信息，只追问最重要的一个缺口；不要重复询问已确认的信息。不能为填满字段要求用户猜测。',
+    tools: ['read-case-context', 'check-report-readiness', 'propose-facts'],
+    allowedActions: ['propose-facts', 'ask-question', 'explain-readiness'], forbiddenActions: ['confirm-facts', 'generate-report', 'assign-liability'],
+  }),
+  'material-check': Object.freeze({
+    id: 'material-check', version: 'material-check-v1', description: '核对材料与用户陈述，暴露矛盾和待确认信息',
+    instructions: '区分用户陈述与材料识别结果；有冲突时说明双方来源并请用户核对，不能自行选定事实。识别与确认必须由材料页面的受控流程执行。',
+    tools: ['read-case-context', 'check-report-readiness', 'propose-facts'],
+    allowedActions: ['propose-facts', 'ask-question', 'flag-conflict'], forbiddenActions: ['confirm-facts', 'generate-report', 'assign-liability'],
+  }),
+  'report-readiness': Object.freeze({
+    id: 'report-readiness', version: 'report-readiness-v1', description: '说明报告准备情况、必要条件与补充信息',
+    instructions: '报告准备状态以案件上下文和程序校验结果为准。明确区分已确认、待确认、待补充和未知，不把准备完成表述为报告已经生成。',
+    tools: ['read-case-context', 'check-report-readiness'],
+    allowedActions: ['explain-readiness', 'ask-question'], forbiddenActions: ['confirm-facts', 'generate-report', 'assign-liability'],
+  }),
+  'report-explain': Object.freeze({
+    id: 'report-explain', version: 'report-explain-v1', description: '解释报告结果、范围和仍待处理的信息',
+    instructions: '仅根据案件上下文和已生成报告回答问题。新增事实必须作为候选信息进入核对流程，不能声称旧报告已自动更新。',
+    tools: ['read-case-context', 'read-report', 'check-report-readiness'],
+    allowedActions: ['answer-question', 'propose-facts', 'explain-readiness'], forbiddenActions: ['confirm-facts', 'mutate-report', 'assign-liability'],
+  }),
+}
+
+export type HarnessSkill = typeof bundleSkill | CaseAgentSkill
+function registeredSkill(name: 'case-bundle'): typeof bundleSkill
+function registeredSkill(name: CaseAgentSkill['id']): CaseAgentSkill
+function registeredSkill(name: string): HarnessSkill
+function registeredSkill(name: string): HarnessSkill {
+  if (name === bundleSkill.id) return bundleSkill
+  if (Object.prototype.hasOwnProperty.call(caseAgentSkills, name)) return caseAgentSkills[name as CaseAgentSkill['id']]
+  throw new Error('UNKNOWN_SKILL')
+}
+export const SkillRegistry = { get: registeredSkill }
 // These first documents are controlled templates. No model receives personal data or writes monetary values.
 export const ModelRouter = { snapshot: () => ({ provider: 'internal', modelId: 'deterministic-template', modelConfigVersion: 'v1' }) }
 export function policyHash(control: Control): string {

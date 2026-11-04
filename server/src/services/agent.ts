@@ -1,6 +1,7 @@
 // Language understanding proposes facts; confirmation, materials, payments and
 // report generation remain controlled state transitions.
-import { contextualAdvice, detectAccidentType, interpretUserMessage, isAcknowledgement, isQuestion, localMessageFacts, validFactValue, type MessageInterpreter } from './agent-language'
+import { detectAccidentType, interpretUserMessage, isAcknowledgement, isGreeting, isQuestion, localMessageFacts, validFactValue, type MessageInterpreter } from './agent-language'
+import { reportFactDefinitions, reportReadiness, selectCaseAgentSkill, caseAgentSkills, CASE_AGENT_PROMPT_VERSION, type CaseAgentContext } from '../harness/case-agent'
 export interface AgentState {
   stage: 'collecting' | 'confirming' | 'analyzing' | 'ready'
   collectedFacts: CollectedFact[]
@@ -8,6 +9,7 @@ export interface AgentState {
   editingFactKey?: string
   nextQuestion?: string
   quickReplies?: QuickReply[]
+  lastTurn?: { skillId: string; skillVersion: string; promptVersion: string; modelStatus: 'model' }
 }
 
 export interface CollectedFact {
@@ -34,14 +36,8 @@ export interface AgentMaterial {
   confirmed?: boolean
 }
 
-const REQUIRED_FACTS = [
-  { key: 'accident_type', label: '事故类型' },
-  { key: 'accident_date', label: '事故日期' },
-  { key: 'accident_location', label: '事故地点' },
-  { key: 'parties_involved', label: '涉事方信息' },
-  { key: 'accident_description', label: '事故经过' },
-]
-const FACT_DEFINITIONS = [...REQUIRED_FACTS, { key: 'liability', label: '责任认定' }]
+const REQUIRED_FACTS = reportFactDefinitions
+const FACT_DEFINITIONS = REQUIRED_FACTS
 const CONTROL_ALIASES: Record<string, string> = {
   'confirm:correct': 'confirm',
   'confirm:edit': 'edit',
@@ -57,9 +53,8 @@ function reply(label: string, action: string): QuickReply {
 }
 
 function missingFact(state: AgentState) {
-  return REQUIRED_FACTS.find(required => !state.collectedFacts.some(
-    fact => fact.key === required.key && fact.confirmed && fact.value.trim()
-  ))
+  const missingKey = reportReadiness(state).missing[0]?.key
+  return REQUIRED_FACTS.find(fact => fact.key === missingKey)
 }
 
 export function generateNextQuestion(state: AgentState): { question: string; quickReplies?: QuickReply[] } {
@@ -74,7 +69,7 @@ export function generateNextQuestion(state: AgentState): { question: string; qui
     }
   }
   if (state.stage === 'ready') {
-    return { question: '信息收集完成，可前往报告页面生成报告', quickReplies: [reply('查看报告', 'generate_report'), reply('修改信息', 'edit')] }
+    return { question: '案件基础信息已整理好。您可以继续补充或修改，也可以前往报告页面查看生成条件。', quickReplies: [reply('查看报告', 'generate_report'), reply('修改信息', 'edit')] }
   }
   const missing = missingFact(state)
   switch (missing?.key) {
@@ -92,6 +87,13 @@ export function generateNextQuestion(state: AgentState): { question: string; qui
     case 'parties_involved':
       return { question: '请提供涉事方信息（如对方车辆和驾驶员） 也可前往材料页面上传、识别并核对材料', quickReplies: [reply('上传材料', 'upload'), { label: '手动输入', value: 'manual_input' }] }
     case 'accident_description': return { question: '请详细描述事故经过' }
+    case 'liability_status': return { question: '事故责任认定进展如何？' }
+    case 'liability': return { question: '认定书如何记载责任？是否有争议？' }
+    case 'injury_status': return { question: '事故中是否有人受伤？' }
+    case 'treatment_status': return { question: '目前接受了哪些治疗？' }
+    case 'medical_expense': return { question: '目前已发生的医疗费用是多少？请区分累计和新增费用' }
+    case 'property_loss': return { question: '有哪些财产损失？金额尚未核实也可以说明' }
+    case 'user_goal': return { question: '目前处于什么处理阶段，您主要希望解决什么问题？' }
     default:
       return { question: '主要信息已收集 还有材料需要补充吗？材料请在材料页面识别并核对确认', quickReplies: [reply('上传材料', 'upload'), reply('结束收集', 'finish'), reply('修改信息', 'edit')] }
   }
@@ -127,11 +129,12 @@ export async function processUserMessage(
   materials: AgentMaterial[] = [],
   action?: string,
   interpret: MessageInterpreter = interpretUserMessage,
-): Promise<AgentState> {
-  // 不共享数组/事实对象，失败的请求和历史状态不会被意外修改。
-  const next: AgentState = { ...state, collectedFacts: state.collectedFacts.map(fact => ({ ...fact })) }
+  context?: CaseAgentContext,
+): Promise<{ agentState: AgentState; assistantText: string }> {
   const text = userMessage.trim()
   const control = normalizeAgentAction(action || text)
+  let editTarget = state.editingFactKey
+  const next: AgentState = { ...state, collectedFacts: state.collectedFacts.map(fact => ({ ...fact })) }
   // Repair acknowledgement values stored as dates by older clients/servers.
   next.collectedFacts = next.collectedFacts.filter(fact => !(fact.source === 'user_text'
     && fact.key === 'accident_date' && (isAcknowledgement(fact.value) || isQuestion(fact.value))))
@@ -151,84 +154,74 @@ export async function processUserMessage(
   if (control === 'confirm') {
     next.collectedFacts = next.collectedFacts.map(fact => ({ ...fact, confirmed: true }))
     delete next.editingFactKey
-    return updatePrompt(next)
-  }
-  if (control === 'edit') {
+  } else if (control === 'edit') {
     next.stage = 'collecting'
     delete next.editingFactKey
-    updatePrompt(next)
-    next.nextQuestion = '请选择需要修改的字段，或输入“字段名：修改后的内容”'
     next.quickReplies = next.collectedFacts.map(fact => reply(fact.label, `edit:${fact.key}`))
-    return next
-  }
-  if (control.startsWith('edit:')) {
+  } else if (control.startsWith('edit:')) {
     const key = control.slice(5)
     if (FACT_DEFINITIONS.some(fact => fact.key === key)) {
       next.editingFactKey = key
       next.stage = 'collecting'
     }
-    return updatePrompt(next)
-  }
-  if (control === 'finish' || control === 'generate_report') {
+  } else if (control === 'finish' || control === 'generate_report') {
     if (canGenerateReport(next)) next.stage = 'ready'
-    return updatePrompt(next)
-  }
-  if (control === 'upload' || control === 'manual_input' || !text) return updatePrompt(next)
-
-  const correction = FACT_DEFINITIONS.find(fact => text.startsWith(`${fact.label}：`) || text.startsWith(`${fact.label}:`) || text.startsWith(`${fact.key}:`))
-  const key = next.editingFactKey || correction?.key
-  let response = ''
-  if (key) {
-    const value = correction ? text.slice(text.indexOf(text.includes('：') ? '：' : ':') + 1).trim() : text
-    if (validFactValue(key, value)) {
-      setFact(next, textFact(key, key === 'accident_type' ? accidentType(value) || value : value))
-      delete next.editingFactKey
-      next.stage = 'collecting'
-    } else response = '还没有收到有效的字段内容，请补充具体信息；不清楚的内容可以稍后核对'
-  } else if (isAcknowledgement(text)) {
-    response = next.collectedFacts.some(fact => !fact.confirmed)
-      ? '请核对已整理的信息，确认无误后点击「信息正确」；需要调整可点击「需要修改」'
-      : '这条回复没有包含新的事故信息，请补充下面问题的具体内容；不清楚的内容可以稍后核对'
-  } else {
-    const missing = missingFact(next)
-    const localFacts = localMessageFacts(text)
-    const naturalMessage = !['traffic_accident', 'work_injury', 'personal_injury'].includes(text)
-      && (text.length >= 12 || isQuestion(text) || localFacts.some(fact => fact.key === 'accident_description') || localFacts.length > 1)
-    if (naturalMessage) {
-      const understood = await interpret(next, text)
-      const changedFacts = understood.facts.filter(fact => !next.collectedFacts.some(existing => existing.key === fact.key && existing.value === fact.value))
-      for (const fact of understood.facts) {
-        if (!FACT_DEFINITIONS.some(definition => definition.key === fact.key) || !validFactValue(fact.key, fact.value)) continue
-        // Validate injected interpreters too; only literal user evidence may become a fact.
-        if (!text.includes(fact.evidence) || (fact.key !== 'accident_type' && !fact.evidence.includes(fact.value))) continue
-        if (fact.key === 'accident_type' && accidentType(fact.evidence) !== fact.value) continue
-        const existing = next.collectedFacts.find(item => item.key === fact.key)
-        if (existing?.value === fact.value) continue
-        const directAnswer = changedFacts.length === 1 && missing?.key === fact.key
-          && !isQuestion(text) && !next.collectedFacts.some(item => !item.confirmed) && next.stage !== 'ready'
-        setFact(next, { ...textFact(fact.key, fact.value), confidence: directAnswer ? 'high' : 'medium', confirmed: directAnswer })
+  } else if (control !== 'upload' && control !== 'manual_input' && text) {
+    const correction = FACT_DEFINITIONS.find(fact => text.startsWith(`${fact.label}：`) || text.startsWith(`${fact.label}:`) || text.startsWith(`${fact.key}:`))
+    const key = next.editingFactKey || correction?.key
+    editTarget = key
+    if (key) {
+      const value = correction ? text.slice(text.indexOf(text.includes('：') ? '：' : ':') + 1).trim() : text
+      if (validFactValue(key, value)) {
+        setFact(next, { ...textFact(key, key === 'accident_type' ? accidentType(value) || value : value), confirmed: false })
+        delete next.editingFactKey
+        next.stage = 'collecting'
       }
-      response = contextualAdvice(text) || understood.reply
-      if (next.collectedFacts.some(fact => !fact.confirmed)) next.stage = 'confirming'
-      // A detailed answer can still be a single value for the active field, but
-      // never treat a question or greeting as an answer to that field.
-      if (understood.facts.length === 0 && !isQuestion(text)
-        && !next.collectedFacts.some(fact => !fact.confirmed) && next.stage !== 'ready' && missing
-        && missing.key !== 'accident_description' && validFactValue(missing.key, text)) {
+    } else if (!isGreeting(text) && !isAcknowledgement(text)) {
+      const missing = missingFact(next)
+      const localFacts = localMessageFacts(text)
+      if (localFacts.length) {
+        for (const fact of localFacts) {
+          if (!FACT_DEFINITIONS.some(definition => definition.key === fact.key) || !validFactValue(fact.key, fact.value)) continue
+          const existing = next.collectedFacts.find(item => item.key === fact.key)
+          if (existing?.value === fact.value) continue
+          const directAnswer = localFacts.length === 1 && missing?.key === fact.key
+            && !isQuestion(text) && !next.collectedFacts.some(item => !item.confirmed) && next.stage !== 'ready'
+          setFact(next, { ...textFact(fact.key, fact.value), confidence: directAnswer ? 'high' : 'medium', confirmed: directAnswer })
+        }
+      } else if (!next.collectedFacts.some(fact => !fact.confirmed) && next.stage !== 'ready' && missing
+        && missing.key !== 'accident_description' && !isQuestion(text) && validFactValue(missing.key, text)) {
         const value = missing.key === 'accident_type' ? accidentType(text) : text
         if (value) setFact(next, textFact(missing.key, value))
       }
-    } else if (!next.collectedFacts.some(fact => !fact.confirmed) && next.stage !== 'ready' && missing
-      && !isQuestion(text) && validFactValue(missing.key, text)) {
-      const value = missing.key === 'accident_type' ? accidentType(text) : text
-      if (value) setFact(next, textFact(missing.key, value))
     }
   }
   updatePrompt(next)
-  if (response) next.nextQuestion = `${response}\n\n${next.nextQuestion}`
-  return next
+  if (control === 'edit') next.quickReplies = next.collectedFacts.map(fact => reply(fact.label, `edit:${fact.key}`))
+  const promptContext: CaseAgentContext = { facts: next.collectedFacts, report: { exists: false, stale: false }, recentMessages: [], ...context,
+    action: action ? control : ['confirm', 'edit', 'finish', 'generate_report', 'upload', 'manual_input'].includes(control) || control.startsWith('edit:') ? control : undefined,
+    editTarget,
+    materials: context?.materials || [],
+    attachedMaterials: materials.map(material => ({ id: material.artifactId, type: material.type, confirmed: material.confirmed === true })) }
+  const skillId = selectCaseAgentSkill(next, text, promptContext)
+  const understood = await interpret(next, text, promptContext)
+  if (!understood.reply?.trim()) throw new Error('MODEL_UNAVAILABLE')
+  if (!promptContext.action && !editTarget && !next.editingFactKey && !isGreeting(text) && !isAcknowledgement(text)) {
+    for (const fact of understood.facts) {
+      if (!FACT_DEFINITIONS.some(definition => definition.key === fact.key) || !validFactValue(fact.key, fact.value)) continue
+      if (!text.includes(fact.evidence) || (fact.key !== 'accident_type' && !fact.evidence.includes(fact.value))) continue
+      if (fact.key === 'accident_type' && accidentType(fact.evidence) !== fact.value) continue
+      const existing = next.collectedFacts.find(item => item.key === fact.key)
+      if (existing?.value === fact.value) continue
+      setFact(next, { ...textFact(fact.key, fact.value), confidence: 'medium', confirmed: false })
+    }
+    updatePrompt(next)
+  }
+  next.nextQuestion = understood.reply
+  next.lastTurn = { skillId, skillVersion: caseAgentSkills[skillId].version, promptVersion: CASE_AGENT_PROMPT_VERSION, modelStatus: 'model' }
+  return { agentState: next, assistantText: understood.reply }
 }
 
 export function canGenerateReport(state: AgentState): boolean {
-  return !state.editingFactKey && !state.collectedFacts.some(fact => !fact.confirmed) && !missingFact(state)
+  return reportReadiness(state).factsReady
 }

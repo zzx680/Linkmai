@@ -11,6 +11,32 @@
   overflow: hidden;
   background: #fff;
 
+  .report-readiness-card {
+    flex-shrink: 0;
+    margin: 8rpx 28rpx 12rpx;
+    padding: 20rpx 24rpx;
+    border: 1rpx solid $color-border;
+    border-radius: $radius-lg;
+    background: $color-surface-secondary;
+  }
+  .readiness-heading,
+  .readiness-counts { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+  .readiness-title { font-size: 26rpx; font-weight: 600; color: $color-text-primary; }
+  .readiness-counts { margin-top: 12rpx; font-size: 23rpx; color: $color-text-secondary; }
+  .readiness-missing,
+  .readiness-warning { display: block; margin-top: 10rpx; font-size: 22rpx; line-height: 1.5; color: $color-text-secondary; }
+  .readiness-warning { color: $color-warning; }
+  .readiness-action {
+    margin: 0;
+    padding: 8rpx 16rpx;
+    border-radius: $radius-full;
+    background: $color-brand-primary;
+    color: white;
+    font-size: 24rpx;
+    line-height: 1.5;
+    &::after { border: 0; }
+  }
+
   .chat-toolbar {
     display: flex;
     align-items: center;

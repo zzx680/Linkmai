@@ -213,7 +213,7 @@ export default function CasePage() {
           <View className="case-summary">
             <View className="summary-item"><Text className="summary-value">{materials.length || currentCase?.materialCount || 0}</Text><Text className="summary-label">材料份数</Text></View>
             <View className="summary-item"><Text className="summary-value">{confirmedCount}</Text><Text className="summary-label">已确认材料</Text></View>
-            <View className="summary-item summary-plan" onClick={currentCase?.hasReport ? goToReport : goToMaterials} role="button" hoverClass="summary-plan-pressed">
+            <View className="summary-item summary-plan" onClick={currentCase?.hasReport ? goToReport : () => Taro.navigateTo({ url: '/pages/payments/index' })} role="button" hoverClass="summary-plan-pressed">
               <View className="summary-plan-status"><Text className="summary-value">{currentCase?.hasReport ? '已生成' : '处理中'}</Text><Icon name="chevron-right" size={14} color="#2A64F0" /></View>
               <Text className="summary-label">完整方案</Text>
             </View>
