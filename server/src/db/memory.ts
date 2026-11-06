@@ -826,6 +826,35 @@ export const memoryDB = {
     return updatedArtifact
   },
 
+  async deleteArtifact(userId: string, caseId: string, artifactId: string, expectedStatuses = ['uploaded', 'processed', 'failed']) {
+    const caseData = cases.get(caseId)
+    const artifact = artifacts.get(artifactId)
+    if (!caseData || caseData.userId !== userId || !artifact || artifact.caseId !== caseId || !expectedStatuses.includes(artifact.status)) return null
+
+    artifacts.delete(artifactId)
+    const confirmed = artifact.metadata?.confirmed === true
+    const inputRevision = caseData.inputRevision + 1
+    cases.set(caseId, {
+      ...caseData,
+      materialCount: Math.max(0, caseData.materialCount - (confirmed ? 1 : 0)),
+      hasReport: false,
+      status: 'collecting',
+      statusLabel: '材料已更新，需重新分析',
+      inputRevision,
+      updatedAt: new Date(),
+    })
+    caseRevisions.set(caseId, [...(caseRevisions.get(caseId) || []), {
+      id: `revision_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      caseId,
+      inputRevision,
+      reasonCode: 'material_deletion',
+      changedEntityType: 'artifact',
+      changedEntityId: artifactId,
+      createdAt: new Date(),
+    }])
+    return artifact
+  },
+
   async confirmArtifact(userId: string, caseId: string, artifactId: string, fields: NonNullable<Artifact['metadata']>['fields'], rawText?: string) {
     const caseData = cases.get(caseId)
     const artifact = artifacts.get(artifactId)

@@ -12,7 +12,7 @@ afterEach(() => { mock.restoreAll(); Object.assign(config.payment.wechat, previo
 async function fixture() {
   const user = await db.createUser(`payment-${crypto.randomUUID()}`)
   const item = await db.createCase(user.id, '支付安全回归')
-  const order = await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: 4990, currency: 'CNY' })
+  const order = await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: config.payment.amountCents, currency: 'CNY' })
   const provider: ProviderOrder = {
     orderNo: order.orderNo, transactionId: `txn-${crypto.randomUUID()}`, tradeState: 'SUCCESS',
     amountCents: order.amountCents, currency: order.currency, appId: 'wx-app', mchId: '1234567890', userId: user.id,
@@ -52,7 +52,7 @@ test('expired USERPAYING stays unresolved and cannot create or launch another or
   const create = mock.method(paymentProvider, 'createOrder', async () => { throw new Error('must not create') })
   await assert.rejects(createCasePaymentOrder(user.id, item.id, user.openid, 'fresh-key'), /PAYMENT_CONFIRMATION_PENDING/)
   assert.equal(create.mock.callCount(), 0)
-  assert.equal((await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: 4990, currency: 'CNY' }))?.id, order.id)
+  assert.equal((await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: config.payment.amountCents, currency: 'CNY' }))?.id, order.id)
 })
 
 test('a payment racing with close cannot create a replacement before confirmation', async () => {
@@ -120,7 +120,7 @@ test('replaying a terminal idempotency key cannot re-open or submit the closed o
   order.idempotencyKey = 'same-key'
   // Create the keyed order after closing the fixture's unkeyed order.
   await db.updatePaymentOrderStatus(order.id, 'closed')
-  const keyed = await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: 4990, currency: 'CNY', idempotencyKey: 'same-key' })
+  const keyed = await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: config.payment.amountCents, currency: 'CNY', idempotencyKey: 'same-key' })
   await db.updatePaymentOrderStatus(keyed.id, 'closed')
   mock.method(paymentProvider, 'queryOrder', async () => ({ ...provider, orderNo: keyed.orderNo, tradeState: 'CLOSED' }))
   const create = mock.method(paymentProvider, 'createOrder', async () => { throw new Error('must not create') })
@@ -131,7 +131,7 @@ test('replaying a terminal idempotency key cannot re-open or submit the closed o
 test('concurrent creation keeps one pending order even with distinct request keys', async () => {
   const { user, item, order } = await fixture()
   await db.updatePaymentOrderStatus(order.id, 'closed')
-  const input = { caseId: item.id, userId: user.id, amountCents: 4990, currency: 'CNY' }
+  const input = { caseId: item.id, userId: user.id, amountCents: config.payment.amountCents, currency: 'CNY' }
   const orders = await Promise.all(Array.from({ length: 10 }, (_, n) => db.createPaymentOrder({ ...input, idempotencyKey: `key-${n}` })))
   assert.equal(new Set(orders.map(value => value.id)).size, 1)
 })
@@ -166,16 +166,16 @@ test('partial refunds and REFUND query state keep access; verified full refund r
   const refund = { eventType: 'REFUND.SUCCESS', tradeState: 'REFUND', tradeStateDescription: 'SUCCESS', refundAmountCents: 100 }
   await notify(provider, refund)
   assert.equal((await db.getCaseEntitlement(user.id, item.id))?.status, 'paid')
-  await notify(provider, { ...refund, refundAmountCents: 4990 })
-  await notify(provider, { ...refund, refundAmountCents: 4990 })
+  await notify(provider, { ...refund, refundAmountCents: order.amountCents })
+  await notify(provider, { ...refund, refundAmountCents: order.amountCents })
   assert.equal((await db.getCaseEntitlement(user.id, item.id))?.status, 'refunded')
 })
 
 test('refund amount and merchant are checked before any entitlement is revoked', async () => {
-  const { user, item, provider } = await fixture()
+  const { user, item, order, provider } = await fixture()
   await notify(provider)
-  for (const altered of [{ mchId: 'other' }, { currency: 'USD' }, { amountCents: 1 }, { refundAmountCents: 5000 }, { transactionId: 'other' }]) {
-    await assert.rejects(notify(provider, { eventType: 'REFUND.SUCCESS', tradeState: 'REFUND', tradeStateDescription: 'SUCCESS', refundAmountCents: 4990, ...altered }), /MISMATCH/)
+  for (const altered of [{ mchId: 'other' }, { currency: 'USD' }, { amountCents: 1 }, { refundAmountCents: order.amountCents + 1 }, { transactionId: 'other' }]) {
+    await assert.rejects(notify(provider, { eventType: 'REFUND.SUCCESS', tradeState: 'REFUND', tradeStateDescription: 'SUCCESS', refundAmountCents: order.amountCents, ...altered }), /MISMATCH/)
     assert.equal((await db.getCaseEntitlement(user.id, item.id))?.status, 'paid')
   }
 })
@@ -183,10 +183,10 @@ test('refund amount and merchant are checked before any entitlement is revoked',
 test('replayed old refund and late prepay response do not downgrade a newer paid entitlement', async () => {
   const { user, item, order, provider } = await fixture()
   await notify(provider)
-  const refund = { eventType: 'REFUND.SUCCESS', tradeState: 'REFUND', tradeStateDescription: 'SUCCESS', refundAmountCents: 4990 }
+  const refund = { eventType: 'REFUND.SUCCESS', tradeState: 'REFUND', tradeStateDescription: 'SUCCESS', refundAmountCents: order.amountCents }
   await notify(provider, refund)
-  const next = await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: 4990, currency: 'CNY' })
-  await db.completePaymentOrder({ orderNo: next.orderNo, userId: user.id, amountCents: 4990, currency: 'CNY', wechatTransactionId: 'new-transaction' })
+  const next = await db.createPaymentOrder({ caseId: item.id, userId: user.id, amountCents: order.amountCents, currency: 'CNY' })
+  await db.completePaymentOrder({ orderNo: next.orderNo, userId: user.id, amountCents: order.amountCents, currency: 'CNY', wechatTransactionId: 'new-transaction' })
   await notify(provider, refund)
   await assert.rejects(db.setPaymentOrderPrepay(order.id, 'late-prepay'), /ORDER_NOT_FOUND/)
   assert.equal((await db.getCaseEntitlement(user.id, item.id))?.status, 'paid')

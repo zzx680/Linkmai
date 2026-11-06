@@ -479,6 +479,13 @@ export async function getMaterials(caseId: string): Promise<Material[]> {
   return request<Material[]>({ url: `/materials/${caseId}` })
 }
 
+export async function deleteMaterial(caseId: string, artifactId: string): Promise<{ deleted: boolean; confirmed: boolean; artifactId: string }> {
+  return request<{ deleted: boolean; confirmed: boolean; artifactId: string }>({
+    url: `/materials/${caseId}/${artifactId}`,
+    method: 'DELETE',
+  })
+}
+
 export interface ReportData extends ReportContract {}
 
 export type ReportResponse = ReportEnvelope<ReportData>

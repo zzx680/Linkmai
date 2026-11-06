@@ -1092,6 +1092,69 @@ export const db = {
     }
   },
 
+  async deleteArtifact(userId: string, caseId: string, artifactId: string, expectedStatuses = ['uploaded', 'processed', 'failed']) {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const caseResult = await client.query(
+        'SELECT id, material_count, input_revision FROM cases WHERE id = $1 AND user_id = $2 FOR UPDATE',
+        [caseId, userId]
+      )
+      if (!caseResult.rows[0]) {
+        await client.query('ROLLBACK')
+        return null
+      }
+      const artifactResult = await client.query(
+        'SELECT * FROM artifacts WHERE id = $1 AND case_id = $2 AND status = ANY($3::text[]) FOR UPDATE',
+        [artifactId, caseId, expectedStatuses]
+      )
+      const row = artifactResult.rows[0]
+      if (!row) {
+        await client.query('ROLLBACK')
+        return null
+      }
+
+      await client.query('DELETE FROM artifacts WHERE id = $1 AND case_id = $2', [artifactId, caseId])
+      const previous = row.metadata || {}
+      const inputRevision = Number(caseResult.rows[0].input_revision || 0) + 1
+      await client.query(
+        `UPDATE cases SET
+           material_count = GREATEST(material_count - $1, 0),
+           has_report = FALSE,
+           status = 'collecting',
+           status_label = '材料已更新，需重新分析',
+           input_revision = $2,
+           updated_at = NOW()
+         WHERE id = $3 AND user_id = $4`,
+        [previous.confirmed === true ? 1 : 0, inputRevision, caseId, userId]
+      )
+      await client.query(
+        'INSERT INTO case_revisions (id,case_id,input_revision,reason_code,changed_entity_type,changed_entity_id,created_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())',
+        [generateId('revision'), caseId, inputRevision, 'material_deletion', 'artifact', artifactId]
+      )
+      await client.query('COMMIT')
+      return {
+        id: row.id,
+        caseId: row.case_id,
+        name: row.name,
+        type: row.type,
+        ossUrl: row.oss_url,
+        ossKey: row.oss_key,
+        fileSize: row.file_size,
+        mimeType: row.mime_type,
+        status: row.status,
+        metadata: row.metadata || {},
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
+  },
+
   async confirmArtifact(userId: string, caseId: string, artifactId: string, fields: any[], rawText?: string) {
     const client = await pool.connect()
     try {

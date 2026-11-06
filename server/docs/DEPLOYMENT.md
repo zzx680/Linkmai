@@ -44,8 +44,10 @@
 | 环境文件 | `/etc/linkmai/staging.env` | `/etc/linkmai/production.env` |
 | 数据库 | 本机 PostgreSQL，独立测试库与账号 | 本机 PostgreSQL，独立正式库与账号 |
 | 数据库连接 | loopback，`POSTGRES_SSL=false` | loopback，`POSTGRES_SSL=false` |
-| 支付配置 | 微信支付，1 分 | 微信支付，4990 分 |
+| 支付配置 | 微信支付，1 分 | 微信支付，9900 分 |
 | 小程序输出 | `miniprogram/dist-staging/` | `miniprogram/dist/` |
+
+当前 production 新案件价格为 9900 分（¥99.00）；已创建且已保存金额的案件权益继续使用其原金额，不追溯修改。staging 保持 1 分测试价。
 
 Nginx 已配置上述域名分别转发至 8100、8200；检查配置不等于已完成 TLS、接口或业务验收。两环境数据库目标、账号和 JWT 不同，但 OSS Bucket 相同，不能宣称存储完全隔离。2026-10-17 记录了负责人允许复用部分外部服务凭据；共享资源的清理、生命周期和权限变化必须核对对两环境的影响，不得对共享 Bucket 整体清理。后续资源隔离单独安排，不在发布时静默切换。
 

@@ -21,12 +21,13 @@ function getTypeInfo(type: string) {
 }
 
 export default function Materials() {
-  const { materials, currentCase, uploadingFiles, processMaterial, confirmMaterial } = useAppStore()
+  const { materials, currentCase, uploadingFiles, processMaterial, confirmMaterial, removeMaterial } = useAppStore()
   const [selectedType, setSelectedType] = useState<MaterialType>('accident_report')
   const [isProcessing, setIsProcessing] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [draftFields, setDraftFields] = useState<Record<string, MaterialField[]>>({})
   const [confirmedIds, setConfirmedIds] = useState<string[]>([])
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (materials.length > 0) {
@@ -95,6 +96,33 @@ export default function Materials() {
       return
     }
     Taro.showModal({ title: '原始识别文本', content: material.rawText, showCancel: false })
+  }
+
+  const deleteMaterial = async (materialId: string) => {
+    if (deletingId) return
+    const result = await Taro.showModal({
+      title: '删除这份材料？',
+      content: '删除后需要重新上传，已确认的信息和分析结果也会失效。',
+      confirmText: '删除',
+      confirmColor: '#C53434',
+    })
+    if (!result.confirm) return
+    setDeletingId(materialId)
+    try {
+      await removeMaterial(materialId)
+      setExpandedId(current => current === materialId ? null : current)
+      setDraftFields(current => {
+        const next = { ...current }
+        delete next[materialId]
+        return next
+      })
+      setConfirmedIds(current => current.filter(id => id !== materialId))
+      Taro.showToast({ title: '材料已删除', icon: 'success' })
+    } catch (error: unknown) {
+      Taro.showToast({ title: (error as Error).message || '删除失败，请重试', icon: 'none' })
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   return (
@@ -177,8 +205,20 @@ export default function Materials() {
                     </View>
                     <Text className="material-meta">{fields.length} 个可识别字段 · {new Date(material.createdAt).toLocaleDateString('zh-CN')}</Text>
                   </View>
-                  <View className={`material-status ${isConfirmed ? 'confirmed' : 'pending'}`}>
-                    <Text>{isConfirmed ? '已确认' : '待核对'}</Text>
+                  <View className="material-summary-side">
+                    <View className={`material-status ${isConfirmed ? 'confirmed' : 'pending'}`}>
+                      <Text>{isConfirmed ? '已确认' : '待核对'}</Text>
+                    </View>
+                    <View
+                      className={`material-delete-button ${deletingId === material.id ? 'disabled' : ''}`}
+                      aria-label="删除材料"
+                      onClick={event => {
+                        event.stopPropagation()
+                        void deleteMaterial(material.id)
+                      }}
+                    >
+                      <Text>{deletingId === material.id ? '删除中' : '删除'}</Text>
+                    </View>
                   </View>
                 </View>
 

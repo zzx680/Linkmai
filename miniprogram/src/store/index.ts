@@ -44,6 +44,7 @@ interface AppState {
   processMaterial: (type: api.MaterialType, artifactId: string) => Promise<api.Material>
   setUploadProgress: (fileId: string, progress: number) => void
   addMaterial: (material: api.Material) => void
+  removeMaterial: (materialId: string) => Promise<void>
   confirmMaterial: (materialId: string, fields: api.MaterialField[]) => Promise<void>
   generateReport: (notificationSubscriptionId?: string) => Promise<void>
   loadReport: (caseId: string) => Promise<void>
@@ -479,6 +480,32 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (activeCaseId && material.caseId && material.caseId !== activeCaseId) return {}
       return { materials: [...state.materials, material] }
     })
+  },
+
+  removeMaterial: async (materialId) => {
+    const material = get().materials.find(item => item.id === materialId)
+    const currentCase = get().currentCase
+    if (!material || !currentCase) return
+    const context = requestGuard.capture(currentCase.id)
+    const result = await api.deleteMaterial(currentCase.id, material.id)
+    if (isStale(context)) return
+    set(state => ({
+      materials: state.materials.filter(item => item.id !== materialId),
+      currentCase: state.currentCase && state.currentCase.id === currentCase.id
+        ? {
+            ...state.currentCase,
+            materialCount: Math.max(0, state.currentCase.materialCount - (result.confirmed ? 1 : 0)),
+            hasReport: false,
+            status: 'collecting',
+            statusLabel: '材料已更新，需重新分析',
+          }
+        : state.currentCase,
+      currentReport: null,
+      reportRunId: null,
+      reportRunStatus: null,
+      reportRunError: null,
+      isGeneratingReport: false,
+    }))
   },
 
   confirmMaterial: async (materialId, fields) => {

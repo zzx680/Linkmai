@@ -63,12 +63,8 @@
     &.is-open { border-color: rgba($color-brand-primary, .3); }
   }
 
-  .status-badge { color: $color-brand-primary; font-size: 22rpx; }
-  .status-reviewing { color: $color-warning-text; }
-  .status-completed { color: $color-success; }
-  .status-dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: currentColor; }
   .case-title { color: $color-text-primary; font-size: 28rpx; font-weight: 600; }
-  .material-summary { display: block; margin: 10rpx 0 24rpx; color: $color-text-tertiary; font-size: 22rpx; }
+  .context-status { color: $color-text-secondary; font-size: 22rpx; }
   .context-heading { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
 
   // Put spacing inside the scroller: native scroll-view does not support padding.
@@ -102,70 +98,35 @@
   animation: panelReveal 220ms ease-out;
 }
 
-.context-progress {
+.context-details {
   display: flex;
-  align-items: center;
-  gap: 10rpx;
+  flex-wrap: wrap;
+  gap: 14rpx 24rpx;
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid $color-border-light;
 }
 
-.context-step {
-  flex: 1;
+.context-detail {
+  width: calc(50% - 12rpx);
   min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 10rpx;
-  color: $color-text-tertiary;
-  font-size: 22rpx;
+  flex-direction: column;
+  gap: 6rpx;
+}
 
-  > text:first-child {
-    width: 34rpx;
-    height: 34rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    border-radius: $radius-full;
-    background: $color-bg-subtle;
-    color: $color-text-secondary;
-    font-size: 20rpx;
-  }
-
-  &.active {
-    color: $color-brand-primary;
-    > text:first-child { background: $color-brand-primary; color: $color-text-inverse; }
-  }
-
-  &.complete {
-    color: $color-success;
-    > text:first-child { background: $color-success-bg; color: $color-success; }
-  }
+.context-detail-wide { width: 100%; }
+.context-detail-label { color: $color-text-tertiary; font-size: 21rpx; }
+.context-detail-value {
+  overflow: hidden;
+  color: $color-text-primary;
+  font-size: 24rpx;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .context-actions { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 20rpx; }
-.context-materials { margin-top: 22rpx; }
-.context-material-list { display: inline-flex; gap: 14rpx; }
-
-.context-material {
-  width: 280rpx;
-  padding: 12rpx;
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-  border-radius: 18rpx;
-  background: $color-bg-subtle;
-}
-
-.context-material-thumb {
-  width: 70rpx;
-  height: 70rpx;
-  flex-shrink: 0;
-  border-radius: 14rpx;
-  background: $color-border-light;
-}
-
-.context-material-copy { min-width: 0; display: flex; flex-direction: column; gap: 6rpx; }
-.context-material-name { overflow: hidden; color: $color-text-primary; font-size: $font-size-xs; text-overflow: ellipsis; white-space: nowrap; }
-.context-material-status { color: $color-warning-text; font-size: 20rpx; &.confirmed { color: $color-success; } }
 
 .conversation-section { margin-bottom: 18rpx; }
 .messages-list { display: flex; flex-direction: column; padding: 10rpx 0 0; }

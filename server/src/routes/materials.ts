@@ -3,7 +3,7 @@ import { Router } from 'express'
 import { db } from '../db'
 import { config } from '../config'
 import { processMaterial, supportedMaterialTypes } from '../services/material'
-import { getSignedUrl } from '../services/oss'
+import { deleteFile, getSignedUrl } from '../services/oss'
 
 export const materialsRouter = Router()
 
@@ -118,6 +118,36 @@ materialsRouter.get('/:caseId', async (req, res) => {
     res.json({ success: true, data: await Promise.all(artifacts.map(toMaterial)) })
   } catch (err: any) {
     res.status(500).json({ success: false, error: '获取材料失败' })
+  }
+})
+
+/**
+ * DELETE /api/materials/:caseId/:artifactId
+ * 删除用户当前案件中的一份材料
+ */
+materialsRouter.delete('/:caseId/:artifactId', async (req, res) => {
+  try {
+    const userId = req.userId
+    const { caseId, artifactId } = req.params
+    if (!userId) return res.status(401).json({ success: false, error: '未认证' })
+    if (!caseId || !artifactId) return res.status(400).json({ success: false, error: '材料删除参数不完整' })
+
+    const currentCase = await getOwnedCase(userId, caseId)
+    if (!currentCase) return res.status(404).json({ success: false, error: '案件不存在' })
+    const artifact = await db.findArtifactById(caseId, artifactId)
+    if (!artifact) return res.status(404).json({ success: false, error: '材料不存在' })
+    if (artifact.status === 'processing') return res.status(409).json({ success: false, error: '材料正在处理中，暂时不能删除' })
+
+    const deleted = await db.deleteArtifact(userId, caseId, artifactId)
+    if (!deleted) return res.status(409).json({ success: false, error: '材料状态已变化，请刷新后重试' })
+
+    if (config.nodeEnv !== 'test' && config.oss.accessKeyId && deleted.ossKey) {
+      await deleteFile(deleted.ossKey).catch(error => console.warn('材料文件清理失败:', error))
+    }
+    res.json({ success: true, data: { deleted: true, confirmed: deleted.metadata?.confirmed === true, artifactId } })
+  } catch (err: any) {
+    console.error('删除材料失败:', safeError(err))
+    res.status(500).json({ success: false, error: '删除材料失败，请稍后重试' })
   }
 })
 

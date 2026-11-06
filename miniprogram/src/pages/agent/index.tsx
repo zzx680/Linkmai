@@ -20,23 +20,12 @@ const stageLabels: Record<string, string> = {
   ready: '信息已整理'
 }
 
-const stageColors: Record<string, string> = {
-  collecting: 'status-collecting',
-  confirming: 'status-reviewing',
-  analyzing: 'status-analyzing',
-  ready: 'status-completed'
-}
-
 const agentMaterialTypes: Array<{ type: MaterialType; label: string }> = [
   { type: 'accident_report', label: '交警认定书' },
   { type: 'medical_record', label: '医疗记录' },
   { type: 'scene_photo', label: '现场照片' },
   { type: 'other', label: '其他材料' }
 ]
-
-function getMaterialLabel(type: string) {
-  return agentMaterialTypes.find(item => item.type === type)?.label || '其他材料'
-}
 
 export default function Agent() {
   const {
@@ -67,7 +56,6 @@ export default function Agent() {
 
   const stage = currentCase ? conversationState : 'collecting'
   const stageLabel = stageLabels[stage] || '收集信息'
-  const stageColor = stageColors[stage] || 'status-collecting'
 
   const handleInputChange = (value: string) => {
     inputRevision.current += 1
@@ -147,17 +135,21 @@ export default function Agent() {
       style={keyboardHeight > 0 ? { height: `calc(100vh - ${keyboardHeight}px)` } : undefined}
     >
       <View className="chat-toolbar">
-        <Button className={`chat-context-button ${isContextExpanded ? 'is-open' : ''}`} aria-label="案件进度" onClick={() => currentCase ? setIsContextExpanded(value => !value) : Taro.switchTab({ url: '/pages/case/index' })}>
+        <Button
+          className={`chat-context-button ${isContextExpanded ? 'is-open' : ''}`}
+          aria-label="案件信息"
+          aria-expanded={isContextExpanded}
+          onClick={() => currentCase ? setIsContextExpanded(value => !value) : Taro.switchTab({ url: '/pages/case/index' })}
+        >
           <Icon name="folder-open" size={20} color="#000000" />
-          <Text>案件进度</Text>
-          <View className={`status-badge ${stageColor}`}><View className="status-dot" /></View>
+          <Text>案件信息</Text>
         </Button>
         {currentCase && <Button className="chat-materials-button" aria-label="查看材料" onClick={() => Taro.navigateTo({ url: '/pages/materials/index' })}>
           <Icon name="files" size={20} color="#000000" />
           <Text>材料 {materials.length}</Text>
         </Button>}
       </View>
-      {currentCase && (
+      {currentCase && isContextExpanded && (
         <View className="report-readiness-card">
           <View className="readiness-heading">
             <Text className="readiness-title">报告准备</Text>
@@ -200,34 +192,28 @@ export default function Agent() {
           <View className="workspace-content">
             {isContextExpanded && (
               <View className="case-context-panel">
-                <View className="context-heading"><Text className="case-title">案件工作台</Text><Text className={`status-badge ${stageColor}`}>{stageLabel}</Text></View>
-                <Text className="material-summary">已整理 {materials.length} 份材料</Text>
-                <View className="context-progress">
-                  <View className={`context-step ${materials.length ? 'complete' : 'active'}`}><Text>1</Text><Text>补充材料</Text></View>
-                  <View className={`context-step ${conversationState === 'confirming' ? 'active' : ''}`}><Text>2</Text><Text>核对信息</Text></View>
-                  <View className={`context-step ${readiness?.canGenerate ? 'active' : ''}`}><Text>3</Text><Text>报告准备</Text></View>
+                <View className="context-heading">
+                  <Text className="case-title">案件信息</Text>
+                  <Text className="context-status">{currentCase.statusLabel || stageLabel}</Text>
+                </View>
+                <View className="context-details">
+                  <View className="context-detail context-detail-wide">
+                    <Text className="context-detail-label">案件名称</Text>
+                    <Text className="context-detail-value">{currentCase.title || '未命名案件'}</Text>
+                  </View>
+                  {currentCase.accidentType && <View className="context-detail">
+                    <Text className="context-detail-label">事故类型</Text>
+                    <Text className="context-detail-value">{currentCase.accidentType}</Text>
+                  </View>}
+                  {currentCase.accidentDate && <View className="context-detail">
+                    <Text className="context-detail-label">事故日期</Text>
+                    <Text className="context-detail-value">{currentCase.accidentDate}</Text>
+                  </View>}
                 </View>
                 <View className="context-actions">
                   <View className="quick-reply" onClick={() => Taro.navigateTo({ url: '/pages/materials/index' })}><Text>查看并核对材料</Text></View>
-                  {conversationState === 'ready' && <View className="quick-reply" onClick={() => Taro.navigateTo({ url: '/pages/report/index' })}><Text>查看案件报告</Text></View>}
+                  {readiness && (readiness.canGenerate || readiness.reportExists) && <View className="quick-reply" onClick={() => Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })}><Text>{readiness.reportExists ? '查看案件报告' : '生成案件报告'}</Text></View>}
                 </View>
-                {materials.length > 0 && (
-                  <ScrollView className="context-materials" scrollX>
-                    <View className="context-material-list">
-                      {materials.map(material => (
-                        <View key={material.id} className="context-material">
-                          <Image src={material.imageUrl} className="context-material-thumb" mode="aspectFill" />
-                          <View className="context-material-copy">
-                            <Text className="context-material-name">{getMaterialLabel(material.type)}</Text>
-                            <Text className={`context-material-status ${material.confirmed ? 'confirmed' : ''}`}>
-                              {material.confirmed ? '已确认' : material.status === 'processing' ? '识别中' : material.status === 'failed' ? '处理失败' : '待核对'}
-                            </Text>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  </ScrollView>
-                )}
               </View>
             )}
 

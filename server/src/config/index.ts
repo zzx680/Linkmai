@@ -65,7 +65,7 @@ export const config = {
     timeoutMs: parseInt(process.env.DEEPSEEK_TIMEOUT_MS || '30000', 10),
   },
   payment: {
-    amountCents: Number(process.env.PAYMENT_AMOUNT_CENTS || '4990'),
+    amountCents: Number(process.env.PAYMENT_AMOUNT_CENTS || '9900'),
     currency: process.env.PAYMENT_CURRENCY || 'CNY',
     orderExpiresMinutes: Number(process.env.PAYMENT_ORDER_EXPIRES_MINUTES || '15'),
     provider: process.env.PAYMENT_PROVIDER || 'mock',
