@@ -16,7 +16,9 @@ async function api(path, data) {
 }
 async function run(fn) { el('error').textContent=''; try { await fn() } catch(e) { el('error').textContent=e.message || '操作失败' } }
 function button(text, action, secondary = false) { const b=node('button',text,secondary ? 'secondary':''); b.onclick=()=>run(async()=>{ b.disabled=true; try { await action() } finally { b.disabled=false } }); return b }
-el('loginForm').onsubmit=e=>{ e.preventDefault(); run(async()=>{ const result=await api('/login',{email:el('email').value,password:el('password').value}); token=result.token; role=result.reviewer.role; el('password').value=''; el('login').hidden=true; el('app').hidden=false; el('logout').hidden=false; el('admin').hidden=role!=='review_admin'; await refresh() }) }
+function setPasswordVisibility(visible) { const password=el('password'), toggle=el('togglePassword'); password.type=visible?'text':'password'; toggle.textContent=visible?'隐藏':'显示'; toggle.setAttribute('aria-pressed',String(visible)); toggle.setAttribute('aria-label',visible?'隐藏密码':'显示密码') }
+el('togglePassword').onclick=()=>setPasswordVisibility(el('password').type==='password')
+el('loginForm').onsubmit=e=>{ e.preventDefault(); run(async()=>{ const result=await api('/login',{email:el('email').value,password:el('password').value}); token=result.token; role=result.reviewer.role; el('password').value=''; setPasswordVisibility(false); el('login').hidden=true; el('app').hidden=false; el('logout').hidden=false; el('admin').hidden=role!=='review_admin'; await refresh() }) }
 el('logout').onclick=()=>{ token=''; location.reload() }
 el('refresh').onclick=()=>run(refresh)
 async function refresh() {
