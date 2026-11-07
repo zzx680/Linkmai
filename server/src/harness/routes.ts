@@ -78,7 +78,7 @@ caseWorkflowRouter.get('/:caseId/documents/:documentId/approved', endpoint(req =
 
 export const reviewRouter = Router()
 reviewRouter.use(harnessEnabled)
-reviewRouter.post('/login', createRateLimiter({ windowMs: 60_000, max: 10 }), endpoint(req => {
+reviewRouter.post('/login', createRateLimiter({ windowMs: 300_000, max: 3 }), endpoint(req => {
   const input = z.object({ email: z.string().email().max(200), password: z.string().min(1).max(200) }).strict().parse(req.body)
   return reviewerLogin(input.email, input.password)
 }))

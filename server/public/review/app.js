@@ -16,9 +16,20 @@ async function api(path, data) {
 }
 async function run(fn) { el('error').textContent=''; try { await fn() } catch(e) { el('error').textContent=e.message || '操作失败' } }
 function button(text, action, secondary = false) { const b=node('button',text,secondary ? 'secondary':''); b.onclick=()=>run(async()=>{ b.disabled=true; try { await action() } finally { b.disabled=false } }); return b }
+const requestedEntry = new URLSearchParams(location.search).get('entry')
+const adminEntry = requestedEntry === 'admin'
+if (adminEntry) {
+  el('loginEyebrow').textContent = 'ADMINISTRATION DESK'
+  el('loginTitle').textContent = '进入管理员后台'
+  el('loginDescription').textContent = '仅限受邀审核管理员登录。权限由账号角色决定。'
+  el('loginSubmit').textContent = '管理员登录'
+} else if (requestedEntry === 'lawyer') {
+  el('loginTitle').textContent = '律师审核登录'
+  el('loginDescription').textContent = '进入受分配案件的审核工作台。审核身份与用户账号独立。'
+}
 function setPasswordVisibility(visible) { const password=el('password'), toggle=el('togglePassword'); password.type=visible?'text':'password'; toggle.textContent=visible?'隐藏':'显示'; toggle.setAttribute('aria-pressed',String(visible)); toggle.setAttribute('aria-label',visible?'隐藏密码':'显示密码') }
 el('togglePassword').onclick=()=>setPasswordVisibility(el('password').type==='password')
-el('loginForm').onsubmit=e=>{ e.preventDefault(); run(async()=>{ const result=await api('/login',{email:el('email').value,password:el('password').value}); token=result.token; role=result.reviewer.role; el('password').value=''; setPasswordVisibility(false); el('login').hidden=true; el('app').hidden=false; el('logout').hidden=false; el('admin').hidden=role!=='review_admin'; await refresh() }) }
+el('loginForm').onsubmit=e=>{ e.preventDefault(); run(async()=>{ const result=await api('/login',{email:el('email').value,password:el('password').value}); token=result.token; role=result.reviewer.role; if(adminEntry&&role!=='review_admin'){ token=''; role=''; throw new Error('该账号不是审核管理员，请从律师登录入口进入审核工作台') } el('password').value=''; setPasswordVisibility(false); el('login').hidden=true; el('app').hidden=false; el('logout').hidden=false; el('admin').hidden=role!=='review_admin'; await refresh() }) }
 el('logout').onclick=()=>{ token=''; location.reload() }
 el('refresh').onclick=()=>run(refresh)
 async function refresh() {
@@ -32,13 +43,14 @@ async function refresh() {
   }
   const tasks=await api('/queue'); el('queue').replaceChildren()
   if(!tasks.length)el('queue').append(node('p','暂无分配给你的审核任务。'))
-  tasks.forEach(task=>{const row=node('div',undefined,'row');row.append(node('span',labels[task.status]||task.status,'badge'),node('div',`案件 ${task.caseId}`,'muted'),node('div',`输入版本 ${task.inputRevision} · ${task.overdue?'已超目标时间，请人工跟进':new Date(task.dueAt).toLocaleString()}`,'muted'))
+  tasks.forEach(task=>{const row=node('div',undefined,'row');row.append(node('span',labels[task.status]||task.status,'badge'),node('div',`案件 ${task.caseId} · 尾号 ${task.phoneLastFour || '未填'}`,'muted'),node('div',`输入版本 ${task.inputRevision} · ${task.overdue?'已超目标时间，请人工跟进':new Date(task.dueAt).toLocaleString()}`,'muted'))
     if(role==='review_admin'&&['pending','in_review'].includes(task.status)){const select=node('select'); members.filter(m=>m.role==='reviewer'&&m.active).forEach(m=>{const option=node('option',m.email);option.value=m.id;select.append(option)});row.append(select,button('分配/改派',async()=>{await api(`/tasks/${task.caseId}/${task.id}/assign`,{reviewerId:select.value});await refresh()}))}
     if(role==='reviewer'&&['pending','in_review'].includes(task.status)) row.append(button('查看审核资料',()=>openTask(task),true));el('queue').append(row)})
 }
 async function openTask(task) {
   const result=await api(`/tasks/${task.caseId}/${task.id}/open`,{})
   const detail=el('detail');detail.replaceChildren(node('h2',`案件草稿 v${result.document.version}`),node('p',`复核事项：${task.reasonCodes.map(code=>riskLabels[code]||code).join('、')}`))
+  if(result.userInfo){const userCard=node('div',undefined,'user-info-card');userCard.append(node('strong','用户标识'),node('div',`电话尾号：${result.userInfo.phoneLastFour||'未提供'}`),node('div',`案件创建：${new Date(result.userInfo.caseCreated).toLocaleString()}`));detail.append(userCard)}
   result.document.sections.forEach(section=>{detail.append(node('h3',section.title));section.paragraphs.forEach(p=>detail.append(node('p',p)))})
   detail.append(node('h3','事实与证明来源'))
   result.facts.forEach(fact=>{const row=node('div',undefined,'row');row.append(node('strong',fieldLabels[fact.key]||fact.label),node('div',factValue(fact)),node('div',`${fact.source==='material'?'已确认材料':'用户陈述'} · ${fact.evidenceRefs.length?`${fact.evidenceRefs.length} 项材料引用`:'待凭证复核'}`,'muted'));detail.append(row)})

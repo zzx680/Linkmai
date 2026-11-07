@@ -5,6 +5,7 @@ import { useAppStore } from '../../store'
 import { Icon } from '../../components'
 import CaseJourney from '../../components/CaseJourney'
 import CaseWorkflow from '../../components/CaseWorkflow'
+import AiGeneratedNotice from '../../components/AiGeneratedNotice'
 import { workflowApi } from '../../services/workflow'
 import { useReportNotification } from '../../hooks/useReportNotification'
 import './index.scss'
@@ -191,10 +192,7 @@ export default function Report() {
           <View className="report-status"><Text>已生成</Text></View>
         </View>
 
-        <View className="scope-banner">
-          <Icon name="triangle-alert" size={24} color="#2A64F0" />
-          <View><Text className="scope-title">阅读边界</Text><Text className="scope-text">以下内容是基于已确认材料的 AI 辅助分析，不是确定的法律结论。</Text></View>
-        </View>
+        <AiGeneratedNotice />
 
         <View className="report-section">
           <View className="section-heading"><Text className="section-index">01</Text><Text className="section-title">事故分析</Text></View>

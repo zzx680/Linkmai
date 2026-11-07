@@ -52,11 +52,15 @@ test('native messages retain literal user content and image attachments', () => 
   assert.equal(node.props.content[1].data, '<script>hello</script>\n第二行')
 })
 
-test('chat messages do not render an assistant name label', () => {
-  const native = loadChat().AgentChatMessage({ message: { role: 'assistant', content: '已收到' } })
-  assert.equal(native.props.name, '')
-  const h5 = renderToStaticMarkup(loadChat(true).AgentChatMessage({ message: { role: 'assistant', content: '已收到' } }))
-  assert.doesNotMatch(h5, /灵迈助手/)
+test('assistant replies visibly retain their AI origin while user messages remain unlabeled', () => {
+  for (const role of ['assistant', 'user']) {
+    const message = { role, content: '已收到' }
+    const native = loadChat().AgentChatMessage({ message })
+    assert.equal(native.props.name, role === 'assistant' ? '灵迈助手 · AI生成' : '')
+    const h5 = renderToStaticMarkup(loadChat(true).AgentChatMessage({ message }))
+    if (role === 'assistant') assert.match(h5, /灵迈助手 · AI生成/)
+    else assert.doesNotMatch(h5, /灵迈助手|AI生成/)
+  }
 })
 
 test('pending replies use the shared thinking orb in native and H5 without rendering empty messages', () => {

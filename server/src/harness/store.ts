@@ -204,18 +204,25 @@ export class WorkflowStore {
     return (await pool.query(`SELECT DISTINCT ar.case_id AS "caseId",c.user_id AS "userId" FROM agent_runs ar JOIN cases c ON c.id=ar.case_id
       WHERE ar.task='case_bundle' AND ar.status IN ('queued','running') LIMIT 100`)).rows
   }
-  async reviewCases(reviewerId: string, admin: boolean): Promise<Array<{ caseId: string; userId: string }>> {
+  async reviewCases(reviewerId: string, admin: boolean): Promise<Array<{ caseId: string; userId: string; phoneLastFour: string | null }>> {
     if (!this.usePostgres) {
       const results = []
       for (const state of memory.values()) if (state.reviews.some(task => admin || task.reviewerId === reviewerId)) {
         const userId = memoryOwners.get(state.caseId)
-        if (userId && await db.findCaseById(userId, state.caseId)) results.push({ caseId: state.caseId, userId })
+        if (userId && await db.findCaseById(userId, state.caseId)) {
+          const user = await db.findUserById(userId)
+          results.push({ caseId: state.caseId, userId, phoneLastFour: user?.phone?.slice(-4) || null })
+        }
       }
       return results
     }
-    return (await pool.query(`SELECT DISTINCT rt.case_id AS "caseId",c.user_id AS "userId" FROM review_tasks rt JOIN cases c ON c.id=rt.case_id
+    return (await pool.query(`SELECT DISTINCT rt.case_id AS "caseId",c.user_id AS "userId",
+      CASE WHEN u.phone IS NOT NULL THEN SUBSTRING(u.phone FROM LENGTH(u.phone)-3 FOR 4) ELSE NULL END AS "phoneLastFour"
+      FROM review_tasks rt JOIN cases c ON c.id=rt.case_id LEFT JOIN users u ON u.id=c.user_id
       WHERE $1::boolean OR rt.payload->>'reviewerId'=$2`, [admin, reviewerId])).rows
   }
+  async getUser(userId: string) { return db.findUserById(userId) }
+  async getCase(userId: string, caseId: string) { return db.findCaseById(userId, caseId) }
 }
 const memoryOwners = new Map<string, string>()
 export const registerMemoryOwner = (caseId: string, userId: string) => memoryOwners.set(caseId, userId)

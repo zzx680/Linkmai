@@ -13,7 +13,7 @@ export async function reviewerLogin(email: string, password: string) {
   const key = reviewerSecret()
   const reviewer = await workflowStore.control(c => c.reviewers.find(r => r.email === email.toLowerCase() && r.active))
   if (!reviewer || !await bcrypt.compare(password, reviewer.passwordHash)) throw new Error('INVALID_REVIEW_CREDENTIALS')
-  return { token: jwt.sign({ sub: reviewer.id, role: reviewer.role }, key, { algorithm: 'HS256', expiresIn: '2h', issuer: 'linkmai-review', audience: 'review-api' }),
+  return { token: jwt.sign({ sub: reviewer.id, role: reviewer.role }, key, { algorithm: 'HS256', expiresIn: '1h', issuer: 'linkmai-review', audience: 'review-api' }),
     reviewer: { id: reviewer.id, role: reviewer.role } }
 }
 export type ReviewRequest = Request & { reviewerId?: string; reviewerRole?: 'reviewer' | 'review_admin' }

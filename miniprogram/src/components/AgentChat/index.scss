@@ -14,6 +14,7 @@
   .t-chat-message { margin-bottom: 0; }
   .t-chat-message__base { font-size: 22rpx; margin-bottom: 12rpx; }
   .t-chat-message.assistant .t-chat-message__base { padding-left: 0; }
+  .t-chat-message.assistant .t-chat-message__name { color: $color-brand-primary; font-size: 24rpx; font-weight: 600; line-height: 1.5; }
   .t-chat-message--base.right .t-chat-content {
     background: $color-brand-light;
     border-radius: 28rpx;
@@ -67,6 +68,7 @@
 .composer-upload { border-color: rgba($color-brand-primary, .15); background: rgba($color-brand-primary, .08); color: $color-brand-primary; }
 
 .chat-preview-message { display: flex; flex-direction: column; align-items: flex-start; }
+.chat-preview-source { display: block; margin-bottom: 12rpx; color: $color-brand-primary; font-size: 24rpx; font-weight: 600; line-height: 1.5; }
 .chat-preview-content { max-width: 100%; color: $color-text-primary; font-size: 30rpx; line-height: 1.72; white-space: pre-wrap; overflow-wrap: anywhere; }
 .chat-preview-message-user {
   align-items: flex-end;

@@ -11,14 +11,8 @@ import { getQuickReplyLabel, getQuickReplySelection } from '../../components/Age
 import OnboardingGuide from '../../components/OnboardingGuide'
 import { completeGuideSteps } from '../../components/OnboardingGuide/progress'
 import { useSpeechInput } from '../../hooks/useSpeechInput'
+import { getCaseInformation } from './case-information'
 import './index.scss'
-
-const stageLabels: Record<string, string> = {
-  collecting: '收集信息',
-  confirming: '待确认',
-  analyzing: '分析中',
-  ready: '信息已整理'
-}
 
 const agentMaterialTypes: Array<{ type: MaterialType; label: string }> = [
   { type: 'accident_report', label: '交警认定书' },
@@ -35,6 +29,7 @@ export default function Agent() {
     materials,
     conversationState,
     readiness,
+    collectedFacts,
     isAiTyping,
     sendMessage,
     uploadImage,
@@ -51,11 +46,12 @@ export default function Agent() {
   useDidHide(() => setKeyboardHeight(0))
 
   useEffect(() => {
+    setIsContextExpanded(false)
     loadMessages().catch(() => undefined)
   }, [loadMessages, currentCase?.id])
 
   const stage = currentCase ? conversationState : 'collecting'
-  const stageLabel = stageLabels[stage] || '收集信息'
+  const caseInformation = currentCase ? getCaseInformation(currentCase, collectedFacts, readiness) : null
 
   const handleInputChange = (value: string) => {
     inputRevision.current += 1
@@ -149,33 +145,11 @@ export default function Agent() {
           <Text>材料 {materials.length}</Text>
         </Button>}
       </View>
-      {currentCase && isContextExpanded && (
-        <View className="report-readiness-card">
-          <View className="readiness-heading">
-            <Text className="readiness-title">报告准备</Text>
-            {readiness && (readiness.canGenerate || readiness.reportExists) && (
-              <Button className="readiness-action" disabled={isAiTyping} onClick={() => Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })}>
-                {readiness.reportExists ? '查看报告' : '生成报告'}
-              </Button>
-            )}
-          </View>
-          {readiness ? <>
-            <View className="readiness-counts">
-              <Text>已确认 {readiness.confirmed}</Text>
-              <Text>待确认 {readiness.pending}</Text>
-              <Text>待补充 {readiness.missing.length}</Text>
-            </View>
-            {readiness.reportStale && <Text className="readiness-warning">新增信息尚未纳入报告</Text>}
-            {readiness.missing.length > 0 && <Text className="readiness-missing">待补充：{readiness.missing.slice(0, 2).map(item => item.label).join('、')}</Text>}
-          </> : <Text className="readiness-missing">正在同步案件信息</Text>}
-        </View>
-      )}
-
       <ScrollView
         className={`workspace-container${!messages.length && !isAiTyping ? ' workspace-empty' : ''}`}
         scrollY
         scrollWithAnimation
-        scrollIntoView={isAiTyping ? 'chat-pending' : messages.length ? `msg-${messages.length - 1}` : ''}
+        scrollIntoView={isContextExpanded ? 'case-context' : isAiTyping ? 'chat-pending' : messages.length ? `msg-${messages.length - 1}` : ''}
       >
         {!currentCase && (
           <View className="init-section">
@@ -190,30 +164,40 @@ export default function Agent() {
 
         {currentCase && (
           <View className="workspace-content">
-            {isContextExpanded && (
-              <View className="case-context-panel">
-                <View className="context-heading">
-                  <Text className="case-title">案件信息</Text>
-                  <Text className="context-status">{currentCase.statusLabel || stageLabel}</Text>
+            {isContextExpanded && caseInformation && (
+              <View id="case-context" className="case-context-panel">
+                <View className="context-section">
+                  <Text className="context-section-title">已收集的信息</Text>
+                  {caseInformation.confirmed.length ? caseInformation.confirmed.map(fact => (
+                    <View className="context-fact" key={fact.key}>
+                      <Text className="context-detail-label">{fact.label}</Text>
+                      <Text className="context-detail-value" selectable>{fact.value}</Text>
+                    </View>
+                  )) : <Text className="context-empty">{readiness ? '还没有已确认的信息，可以先聊聊事故经过。' : '正在同步案件信息…'}</Text>}
                 </View>
-                <View className="context-details">
-                  <View className="context-detail context-detail-wide">
-                    <Text className="context-detail-label">案件名称</Text>
-                    <Text className="context-detail-value">{currentCase.title || '未命名案件'}</Text>
-                  </View>
-                  {currentCase.accidentType && <View className="context-detail">
-                    <Text className="context-detail-label">事故类型</Text>
-                    <Text className="context-detail-value">{currentCase.accidentType}</Text>
-                  </View>}
-                  {currentCase.accidentDate && <View className="context-detail">
-                    <Text className="context-detail-label">事故日期</Text>
-                    <Text className="context-detail-value">{currentCase.accidentDate}</Text>
-                  </View>}
+                {caseInformation.pending.length > 0 && <View className="context-section context-pending">
+                  <Text className="context-section-title">待你确认</Text>
+                  {caseInformation.pending.map(fact => (
+                    <View className="context-fact" key={fact.key}>
+                      <Text className="context-detail-label">{fact.label}</Text>
+                      <Text className="context-detail-value" selectable>{fact.value}</Text>
+                    </View>
+                  ))}
+                </View>}
+                <View className="context-section context-needed">
+                  <Text className="context-section-title">还需你补充的信息</Text>
+                  {caseInformation.missing.length ? <View className="context-missing-list">
+                    {caseInformation.missing.map(fact => (
+                      <View className="context-missing-item" key={fact.key}>
+                        <View className="context-missing-dot" />
+                        <Text>{fact.label}</Text>
+                      </View>
+                    ))}
+                  </View> : <Text className="context-empty">{!readiness ? '正在同步待补充信息…' : caseInformation.pending.length ? '先确认上面的信息，再继续补充。' : readiness.unknown?.length ? '暂不清楚的信息，可在了解后继续补充。' : '基础信息已收集，可以继续补充新的情况。'}</Text>}
                 </View>
-                <View className="context-actions">
-                  <View className="quick-reply" onClick={() => Taro.navigateTo({ url: '/pages/materials/index' })}><Text>查看并核对材料</Text></View>
-                  {readiness && (readiness.canGenerate || readiness.reportExists) && <View className="quick-reply" onClick={() => Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })}><Text>{readiness.reportExists ? '查看案件报告' : '生成案件报告'}</Text></View>}
-                </View>
+                {readiness && (readiness.canGenerate || readiness.reportExists) && <View className="context-actions">
+                  <Button className="context-report-button" disabled={isAiTyping} onClick={() => Taro.navigateTo({ url: `/pages/report/index?caseId=${currentCase.id}` })}>{readiness.reportExists ? '查看案件报告' : '生成案件报告'}</Button>
+                </View>}
               </View>
             )}
 

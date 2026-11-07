@@ -5,6 +5,7 @@ import { workflowApi, WorkflowWorkspace } from '../../services/workflow'
 import { useAppStore } from '../../store'
 import { ensureCaseDataConsent, ensureReviewConsent } from '../../utils/privacy-consent'
 import { useReportNotification } from '../../hooks/useReportNotification'
+import AiGeneratedNotice from '../AiGeneratedNotice'
 import './index.scss'
 
 const fields = [
@@ -127,6 +128,7 @@ export default function CaseWorkflow({ caseId }: { caseId: string }) {
           })
         }}><Text>生成报告、证据目录与行动计划</Text></View>
         {activeDocuments.map(doc => <View key={doc.id} className="workflow-document"><Text className="workflow-document-title">{documentTitles[doc.type]} · v{doc.version}</Text><Text className="workflow-label">{statuses[doc.status]}</Text>
+          <AiGeneratedNotice />
           {doc.sections.map((section,index) => <View key={index}><Text className="workflow-section-title">{section.title}</Text>{section.paragraphs.map((paragraph,n) => <Text key={n} className="workflow-body">{paragraph}</Text>)}</View>)}
           {doc.status === 'draft' && !workspace.reviews.some(task => task.documentId === doc.id && task.status === 'returned') && <View className="workflow-button secondary" onClick={() => void act(async () => {
             const userId = useAppStore.getState().user?.id

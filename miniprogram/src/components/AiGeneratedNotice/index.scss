@@ -1,0 +1,26 @@
+@use '../../styles/design-tokens.scss' as *;
+
+.ai-generated-notice {
+  box-sizing: border-box;
+  padding: $space-4;
+  margin-bottom: $space-4;
+  border: 1rpx solid rgba($color-brand-primary, .18);
+  border-radius: $radius-lg;
+  background: $color-brand-light;
+  text-align: left;
+}
+.ai-generated-notice-title {
+  display: block;
+  color: $color-brand-primary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-normal;
+}
+.ai-generated-notice-description {
+  display: block;
+  margin-top: $space-2;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
+  overflow-wrap: anywhere;
+}

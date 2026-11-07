@@ -289,7 +289,7 @@ export class HarnessService {
     const result = []
     for (const entry of cases) {
       const tasks = await this.command(entry.userId, entry.caseId, state => state.reviews.filter(task => actor.role === 'review_admin' || task.reviewerId === reviewerId)
-        .map(task => ({ ...task, caseId: entry.caseId, overdue: task.dueAt < timestamp(Date.now()) && ['pending','in_review'].includes(task.status) })))
+        .map(task => ({ ...task, caseId: entry.caseId, phoneLastFour: entry.phoneLastFour, overdue: task.dueAt < timestamp(Date.now()) && ['pending','in_review'].includes(task.status) })))
       result.push(...tasks)
     }
     return result
@@ -307,7 +307,7 @@ export class HarnessService {
         if (actor.role !== 'review_admin') throw new Error('REVIEWER_FORBIDDEN')
         const target = control.reviewers.find(r => r.id === input.reviewerId && r.active && r.role === 'reviewer')
         if (!target || !['pending','in_review'].includes(task.status)) throw new Error('INVALID_REVIEW_ASSIGNMENT')
-        task.reviewerId = target.id; task.status = 'pending'; audit(state, 'REVIEW_ASSIGNED', task.id, actorId); return task
+        task.reviewerId = target.id; task.status = 'pending'; audit(state, 'REVIEW_ASSIGNED', task.id, actorId); audit(state, 'REVIEW_REASSIGNED_TO', task.id, target.id); return task
       }
       if (task.reviewerId !== actorId || actor.role !== 'reviewer') throw new Error('REVIEWER_FORBIDDEN')
       const document = findDocument(state, task.documentId)
@@ -318,7 +318,10 @@ export class HarnessService {
         const changes = previous ? [...new Set([...previous.sections, ...document.sections].map(section => section.title))]
           .filter(title => fingerprint(previous.sections.find(s => s.title === title)) !== fingerprint(document.sections.find(s => s.title === title)))
           .map(title => ({ title, before: previous.sections.find(s => s.title === title)?.paragraphs || [], after: document.sections.find(s => s.title === title)?.paragraphs || [] })) : []
+        const user = await this.store.getUser(owned.userId)
+        const caseRecord = await this.store.getCase(owned.userId, caseId)
         return { task, document, previous, changes,
+          userInfo: { phoneLastFour: user?.phone?.slice(-4) || null, caseCreated: caseRecord?.createdAt?.getTime() || Date.now() },
           facts: state.facts.filter(f => document.factRefs.includes(f.id)), evidence: state.evidence.filter(e => document.evidenceRefs.includes(e.id)),
           legal: await sources.getLegalReferences(document.legalRefs),
           calculation: state.calculations.find(c => c.id === document.calculationId) }

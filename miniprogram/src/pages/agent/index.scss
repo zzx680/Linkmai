@@ -11,32 +11,6 @@
   overflow: hidden;
   background: #fff;
 
-  .report-readiness-card {
-    flex-shrink: 0;
-    margin: 8rpx 28rpx 12rpx;
-    padding: 20rpx 24rpx;
-    border: 1rpx solid $color-border;
-    border-radius: $radius-lg;
-    background: $color-surface-secondary;
-  }
-  .readiness-heading,
-  .readiness-counts { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
-  .readiness-title { font-size: 26rpx; font-weight: 600; color: $color-text-primary; }
-  .readiness-counts { margin-top: 12rpx; font-size: 23rpx; color: $color-text-secondary; }
-  .readiness-missing,
-  .readiness-warning { display: block; margin-top: 10rpx; font-size: 22rpx; line-height: 1.5; color: $color-text-secondary; }
-  .readiness-warning { color: $color-warning; }
-  .readiness-action {
-    margin: 0;
-    padding: 8rpx 16rpx;
-    border-radius: $radius-full;
-    background: $color-brand-primary;
-    color: white;
-    font-size: 24rpx;
-    line-height: 1.5;
-    &::after { border: 0; }
-  }
-
   .chat-toolbar {
     display: flex;
     align-items: center;
@@ -62,10 +36,6 @@
     &:active { background: $color-brand-light; }
     &.is-open { border-color: rgba($color-brand-primary, .3); }
   }
-
-  .case-title { color: $color-text-primary; font-size: 28rpx; font-weight: 600; }
-  .context-status { color: $color-text-secondary; font-size: 22rpx; }
-  .context-heading { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
 
   // Put spacing inside the scroller: native scroll-view does not support padding.
   .workspace-container { flex: 1; height: 0; min-height: 0; width: 100%; }
@@ -98,35 +68,28 @@
   animation: panelReveal 220ms ease-out;
 }
 
-.context-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14rpx 24rpx;
-  margin-top: 22rpx;
-  padding-top: 18rpx;
+// Keep all values readable, including long narratives and narrow screens.
+.context-section + .context-section {
+  margin-top: $space-3;
+  padding-top: $space-3;
   border-top: 1rpx solid $color-border-light;
 }
-
-.context-detail {
-  width: calc(50% - 12rpx);
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
+.context-section-title { display: block; color: $color-text-primary; font-size: $font-size-base; font-weight: $font-weight-semibold; line-height: $line-height-normal; }
+.context-fact { display: flex; flex-direction: column; gap: $space-1; margin-top: $space-2; min-width: 0; }
+.context-detail-label { color: $color-text-secondary; font-size: $font-size-xs; line-height: $line-height-normal; }
+.context-detail-value { display: block; color: $color-text-primary; font-size: $font-size-sm; line-height: $line-height-relaxed; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+.context-empty { display: block; margin-top: $space-2; color: $color-text-secondary; font-size: $font-size-sm; line-height: $line-height-relaxed; }
+.context-pending .context-section-title { color: $color-warning-text; }
+.context-needed .context-section-title { color: $color-brand-primary; }
+.context-missing-list { display: flex; flex-direction: column; gap: $space-2; margin-top: $space-2; }
+.context-missing-item { display: flex; align-items: flex-start; gap: 12rpx; color: $color-text-primary; font-size: $font-size-sm; line-height: $line-height-relaxed; overflow-wrap: anywhere; }
+.context-missing-dot { flex-shrink: 0; width: 8rpx; height: 8rpx; margin-top: 18rpx; border-radius: $radius-full; background: $color-brand-primary; }
+.context-actions { margin-top: $space-3; }
+.context-report-button {
+  margin: 0; padding: 14rpx 22rpx; border-radius: $radius-full;
+  background: $color-brand-light; color: $color-brand-primary; font-size: $font-size-sm; line-height: $line-height-normal;
+  &::after { border: 0; }
 }
-
-.context-detail-wide { width: 100%; }
-.context-detail-label { color: $color-text-tertiary; font-size: 21rpx; }
-.context-detail-value {
-  overflow: hidden;
-  color: $color-text-primary;
-  font-size: 24rpx;
-  line-height: 1.45;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.context-actions { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 20rpx; }
 
 .conversation-section { margin-bottom: 18rpx; }
 .messages-list { display: flex; flex-direction: column; padding: 10rpx 0 0; }

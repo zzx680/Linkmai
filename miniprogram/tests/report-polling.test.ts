@@ -37,6 +37,7 @@ function setup(harness: boolean | 'reject' = false) {
       if (id === '../../components') return { Icon: () => null }
       if (id === '../../services/workflow') return { workflowApi: { enabled: () => harness === 'reject' ? Promise.reject(new Error('temporary')) : Promise.resolve(harness) } }
       if (id === '../../components/CaseWorkflow') return {}
+      if (id === '../../components/AiGeneratedNotice') return { default: () => null, __esModule: true }
       if (id === '../../components/CaseJourney' || id.endsWith('.scss')) return {}
       return localRequire(id)
     },

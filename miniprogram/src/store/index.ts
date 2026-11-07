@@ -18,6 +18,7 @@ interface AppState {
   messages: api.Message[]
   conversationState: api.ConversationState
   readiness: api.ReportReadiness | null
+  collectedFacts: api.CollectedFact[]
   isAiTyping: boolean
   materials: api.Material[]
   uploadingFiles: Map<string, number>
@@ -65,6 +66,7 @@ function createInitialState(token: string | null = null) {
   messages: [] as api.Message[],
   conversationState: 'collecting' as api.ConversationState,
   readiness: null as api.ReportReadiness | null,
+  collectedFacts: [] as api.CollectedFact[],
   isAiTyping: false,
   materials: [] as api.Material[],
   uploadingFiles: new Map<string, number>(),
@@ -237,7 +239,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           reportRunError: null,
           isGeneratingReport: false,
           conversationState: 'collecting',
-          readiness: null
+          readiness: null,
+          collectedFacts: []
         })
         return
       }
@@ -262,7 +265,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           reportRunError: null,
           isGeneratingReport: false,
           conversationState: 'collecting' as api.ConversationState,
-          readiness: null
+          readiness: null,
+          collectedFacts: []
         } : {})
       })
 
@@ -279,6 +283,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         patch.messages = historyResult.value.messages
         patch.conversationState = historyResult.value.conversationState || historyResult.value.agentState?.stage || 'collecting'
         patch.readiness = historyResult.value.readiness || null
+        patch.collectedFacts = historyResult.value.agentState?.collectedFacts || []
       }
       if (reportResult.status === 'fulfilled') patch.currentReport = reportResult.value
       set(patch)
@@ -313,6 +318,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         isGeneratingReport: false,
         conversationState: 'collecting',
         readiness: null,
+        collectedFacts: [],
         isAiTyping: false
       })
     } catch (error: unknown) {
@@ -338,7 +344,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({
         messages: history.messages,
         conversationState: history.conversationState || history.agentState?.stage || 'collecting',
-        readiness: history.readiness || null
+        readiness: history.readiness || null,
+        collectedFacts: history.agentState?.collectedFacts || []
       })
     } catch (error) {
       if (isStale(context)) return
@@ -395,6 +402,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         messages: [...state.messages.filter(message => message.id !== temporaryMessage.id), temporaryMessage, assistantMessage],
         conversationState: response.agentState?.stage || state.conversationState,
         readiness: response.readiness || null,
+        collectedFacts: response.agentState?.collectedFacts || [],
         isAiTyping: false
       }))
       if (retrying) await get().loadMessages().catch(() => undefined)

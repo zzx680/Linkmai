@@ -310,6 +310,20 @@ export interface Message {
 
 export type ConversationState = 'collecting' | 'confirming' | 'analyzing' | 'ready'
 
+export interface CollectedFact {
+  key: string
+  label: string
+  value: string
+  confirmed: boolean
+  unknown?: boolean
+}
+
+export interface ConversationAgentState {
+  stage: ConversationState
+  collectedFactsCount?: number
+  collectedFacts?: CollectedFact[]
+}
+
 export interface ReportReadiness {
   confirmed: number
   pending: number
@@ -324,14 +338,14 @@ export interface ReportReadiness {
 export interface ConversationHistory {
   messages: Message[]
   conversationState?: ConversationState
-  agentState?: { stage: ConversationState; collectedFactsCount?: number }
+  agentState?: ConversationAgentState
   readiness?: ReportReadiness
 }
 
 export interface SendMessageResponse {
   message: string
   quickReplies?: QuickReply[]
-  agentState?: { stage: ConversationState; collectedFactsCount?: number }
+  agentState?: ConversationAgentState
   readiness?: ReportReadiness
 }
 
