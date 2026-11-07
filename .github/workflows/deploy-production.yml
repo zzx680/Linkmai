@@ -147,6 +147,7 @@ jobs:
           DEPLOY_SSH_USER: ${{ secrets.PROD_SSH_USER }}
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+          LINKMAI_ENABLE_ROOT_DOMAIN: ${{ vars.LINKMAI_ENABLE_ROOT_DOMAIN || 'false' }}
         run: bash server/scripts/ci-deploy.sh
       - uses: actions/setup-node@v4
         with:

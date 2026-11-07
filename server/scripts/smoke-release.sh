@@ -64,6 +64,20 @@ elif node -e '
 ' "$SMOKE_RESPONSE_FILE"; then
   request 200 GET /review/
 fi
+if [ -n "${LINKMAI_ROOT_SITE_URL:-}" ]; then
+  ROOT_SITE_URL=${LINKMAI_ROOT_SITE_URL%/}
+  status=$(curl --silent --show-error --max-time 15 --output "$SMOKE_RESPONSE_FILE" --write-out '%{http_code}' "$ROOT_SITE_URL/")
+  if [ "$status" != 200 ]; then
+    echo "根域首页预期 200，实际 ${status}"
+    cat "$SMOKE_RESPONSE_FILE"
+    exit 1
+  fi
+  grep -q '律师登录' "$SMOKE_RESPONSE_FILE" || { echo '根域首页缺少律师登录入口' >&2; exit 1; }
+  grep -q '管理员后台' "$SMOKE_RESPONSE_FILE" || { echo '根域首页缺少管理员后台入口' >&2; exit 1; }
+  ROOT_API_STATUS=$(curl --silent --show-error --max-time 15 --output "$SMOKE_RESPONSE_FILE" --write-out '%{http_code}' "$ROOT_SITE_URL/api/review/queue")
+  [ "$ROOT_API_STATUS" = 401 ] || { echo "根域审核 API 未认证预期 401，实际 ${ROOT_API_STATUS}" >&2; cat "$SMOKE_RESPONSE_FILE"; exit 1; }
+fi
+
 request 401 GET /api/auth/session
 request 401 GET /api/payment-orders
 request 401 GET /api/cases/current

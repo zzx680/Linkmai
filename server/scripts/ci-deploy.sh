@@ -13,6 +13,7 @@ done
 if [ "$DEPLOY_TARGET" = production ]; then
   [[ "${STAGING_RELEASE_ID:-}" =~ ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$ ]] || exit 1
 fi
+[[ "$DEPLOY_TARGET" = production && "${LINKMAI_ENABLE_ROOT_DOMAIN:-false}" =~ ^(true|false)$ ]] || [ "$DEPLOY_TARGET" != production ] || { echo "LINKMAI_ENABLE_ROOT_DOMAIN 必须为 true 或 false" >&2; exit 1; }
 artifact_dir=${LINKMAI_ARTIFACT_DIR:-release-artifact}
 (cd "$artifact_dir" && sha256sum --check release-source.tar.sha256)
 node -e '
@@ -106,5 +107,50 @@ done
 LINKMAI_EXPECT_REVIEW=true LINKMAI_EXPECTED_SHA="$RELEASE_SHA" LINKMAI_EXPECTED_RELEASE_ID="$RELEASE_ID" \
   bash "/var/www/linkmai-$DEPLOY_TARGET/current/server/scripts/smoke-$DEPLOY_TARGET.sh" "https://$([ "$DEPLOY_TARGET" = staging ] && printf staging-api || printf api).linkmai.com"
 REMOTE_ENABLE_REVIEW
+if [ "$DEPLOY_TARGET" = production ] && [ "${LINKMAI_ENABLE_ROOT_DOMAIN:-false}" = true ]; then
+  ssh "${ssh_options[@]}" "$remote" "sudo -n env ROOT_NGINX_FILE=/etc/nginx/sites-available/linkmai.com.conf ROOT_NGINX_ENABLED=/etc/nginx/sites-enabled/linkmai.com.conf ROOT_NGINX_SOURCE=/var/www/linkmai-production/current/server/deploy/nginx-root-domain.conf ROOT_SITE_SOURCE=/var/www/linkmai-production/current/server/public/site ROOT_SITE_ROOT=/var/www/linkmai-root ROOT_SITE_RELEASE_ID='$RELEASE_ID' bash -s" <<'REMOTE_ENABLE_ROOT_SITE'
+set -euo pipefail
+[ -r /etc/linkmai/certs/linkmai.com/fullchain.pem ] && [ -r /etc/linkmai/certs/linkmai.com/privkey.pem ] || { echo '根域 TLS 证书尚未准备好' >&2; exit 1; }
+[ -r "$ROOT_NGINX_SOURCE" ] || { echo '根域 Nginx 模板缺失' >&2; exit 1; }
+[ -d "$ROOT_SITE_SOURCE" ] || { echo '根域静态资源缺失' >&2; exit 1; }
+[[ "$ROOT_SITE_RELEASE_ID" =~ ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$ ]] || { echo '非法根域发布版本' >&2; exit 1; }
+backup_nginx="${ROOT_NGINX_FILE}.bak-$(date -u +%Y%m%dT%H%M%SZ)"
+backup_enabled="${ROOT_NGINX_ENABLED}.bak-$(date -u +%Y%m%dT%H%M%SZ)"
+root_site_release="$ROOT_SITE_ROOT/releases/$ROOT_SITE_RELEASE_ID"
+root_site_current="$ROOT_SITE_ROOT/current"
+previous_site_target=''
+had_nginx=false
+had_enabled=false
+if [ -L "$root_site_current" ]; then previous_site_target=$(readlink -f "$root_site_current"); fi
+if [ -e "$ROOT_NGINX_FILE" ]; then sudo -n cp -a "$ROOT_NGINX_FILE" "$backup_nginx"; had_nginx=true; fi
+if [ -L "$ROOT_NGINX_ENABLED" ] || [ -e "$ROOT_NGINX_ENABLED" ]; then sudo -n cp -aL "$ROOT_NGINX_ENABLED" "$backup_enabled"; had_enabled=true; fi
+restore_root_site() {
+  status=$?
+  if [ "$status" -ne 0 ]; then
+    if [ "$had_nginx" = true ]; then sudo -n cp -a "$backup_nginx" "$ROOT_NGINX_FILE"; else sudo -n rm -f "$ROOT_NGINX_FILE"; fi
+    if [ "$had_enabled" = true ]; then sudo -n rm -f "$ROOT_NGINX_ENABLED" && sudo -n ln -s "$ROOT_NGINX_FILE" "$ROOT_NGINX_ENABLED"; else sudo -n rm -f "$ROOT_NGINX_ENABLED"; fi
+    if [ -n "$previous_site_target" ]; then sudo -n ln -sfn "$previous_site_target" "${root_site_current}.next" && sudo -n mv -Tf "${root_site_current}.next" "$root_site_current"; else sudo -n rm -f "$root_site_current"; fi
+    sudo -n rm -rf "$root_site_release"
+    sudo -n nginx -t >/dev/null 2>&1 && sudo -n systemctl reload nginx || true
+  fi
+  sudo -n rm -f "$backup_nginx" "$backup_enabled"
+  exit "$status"
+}
+trap restore_root_site EXIT
+sudo -n install -d -m 755 "$ROOT_SITE_ROOT/releases"
+sudo -n rm -rf "$root_site_release"
+sudo -n install -d -m 755 "$root_site_release/site"
+sudo -n cp -a "$ROOT_SITE_SOURCE/." "$root_site_release/site/"
+sudo -n find "$root_site_release" -type d -exec chmod 755 {} +
+sudo -n find "$root_site_release" -type f -exec chmod 644 {} +
+sudo -n ln -sfn "$root_site_release" "${root_site_current}.next"
+sudo -n mv -Tf "${root_site_current}.next" "$root_site_current"
+sudo -n install -m 644 "$ROOT_NGINX_SOURCE" "$ROOT_NGINX_FILE"
+sudo -n ln -sfn "$ROOT_NGINX_FILE" "$ROOT_NGINX_ENABLED"
+sudo -n nginx -t
+sudo -n systemctl reload nginx
+REMOTE_ENABLE_ROOT_SITE
+  ssh "${ssh_options[@]}" "$remote" "sudo -n env LINKMAI_ROOT_SITE_URL=https://linkmai.com LINKMAI_EXPECT_REVIEW=true LINKMAI_EXPECTED_SHA='$RELEASE_SHA' LINKMAI_EXPECTED_RELEASE_ID='$RELEASE_ID' bash /var/www/linkmai-$DEPLOY_TARGET/current/server/scripts/smoke-$DEPLOY_TARGET.sh https://api.linkmai.com"
+fi
 # Remove only successful source attempts; failures preserve diagnostics.
 ssh "${ssh_options[@]}" "$remote" "rm -rf -- '$remote_source'"
