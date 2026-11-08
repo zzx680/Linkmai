@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArtifactCard } from '../../components/artifact/ArtifactCard'
@@ -8,6 +8,7 @@ import { QuickReplies } from '../../components/agent/QuickReplies'
 import { RippleLoading } from '../../components/agent/RippleLoading'
 import { BottomNav } from '../../components/navigation/BottomNav'
 import { ReportSummaryCard } from '../../components/report/ReportSummaryCard'
+import brandLogo from '../../assets/brand/linkmai-logo.png'
 import { demoCase, demoReport, useCurrentCaseStore } from '../../stores/currentCase'
 import { Artifact, ChatMessage, ExtractedField, QuickReplyOption } from '../../types/domain'
 import { uploadImages } from '../../services/upload'
@@ -316,9 +317,9 @@ export default function AgentPage() {
     <View className="agent-page lm-page">
       <View className="agent-page__topbar">
         <View className="agent-page__topbar-left">
-          <Text className="agent-page__logo-mark">AI</Text>
+          <Image className="agent-page__logo" src={brandLogo} mode="aspectFit" aria-label="灵迈 Linkmai AI" />
           <View>
-            <Text className="agent-page__title">灵迈 Agent</Text>
+            <Text className="agent-page__title">Agent</Text>
             <Text className="agent-page__subtitle">{hasStarted ? '正在一起核对事实' : '材料优先 · 逐步分析'}</Text>
           </View>
         </View>

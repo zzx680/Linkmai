@@ -13,6 +13,20 @@
   letter-spacing: 2.5px;
 }
 
+.page-header__brand {
+  display: flex;
+  align-items: center;
+  min-height: 27px;
+  gap: 12px;
+}
+
+.page-header__logo {
+  display: block;
+  width: 118px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+
 .page-header__title {
   display: block;
   margin-top: 12px;

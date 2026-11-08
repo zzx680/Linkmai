@@ -1,5 +1,6 @@
-import { View, Text } from '@tarojs/components'
+import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import brandLogo from '../../assets/brand/linkmai-logo.png'
 import { useCurrentCaseStore, demoCase } from '../../stores/currentCase'
 import { CurrentCaseCard } from '../../components/case/CurrentCaseCard'
 import { BottomNav } from '../../components/navigation/BottomNav'
@@ -56,7 +57,7 @@ export default function CasePage() {
     <View className="case-page lm-page">
       <View className="case-page__content lm-safe-content">
         <View className="case-page__topline reveal">
-          <Text className="case-page__brand">LINGMAI</Text>
+          <Image className="case-page__brand" src={brandLogo} mode="aspectFit" aria-label="灵迈 Linkmai AI" />
           <Text className="case-page__edition">事故后 · 参考服务</Text>
         </View>
 

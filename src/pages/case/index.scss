@@ -13,10 +13,10 @@
 }
 
 .case-page__brand {
-  color: #20251f;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 4px;
+  display: block;
+  width: 142px;
+  height: 27px;
+  flex: 0 0 auto;
 }
 
 .case-page__edition {

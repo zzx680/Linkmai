@@ -1,4 +1,5 @@
-import { View, Text } from '@tarojs/components'
+import { View, Text, Image } from '@tarojs/components'
+import brandLogo from '../../assets/brand/linkmai-logo.png'
 import './PageHeader.scss'
 
 interface PageHeaderProps {
@@ -8,11 +9,14 @@ interface PageHeaderProps {
   onAction?: () => void
 }
 
-export function PageHeader({ kicker = 'LINGMAI / 灵迈', title, action, onAction }: PageHeaderProps) {
+export function PageHeader({ kicker, title, action, onAction }: PageHeaderProps) {
   return (
     <View className="page-header">
       <View>
-        <Text className="page-header__kicker">{kicker}</Text>
+        <View className="page-header__brand">
+          <Image className="page-header__logo" src={brandLogo} mode="aspectFit" aria-label="灵迈 Linkmai AI" />
+          {kicker ? <Text className="page-header__kicker">{kicker}</Text> : null}
+        </View>
         <Text className="page-header__title">{title}</Text>
       </View>
       {action ? (

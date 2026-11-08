@@ -25,19 +25,12 @@
   align-items: center;
 }
 
-.agent-page__logo-mark {
-  display: flex;
-  width: 39px;
-  height: 39px;
-  align-items: center;
-  justify-content: center;
+.agent-page__logo {
+  display: block;
+  width: 142px;
+  height: 27px;
+  flex: 0 0 auto;
   margin-right: 12px;
-  color: #fffaf2;
-  background: #20251f;
-  border-radius: 12px 4px 12px 12px;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 1px;
 }
 
 .agent-page__title,
