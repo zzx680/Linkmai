@@ -16,13 +16,13 @@ async function api(path, data) {
 }
 async function run(fn) { el('error').textContent=''; try { await fn() } catch(e) { el('error').textContent=e.message || '操作失败' } }
 function button(text, action, secondary = false) { const b=node('button',text,secondary ? 'secondary':''); b.onclick=()=>run(async()=>{ b.disabled=true; try { await action() } finally { b.disabled=false } }); return b }
-el('loginForm').onsubmit=e=>{ e.preventDefault(); run(async()=>{ const result=await api('/login',{email:el('email').value,password:el('password').value}); token=result.token; role=result.reviewer.role; el('password').value=''; el('login').hidden=true; el('app').hidden=false; el('logout').hidden=false; el('admin').hidden=role!=='review_admin'; await refresh() }) }
+el('loginForm').onsubmit=e=>{ e.preventDefault(); run(async()=>{ const result=await api('/login',{account:el('account').value,password:el('password').value}); token=result.token; role=result.reviewer.role; el('password').value=''; el('login').hidden=true; el('app').hidden=false; el('logout').hidden=false; el('admin').hidden=role!=='review_admin'; await refresh() }) }
 el('logout').onclick=()=>{ token=''; location.reload() }
 el('refresh').onclick=()=>run(refresh)
 async function refresh() {
   if (role==='review_admin') {
     members=await api('/members'); el('members').replaceChildren()
-    members.forEach(member=>{ const row=node('div',undefined,'row'); row.append(node('span',`${member.email} · ${member.role} · ${member.active?'有效':'停用'}　`)); if(member.role==='reviewer') row.append(button(member.active?'停用':'启用',async()=>{await api(`/members/${member.id}/status`,{active:!member.active});await refresh()},true)); el('members').append(row) })
+    members.forEach(member=>{ const row=node('div',undefined,'row'); row.append(node('span',`${member.displayName} · ${member.role==='review_admin'?'管理员':'律师'} · ${member.active?'有效':'停用'}　`)); if(member.role==='reviewer') row.append(button(member.active?'停用':'启用',async()=>{await api(`/members/${member.id}/status`,{active:!member.active});await refresh()},true)); el('members').append(row) })
     const policies=await api('/policies'); el('legal').replaceChildren()
     policies.legal.forEach(ref=>{ const label=node('label',undefined,'law'), check=node('input'); check.type='checkbox';check.value=ref.id;check.disabled=!ref.approved||!ref.active; label.append(check,node('span',`${ref.id} · ${ref.from} · ${ref.approved?'已审核':'待审核'}`));el('legal').append(label) })
     el('legalDocuments').replaceChildren();const documents=new Map(policies.legal.map(ref=>[ref.documentId,ref]));documents.forEach(ref=>{const row=node('div',undefined,'row');row.append(node('span',`${ref.documentId} · ${ref.approved?'已审核':'待审核/已拒绝'}　`),button('查看原文与审核',()=>openLegal(ref.documentId),true));el('legalDocuments').append(row)})
@@ -31,7 +31,7 @@ async function refresh() {
   const tasks=await api('/queue'); el('queue').replaceChildren()
   if(!tasks.length)el('queue').append(node('p','暂无分配给你的审核任务。'))
   tasks.forEach(task=>{const row=node('div',undefined,'row');row.append(node('span',labels[task.status]||task.status,'badge'),node('div',`案件 ${task.caseId}`,'muted'),node('div',`输入版本 ${task.inputRevision} · ${task.overdue?'已超目标时间，请人工跟进':new Date(task.dueAt).toLocaleString()}`,'muted'))
-    if(role==='review_admin'&&['pending','in_review'].includes(task.status)){const select=node('select'); members.filter(m=>m.role==='reviewer'&&m.active).forEach(m=>{const option=node('option',m.email);option.value=m.id;select.append(option)});row.append(select,button('分配/改派',async()=>{await api(`/tasks/${task.caseId}/${task.id}/assign`,{reviewerId:select.value});await refresh()}))}
+    if(role==='review_admin'&&['pending','in_review'].includes(task.status)){const select=node('select'); members.filter(m=>m.role==='reviewer'&&m.active).forEach(m=>{const option=node('option',m.displayName);option.value=m.id;select.append(option)});row.append(select,button('分配/改派',async()=>{await api(`/tasks/${task.caseId}/${task.id}/assign`,{reviewerId:select.value});await refresh()}))}
     if(role==='reviewer'&&['pending','in_review'].includes(task.status)) row.append(button('查看审核资料',()=>openTask(task),true));el('queue').append(row)})
 }
 async function openTask(task) {
@@ -50,7 +50,7 @@ async function openTask(task) {
   const note=node('textarea');note.placeholder='审核意见（必填）';const returns=node('textarea');returns.placeholder='退回修改项，每行一项';detail.append(note,returns)
   detail.append(button('批准此版本',async()=>{if(!confirm('确认已核对事实、依据、计算和风险，批准当前版本？'))return;await api(`/tasks/${task.caseId}/${task.id}/approve`,{note:note.value});detail.replaceChildren(node('p','该版本已批准'));await refresh()}),button('退回修改',async()=>{await api(`/tasks/${task.caseId}/${task.id}/return`,{note:note.value,returnItems:returns.value.split('\n').map(v=>v.trim()).filter(Boolean)});detail.replaceChildren(node('p','已退回，用户修改后生成新版本重新审核'));await refresh()},true))
 }
-el('memberForm').onsubmit=e=>{e.preventDefault();run(async()=>{await api('/members',{email:el('memberEmail').value,password:el('memberPassword').value});el('memberPassword').value='';await refresh()})}
+el('memberForm').onsubmit=e=>{e.preventDefault();run(async()=>{await api('/members',{phone:el('memberPhone').value,password:el('memberPassword').value});el('memberPhone').value='';el('memberPassword').value='';await refresh()})}
 const legalRefs=()=>Array.from(document.querySelectorAll('#legal input:checked')).map(input=>input.value)
 el('publish').onclick=()=>run(async()=>{await api('/calculator/publish',{version:'compensation-v1',legalRefs:legalRefs()});await refresh()})
 el('parameterForm').onsubmit=e=>{e.preventDefault();run(async()=>{await api('/parameters',{id:el('parameterId').value,version:el('parameterVersion').value,code:el('parameterCode').value,jurisdiction:el('jurisdiction').value,from:el('from').value,...(el('to').value?{to:el('to').value}:{}),value:Number(el('parameterValue').value),legalRefs:legalRefs()});await refresh()})}

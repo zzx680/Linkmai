@@ -16,12 +16,14 @@ export function harnessEnabled(_req: Request, res: Response, next: NextFunction)
 const identifier = z.string().min(1).max(160)
 const candidate = z.object({ key: z.string().regex(/^[a-z][a-z0-9_]{0,99}$/), label: z.string().trim().min(1).max(100),
   value: z.string().trim().min(1).max(3000), evidenceRefs: z.array(identifier).max(20).default([]) }).strict()
+const maskPhone = (phone: string) => `${phone.slice(0,3)}****${phone.slice(-4)}`
 const codeMessage: Record<string,string> = {
   CASE_NOT_FOUND: '案件不存在', PAYMENT_REQUIRED: '请先解锁本案件', FACT_CONFLICT: '请先解决事实冲突', FACTS_REQUIRED: '请先确认事故事实',
   FACT_CONFIRMATION_REQUIRED: '请先确认或拒绝待确认信息，再重新生成当前版本',
   ACCIDENT_DATE_REQUIRED: '请确认 YYYY-MM-DD 格式的事故日期', JURISDICTION_REQUIRED: '请确认事故地区代码',
   CALCULATOR_NOT_APPROVED: '赔偿计算规则尚未审核启用', INPUT_STALE: '案件输入或规则已更新，请刷新并重新生成',
   LAWYER_REVIEW_REQUIRED: '该产物需要律师审核', REVIEWER_FORBIDDEN: '无权处理该审核任务', INVALID_REVIEW_CREDENTIALS: '审核账号或密码错误',
+  REVIEWER_ALREADY_EXISTS: '该律师手机号已被使用，请核对后重试。', INVALID_REVIEWER_PHONE: '请输入 11 位中国大陆手机号。',
   REVIEW_AUTH_NOT_CONFIGURED: '审核服务尚未配置', DOCUMENT_NOT_APPROVED: '文书尚未批准', NEW_DOCUMENT_VERSION_REQUIRED: '草稿已退回，请核对修改项后生成新版本',
   REVIEW_CONSENT_REQUIRED: '请先确认人工复核的资料使用说明', WORKFLOW_PAUSED: '当前暂停新分析与审核提交，已有审核任务仍可跟进',
 }
@@ -79,8 +81,8 @@ caseWorkflowRouter.get('/:caseId/documents/:documentId/approved', endpoint(req =
 export const reviewRouter = Router()
 reviewRouter.use(harnessEnabled)
 reviewRouter.post('/login', createRateLimiter({ windowMs: 60_000, max: 10 }), endpoint(req => {
-  const input = z.object({ email: z.string().email().max(200), password: z.string().min(1).max(200) }).strict().parse(req.body)
-  return reviewerLogin(input.email, input.password)
+  const input = z.object({ account: z.string().trim().min(1).max(200), password: z.string().min(1).max(200) }).strict().parse(req.body)
+  return reviewerLogin(input.account, input.password)
 }))
 reviewRouter.use(reviewerAuth)
 reviewRouter.get('/queue', endpoint(req => harness.reviewQueue(req.reviewerId!)))
@@ -88,14 +90,17 @@ reviewRouter.get('/tasks/:caseId/:taskId/evidence/:evidenceId', endpoint(req => 
 reviewRouter.post('/tasks/:caseId/:taskId/:action', endpoint(req => harness.reviewAction(req.reviewerId!, param(req,'caseId'), param(req,'taskId'),
   z.enum(['assign','open','approve','return']).parse(req.params.action),
   z.object({ reviewerId: identifier.optional(), note: z.string().trim().min(1).max(3000).optional(), returnItems: z.array(z.string().trim().min(1).max(500)).min(1).max(20).optional() }).strict().parse(req.body || {}))))
-reviewRouter.get('/members', reviewAdmin, endpoint(async () => workflowStore.control(c => c.reviewers.map(({ passwordHash: _hash, ...member }) => member))))
+reviewRouter.get('/members', reviewAdmin, endpoint(async () => workflowStore.control(c => c.reviewers.map(({ passwordHash: _hash, phone, ...member }) => ({
+  ...member, ...(phone ? { phoneMasked: maskPhone(phone) } : {}), displayName: phone ? maskPhone(phone) : member.email,
+})))))
 reviewRouter.post('/members', reviewAdmin, endpoint(async req => {
-  const input = z.object({ email: z.string().email().max(200), password: z.string().min(12).max(200) }).strict().parse(req.body)
+  const input = z.object({ phone: z.string().trim().min(1).max(200), password: z.string().min(12).max(200) }).strict().parse(req.body)
+  if (!/^1[3-9]\d{9}$/.test(input.phone)) throw new Error('INVALID_REVIEWER_PHONE')
   const passwordHash = await bcrypt.hash(input.password, 12)
   return workflowStore.control(c => {
-    if (c.reviewers.some(r => r.email === input.email.toLowerCase())) throw new Error('REVIEWER_ALREADY_EXISTS')
-    const member = { id: id(), email: input.email.toLowerCase(), role: 'reviewer' as const, active: true, passwordHash, invitedBy: req.reviewerId }
-    c.reviewers.push(member); return { id: member.id, email: member.email }
+    if (c.reviewers.some(r => r.phone === input.phone)) throw new Error('REVIEWER_ALREADY_EXISTS')
+    const member = { id: id(), phone: input.phone, role: 'reviewer' as const, active: true, passwordHash, invitedBy: req.reviewerId }
+    c.reviewers.push(member); return { id: member.id, phoneMasked: maskPhone(member.phone) }
   }, req.reviewerId!)
 }))
 reviewRouter.post('/members/:memberId/status', reviewAdmin, endpoint(req => {

@@ -48,7 +48,7 @@ export interface Workspace {
   sourceHash: string; contextHash: string; facts: Fact[]; evidence: Evidence[]; conflicts: Conflict[]
   calculations: Calculation[]; documents: Document[]; reviews: ReviewTask[]; runs: Run[]; events: AuditEvent[]
 }
-export interface Reviewer { id: string; email: string; passwordHash: string; role: 'reviewer' | 'review_admin'; active: boolean; invitedBy?: string }
+export interface Reviewer { id: string; email?: string; phone?: string; passwordHash: string; role: 'reviewer' | 'review_admin'; active: boolean; invitedBy?: string }
 export interface LegalState { id: string; documentId: string; contentHash: string; sourceHash: string; jurisdiction: string; from: string; to?: string; active: boolean; approved: boolean; reviewedBy?: string }
 export interface Sources {
   revision: number; paid: boolean

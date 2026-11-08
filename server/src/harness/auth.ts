@@ -9,9 +9,12 @@ export function reviewerSecret(): string {
   if (key.length < 32 || key === config.jwtSecret) throw new Error('REVIEW_AUTH_NOT_CONFIGURED')
   return key
 }
-export async function reviewerLogin(email: string, password: string) {
+export async function reviewerLogin(account: string, password: string) {
   const key = reviewerSecret()
-  const reviewer = await workflowStore.control(c => c.reviewers.find(r => r.email === email.toLowerCase() && r.active))
+  const normalized = account.trim().toLowerCase()
+  const reviewer = await workflowStore.control(c => c.reviewers.find(r => r.active && (
+    r.role === 'review_admin' ? r.email === normalized : r.phone === account.trim()
+  )))
   if (!reviewer || !await bcrypt.compare(password, reviewer.passwordHash)) throw new Error('INVALID_REVIEW_CREDENTIALS')
   return { token: jwt.sign({ sub: reviewer.id, role: reviewer.role }, key, { algorithm: 'HS256', expiresIn: '2h', issuer: 'linkmai-review', audience: 'review-api' }),
     reviewer: { id: reviewer.id, role: reviewer.role } }

@@ -108,7 +108,8 @@ export class WorkflowStore {
     FROM legal_sections s JOIN legal_documents d ON d.id=s.document_id`)).rows.map(row => ({ id: row.legal_ref_id, documentId: row.document_id, reviewedBy: row.reviewed_by || undefined, contentHash: row.content_hash,
       sourceHash: row.source_hash, jurisdiction: row.jurisdiction, from: row.effective_from, to: row.effective_to || undefined,
       active: row.status === 'active', approved: row.review_status === 'approved' }))
-    return { calculators: await load('calculator_versions'), parameters: await load('regional_parameters'), reviewers: await load('reviewers'), legal }
+    const reviewers = (await client.query('SELECT email,phone,payload FROM reviewers ORDER BY id')).rows.map(row => ({ ...row.payload, email: row.email || undefined, phone: row.phone || undefined }))
+    return { calculators: await load('calculator_versions'), parameters: await load('regional_parameters'), reviewers, legal }
   }
   private async loadMemoryLegal() {
     const references = await db.getLegalReferences([...new Set([...coreTrafficLegalSections.map(section => section.legalRefId), ...memoryControl.legal.map(ref => ref.id)])])
@@ -144,7 +145,8 @@ export class WorkflowStore {
         for (const row of control[key]) {
           if (fingerprint(before[key].find(item => item.id === row.id)) === fingerprint(row)) continue
           if (key === 'reviewers') {
-            await client.query('INSERT INTO reviewers(id,email,payload) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET email=EXCLUDED.email,payload=EXCLUDED.payload', [row.id, (row as Control['reviewers'][number]).email, JSON.stringify(row)])
+            const reviewer = row as Control['reviewers'][number]
+            await client.query('INSERT INTO reviewers(id,email,phone,payload) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO UPDATE SET email=EXCLUDED.email,phone=EXCLUDED.phone,payload=EXCLUDED.payload', [reviewer.id, reviewer.email || null, reviewer.phone || null, JSON.stringify(reviewer)])
           } else await client.query(`INSERT INTO ${table}(id,payload) VALUES($1,$2) ON CONFLICT(id) DO UPDATE SET payload=EXCLUDED.payload`, [row.id, JSON.stringify(row)])
         }
       }

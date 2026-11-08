@@ -42,7 +42,7 @@ async function fixture() {
   const admin = id(), lawyer = id(), other = id()
   await store.control(c => {
     c.calculators = [version]; c.parameters = []
-    c.reviewers.push(...[{id:admin,role:'review_admin' as const},{id:lawyer,role:'reviewer' as const},{id:other,role:'reviewer' as const}].map(r => ({...r,email:`${r.id}@example.test`,passwordHash:'not-a-real-password',active:true})))
+    c.reviewers.push(...[{id:admin,role:'review_admin' as const,email:`${admin}@example.test`},{id:lawyer,role:'reviewer' as const,phone:'13800138000'},{id:other,role:'reviewer' as const,phone:'13900139000'}].map(r => ({...r,passwordHash:'not-a-real-password',active:true})))
   })
   const user = await db.createUser(`workflow-${id()}`)
   const item = await db.createCase(user.id, '测试案件')
