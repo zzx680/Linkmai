@@ -46,3 +46,6 @@ wechat_api_v3_key
 !.env.staging.example
 !.env.production.example
 !.env.development
+
+.tmp-visual/
+.playwright-mcp/
