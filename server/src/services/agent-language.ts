@@ -1,8 +1,7 @@
-import { z } from 'zod'
 import { config } from '../config'
 import { callDeepSeek } from './deepseek'
 import type { AgentState } from './agent'
-import { caseAgentFactKeys, caseAgentPrompt, type CaseAgentContext } from '../harness/case-agent'
+import { caseAgentFactKeys, reportFactDefinitions, type CaseAgentContext } from '../harness/case-agent'
 
 const keys = caseAgentFactKeys
 export type FactKey = typeof keys[number]
@@ -10,13 +9,7 @@ export interface LanguageFact { key: FactKey; value: string; evidence: string }
 export interface LanguageResult { facts: LanguageFact[]; reply: string; status?: 'model' }
 export type MessageInterpreter = (state: AgentState, text: string, context?: CaseAgentContext) => Promise<LanguageResult>
 
-const resultSchema = z.object({
-  facts: z.array(z.object({
-    key: z.enum(keys), value: z.string().trim().min(1).max(3000),
-    evidence: z.string().trim().min(1).max(3000),
-  }).strict()).max(keys.length),
-  reply: z.string().trim().min(1).max(1200),
-}).strict()
+export const CONVERSATION_SYSTEM_PROMPT = '你是交通事故律师，熟悉中国大陆交通事故处理、责任认定、保险理赔及人身损害赔偿。请结合对话上下文理解用户处境，先回答用户当前的问题，再给出具体、可执行的建议。信息不足时只追问必要问题，避免重复询问。区分已知事实与推测，不编造事实、法条或赔偿金额；结论取决于证据、地区或时间时，说明依据和不确定之处。使用自然、清晰、简洁的中文交流。'
 
 export function isGreeting(text: string) {
   return /^(?:你好|您好|嗨|哈喽|hello|hi)[\s，。！？,.!?]*$/i.test(text.trim())
@@ -48,61 +41,47 @@ export function validFactValue(key: string, text: string) {
   return value.length >= 2
 }
 
-export function localMessageFacts(text: string): LanguageFact[] {
-  if (isAcknowledgement(text)) return []
-  if (/如果|假如|假设|举个例子|没有发生|并未发生/.test(text)) return []
-  if (isQuestion(text) && !/撞|碰撞|追尾|摔倒|摔伤|砸伤|发生.{0,6}事故|事故发生/.test(text)) return []
-  const facts: LanguageFact[] = []
-  const type = detectAccidentType(text)
-  if (type) facts.push({ key: 'accident_type', value: type, evidence: text })
-  const date = text.match(/\d{4}[-年/.]\d{1,2}[-月/.]\d{1,2}[日号]?|\d{1,2}月\d{1,2}[日号]?|今天|昨天|前天|昨晚|上周[一二三四五六日天]|星期[一二三四五六日天]|周[一二三四五六日天]/)?.[0]
-  if (date) facts.push({ key: 'accident_date', value: date, evidence: date })
-  const location = text.match(/(?:在|地点[是为：:]?)([^，。！？\n]{2,35}(?:路口|交叉口|路段|大街|大道|街道|高速|停车场|小区门口|学校门口))/)?.[1]
-  if (location) facts.push({ key: 'accident_location', value: location, evidence: location })
-  // Keep the user's words; “红绿灯” alone does not identify a specific location.
-  const parties = text.match(/(?:被|和|与)([^，。！？\n]{1,30}(?:汽车|轿车|货车|电动车|摩托车|自行车|行人|司机|驾驶员))/)?.[1]
-  if (parties) facts.push({ key: 'parties_involved', value: parties, evidence: parties })
-  if (/(?:撞|碰撞|追尾|剐蹭|刮蹭|摔倒|摔伤|砸伤)/.test(text) && text.length >= 8) {
-    facts.push({ key: 'accident_description', value: text.slice(0, 3000), evidence: text.slice(0, 3000) })
+// Action-only requests still need a user message, both now and in saved history.
+export function conversationText(text: string, context?: Pick<CaseAgentContext, 'action' | 'attachedMaterials'>): string {
+  const eventLabels: Record<string, string> = {
+    confirm: '确认信息', edit: '修改信息', finish: '结束收集',
+    upload: '上传材料', generate_report: '查看报告', manual_input: '手动输入',
   }
-  return facts
+  const event = context?.action?.startsWith('edit:')
+    ? `修改${reportFactDefinitions.find(fact => fact.key === context.action!.slice(5))?.label || '案件信息'}`
+    : context?.action && Object.hasOwn(eventLabels, context.action) ? eventLabels[context.action] : ''
+  return text.trim() || event || (context?.attachedMaterials?.length ? '上传了材料' : '')
 }
 
-export function contextualAdvice(text: string): string {
-  if (/(?:特别|很|剧烈|一直|非常).{0,4}(?:痛|疼)|(?:撞|摔|受伤).{0,30}(?:痛|疼)|(?:头晕|出血|昏迷|呼吸困难|站不起来)/.test(text)
-    && !/(?:没有|没|不)(?:有)?(?:疼痛|痛|疼|头晕|出血)/.test(text)) {
-    return '你提到撞倒后疼痛，先确保人身安全，尽快就医检查；若疼痛剧烈、头晕、出血或无法活动，请拨打 120 并避免勉强移动\n尚未报警可拨打 122／110，条件允许时保留现场照片、对方车牌和联系方式，并保存病历及费用票据；不要为收集材料耽误就医'
+// Build ordinary chat history separately from the single system prompt.
+// The bounded history comes from the owned case snapshot.
+export function conversationMessages(text: string, context?: CaseAgentContext): Array<{ role: 'user' | 'assistant'; content: string }> {
+  const messages: Array<{ role: 'user' | 'assistant'; content: string }> = []
+  let remaining = 48_000
+  for (const item of [...(context?.recentMessages || [])].slice(-20).reverse()) {
+    if ((item.role !== 'user' && item.role !== 'assistant') || !item.text.trim()) continue
+    if (item.text.length > remaining) break
+    messages.unshift({ role: item.role, content: item.text })
+    remaining -= item.text.length
   }
-  if (/诉状|起诉书|文书|PDF|Word|word|导出|赔偿报告/.test(text)) {
-    return '目前可在核对材料并解锁案件后生成包含赔偿建议的事故分析报告，暂不支持生成诉状或导出 PDF／Word 文件'
-  }
-  if (/(?:现在|接下来|下一步).{0,6}(?:怎么办|干嘛|做什么)|该怎么办|应该怎么|怎么处理/.test(text)) {
-    return '先确保现场安全；有伤情先就医，未报警可联系 122／110 记录事故，条件允许时保留现场照片、对方车辆信息和就医票据，再根据认定书及实际损失核对后续处理事项'
-  }
-  return ''
+  // A bounded window may begin with the previous answer; keep complete turns.
+  while (messages[0]?.role === 'assistant') messages.shift()
+  const content = conversationText(text, context)
+  if (!content) throw new Error('MODEL_UNAVAILABLE')
+  messages.push({ role: 'user', content })
+  return messages
 }
 
-// Model facts must quote literal evidence from this user's message. Unknown
-// fields, instructions masquerading as fields, and invented values are rejected.
-export function parseLanguageResult(raw: string, text: string): LanguageResult {
-  const json = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
-  const parsed = resultSchema.parse(JSON.parse(json))
-  const facts = parsed.facts.filter(fact => text.includes(fact.evidence)
-    && (fact.key === 'accident_type'
-      ? ['traffic_accident', 'work_injury', 'personal_injury'].includes(fact.value) && detectAccidentType(fact.evidence) === fact.value
-      : fact.evidence.includes(fact.value) && validFactValue(fact.key, fact.value)))
-  return { facts, reply: parsed.reply }
-}
-
-export const interpretUserMessage: MessageInterpreter = async (state, text, context) => {
+export const interpretUserMessage: MessageInterpreter = async (_state, text, context) => {
   if (!config.deepseek.apiKey) throw new Error('MODEL_UNAVAILABLE')
-  const prompt = caseAgentPrompt(state, text, context)
   try {
     const response = await callDeepSeek([
-      { role: 'system', content: prompt.instructions },
-      { role: 'user', content: JSON.stringify(prompt.input) },
-    ], { temperature: 0.3, maxTokens: 1200, timeoutMs: 6500 })
-    return { ...parseLanguageResult(response.choices[0].message.content, text), status: 'model' }
+      { role: 'system', content: CONVERSATION_SYSTEM_PROMPT },
+      ...conversationMessages(text, context),
+    ], { timeoutMs: 6500 })
+    const reply = response.choices?.[0]?.message?.content
+    if (typeof reply !== 'string' || !reply.trim()) throw new Error('MODEL_UNAVAILABLE')
+    return { facts: [], reply: reply.trim(), status: 'model' }
   } catch {
     throw new Error('MODEL_UNAVAILABLE')
   }

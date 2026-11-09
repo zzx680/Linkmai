@@ -13,12 +13,13 @@ async function processUserMessage(state: AgentState, text: string, action?: stri
   return runTurn(state, text, [], action, testInterpreter)
 }
 
-test('accident choices send Chinese text and still advance the backend state', async () => {
+test('saved accident choices send Chinese text without auto-collecting facts', async () => {
   for (const [value, label] of [['traffic_accident', '交通事故'], ['work_injury', '工伤事故'], ['personal_injury', '意外伤害']]) {
     const selection = getQuickReplySelection({ value, label })
     assert.equal(selection.text, label)
     const { agentState, assistantText } = await processUserMessage({ stage: 'collecting', collectedFacts: [] }, selection.text, selection.action)
-    assert.equal(agentState.collectedFacts[0].value, value)
+    assert.deepEqual(agentState.collectedFacts, [])
+    assert.deepEqual(agentState.quickReplies, [])
     // The unified model reply is surfaced to the conversation, not the old local question.
     assert.equal(assistantText, modelReply)
     assert.equal(agentState.nextQuestion, modelReply)

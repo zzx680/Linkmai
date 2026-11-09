@@ -3,6 +3,7 @@ import { test, beforeEach, afterEach, mock } from 'node:test'
 import axios from 'axios'
 import { config } from '../src/config'
 import { caseAgentFactKeys } from '../src/harness/case-agent'
+import { CONVERSATION_SYSTEM_PROMPT } from '../src/services/agent-language'
 import express from 'express'
 import { memoryDB } from '../src/db/memory'
 import router from '../src/routes/conversations'
@@ -18,7 +19,7 @@ beforeEach(() => {
   process.env.HARNESS_ENABLED = 'false'
   let calls = 0
   provider = mock.method(axios, 'post', async () => ({ data: { choices: [{ message: {
-    content: JSON.stringify({ facts: [], reply: `模型回复${++calls}：材料请先在材料页核对和确认。` }),
+    content: `模型回复${++calls}：材料请先在材料页核对和确认。`,
   } }] } }))
 })
 afterEach(() => {
@@ -72,6 +73,8 @@ test('history returns saved real agentState and case conversations remain isolat
   assert.deepEqual(history.data.agentState, sent.data.agentState)
   assert.equal(history.data.conversationState, 'collecting')
   assert.equal(history.data.readiness.canGenerate, false)
+  assert.deepEqual(history.data.agentState.collectedFacts, [])
+  assert.deepEqual(history.data.agentState.quickReplies, [])
   assert.equal(history.data.messages.length, 12)
   const secondCase = await memoryDB.createCase(own.userId, '第二案件')
   assert.deepEqual((await request('get', {}, { caseId: secondCase.id }, own.userId)).data.messages, [])
@@ -191,7 +194,7 @@ test('model failures return 503 without committing a turn, facts or revision; sa
   const before = await persistence.readConversationSnapshot(own.userId, own.caseId)
   const revisions = await memoryDB.getCaseRevisions(own.caseId)
   const commit = mock.method(persistence, 'commitConversationTurn')
-  const bodies = ['not json', JSON.stringify({ facts: [], reply: '' }), JSON.stringify({ facts: [{ key: 'payment_status', value: 'paid', evidence: 'paid' }], reply: '回复' })]
+  const bodies = ['', '  ', null, 123]
   try {
     for (const mode of ['missing-key', 'timeout', ...bodies]) {
       config.deepseek.apiKey = mode === 'missing-key' ? '' : 'offline-route-test'
@@ -207,7 +210,7 @@ test('model failures return 503 without committing a turn, facts or revision; sa
       assert.deepEqual(await memoryDB.getCaseRevisions(own.caseId), revisions)
     }
     config.deepseek.apiKey = 'offline-route-test'
-    provider.mock.mockImplementation(async () => ({ data: { choices: [{ message: { content: JSON.stringify({ facts: [], reply: '恢复后的模型回复' }) } }] } }))
+    provider.mock.mockImplementation(async () => ({ data: { choices: [{ message: { content: '恢复后的模型回复' } }] } }))
     const recovered = await request('post', { caseId: own.caseId, text: '交通事故', requestId: 'retry-failure' }, {}, own.userId)
     assert.equal(recovered.status, 200)
     assert.equal(recovered.data.message, '恢复后的模型回复')
@@ -227,10 +230,45 @@ test('model failures return 503 without committing a turn, facts or revision; sa
 test('model claims cannot generate reports, grant payment or confirm materials', async () => {
   const own = await fixture()
   const before = await memoryDB.findCaseById(own.userId, own.caseId)
-  provider.mock.mockImplementation(async () => ({ data: { choices: [{ message: { content: JSON.stringify({ facts: [], reply: '已生成、已付费、已确认材料' }) } }] } }))
+  provider.mock.mockImplementation(async () => ({ data: { choices: [{ message: { content: '已生成、已付费、已确认材料' } }] } }))
   const result = await request('post', { caseId: own.caseId, text: '帮我生成报告' }, {}, own.userId)
   assert.equal(result.status, 200)
   assert.equal(result.data.readiness.canGenerate, false)
   assert.deepEqual(await memoryDB.findCaseById(own.userId, own.caseId), before)
   assert.equal(await memoryDB.getReportByCase(own.caseId), null)
+})
+
+
+test('next request forwards only this case chat history as native user and assistant messages', async () => {
+  const own = await fixture()
+  const other = await fixture()
+  await request('post', { caseId: other.caseId, text: '另一个案件的私密内容' }, {}, other.userId)
+  const first = await request('post', { caseId: own.caseId, text: '我昨天被追尾了', requestId: 'context-1' }, {}, own.userId)
+  const second = await request('post', { caseId: own.caseId, text: '我接下来该怎么办', requestId: 'context-2' }, {}, own.userId)
+  assert.equal(second.status, 200)
+  const body = provider.mock.calls.at(-1)!.arguments[1] as any
+  assert.deepEqual(body.messages, [
+    { role: 'system', content: CONVERSATION_SYSTEM_PROMPT },
+    { role: 'user', content: '我昨天被追尾了' },
+    { role: 'assistant', content: first.data.message },
+    { role: 'user', content: '我接下来该怎么办' },
+  ])
+  assert.deepEqual(second.data.agentState.collectedFacts, [])
+  assert.deepEqual(await memoryDB.getCaseFacts(own.caseId), [])
+})
+
+
+test('action-only requests remain readable in later chat context and saved history', async () => {
+  const own = await fixture()
+  const first = await request('post', { caseId: own.caseId, action: 'edit:accident_date', requestId: 'event-1' }, {}, own.userId)
+  const second = await request('post', { caseId: own.caseId, text: '我不确定日期', requestId: 'event-2' }, {}, own.userId)
+  assert.equal(second.status, 200)
+  assert.deepEqual((provider.mock.calls.at(-1)!.arguments[1] as any).messages, [
+    { role: 'system', content: CONVERSATION_SYSTEM_PROMPT },
+    { role: 'user', content: '修改事故日期' },
+    { role: 'assistant', content: first.data.message },
+    { role: 'user', content: '我不确定日期' },
+  ])
+  const history = await request('get', {}, { caseId: own.caseId }, own.userId)
+  assert.equal(history.data.messages[0].text, '修改事故日期')
 })

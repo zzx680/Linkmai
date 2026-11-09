@@ -46,6 +46,18 @@ test('AgentRun PostgreSQL row-lock concurrency', { skip: process.env.AGENT_RUN_P
     return { locked: locked.promise, contender: contender.promise, release: release.resolve, restore: () => stub.mock.restore() }
   }
   try {
+    await t.test('conversation history orders user before assistant at the same transaction timestamp', async () => {
+      const { user, caseData } = await fixture()
+      const conversation = await db.findOrCreateConversation(user.id, caseData.id)
+      // Reverse lexical IDs and insertion order expose timestamp-only sorting.
+      await pool.query(`INSERT INTO messages (id,conversation_id,role,kind,text,created_at) VALUES
+        ($1,$3,'assistant','text','回答','2026-11-09T00:00:00Z'),
+        ($2,$3,'user','text','问题','2026-11-09T00:00:00Z')`,
+        [`a-${conversation.id}`, `z-${conversation.id}`, conversation.id])
+      const snapshot = await db.readConversationSnapshot(user.id, caseData.id)
+      assert.deepEqual(snapshot.recentMessages.map(message => message.role), ['user', 'assistant'])
+      assert.deepEqual((await db.getMessages(conversation.id)).map(message => message.role), ['user', 'assistant'])
+    })
     for (const publishFirst of [true, false]) {
       await t.test(`publication versus failure, publication first: ${publishFirst}`, async () => {
         const { user, caseData } = await fixture()

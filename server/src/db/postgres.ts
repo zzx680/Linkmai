@@ -770,7 +770,7 @@ export const db = {
       const conversation = conversationResult.rows[0]
       if (!conversation) throw new Error('CONVERSATION_STALE')
       const countResult = await client.query('SELECT COUNT(*)::int AS count FROM messages WHERE conversation_id=$1', [conversation.id])
-      const messagesResult = await client.query('SELECT * FROM (SELECT * FROM messages WHERE conversation_id=$1 ORDER BY created_at DESC,id DESC LIMIT 20) recent ORDER BY created_at ASC,id ASC', [conversation.id])
+      const messagesResult = await client.query(`SELECT * FROM (SELECT * FROM messages WHERE conversation_id=$1 ORDER BY created_at DESC,CASE role WHEN 'user' THEN 0 ELSE 1 END DESC,id DESC LIMIT 20) recent ORDER BY created_at ASC,CASE role WHEN 'user' THEN 0 ELSE 1 END ASC,id ASC`, [conversation.id])
       const artifactsResult = await client.query('SELECT * FROM artifacts WHERE case_id=$1 ORDER BY created_at ASC,id ASC', [caseId])
       const factsResult = await client.query('SELECT * FROM case_facts WHERE case_id=$1 ORDER BY fact_key', [caseId])
       const messages = messagesResult.rows.map(row => ({ id: row.id, conversationId: row.conversation_id, role: row.role, kind: row.kind, text: row.text || undefined, metadata: row.metadata || undefined, requestId: row.request_id || undefined, requestHash: row.request_hash || undefined, createdAt: row.created_at }))
@@ -936,7 +936,7 @@ export const db = {
 
   async getMessages(conversationId: string) {
     const result = await pool.query(
-      'SELECT * FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC',
+      `SELECT * FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC,CASE role WHEN 'user' THEN 0 ELSE 1 END ASC,id ASC`,
       [conversationId]
     )
     return result.rows.map(row => ({

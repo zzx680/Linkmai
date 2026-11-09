@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto'
 import { safeError } from '../utils/safe-error'
 import express from 'express'
 import { db } from '../db'
-import { generateNextQuestion, normalizeAgentAction, processUserMessage, type AgentMaterial, type AgentState } from '../services/agent'
-import { interpretUserMessage } from '../services/agent-language'
+import { normalizeAgentAction, processUserMessage, type AgentMaterial, type AgentState } from '../services/agent'
+import { conversationText, interpretUserMessage } from '../services/agent-language'
 import { conversationHash, type ConversationSnapshot } from '../db/conversation'
 import { caseAgentFactKeys, reportReadiness, type CaseAgentContext } from '../harness/case-agent'
 import { harness } from '../harness/service'
@@ -33,9 +33,7 @@ async function ownedCase(req: express.Request, res: express.Response, caseId: un
 }
 
 function initialState(): AgentState {
-  const state: AgentState = { stage: 'collecting', collectedFacts: [] }
-  const next = generateNextQuestion(state)
-  return { ...state, nextQuestion: next.question, quickReplies: next.quickReplies }
+  return { stage: 'collecting', collectedFacts: [], quickReplies: [] }
 }
 
 function readiness(state: AgentState, context: CaseAgentContext): Readiness {
@@ -64,7 +62,13 @@ async function caseContext(userId: string, snapshot: any, workspace?: Awaited<Re
       id: artifact.id, type: artifact.type, status: artifact.status, confirmed: artifact.metadata?.confirmed === true,
     })),
     report: { exists: reportExists, stale: reportStale },
-    recentMessages: (snapshot.recentMessages || []).filter((message: any) => typeof message.text === 'string'),
+    recentMessages: (snapshot.recentMessages || []).map((message: any) => ({
+      role: message.role,
+      text: conversationText(typeof message.text === 'string' ? message.text : '', {
+        action: typeof message.metadata?.action === 'string' ? normalizeAgentAction(message.metadata.action) : undefined,
+        attachedMaterials: (message.metadata?.artifactIds || []).map((id: string) => ({ id, type: 'other', confirmed: false })),
+      }),
+    })).filter((message: { text: string }) => message.text),
     ...(workspace ? { workspace: { revision: workspace.revision, workflow: workspace.workflow, conflicts: workspace.conflicts } } : {}),
   }
 }
@@ -132,7 +136,7 @@ router.post('/current/messages', async (req, res) => {
     const context = await caseContext(req.userId!, snapshot, workspace)
     const { agentState, assistantText } = await processUserMessage(state, text || '', materials, action, interpretUserMessage, context)
     const committed = await persistence.commitConversationTurn({
-      userId: req.userId!, caseId: caseData.id, requestId, requestHash, text: text || '',
+      userId: req.userId!, caseId: caseData.id, requestId, requestHash, text: conversationText(text || '', { action: action ? normalizeAgentAction(action) : undefined, attachedMaterials: materials.map(material => ({ type: material.type, confirmed: material.confirmed === true })) }),
       metadata: { ...(action ? { action: normalizeAgentAction(action) } : {}), ...(attachedIds.length ? { artifactIds: attachedIds } : {}) },
       expected: snapshot, agentState, assistantText,
     })
