@@ -40,7 +40,7 @@ function renderPage(options: {
       hasReport: true,
       entitlement: {
         status: options.status ?? 'unpaid',
-        amountCents: options.amountCents ?? 9900,
+        amountCents: options.amountCents ?? 4880,
         currency: 'CNY',
         features: options.features,
       },
@@ -98,7 +98,7 @@ describe('payment page rendering', () => {
     assert.match(html, /灵迈/)
     assert.match(html, /PRO/)
     assert.match(html, /单次案件解决方案/)
-    assert.match(html, /¥99.00/)
+    assert.match(html, /¥48\.80/)
     assert.doesNotMatch(html, /灵迈 · 案件方案|测试案件/)
   })
 

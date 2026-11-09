@@ -28,6 +28,7 @@ describe('payment presentation and recovery', () => {
   it('uses the server amount without an invented default', () => {
     const entitlement: CaseEntitlement = { status: 'unpaid', amountCents: 1, currency: 'CNY' }
     assert.equal(formatPaymentPrice(entitlement), '¥0.01')
+    assert.equal(formatPaymentPrice({ ...entitlement, amountCents: 4880 }), '¥48.80')
     assert.equal(formatPaymentPrice({ ...entitlement, amountCents: 4990 }), '¥49.90')
     assert.equal(formatPaymentPrice(), null)
     for (const amountCents of [0, -1, NaN, Infinity, 1.5]) {

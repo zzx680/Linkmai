@@ -6,8 +6,9 @@ import { paymentProvider, type ProviderOrder, type VerifiedPaymentNotification }
 import { createCasePaymentOrder, processPaymentNotification, queryPaymentOrder } from '../src/services/payment'
 
 const previous = { ...config.payment.wechat }
+const previousAmountCents = config.payment.amountCents
 beforeEach(() => Object.assign(config.payment.wechat, { appId: 'wx-app', mchId: '1234567890' }))
-afterEach(() => { mock.restoreAll(); Object.assign(config.payment.wechat, previous) })
+afterEach(() => { mock.restoreAll(); Object.assign(config.payment.wechat, previous); config.payment.amountCents = previousAmountCents })
 
 async function fixture() {
   const user = await db.createUser(`payment-${crypto.randomUUID()}`)
@@ -136,7 +137,7 @@ test('concurrent creation keeps one pending order even with distinct request key
   assert.equal(new Set(orders.map(value => value.id)).size, 1)
 })
 
-test('new and reused prepay responses expose the actual immutable order amount', async () => {
+test('a price change applies to new orders while reused prepay keeps its original amount', async () => {
   const user = await db.createUser(`price-${crypto.randomUUID()}`)
   const item = await db.createCase(user.id, '金额核对')
   const payment = { timeStamp: '1', nonceStr: 'n', package: 'prepay_id=p', signType: 'RSA' as const, paySign: 's' }
@@ -145,6 +146,7 @@ test('new and reused prepay responses expose the actual immutable order amount',
   const first = await createCasePaymentOrder(user.id, item.id, user.openid)
   assert.equal(first.amountCents, config.payment.amountCents)
   assert.equal(first.currency, 'CNY')
+  config.payment.amountCents = first.amountCents! + 1000
   const entitlement = await db.getCaseEntitlement(user.id, item.id)
   entitlement!.amountCents = first.amountCents! + 1000
   mock.method(paymentProvider, 'queryOrder', async () => ({
@@ -155,6 +157,10 @@ test('new and reused prepay responses expose the actual immutable order amount',
   assert.equal(reused.amountCents, first.amountCents)
   assert.equal(reused.currency, first.currency)
   assert.equal((await db.getCaseEntitlement(user.id, item.id))?.amountCents, first.amountCents)
+  const newCase = await db.createCase(user.id, '调价后新案件')
+  const newOrder = await createCasePaymentOrder(user.id, newCase.id, user.openid)
+  assert.equal(newOrder.amountCents, config.payment.amountCents)
+  assert.equal((await db.getCaseEntitlement(user.id, newCase.id))?.amountCents, config.payment.amountCents)
 })
 
 test('partial refunds and REFUND query state keep access; verified full refund revokes it', async () => {
