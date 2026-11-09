@@ -8,6 +8,7 @@
     "build:weapp": "taro build --type weapp",
     "dev:h5": "taro build --type h5 --watch",
     "build:h5": "taro build --type h5",
+    "preview:review": "node server/scripts/preview-review.cjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
