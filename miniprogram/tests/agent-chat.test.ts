@@ -48,7 +48,7 @@ test('native messages retain literal user content and image attachments', () => 
   assert.equal(node.props.placement, 'right')
   assert.equal(node.props.content[0].type, 'attachment')
   assert.equal(node.props.content[0].data[0].fileType, 'image')
-  assert.equal(node.props.content[1].type, 'text')
+  assert.equal(node.props.content[1].type, 'markdown')
   assert.equal(node.props.content[1].data, '<script>hello</script>\n第二行')
 })
 
