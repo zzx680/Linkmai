@@ -260,6 +260,7 @@ export default function Agent() {
 
       {currentCase && (
         <View className="input-bar">
+          <Text className="ai-generated-notice">内容由人工智能生成</Text>
           <AgentChatSender
             value={inputText}
             sending={isAiTyping}

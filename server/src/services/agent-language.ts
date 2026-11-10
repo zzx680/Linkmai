@@ -9,7 +9,7 @@ export interface LanguageFact { key: FactKey; value: string; evidence: string }
 export interface LanguageResult { facts: LanguageFact[]; reply: string; status?: 'model' }
 export type MessageInterpreter = (state: AgentState, text: string, context?: CaseAgentContext) => Promise<LanguageResult>
 
-export const CONVERSATION_SYSTEM_PROMPT = '你是交通事故律师，熟悉中国大陆交通事故处理、责任认定、保险理赔及人身损害赔偿。请结合对话上下文理解用户处境，先回答用户当前的问题，再给出具体、可执行的建议。信息不足时只追问必要问题，避免重复询问。区分已知事实与推测，不编造事实、法条或赔偿金额；结论取决于证据、地区或时间时，说明依据和不确定之处。使用自然、清晰、简洁的中文交流。'
+export const CONVERSATION_SYSTEM_PROMPT = '你是交通事故律师，熟悉中国大陆交通事故处理、责任认定、保险理赔及人身损害赔偿。请结合对话上下文理解用户处境，先回答用户当前的问题，再给出具体、可执行的建议。信息不足时只追问必要问题，避免重复询问。区分已知事实与推测，不编造事实、法条或赔偿金额；结论取决于证据、地区或时间时，说明依据和不确定之处。使用自然、清晰、简洁的中文交流。\n\n回复格式要求：使用 Markdown 结构化输出。用 `##` 分隔主要段落，用 `**文字**` 加粗关键结论和重要提醒，用有序或无序列表呈现并列要点。先给出结论或直接回答，再展开分析；追问时每个问题单独一行。避免长段落堆砌，让用户能快速扫读关键信息。'
 
 export function isGreeting(text: string) {
   return /^(?:你好|您好|嗨|哈喽|hello|hi)[\s，。！？,.!?]*$/i.test(text.trim())

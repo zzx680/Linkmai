@@ -26,7 +26,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
           fileType: 'image', name: `材料 ${index + 1}`, url, size: 0,
         })),
       }] : []),
-      { type: 'text', data: text },
+      { type: 'markdown', data: text },
     ]
     return (
       <t-chat-message

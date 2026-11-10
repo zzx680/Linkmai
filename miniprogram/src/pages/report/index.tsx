@@ -166,10 +166,6 @@ export default function Report() {
           </View>
         </View>
 
-        <View className="report-note">
-          <Icon name="info" size={20} color="#6B7280" />
-          <Text>报告区分材料事实、AI 分析和行动建议；重要结论请回到原始材料核对。</Text>
-        </View>
       </View>
     )
   }
@@ -191,10 +187,6 @@ export default function Report() {
           <View className="report-status"><Text>已生成</Text></View>
         </View>
 
-        <View className="scope-banner">
-          <Icon name="triangle-alert" size={24} color="#2A64F0" />
-          <View><Text className="scope-title">阅读边界</Text><Text className="scope-text">以下内容是基于已确认材料的 AI 辅助分析，不是确定的法律结论。</Text></View>
-        </View>
 
         <View className="report-section">
           <View className="section-heading"><Text className="section-index">01</Text><Text className="section-title">事故分析</Text></View>
@@ -214,7 +206,6 @@ export default function Report() {
         <View className="report-section">
           <View className="section-heading"><Text className="section-index">03</Text><Text className="section-title">赔偿建议</Text></View>
           <View className="content-card compensation-card">
-            <Text className="card-caption">AI 估算与说明</Text>
             {compensationParagraphs.length ? compensationParagraphs.map((paragraph, index) => <Text key={index} className="body-paragraph">{paragraph}</Text>) : <Text className="muted-text">暂无赔偿建议</Text>}
           </View>
         </View>

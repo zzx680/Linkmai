@@ -158,6 +158,14 @@
 
 
   .input-bar { flex-shrink: 0; background: transparent; }
+  .ai-generated-notice {
+    display: block;
+    padding: 4rpx 28rpx 0;
+    color: $color-text-secondary;
+    font-size: 24rpx;
+    line-height: 1.5;
+    text-align: center;
+  }
   &.keyboard-open {
     padding-bottom: 0;
     .chat-toolbar { padding-top: 8rpx; }
