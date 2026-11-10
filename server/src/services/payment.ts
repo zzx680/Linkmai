@@ -21,6 +21,7 @@ export async function getEntitlement(userId: string, caseId: string) {
     status,
     amountCents: entitlement?.amountCents || config.payment.amountCents,
     currency: entitlement?.currency || config.payment.currency,
+    currentPrice: { amountCents: config.payment.amountCents, currency: config.payment.currency },
     paidAt: entitlement?.paidAt || null,
     features: entitlementFeatures(status === 'paid'),
   }
@@ -103,7 +104,10 @@ async function recoverCreateOrderFailure(order: PaymentOrder, originalError: unk
   }
 }
 
-async function reconcilePaymentOrder(order: PaymentOrder): Promise<PaymentOrder> {
+const hasCurrentPrice = (order: PaymentOrder) => order.amountCents === config.payment.amountCents
+  && order.currency === config.payment.currency
+
+async function reconcilePaymentOrder(order: PaymentOrder, replaceOutdatedPrice = false): Promise<PaymentOrder> {
   if (order.status === 'refunded') return order
 
   let providerOrder: ProviderOrder
@@ -132,7 +136,7 @@ async function reconcilePaymentOrder(order: PaymentOrder): Promise<PaymentOrder>
       // successful full-refund notification may revoke this case's access.
       return order
     case 'NOTPAY':
-      if (order.expiresAt.getTime() <= Date.now()) {
+      if (order.expiresAt.getTime() <= Date.now() || (replaceOutdatedPrice && !hasCurrentPrice(order))) {
         return (await closeExpiredOrder(order)) || order
       }
       return order
@@ -174,11 +178,14 @@ export async function createCasePaymentOrder(userId: string, caseId: string, ope
   if (!existing) existing = await db.findPendingPaymentOrder(userId, caseId)
 
   if (existing) {
-    const reconciled = await reconcilePaymentOrder(existing)
+    const reconciled = await reconcilePaymentOrder(existing, true)
     if (reconciled.status === 'paid') {
       return { alreadyPaid: true as const, entitlement: await getEntitlement(userId, caseId) }
     }
     if (['created', 'pending'].includes(reconciled.status)) {
+      // USERPAYING or an uncertain close must never launch the old price or
+      // create another charge. Only verified NOTPAY orders can be replaced.
+      if (!hasCurrentPrice(reconciled)) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       if (reconciled.expiresAt.getTime() <= Date.now()) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       if (!reconciled.prepayId) throw new Error('PAYMENT_CONFIRMATION_PENDING')
       // The active provider order has an immutable amount; keep the case entitlement
@@ -209,6 +216,7 @@ export async function createCasePaymentOrder(userId: string, caseId: string, ope
     return { alreadyPaid: true as const, entitlement: await getEntitlement(userId, caseId) }
   }
   if (!['created', 'pending'].includes(order.status)) throw new Error('ORDER_NOT_PAYABLE')
+  if (!hasCurrentPrice(order)) throw new Error('PAYMENT_CONFIRMATION_PENDING')
   if (order.expiresAt.getTime() <= Date.now()) throw new Error('PAYMENT_CONFIRMATION_PENDING')
   if (order.prepayId) {
     return {

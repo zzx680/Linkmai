@@ -28,13 +28,24 @@ describe('payment presentation and recovery', () => {
   it('uses the server amount without an invented default', () => {
     const entitlement: CaseEntitlement = { status: 'unpaid', amountCents: 1, currency: 'CNY' }
     assert.equal(formatPaymentPrice(entitlement), '¥0.01')
-    assert.equal(formatPaymentPrice({ ...entitlement, amountCents: 4880 }), '¥48.80')
+    assert.equal(formatPaymentPrice({ ...entitlement, amountCents: 1980 }), '¥19.80')
     assert.equal(formatPaymentPrice({ ...entitlement, amountCents: 4990 }), '¥49.90')
     assert.equal(formatPaymentPrice(), null)
     for (const amountCents of [0, -1, NaN, Infinity, 1.5]) {
       assert.equal(formatPaymentPrice({ ...entitlement, amountCents }), null)
     }
     assert.equal(formatPaymentPrice({ ...entitlement, currency: 'USD' }), null)
+  })
+
+  it('uses the current quote for payment while preserving historical paid and refunded amounts', () => {
+    const entitlement: CaseEntitlement = { status: 'pending', amountCents: 9900, currency: 'CNY', currentPrice: { amountCents: 1980, currency: 'CNY' } }
+    assert.equal(formatPaymentPrice(entitlement), '¥19.80')
+    assert.equal(matchesPaymentAmount({ amountCents: 1980, currency: 'CNY' }, entitlement), true)
+    assert.equal(matchesPaymentAmount({ amountCents: 9900, currency: 'CNY' }, entitlement), false)
+    assert.equal(formatPaymentPrice({ ...entitlement, status: 'unpaid' }), '¥19.80')
+    assert.equal(formatPaymentPrice({ ...entitlement, status: 'paid' }), '¥99.00')
+    assert.equal(formatPaymentPrice({ ...entitlement, status: 'refunded' }), '¥99.00')
+    assert.equal(formatPaymentPrice({ ...entitlement, currentPrice: { amountCents: 0, currency: 'CNY' } }), null)
   })
 
   it('shows supported entitlement labels', () => {

@@ -3,7 +3,7 @@ import { beforeEach, afterEach, mock, test } from 'node:test'
 import { config } from '../src/config'
 import { memoryDB as db } from '../src/db/memory'
 import { paymentProvider, type ProviderOrder, type VerifiedPaymentNotification } from '../src/services/payment/provider'
-import { createCasePaymentOrder, processPaymentNotification, queryPaymentOrder } from '../src/services/payment'
+import { createCasePaymentOrder, getEntitlement, processPaymentNotification, queryPaymentOrder } from '../src/services/payment'
 
 const previous = { ...config.payment.wechat }
 const previousAmountCents = config.payment.amountCents
@@ -137,7 +137,7 @@ test('concurrent creation keeps one pending order even with distinct request key
   assert.equal(new Set(orders.map(value => value.id)).size, 1)
 })
 
-test('a price change applies to new orders while reused prepay keeps its original amount', async () => {
+test('same-price prepay is reused and its saved amount stays immutable', async () => {
   const user = await db.createUser(`price-${crypto.randomUUID()}`)
   const item = await db.createCase(user.id, '金额核对')
   const payment = { timeStamp: '1', nonceStr: 'n', package: 'prepay_id=p', signType: 'RSA' as const, paySign: 's' }
@@ -146,7 +146,6 @@ test('a price change applies to new orders while reused prepay keeps its origina
   const first = await createCasePaymentOrder(user.id, item.id, user.openid)
   assert.equal(first.amountCents, config.payment.amountCents)
   assert.equal(first.currency, 'CNY')
-  config.payment.amountCents = first.amountCents! + 1000
   const entitlement = await db.getCaseEntitlement(user.id, item.id)
   entitlement!.amountCents = first.amountCents! + 1000
   mock.method(paymentProvider, 'queryOrder', async () => ({
@@ -161,6 +160,72 @@ test('a price change applies to new orders while reused prepay keeps its origina
   const newOrder = await createCasePaymentOrder(user.id, newCase.id, user.openid)
   assert.equal(newOrder.amountCents, config.payment.amountCents)
   assert.equal((await db.getCaseEntitlement(user.id, newCase.id))?.amountCents, config.payment.amountCents)
+})
+
+test('a lower current quote closes a confirmed unpaid old order before creating a new prepay', async () => {
+  config.payment.amountCents = 9900
+  const { user, item, order, provider } = await fixture()
+  await db.setPaymentOrderPrepay(order.id, 'old-prepay')
+  config.payment.amountCents = 1980
+  const quote = await getEntitlement(user.id, item.id)
+  assert.equal(quote.amountCents, 9900)
+  assert.deepEqual(quote.currentPrice, { amountCents: 1980, currency: 'CNY' })
+  mock.method(paymentProvider, 'queryOrder', async () => ({ ...provider, tradeState: 'NOTPAY' }))
+  const steps: string[] = []
+  mock.method(paymentProvider, 'closeOrder', async () => { steps.push('close-old') })
+  const create = mock.method(paymentProvider, 'createOrder', async input => {
+    steps.push('create-new')
+    assert.equal(input.amountCents, 1980)
+    return { prepayId: 'new-prepay', payment: { timeStamp: '1', nonceStr: 'n', package: 'prepay_id=new', signType: 'RSA' as const, paySign: 's' } }
+  })
+  const result = await createCasePaymentOrder(user.id, item.id, user.openid, 'current-price')
+  assert.deepEqual(steps, ['close-old', 'create-new'])
+  assert.equal(create.mock.callCount(), 1)
+  assert.notEqual(result.orderId, order.id)
+  assert.equal(result.amountCents, 1980)
+  assert.equal((await db.findPaymentOrderById(user.id, order.id))?.status, 'closed')
+  assert.equal(order.amountCents, 9900)
+  assert.equal((await getEntitlement(user.id, item.id)).amountCents, 1980)
+})
+
+test('a price change cannot replace an in-progress, uncertain or concurrently paid old order', async () => {
+  for (const state of ['USERPAYING', 'query-error', 'close-error', 'close-paid']) {
+    config.payment.amountCents = 9900
+    const { user, item, order, provider } = await fixture()
+    await db.setPaymentOrderPrepay(order.id, 'old-prepay')
+    config.payment.amountCents = 1980
+    mock.method(paymentProvider, 'queryOrder', async () => {
+      if (state === 'query-error') throw new Error('PAYMENT_PROVIDER_ERROR')
+      return { ...provider, tradeState: state === 'USERPAYING' ? state : 'NOTPAY' }
+    })
+    const close = mock.method(paymentProvider, 'closeOrder', async () => {
+      if (state === 'close-paid') throw new Error('ALREADY_PAID')
+      throw new Error('PAYMENT_PROVIDER_ERROR')
+    })
+    const create = mock.method(paymentProvider, 'createOrder', async () => { throw new Error('must not create') })
+    await assert.rejects(createCasePaymentOrder(user.id, item.id, user.openid), /PAYMENT_CONFIRMATION_PENDING|PAYMENT_PROVIDER_ERROR|ALREADY_PAID/)
+    assert.equal(create.mock.callCount(), 0)
+    assert.equal(close.mock.callCount(), state.startsWith('close-') ? 1 : 0)
+    assert.equal(order.status, 'pending')
+    assert.equal(order.amountCents, 9900)
+    mock.restoreAll()
+  }
+})
+
+test('an old order confirmed paid during repricing keeps its actual amount and cannot charge again', async () => {
+  config.payment.amountCents = 9900
+  const { user, item, order, provider } = await fixture()
+  config.payment.amountCents = 1980
+  mock.method(paymentProvider, 'queryOrder', async () => provider)
+  const create = mock.method(paymentProvider, 'createOrder', async () => { throw new Error('must not create') })
+  const close = mock.method(paymentProvider, 'closeOrder', async () => { throw new Error('must not close') })
+  const result = await createCasePaymentOrder(user.id, item.id, user.openid)
+  assert.equal(result.alreadyPaid, true)
+  assert.equal(result.entitlement?.amountCents, 9900)
+  assert.equal(result.entitlement?.currentPrice.amountCents, 1980)
+  assert.equal(create.mock.callCount(), 0)
+  assert.equal(close.mock.callCount(), 0)
+  assert.equal(order.status, 'paid')
 })
 
 test('partial refunds and REFUND query state keep access; verified full refund revokes it', async () => {

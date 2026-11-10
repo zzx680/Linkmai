@@ -247,11 +247,14 @@ const mockProvider: PaymentProvider = {
   },
   createPaymentParams: createClientPaymentParams,
   async queryOrder(orderNo) {
+    const { db } = await import('../../db')
+    const order = await db.findPaymentOrderByOrderNo(orderNo)
+    if (!order) throw new Error('PAYMENT_ORDER_NOT_FOUND')
     return {
       orderNo,
-      tradeState: 'NOTPAY',
-      amountCents: config.payment.amountCents,
-      currency: config.payment.currency,
+      tradeState: order.status === 'closed' ? 'CLOSED' : 'NOTPAY',
+      amountCents: order.amountCents,
+      currency: order.currency,
       appId: config.payment.wechat.appId,
       mchId: config.payment.wechat.mchId,
     }

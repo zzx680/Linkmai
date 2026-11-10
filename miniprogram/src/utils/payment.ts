@@ -19,18 +19,32 @@ export function matchesPendingPayment(value: unknown, userId: string, caseId: st
     && typeof payment.orderId === 'string' && payment.orderId.length > 0
 }
 
+function payablePrice(entitlement?: CaseEntitlement) {
+  if (!entitlement) return undefined
+  return entitlement.status === 'paid' || entitlement.status === 'refunded'
+    ? entitlement : entitlement.currentPrice ?? entitlement
+}
+
+export function hasPaymentPriceChange(entitlement?: CaseEntitlement): boolean {
+  const price = payablePrice(entitlement)
+  return !!entitlement && entitlement.status === 'pending' && !!price
+    && (price.amountCents !== entitlement.amountCents || price.currency !== entitlement.currency)
+}
+
 export function formatPaymentPrice(entitlement?: CaseEntitlement): string | null {
-  if (!entitlement || entitlement.currency !== 'CNY'
-    || !Number.isSafeInteger(entitlement.amountCents) || entitlement.amountCents <= 0) return null
-  return `¥${(entitlement.amountCents / 100).toFixed(2)}`
+  const price = payablePrice(entitlement)
+  if (!price || price.currency !== 'CNY'
+    || !Number.isSafeInteger(price.amountCents) || price.amountCents <= 0) return null
+  return `¥${(price.amountCents / 100).toFixed(2)}`
 }
 
 export function matchesPaymentAmount(order: Pick<PaymentOrderResponse, 'amountCents' | 'currency'>, entitlement?: CaseEntitlement): boolean {
   if (!formatPaymentPrice(entitlement)) return false
   const orderAmount = Number(order.amountCents)
-  const entitlementAmount = Number(entitlement!.amountCents)
+  const price = payablePrice(entitlement)!
+  const entitlementAmount = Number(price.amountCents)
   return Number.isSafeInteger(orderAmount) && Number.isSafeInteger(entitlementAmount)
-    && orderAmount === entitlementAmount && order.currency === entitlement!.currency
+    && orderAmount === entitlementAmount && order.currency === price.currency
 }
 
 export function entitlementLabel(status?: CaseEntitlement['status']): string {

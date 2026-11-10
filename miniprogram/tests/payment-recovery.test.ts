@@ -106,7 +106,7 @@ test('a failed payment status check retains the order for retry and reports the 
   assert.deepEqual(f.toasts, ['连接超时，请检查网络后重试'])
 })
 
-test('an order amount changed by server reconciliation can continue with the same payment order', async () => {
+test('a refreshed price is shown for another tap before payment can open', async () => {
   const payment = { timeStamp: '1', nonceStr: 'n', package: 'prepay_id=p', signType: 'RSA', paySign: 's' }
   const f = fixture({
     createResult: { alreadyPaid: false, orderId: 'order-1', amountCents: 1, currency: 'CNY', payment },
@@ -114,8 +114,8 @@ test('an order amount changed by server reconciliation can continue with the sam
     orderStatus: 'paid',
   })
   await f.api.handlePayment()
-  assert.deepEqual(f.calls, ['create-order', 'refresh-case', 'open-payment', 'check-order', 'clear-pending', 'refresh-case'])
-  assert.deepEqual(f.toasts, ['已解锁完整方案'])
+  assert.deepEqual(f.calls, ['create-order', 'refresh-case'])
+  assert.deepEqual(f.toasts, ['支付金额已更新，请核对后重新支付'])
 })
 
 test('a payment amount mismatch that is not reconciled never opens payment', async () => {

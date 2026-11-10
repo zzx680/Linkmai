@@ -186,6 +186,7 @@ export interface CaseEntitlement {
   status: 'unpaid' | 'pending' | 'paid' | 'refunded'
   amountCents: number
   currency: string
+  currentPrice?: { amountCents: number; currency: string }
   paidAt?: string | null
   features?: {
     fullReport: boolean

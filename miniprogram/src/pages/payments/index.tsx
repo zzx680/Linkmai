@@ -5,7 +5,7 @@ import { getCurrentCase } from '../../services/api'
 import { Icon } from '../../components'
 import { useCasePayment } from '../../hooks/useCasePayment'
 import { useAppStore } from '../../store'
-import { entitlementLabel, formatPaymentPrice } from '../../utils/payment'
+import { entitlementLabel, formatPaymentPrice, hasPaymentPriceChange } from '../../utils/payment'
 import { IS_H5 } from '../../config/env'
 import OrderHistory from './OrderHistory'
 import brandMark from '../../assets/brand/linkmai-chat.png'
@@ -64,6 +64,7 @@ function CasePaymentPanel() {
 
   const entitlement = currentCase?.entitlement
   const price = formatPaymentPrice(entitlement)
+  const priceChanged = hasPaymentPriceChange(entitlement)
   const status = entitlement?.status === 'paid' || entitlement?.status === 'refunded'
     ? entitlement.status : confirmation === 'failed' ? 'unpaid' : confirmation || entitlement?.status || 'unpaid'
   const isPaid = status === 'paid'
@@ -135,7 +136,7 @@ function CasePaymentPanel() {
           </View>
           <View className="plan-price-row">
             <View className="plan-price-copy">
-              <Text className="plan-price-label">一次性解锁</Text>
+              <Text className="plan-price-label">{isPaid ? '实付金额' : isRefunded ? '原订单金额' : '一次性解锁'}</Text>
               <Text className="plan-price">{price || '金额待确认'}</Text>
             </View>
             <View className="plan-mark"><Icon name={isPaid ? 'circle-check' : 'shield-check'} size={30} color="#FFFFFF" /></View>
@@ -150,7 +151,8 @@ function CasePaymentPanel() {
             ? `本案件已解锁，后续更新不再收费${paidAt ? ` · ${paidAt}` : ''}`
             : isRefunded ? '该订单已退款，相关付费权益已失效'
               : !price ? '暂未取得有效金额，请稍后重新加载'
-                : '付款尚未确认；继续支付前会先核对原订单'}</Text>
+                : priceChanged ? '价格已更新，确认原订单未付款后将按现价重新下单'
+                  : '付款尚未确认；继续支付前会先核对原订单'}</Text>
         </View>
       )}
 
@@ -177,10 +179,10 @@ function CasePaymentPanel() {
       <View className="action-panel payment-dock">
         {canPay && <Button className={`primary-button${isPaying ? ' button-disabled' : ''}`} disabled={isPaying} onClick={handlePayment}>
           <Image className="unlock-sparkles" src={unlockSparkles} mode="aspectFit" aria-hidden />
-          <Text>{isPaying ? '正在准备支付...' : '立即解锁'}</Text>
+          <Text>{isPaying ? '正在准备支付...' : `立即解锁 · ${price}`}</Text>
         </Button>}
         {isPending && <>
-          {price && <Button className={`primary-button${isPaying || isLoading ? ' button-disabled' : ''}`} disabled={isPaying || isLoading} onClick={() => { if (!isPaying && !isLoading) handlePayment() }}><Text>{isPaying ? '正在核对原订单...' : `继续支付 · ${price}`}</Text></Button>}
+          {price && <Button className={`primary-button${isPaying || isLoading ? ' button-disabled' : ''}`} disabled={isPaying || isLoading} onClick={() => { if (!isPaying && !isLoading) handlePayment() }}><Text>{isPaying ? '正在核对原订单...' : `${priceChanged ? '按现价支付' : '继续支付'} · ${price}`}</Text></Button>}
           <Button className={`secondary-button${isPaying || isLoading ? ' button-disabled' : ''}`} disabled={isPaying || isLoading} onClick={refresh}><Text>{isPaying || isLoading ? '正在确认...' : '刷新支付结果'}</Text></Button>
         </>}
         {isPaid && <Button className="primary-button" onClick={goNext}><Text>{currentCase.hasReport ? '查看完整方案' : '继续处理案件'}</Text></Button>}

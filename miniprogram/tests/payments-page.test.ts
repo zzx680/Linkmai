@@ -28,6 +28,7 @@ function renderPage(options: {
   hasCase?: boolean
   status?: CaseEntitlement['status']
   amountCents?: number
+  currentPrice?: CaseEntitlement['currentPrice']
   features?: CaseEntitlement['features']
 } = {}) {
   const state = {
@@ -40,8 +41,9 @@ function renderPage(options: {
       hasReport: true,
       entitlement: {
         status: options.status ?? 'unpaid',
-        amountCents: options.amountCents ?? 4880,
+        amountCents: options.amountCents ?? 1980,
         currency: 'CNY',
+        currentPrice: options.currentPrice,
         features: options.features,
       },
     },
@@ -98,7 +100,7 @@ describe('payment page rendering', () => {
     assert.match(html, /灵迈/)
     assert.match(html, /PRO/)
     assert.match(html, /单次案件解决方案/)
-    assert.match(html, /¥48\.80/)
+    assert.match(html, /¥19\.80/)
     assert.doesNotMatch(html, /灵迈 · 案件方案|测试案件/)
   })
 
@@ -116,6 +118,18 @@ describe('payment page rendering', () => {
     const refunded = renderPage({ status: 'refunded' })
     assert.match(refunded, /相关付费权益已失效/)
     assert.doesNotMatch(refunded, /立即解锁/)
+  })
+
+  it('shows the current price for an old unpaid order in both the card and payment button', () => {
+    const html = renderPage({ status: 'pending', amountCents: 9900, currentPrice: { amountCents: 1980, currency: 'CNY' } })
+    assert.match(html, /按现价支付 · ¥19\.80/)
+    assert.match(html, /确认原订单未付款后将按现价重新下单/)
+    assert.equal((html.match(/¥19\.80/g) || []).length, 2)
+    assert.doesNotMatch(html, /¥99\.00/)
+    const paid = renderPage({ status: 'paid', amountCents: 9900, currentPrice: { amountCents: 1980, currency: 'CNY' } })
+    assert.match(paid, /实付金额/)
+    assert.match(paid, /¥99\.00/)
+    assert.doesNotMatch(paid, /按现价支付/)
   })
 
   it('omits the removed payment reassurance and legal footer', () => {
