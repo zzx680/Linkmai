@@ -67,6 +67,26 @@
 .composer-upload { border-color: rgba($color-brand-primary, .15); background: rgba($color-brand-primary, .08); color: $color-brand-primary; }
 
 .chat-preview-message { display: flex; flex-direction: column; align-items: flex-start; }
+.chat-message-wrapper { width: 100%; }
+.chat-message-wrapper-assistant { display: flex; flex-direction: column; }
+.chat-message-meta { box-sizing: border-box; display: flex; align-items: center; gap: 16rpx; width: calc(100% - 24rpx); margin: 16rpx 0 20rpx; padding: 12rpx 0 0; border-top: 1rpx solid $color-border-light; }
+.chat-message-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56rpx;
+  min-height: 56rpx;
+  margin: 0;
+  padding: 8rpx;
+  border: 0;
+  background: transparent;
+  color: $color-text-secondary;
+  font-size: 22rpx;
+  line-height: 1.4;
+  &::after { border: 0; }
+  &:active { color: $color-brand-primary; }
+}
+.chat-message-time { color: $color-text-tertiary; font-size: 22rpx; line-height: 1.4; }
 .chat-preview-content { max-width: 100%; color: $color-text-primary; font-size: 30rpx; line-height: 1.72; white-space: pre-wrap; overflow-wrap: anywhere; }
 .chat-preview-message-user {
   align-items: flex-end;

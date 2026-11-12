@@ -48,6 +48,7 @@ import icon45 from '../../assets/icons/lucide/contact-round-2a64f0.png'
 import icon46 from '../../assets/icons/lucide/contact-round-6b7280.png'
 import icon47 from '../../assets/icons/lucide/contact-round-8259c7.png'
 import icon48 from '../../assets/icons/lucide/contact-round-8e8e93.png'
+import icon141 from '../../assets/icons/lucide/copy-6b7280.png'
 import icon49 from '../../assets/icons/lucide/credit-card-000000.png'
 import icon50 from '../../assets/icons/lucide/credit-card-6b7280.png'
 import icon51 from '../../assets/icons/lucide/credit-card-8e8e93.png'
@@ -232,6 +233,9 @@ export const iconAssets: Record<string, Record<string, string>> = {
     '#000000': icon58,
     '#6B7280': icon59,
     '#8E8E93': icon60,
+  },
+  'copy': {
+    '#6B7280': icon141,
   },
   'folder': {
     '#2A64F0': icon61,

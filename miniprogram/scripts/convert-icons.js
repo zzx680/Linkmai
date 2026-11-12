@@ -12,7 +12,7 @@ const packageRoot = path.dirname(require.resolve('lucide-static/package.json'))
 const names = [
   'arrow-right', 'arrow-up', 'bell', 'camera', 'car-front', 'chart-no-axes-combined',
   'check', 'chevron-right', 'circle-check', 'circle-help', 'clock-3',
-  'contact-round', 'credit-card', 'file-text', 'files', 'folder', 'folder-open',
+  'contact-round', 'copy', 'credit-card', 'file-text', 'files', 'folder', 'folder-open',
   'hospital', 'house', 'id-card', 'inbox', 'info', 'loader-circle', 'lock-keyhole',
   'messages-square', 'mic', 'plus', 'route', 'scale', 'settings', 'shield-check',
   'triangle-alert', 'undo-2', 'user-round', 'x',

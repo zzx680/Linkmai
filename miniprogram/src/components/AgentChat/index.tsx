@@ -1,4 +1,5 @@
 import { Button, Image, Slot, Text, View } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 import { IS_H5 } from '../../config/env'
 import Icon from '../Icon'
 import ThinkingOrb from '../ThinkingOrb'
@@ -10,6 +11,33 @@ import './index.scss'
 interface ChatMessageProps {
   message?: Message
   pending?: boolean
+}
+
+export function formatChatMessageTime(timestamp?: string) {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
+}
+
+function ChatMessageMeta({ text, timestamp }: { text: string; timestamp?: string }) {
+  const time = formatChatMessageTime(timestamp)
+  return (
+    <View className="chat-message-meta">
+      <Button
+        className="chat-message-copy"
+        aria-label="复制回答"
+        onClick={() => {
+          void Taro.setClipboardData({ data: text })
+            .then(() => Taro.showToast({ title: '已复制', icon: 'success' }))
+            .catch(() => Taro.showToast({ title: '复制失败，请重试', icon: 'none' }))
+        }}
+      >
+        <Icon name="copy" size={16} color="#6B7280" />
+      </Button>
+      {time && <Text className="chat-message-time">{time}</Text>}
+    </View>
+  )
 }
 
 // The mini program uses TDesign's native components; H5 keeps a lightweight
@@ -28,7 +56,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
       }] : []),
       { type: 'markdown', data: text },
     ]
-    return (
+    return <View className={`chat-message-wrapper chat-message-wrapper-${role}`}>
       <t-chat-message
         chat-id={message?.id || 'pending'}
         role={role}
@@ -39,16 +67,18 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
         animation="dots"
         content={content}
       />
-    )
+      {role === 'assistant' && <ChatMessageMeta text={text} timestamp={message?.timestamp} />}
+    </View>
   }
-  return (
+  return <View className={`chat-message-wrapper chat-message-wrapper-${role}`}>
     <View className={`chat-preview-message chat-preview-message-${role}`}>
       <View className="chat-preview-content">
         {message?.images?.map(url => <Image key={url} src={url} mode="aspectFill" className="chat-preview-image" />)}
         <Text selectable>{text}</Text>
       </View>
     </View>
-  )
+    {role === 'assistant' && <ChatMessageMeta text={text} timestamp={message?.timestamp} />}
+  </View>
 }
 
 interface ChatSenderProps {

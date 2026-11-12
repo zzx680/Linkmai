@@ -23,6 +23,7 @@ function loadChat(h5 = false) {
         Text: ({ selectable: _selectable, ...props }: any) => React.createElement('span', props),
       }
       if (id === '../../config/env') return { IS_H5: h5 }
+      if (id === '@tarojs/taro') return { setClipboardData: async () => undefined, showToast: () => undefined }
       if (id === './labels') return labels
       if (id === '../Icon') return { __esModule: true, default: () => React.createElement('img', { alt: '' }) }
       if (id === '../ThinkingOrb') return { __esModule: true, default: () => React.createElement('div', { role: 'status', 'aria-label': '正在整理案件信息' }) }
@@ -35,7 +36,7 @@ function loadChat(h5 = false) {
 
 function find(node: React.ReactNode, type: string, className?: string): React.ReactElement<any> | undefined {
   if (!React.isValidElement<any>(node)) return
-  if (node.type === type && (!className || node.props.className === className)) return node
+  if ((type === '*' || node.type === type) && (!className || node.props.className === className)) return node
   return React.Children.toArray(node.props.children).map(child => find(child, type, className)).find(Boolean)
 }
 
@@ -44,19 +45,30 @@ test('native messages retain literal user content and image attachments', () => 
   const node = AgentChatMessage({ message: {
     id: 'm1', role: 'user', content: '<script>hello</script>\n第二行', images: ['https://example.com/photo.png'],
   } })
-  assert.equal(node.type, 't-chat-message')
-  assert.equal(node.props.placement, 'right')
-  assert.equal(node.props.content[0].type, 'attachment')
-  assert.equal(node.props.content[0].data[0].fileType, 'image')
-  assert.equal(node.props.content[1].type, 'markdown')
-  assert.equal(node.props.content[1].data, '<script>hello</script>\n第二行')
+  const chat = find(node, 't-chat-message')!
+  assert.equal(chat.props.placement, 'right')
+  assert.equal(chat.props.content[0].type, 'attachment')
+  assert.equal(chat.props.content[0].data[0].fileType, 'image')
+  assert.equal(chat.props.content[1].type, 'markdown')
+  assert.equal(chat.props.content[1].data, '<script>hello</script>\n第二行')
 })
 
-test('chat messages do not render an assistant name label', () => {
-  const native = loadChat().AgentChatMessage({ message: { role: 'assistant', content: '已收到' } })
-  assert.equal(native.props.name, '')
-  const h5 = renderToStaticMarkup(loadChat(true).AgentChatMessage({ message: { role: 'assistant', content: '已收到' } }))
-  assert.doesNotMatch(h5, /灵迈助手/)
+test('assistant replies expose copy action and timestamp while user messages stay unchanged', () => {
+  const timestamp = '2026-11-11T12:21:00.000Z'
+  const native = loadChat().AgentChatMessage({ message: { role: 'assistant', content: '已收到', timestamp } })
+  assert.equal(find(native, 't-chat-message')!.props.placement, 'left')
+  assert.equal(find(native, 't-chat-message')!.props.name, '')
+  const meta = native.props.children[1]
+  assert.equal(meta.props.text, '已收到')
+  assert.equal(meta.props.timestamp, timestamp)
+  const h5 = renderToStaticMarkup(loadChat(true).AgentChatMessage({ message: { role: 'assistant', content: '已收到', timestamp } }))
+  assert.match(h5, /chat-message-copy/)
+  assert.match(h5, /chat-message-time/)
+  assert.match(h5, /aria-label="复制回答"/)
+  assert.doesNotMatch(h5, />复制</)
+  assert.doesNotMatch(h5, /灵迈助手|AI生成/)
+  const user = renderToStaticMarkup(loadChat(true).AgentChatMessage({ message: { role: 'user', content: '我说的内容', timestamp } }))
+  assert.doesNotMatch(user, /复制|chat-message-time/)
 })
 
 test('pending replies use the shared thinking orb in native and H5 without rendering empty messages', () => {
@@ -161,7 +173,7 @@ test('saved shortcut codes display in Chinese in both native and H5 messages', (
   ]) {
     const message = { id: 'old-message', role: 'user', content }
     const native = loadChat().AgentChatMessage({ message })
-    assert.equal(native.props.content[0].data, expected)
+    assert.equal(find(native, 't-chat-message')!.props.content[1]?.data || find(native, 't-chat-message')!.props.content[0]?.data, expected)
     const html = renderToStaticMarkup(loadChat(true).AgentChatMessage({ message }))
     assert.ok(html.includes(expected))
     assert.ok(!html.includes(content))
