@@ -71,6 +71,9 @@ function toEntitlement(row: any) {
     amountCents: row.amount_cents,
     currency: row.currency,
     paidAt: row.paid_at,
+    expiresAt: row.expires_at || null,
+    reviewQuotaRemaining: row.review_quota_remaining ?? 0,
+    source: row.source || 'purchase',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -603,8 +606,9 @@ export const db = {
       if (!row) throw new Error('AGENT_RUN_NOT_FOUND')
       if (row.owner_id !== input.userId) throw new Error('CASE_NOT_FOUND')
       if (row.status !== 'running') throw new Error('AGENT_RUN_NOT_RUNNING')
-      const entitlement = await client.query('SELECT status FROM case_entitlements WHERE case_id=$1 AND user_id=$2 FOR UPDATE', [row.case_id, input.userId])
-      if (entitlement.rows[0]?.status !== 'paid') throw new Error('PAYMENT_REQUIRED')
+      const entitlement = await client.query('SELECT status, expires_at FROM case_entitlements WHERE case_id=$1 AND user_id=$2 FOR UPDATE', [row.case_id, input.userId])
+      if (entitlement.rows[0]?.status !== 'paid'
+        || (entitlement.rows[0]?.expires_at && new Date(entitlement.rows[0].expires_at).getTime() <= Date.now())) throw new Error('PAYMENT_REQUIRED')
       const inputs = await client.query('SELECT * FROM artifacts WHERE case_id=$1', [row.case_id])
       if (materialSnapshot(inputs.rows) !== input.materialSnapshot) throw new Error('REPORT_STALE')
       if (row.current_revision !== row.input_revision) {

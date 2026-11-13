@@ -153,6 +153,9 @@ export interface CaseEntitlement {
   amountCents: number
   currency: string
   paidAt?: Date | null
+  expiresAt?: Date | null
+  reviewQuotaRemaining?: number
+  source?: 'purchase' | 'subscription' | 'grant' | 'review_bundle'
   createdAt: Date
   updatedAt: Date
 }
@@ -577,7 +580,7 @@ export const memoryDB = {
     const currentCase = cases.get(run.caseId)
     if (!currentCase || currentCase.userId !== input.userId) throw new Error('CASE_NOT_FOUND')
     const entitlement = entitlements.get(run.caseId)
-    if (entitlement?.status !== 'paid') throw new Error('PAYMENT_REQUIRED')
+    if (entitlement?.status !== 'paid' || (entitlement.expiresAt && entitlement.expiresAt.getTime() <= Date.now())) throw new Error('PAYMENT_REQUIRED')
     const inputs = [...artifacts.values()].filter(item => item.caseId === run.caseId)
     if (materialSnapshot(inputs) !== input.materialSnapshot) throw new Error('REPORT_STALE')
     if (currentCase.inputRevision !== run.inputRevision) {
@@ -982,6 +985,9 @@ export const memoryDB = {
       amountCents: config.payment.amountCents,
       currency: config.payment.currency,
       paidAt: null,
+      expiresAt: null,
+      reviewQuotaRemaining: 0,
+      source: 'purchase',
       createdAt: now,
       updatedAt: now,
     }
@@ -1108,6 +1114,9 @@ export const memoryDB = {
         amountCents: input.amountCents,
         currency: input.currency,
         paidAt: null,
+        expiresAt: null,
+        reviewQuotaRemaining: 0,
+        source: 'purchase',
         createdAt: now,
         updatedAt: now,
       })

@@ -78,13 +78,54 @@ export default function CaseWorkflow({ caseId }: { caseId: string }) {
   const activeEvidence = workspace?.evidence.filter(item => item.status === 'active') || []
   const calculation = workspace?.calculations.find(item => item.contextHash === workspace.contextHash)
   const activeDocuments = workspace?.documents.filter(doc => !['stale','superseded'].includes(doc.status)) || []
+  const candidates = workspace?.claimCandidates || []
+  // The calculator refuses to run without a confirmed date and region, so the empty
+  // state has to point at those two fields instead of blaming the materials.
+  const confirmedKey = (key: string) => workspace?.facts.some(fact => fact.key === key && fact.status === 'confirmed') || false
+  const hasAccidentBasics = confirmedKey('accident_date') && confirmedKey('jurisdiction')
+  const measured = calculation?.items.filter(item => item.amountCents !== undefined) || []
+  const awaiting = calculation?.items.filter(item => item.amountCents === undefined) || []
+  const measuredSum = measured.reduce((total, item) => total + (item.amountCents || 0), 0)
   return <View className="case-workflow">
-    <View className="workflow-heading"><Text className="workflow-eyebrow">案件文书</Text><Text className="workflow-title">先核对，再向前一步</Text>
-      <Text className="workflow-description">损失项目由规则计算。草稿经你确认后，将交给指定律师复核。</Text>
-      <Text className="workflow-version">案件版本 {workspace?.revision ?? '…'} · <Text onClick={() => setCycle(n => n + 1)}>刷新进度</Text></Text></View>
+    <View className="workflow-heading"><Text className="workflow-eyebrow">案件处理台</Text><Text className="workflow-title">可主张的损失与下一步</Text>
+      <Text className="workflow-description">金额由已审核规则按你确认的信息计算，不含责任分摊与已付款扣减。</Text>
+      <Text className="workflow-version">案件版本 {workspace?.revision ?? '…'} · <Text onClick={() => setCycle(n => n + 1)}>刷新</Text></Text></View>
     {error && <Text className="workflow-error">{error}</Text>}
     {!workspace ? <Text>正在加载案件…</Text> : <>
-      <View className="workflow-card"><Text className="workflow-card-title">补充计算与核对信息</Text><Text className="workflow-muted">刑事、特殊主体与期限风险由独立审核流程核对，用户输入不能替代该审核。</Text>
+      <View className="workflow-card">
+        <Text className="workflow-card-title">损失测算</Text>
+        {calculation ? <>
+          <Text className="workflow-amount-label">已测算 {measured.length} 项</Text>
+          <Text className="workflow-amount">¥{yuan(measuredSum)}</Text>
+          <View className="workflow-items">{measured.map(item => <View key={item.code} className="workflow-item">
+            <Text className="workflow-item-label">{item.label}</Text>
+            <Text className="workflow-item-value">{yuan(item.amountCents!)}</Text></View>)}</View>
+          {!!awaiting.length && <View className="workflow-pending"><Text className="workflow-label">待补 {awaiting.length} 项</Text>
+            {awaiting.map(item => <View key={item.code} className="workflow-item">
+              <Text className="workflow-item-label">{item.label}</Text>
+              <Text className="workflow-item-muted">待补</Text></View>)}</View>}
+        </> : <Text className="workflow-muted">{hasAccidentBasics
+          ? '确认材料与事实后，按当前已审核规则核算。'
+          : '先在下方补充事故日期与事故地区，才能按当地标准核算。'}</Text>}
+        <View className="workflow-button secondary" onClick={() => void act(() => workflowApi.calculate(caseId))}><Text>{calculation ? '按最新信息重新核算' : '核算已确认信息'}</Text></View>
+      </View>
+      {!!candidates.length && <View className="workflow-card"><Text className="workflow-card-title">材料里的金额</Text>
+        <Text className="workflow-muted">来自已确认材料，确认后计入对应损失项目。</Text>
+        {candidates.map(item => <View key={item.id} className="workflow-row">
+          <Text className="workflow-label">{item.sourceLabel}</Text>
+          <Text className="workflow-body">¥{yuan(item.amountCents)}</Text>
+          {item.key ? <View className="workflow-actions"><Text onClick={() => void act(() => workflowApi.acceptClaim(caseId, item.id))}>计入{item.label}</Text></View>
+            : <View>{item.alternatives.map(key => <Text key={key} className="workflow-choice" onClick={() => void act(() => workflowApi.acceptClaim(caseId, item.id, key))}>计入{title(key)}</Text>)}</View>}
+        </View>)}
+      </View>}
+      <View className="workflow-card"><Text className="workflow-card-title">事实确认</Text>
+        {workspace.facts.filter(fact => fact.status !== 'rejected').map(fact => <View key={fact.id} className="workflow-row"><Text className="workflow-label">{fact.label} · {statuses[fact.status]}</Text><Text className="workflow-body">{fact.key.endsWith('_cents') && /^\d+$/.test(fact.value) ? `${yuan(Number(fact.value))} 元` : displayValue(fact.key,fact.value)}</Text>
+          {fact.status === 'proposed' && <View className="workflow-actions"><Text onClick={() => void act(() => workflowApi.decide(caseId,fact.id,'confirm'))}>确认此信息</Text><Text onClick={() => void act(() => workflowApi.decide(caseId,fact.id,'reject'))}>拒绝</Text></View>}
+        </View>)}
+        {workspace.conflicts.filter(conflict => conflict.status === 'open').map(conflict => <View key={conflict.id} className="workflow-conflict"><Text>请选择核实后的 {title(conflict.key)}：</Text>{conflict.factIds.map(factId => <Text key={factId} className="workflow-choice" onClick={() => void act(() => workflowApi.resolve(caseId,conflict.id,factId))}>{workspace.facts.find(f => f.id === factId)?.value}</Text>)}</View>)}
+        {!workspace.facts.length && <Text className="workflow-muted">先在“处理”页描述事故，或上传并确认材料。</Text>}
+      </View>
+      <View className="workflow-card"><Text className="workflow-card-title">补充信息</Text>
         <Picker mode="selector" range={fields.map(item => item[1])} value={field} onChange={e => { setField(Number(e.detail.value)); setValue('') }}><View className="workflow-picker">{fields[field][1]}　⌄</View></Picker>
         {selectedKey === 'accident_date' ? <Picker mode="date" value={value} onChange={e => setValue(e.detail.value)}><View className="workflow-picker">{value || '选择事故日期'}　⌄</View></Picker> : selectedKey === 'jurisdiction' ? <Picker mode="selector" range={regions.map(r => r[0])} onChange={e => setValue(regions[Number(e.detail.value)][1])}><View className="workflow-picker">{displayValue(selectedKey,value) || '选择事故所在地'}　⌄</View></Picker> : options ? <Picker mode="selector" range={options.map(o => o.label)} onChange={e => setValue(options[Number(e.detail.value)].value)}><View className="workflow-picker">{displayValue(selectedKey,value) || '请选择'}　⌄</View></Picker> : <Input className="workflow-input" value={value} placeholder={fields[field][2]} onInput={e => setValue(e.detail.value)} />}
         <Picker mode="selector" range={['用户陈述（待凭证复核）', ...activeEvidence.map(item => `材料字段：${title(item.fieldKey || '')}`)]} value={evidence} onChange={e => setEvidence(Number(e.detail.value))}>
@@ -100,18 +141,6 @@ export default function CaseWorkflow({ caseId }: { caseId: string }) {
           await workflowApi.propose(caseId, { key, label, value: submitted, evidenceRefs: evidence && activeEvidence[evidence - 1] ? [activeEvidence[evidence - 1].id] : [] })
           setValue('')
         })}><Text>{busy ? '处理中…' : '添加待确认信息'}</Text></View>
-      </View>
-      <View className="workflow-card"><Text className="workflow-card-title">事实确认</Text>
-        {workspace.facts.filter(fact => fact.status !== 'rejected').map(fact => <View key={fact.id} className="workflow-row"><Text className="workflow-label">{fact.label} · {statuses[fact.status]}</Text><Text className="workflow-body">{fact.key.endsWith('_cents') && /^\d+$/.test(fact.value) ? `${yuan(Number(fact.value))} 元` : displayValue(fact.key,fact.value)}</Text>
-          {fact.status === 'proposed' && <View className="workflow-actions"><Text onClick={() => void act(() => workflowApi.decide(caseId,fact.id,'confirm'))}>确认此信息</Text><Text onClick={() => void act(() => workflowApi.decide(caseId,fact.id,'reject'))}>拒绝</Text></View>}
-        </View>)}
-        {workspace.conflicts.filter(conflict => conflict.status === 'open').map(conflict => <View key={conflict.id} className="workflow-conflict"><Text>请选择核实后的 {title(conflict.key)}：</Text>{conflict.factIds.map(factId => <Text key={factId} className="workflow-choice" onClick={() => void act(() => workflowApi.resolve(caseId,conflict.id,factId))}>{workspace.facts.find(f => f.id === factId)?.value}</Text>)}</View>)}
-        {!workspace.facts.length && <Text className="workflow-muted">先在“处理”页描述事故，或上传并确认材料。</Text>}
-      </View>
-      <View className="workflow-card"><Text className="workflow-card-title">损失项目试算</Text><Text className="workflow-muted">请逐项注明是否主张。缺少标准或材料时不提供确定总额；不包含责任分摊和已付款扣减。</Text>
-        {calculation && <><Text className="workflow-label">{statuses[calculation.status]}</Text>{calculation.items.map(item => <View key={item.code} className="workflow-row"><Text>{item.label}　{item.amountCents === undefined ? '待补充' : `${yuan(item.amountCents)} 元`}</Text>
-          {!!item.missingInputs.length && <Text className="workflow-muted">待补：{item.missingInputs.map(title).join('、')}</Text>}</View>)}<Text className="workflow-total">{calculation.totalCents === undefined ? '输入未齐，不提供总额' : `所选项目合计 ¥${yuan(calculation.totalCents)}`}</Text></>}
-        <View className="workflow-button secondary" onClick={() => void act(() => workflowApi.calculate(caseId))}><Text>核算已确认输入</Text></View>
       </View>
       <View className="workflow-card"><Text className="workflow-card-title">文书与审核</Text>
         {workspace.runs.slice(-1).map(run => <Text key={run.id} className="workflow-label">{statuses[run.status]}{run.safeErrorCode ? ' · 请核对信息后重试' : ''}</Text>)}

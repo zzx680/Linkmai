@@ -184,10 +184,13 @@ export function submitPrivacyRequest(kind: PrivacyRequestKind): Promise<PrivacyR
 
 export interface CaseEntitlement {
   status: 'unpaid' | 'pending' | 'paid' | 'refunded'
+  active?: boolean
   amountCents: number
   currency: string
   currentPrice?: { amountCents: number; currency: string }
   paidAt?: string | null
+  expiresAt?: string | null
+  reviewQuotaRemaining?: number
   features?: {
     fullReport: boolean
     compensationEstimate: boolean

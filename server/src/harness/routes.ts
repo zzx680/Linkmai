@@ -49,6 +49,10 @@ caseWorkflowRouter.get('/:caseId/calculator-fields', endpoint(async req => {
   await harness.get(user(req), param(req,'caseId')); return expenseDefinitions
 }))
 caseWorkflowRouter.post('/:caseId/facts', endpoint(req => harness.propose(user(req), param(req,'caseId'), candidate.parse(req.body))))
+caseWorkflowRouter.post('/:caseId/claims/:candidateId/accept', endpoint(req => {
+  const input = z.object({ key: z.string().regex(/^[a-z][a-z0-9_]{0,99}$/).optional() }).strict().parse(req.body || {})
+  return harness.acceptClaim(user(req), param(req,'caseId'), param(req,'candidateId'), input.key)
+}))
 caseWorkflowRouter.post('/:caseId/facts/:factId/:decision', endpoint(req => harness.decideFact(user(req), param(req,'caseId'), param(req,'factId'), z.enum(['confirm','reject']).parse(req.params.decision))))
 caseWorkflowRouter.post('/:caseId/conflicts/:conflictId/resolve', endpoint(req => harness.resolve(user(req), param(req,'caseId'), param(req,'conflictId'), z.object({ factId: identifier }).strict().parse(req.body).factId)))
 caseWorkflowRouter.post('/:caseId/calculations', endpoint(req => harness.calculate(user(req), param(req,'caseId'))))

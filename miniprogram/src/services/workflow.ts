@@ -4,8 +4,13 @@ export interface WorkflowDocument {
   id: string; type: string; version: number; status: string; inputRevision: number; riskReasons: string[]
   sections: Array<{ title: string; paragraphs: string[] }>; reviewTaskId?: string
 }
+export interface WorkflowClaimCandidate {
+  id: string; key: string | null; label: string; amountCents: number
+  evidenceIds: string[]; sourceLabel: string; alternatives: string[]
+}
 export interface WorkflowWorkspace {
   caseId: string; revision: number; workflow: string; facts: WorkflowFact[]
+  claimCandidates: WorkflowClaimCandidate[]
   evidence: Array<{ id: string; sourceId: string; fieldKey?: string; status: string }>
   conflicts: Array<{ id: string; key: string; factIds: string[]; status: string }>
   calculations: Array<{ id: string; status: string; totalCents?: number; contextHash: string; items: Array<{ code: string; label: string; amountCents?: number; formula: string; missingInputs: string[] }> }>
@@ -20,6 +25,10 @@ export const workflowApi = {
   get: (caseId: string) => request<WorkflowWorkspace>({ url: `${base(caseId)}/workspace` }),
   propose: (caseId: string, input: { key: string; label: string; value: string; evidenceRefs: string[] }) => request<WorkflowFact>({ url: `${base(caseId)}/facts`, method: 'POST', data: input }),
   decide: (caseId: string, factId: string, decision: 'confirm' | 'reject') => request({ url: `${base(caseId)}/facts/${encodeURIComponent(factId)}/${decision}`, method: 'POST' }),
+  acceptClaim: (caseId: string, candidateId: string, key?: string) => request<WorkflowFact[]>({
+    url: `${base(caseId)}/claims/${encodeURIComponent(candidateId)}/accept`, method: 'POST',
+    data: key ? { key } : undefined,
+  }),
   resolve: (caseId: string, conflictId: string, factId: string) => request({ url: `${base(caseId)}/conflicts/${encodeURIComponent(conflictId)}/resolve`, method: 'POST', data: { factId } }),
   calculate: (caseId: string) => request({ url: `${base(caseId)}/calculations`, method: 'POST' }),
   generate: (caseId: string, notificationSubscriptionId?: string) => request({

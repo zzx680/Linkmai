@@ -2,6 +2,7 @@ import { Control, Document, Fact, Sources, Workspace } from './types'
 import { calculate, CALCULATOR_VERSION, fingerprint, integerInput, numericFactKeys } from './calculator'
 import { applicableParameters, ContextBuilder, contextHash, currentLegalRefs, draftSections, ModelRouter, OutputValidator, requireCalculator, RiskValidator, SkillRegistry } from './policy'
 import { id, registerMemoryOwner, sourceDigest, WorkflowStore, workflowStore } from './store'
+import { claimableFactKeys, claimCodeByKey, materialClaimCandidates } from './material-claims'
 import { getSignedUrl } from '../services/oss'
 
 const timestamp = (now: number) => new Date(now).toISOString()
@@ -41,6 +42,10 @@ function synchronize(state: Workspace, sources: Sources, control: Control) {
     state.sourceHash = digest
     state.evidence.forEach(e => { e.status = 'replaced' })
     const incoming: Fact[] = []
+    // Only these describe the case itself. Everything else read off a material is a
+    // per-document record: two invoices are not two competing answers to one question,
+    // so they must not collide into a conflict or silently overwrite each other.
+    const caseLevelKeys = new Set(['accident_date', 'accident_location', 'parties_a', 'parties_b', 'liability', 'accident_description'])
     for (const artifact of sources.artifacts) {
       if (!artifact.metadata?.confirmed) continue
       for (const field of artifact.metadata.fields || []) {
@@ -49,7 +54,8 @@ function synchronize(state: Workspace, sources: Sources, control: Control) {
         const existing = state.evidence.find(e => e.id === evidenceId)
         if (existing) existing.status = 'active'
         else state.evidence.push({ id: evidenceId, sourceId: artifact.id, fieldKey: field.key, sourceHash: hash, status: 'active' })
-        incoming.push({ id: fingerprint(['material',hash]), key: field.key, label: field.label, value: String(field.value),
+        const key = caseLevelKeys.has(field.key) ? field.key : `${field.key}#${artifact.id}`
+        incoming.push({ id: fingerprint(['material',hash]), key, label: field.label, value: String(field.value),
           status: 'confirmed', source: 'material', sourceId: artifact.id, evidenceRefs: [evidenceId], revision: state.revision })
       }
     }
@@ -142,8 +148,44 @@ export class HarnessService {
       legalReferences: sources.paid ? (await sources.getLegalReferences([...new Set(state.documents.filter(d => d.contextHash === state.contextHash).flatMap(d => d.legalRefs))]))
         .map(ref => ({ id: ref.legalRefId, title: ref.title, articleNumber: ref.articleNumber, content: ref.content,
           sourceUrl: ref.sourceUrl, from: ref.effectiveFrom, to: ref.effectiveTo })) : [],
+      // Amounts read off confirmed materials, offered for one-tap confirmation.
+      // Kept outside the paid gate: the user must be able to see what paying unlocks.
+      claimCandidates: materialClaimCandidates(state, sources),
       documents: sources.paid ? state.documents : [], calculations: sources.paid ? state.calculations : [],
       runs: state.runs.map(({ leaseToken: _token, leaseOwner: _owner, ...run }) => run) }))
+  }
+  // Accepts a material-derived amount for one loss item. The amount is recomputed
+  // server side from the same materials, so a client cannot submit its own number.
+  acceptClaim(userId: string, caseId: string, candidateId: string, key?: string) {
+    return this.command(userId, caseId, (state, sources, control) => {
+      const candidate = materialClaimCandidates(state, sources).find(item => item.id === candidateId)
+      if (!candidate) throw new Error('CLAIM_CANDIDATE_NOT_FOUND')
+      const targetKey = key || candidate.key
+      if (key && !candidate.alternatives.includes(key)) throw new Error('CLAIM_KEY_NOT_ALLOWED')
+      if (!targetKey || !claimableFactKeys.has(targetKey)) throw new Error('CLAIM_KEY_REQUIRED')
+      const code = claimCodeByKey[targetKey]
+      const value = String(candidate.amountCents)
+      const push = (factKey: string, label: string, factValue: string, evidenceRefs: string[]) => {
+        const existing = state.facts.find(item => item.key === factKey && item.status !== 'rejected')
+        if (existing) {
+          if (existing.value === factValue) return
+          existing.value = factValue; existing.label = label; existing.status = 'confirmed'
+          existing.evidenceRefs = [...new Set([...existing.evidenceRefs, ...evidenceRefs])]
+          existing.revision = state.revision + 1
+          return
+        }
+        // source 'user': a person confirmed this amount. Material-derived auto facts are
+        // recomputed on every sync and would otherwise be discarded on the next material change.
+        state.facts.push({ id: id(), key: factKey, label, value: factValue, status: 'confirmed',
+          source: 'user', sourceId: userId, evidenceRefs: evidenceRefs, revision: state.revision + 1 })
+      }
+      push(targetKey, candidate.label, value, candidate.evidenceIds)
+      // Claiming an amount also states the scope, which the calculator otherwise reports as missing.
+      push(`claim_${code}`, '是否主张', 'yes', [])
+      reconcileConflicts(state)
+      changedInput(state, control, userId, candidateId, 'CLAIM_ACCEPTED')
+      return state.facts.filter(fact => fact.key === targetKey || fact.key === `claim_${code}`)
+    })
   }
   propose(userId: string, caseId: string, input: { key: string; label: string; value: string; evidenceRefs: string[] }) {
     return this.command(userId, caseId, (state, _sources, control) => {

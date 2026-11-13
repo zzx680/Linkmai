@@ -2,13 +2,14 @@ import { safeError } from '../utils/safe-error'
 import express from 'express'
 import { db } from '../db'
 import { config } from '../config'
+import { entitlementActive } from '../services/payment'
 
 const router = express.Router()
 
 async function withEntitlement(caseData: any, userId: string) {
   if (!caseData) return null
   const entitlement = await db.getCaseEntitlement(userId, caseData.id)
-  const paid = entitlement?.status === 'paid'
+  const paid = entitlementActive(entitlement)
   return {
     ...caseData,
     liability: paid ? caseData.liability : null,
@@ -17,9 +18,12 @@ async function withEntitlement(caseData: any, userId: string) {
     hasReport: caseData.hasReport ?? caseData.has_report ?? false,
     entitlement: {
       status: entitlement?.status || 'unpaid',
+      active: paid,
       amountCents: entitlement?.amountCents || config.payment.amountCents,
       currency: entitlement?.currency || config.payment.currency,
       paidAt: entitlement?.paidAt || null,
+      expiresAt: entitlement?.expiresAt || null,
+      reviewQuotaRemaining: entitlement?.reviewQuotaRemaining ?? 0,
     },
     nextAction: !caseData.materialCount
       ? 'continue_materials'

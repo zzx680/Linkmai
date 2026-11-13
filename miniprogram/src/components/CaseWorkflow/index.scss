@@ -23,6 +23,14 @@
   .workflow-choice { display: block; padding: 20rpx 0; color: $color-brand-primary; }
   .workflow-error { display: block; padding: 24rpx; margin-bottom: 24rpx; border-radius: 16rpx; background: #fff2ec; color: #954620; line-height: 1.7; }
   .workflow-total { display: block; margin-top: 28rpx; font-size: 32rpx; font-weight: 600; }
+  .workflow-amount-label { display: block; font-size: 24rpx; color: $color-text-secondary; }
+  .workflow-amount { display: block; font-size: 60rpx; font-weight: 600; margin: 8rpx 0 24rpx; letter-spacing: -1rpx; }
+  .workflow-items { border-top: 1rpx solid $color-border-light; }
+  .workflow-item { display: flex; align-items: baseline; justify-content: space-between; padding: 18rpx 0; border-bottom: 1rpx solid $color-border-light; }
+  .workflow-item-label { font-size: 27rpx; }
+  .workflow-item-value { font-size: 27rpx; font-weight: 600; }
+  .workflow-item-muted { font-size: 25rpx; color: $color-text-secondary; }
+  .workflow-pending { margin-top: 12rpx; }
   .workflow-document { padding-top: 40rpx; margin-top: 32rpx; border-top: 1rpx solid $color-border-light; }
   .workflow-document-title { display: block; font-size: 30rpx; font-weight: 600; margin-bottom: 16rpx; }
   .workflow-section-title { display: block; font-weight: 600; margin: 24rpx 0 14rpx; }

@@ -30,6 +30,10 @@ async function memoryLock<T>(fn: () => Promise<T>): Promise<T> {
 }
 export type CaseCommand<T> = (state: Workspace, sources: Sources, control: Control) => T | Promise<T>
 
+// A paid grant is only usable until it expires; rows without an expiry stay active.
+const paidRow = (row: { status?: string; expires_at?: Date | string | null } | undefined) =>
+  row?.status === 'paid' && (!row.expires_at || new Date(row.expires_at).getTime() > Date.now())
+
 export class WorkflowStore {
   constructor(private readonly usePostgres = config.database.type === 'postgres') {}
   async transaction<T>(userId: string, caseId: string, command: CaseCommand<T>): Promise<T> {
@@ -67,12 +71,12 @@ export class WorkflowStore {
         ;(state as unknown as Record<string, unknown>)[key] = result.rows.map(row => row.payload)
       }
       state.runs = (await client.query("SELECT harness_payload FROM agent_runs WHERE case_id=$1 AND task='case_bundle' ORDER BY created_at", [caseId])).rows.map(row => row.harness_payload)
-      const entitlement = await client.query('SELECT status FROM case_entitlements WHERE case_id=$1 AND user_id=$2 FOR UPDATE', [caseId, userId])
+      const entitlement = await client.query('SELECT status, expires_at FROM case_entitlements WHERE case_id=$1 AND user_id=$2 FOR UPDATE', [caseId, userId])
       const facts = (await client.query('SELECT * FROM case_facts WHERE case_id=$1', [caseId])).rows.map(row => ({ id: row.id, key: row.fact_key,
         label: row.label, value: row.value, sourceType: row.source_type, sourceId: row.source_id }))
       const artifacts = (await client.query('SELECT id,type,status,metadata,oss_key AS "ossKey" FROM artifacts WHERE case_id=$1 ORDER BY id', [caseId])).rows
       const control = await this.loadControl(client)
-      const result = await command(state, { revision, paid: entitlement.rows[0]?.status === 'paid', facts, artifacts,
+      const result = await command(state, { revision, paid: paidRow(entitlement.rows[0]), facts, artifacts,
         getLegalReferences: refs => postgresDB.getLegalReferences(refs, client) }, control)
       if (state.revision !== revision) {
         await client.query("UPDATE cases SET input_revision=$1,has_report=FALSE,status='collecting',status_label='案件信息已更新',updated_at=NOW() WHERE id=$2", [state.revision, caseId])
@@ -94,7 +98,7 @@ export class WorkflowStore {
           [run.id, caseId, run.inputRevision, run.skillVersion, run.key, run.status, JSON.stringify(run), run.leaseOwner || null, run.leaseExpiresAt || null, run.attemptCount,
             run.safeErrorCode || null, run.startedAt || null, run.completedAt || null])
       }
-      const ready = entitlement.rows[0]?.status === 'paid' && state.documents.some(d => d.type === 'case_report' && d.status === 'approved' && d.contextHash === state.contextHash)
+      const ready = paidRow(entitlement.rows[0]) && state.documents.some(d => d.type === 'case_report' && d.status === 'approved' && d.contextHash === state.contextHash)
       await client.query(`UPDATE cases SET has_report=$1,status=CASE WHEN $1 THEN 'ready' WHEN status='ready' THEN 'collecting' ELSE status END,
         status_label=CASE WHEN $1 THEN '报告已复核' WHEN status='ready' THEN '等待核对与复核' ELSE status_label END WHERE id=$2`, [ready, caseId])
       await client.query('COMMIT')

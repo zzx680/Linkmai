@@ -2,34 +2,46 @@ import { config } from '../config'
 import { db, PaymentOrder } from '../db'
 import { paymentProvider, ProviderOrder } from './payment/provider'
 
-const entitlementFeatures = (paid: boolean) => ({
-  fullReport: paid,
-  compensationEstimate: paid,
-  actionPlan: paid,
+const entitlementFeatures = (active: boolean) => ({
+  fullReport: active,
+  compensationEstimate: active,
+  actionPlan: active,
   // Keep the response field compatible, but do not grant an unimplemented feature.
   documentGeneration: false,
-  rerunAfterMaterialUpdate: paid,
+  rerunAfterMaterialUpdate: active,
 })
+
+// A paid grant is only usable while it has not expired. Rows created before the
+// delivery model existed have no expiry and therefore stay active indefinitely.
+export function entitlementActive(entitlement?: { status: string; expiresAt?: Date | null } | null): boolean {
+  if (!entitlement || entitlement.status !== 'paid') return false
+  return !entitlement.expiresAt || entitlement.expiresAt.getTime() > Date.now()
+}
 
 export async function getEntitlement(userId: string, caseId: string) {
   const caseData = await db.findCaseById(userId, caseId)
   if (!caseData) throw new Error('CASE_NOT_FOUND')
   const entitlement = await db.getCaseEntitlement(userId, caseId)
   const status = entitlement?.status || 'unpaid'
+  const active = entitlementActive(entitlement)
   return {
     caseId,
     status,
+    active,
     amountCents: entitlement?.amountCents || config.payment.amountCents,
     currency: entitlement?.currency || config.payment.currency,
     currentPrice: { amountCents: config.payment.amountCents, currency: config.payment.currency },
     paidAt: entitlement?.paidAt || null,
-    features: entitlementFeatures(status === 'paid'),
+    expiresAt: entitlement?.expiresAt || null,
+    reviewQuotaRemaining: entitlement?.reviewQuotaRemaining ?? 0,
+    source: entitlement?.source || 'purchase',
+    features: entitlementFeatures(active),
   }
 }
 
 export async function requirePaidEntitlement(userId: string, caseId: string) {
   const entitlement = await getEntitlement(userId, caseId)
-  if (entitlement.status !== 'paid') {
+  if (!entitlement.active) {
     const error = new Error('PAYMENT_REQUIRED') as Error & { entitlement?: typeof entitlement }
     error.entitlement = entitlement
     throw error

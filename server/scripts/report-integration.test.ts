@@ -245,7 +245,7 @@ test('PostgreSQL run publication rejects lost entitlement inside the transaction
       assert.match(sql, /FOR UPDATE OF ar,c/)
       return { rows: [{ id: 'run', case_id: 'case', owner_id: 'owner', status: 'running', input_revision: 1, current_revision: 1 }] }
     }
-    if (sql.includes('SELECT status FROM case_entitlements')) return { rows: [{ status: 'refunded' }] }
+    if (sql.includes('FROM case_entitlements')) return { rows: [{ status: 'refunded', expires_at: null }] }
     return { rows: [] }
   }, release: () => undefined }
   const stub = mock.method(Pool.prototype, 'connect', async () => client as never)
@@ -264,7 +264,7 @@ test('PostgreSQL run publication rejects changed materials inside the transactio
       assert.match(sql, /FOR UPDATE OF ar,c/)
       return { rows: [{ id: 'run', case_id: 'case', owner_id: 'owner', status: 'running', input_revision: 1, current_revision: 1 }] }
     }
-    if (sql.includes('SELECT status FROM case_entitlements')) return { rows: [{ status: 'paid' }] }
+    if (sql.includes('FROM case_entitlements')) return { rows: [{ status: 'paid', expires_at: null }] }
     if (sql.includes('SELECT * FROM artifacts')) return { rows: [] }
     return { rows: [] }
   }, release: () => undefined }
