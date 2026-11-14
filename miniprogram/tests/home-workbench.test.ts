@@ -15,6 +15,7 @@ const caseStylesSource = readFileSync(path.resolve(__dirname, '../src/pages/case
 const journeySource = readFileSync(path.resolve(__dirname, '../src/components/CaseJourney.tsx'), 'utf8')
 const casePageConfigSource = readFileSync(path.resolve(__dirname, '../src/pages/case/index.config.ts'), 'utf8')
 const shareCoverPath = path.resolve(__dirname, '../src/assets/share/home-card.png')
+const tabBarStylesSource = readFileSync(path.resolve(__dirname, '../src/custom-tab-bar/index.scss'), 'utf8')
 
 function clickHomePrimaryAction(currentCase: Case, target = 'primary') {
   const pagePath = path.resolve(__dirname, '../src/pages/case/index.tsx')
@@ -145,6 +146,10 @@ describe('home workbench state', () => {
     assert.equal(getJourneyStep('unlock_full_plan'), 2)
     assert.equal(getJourneyStep('continue_case'), 2)
     assert.equal(getJourneyStep('view_report'), 3)
+  })
+
+  it('keeps the bottom navigation clickable while onboarding guidance is visible', () => {
+    assert.match(tabBarStylesSource, /\.tab-shell\s*\{[\s\S]*z-index:\s*12100;/)
   })
 
   it('maps collection and confirmation stages to material actions', () => {

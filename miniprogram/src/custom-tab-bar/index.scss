@@ -3,7 +3,9 @@
 
 .tab-shell {
   position: fixed;
-  z-index: $z-fixed;
+  // Keep tab navigation above the onboarding overlay so first-time users can
+  // leave a page even while a guide step is visible.
+  z-index: 12100;
   left: 0;
   right: 0;
   bottom: 0;
