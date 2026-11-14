@@ -334,7 +334,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const context = requestGuard.capture(currentCase.id)
     try {
       const history = await api.getConversationHistory(currentCase.id)
-      if (isStale(context)) return
+      if (isStale(context) || get().isAiTyping) return
       set({
         messages: history.messages,
         conversationState: history.conversationState || history.agentState?.stage || 'collecting',
@@ -380,8 +380,24 @@ export const useAppStore = create<AppState>((set, get) => ({
       isAiTyping: true
     }))
 
+    const streamMessage: api.Message = {
+      id: `stream-${requestId}`,
+      role: 'assistant',
+      content: '',
+      streaming: true,
+      timestamp: new Date().toISOString()
+    }
     try {
-      const response = await api.sendMessage(currentCase.id, content, action, artifactIds, requestId)
+      const response = await api.sendMessageStream(
+        currentCase.id, content, action, artifactIds, requestId,
+        delta => {
+          if (isStale(context) || !delta) return
+          set(state => ({ messages: state.messages.some(message => message.id === streamMessage.id)
+            ? state.messages.map(message => message.id === streamMessage.id ? { ...message, content: message.content + delta } : message)
+            : [...state.messages, { ...streamMessage, content: delta }],
+          }))
+        },
+      )
       pendingConversationRequests.delete(requestKey)
       if (isStale(context)) return
       const assistantMessage: api.Message = {
@@ -392,7 +408,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         timestamp: new Date().toISOString()
       }
       set(state => ({
-        messages: [...state.messages.filter(message => message.id !== temporaryMessage.id), temporaryMessage, assistantMessage],
+        messages: [...state.messages.filter(message => message.id !== temporaryMessage.id && message.id !== streamMessage.id), temporaryMessage, assistantMessage],
         conversationState: response.agentState?.stage || state.conversationState,
         readiness: response.readiness || null,
         isAiTyping: false
@@ -407,7 +423,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         return
       }
       set(state => ({
-        messages: state.messages.filter(message => message.id !== temporaryMessage.id),
+        messages: state.messages.filter(message => message.id !== temporaryMessage.id && message.id !== streamMessage.id),
         isAiTyping: false
       }))
       if (error instanceof api.ApiError && error.statusCode === 409 && error.code === 'CONVERSATION_STALE') {

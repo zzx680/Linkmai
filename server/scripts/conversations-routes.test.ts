@@ -8,6 +8,8 @@ import express from 'express'
 import { memoryDB } from '../src/db/memory'
 import router from '../src/routes/conversations'
 import { db } from '../src/db'
+import { Readable } from 'node:stream'
+import { createChatEventParser } from '../../miniprogram/src/services/chat-stream'
 
 let provider: ReturnType<typeof mock.method>
 let originalKey: string
@@ -34,9 +36,19 @@ async function request(method: string, body: Record<string, unknown> = {}, query
   const layer = (router as any).stack.find((item: any) => item.route?.path === '/current/messages' && item.route.methods[method])
   let status = 200
   let payload: any
-  const res = { status(code: number) { status = code; return this }, json(value: unknown) { payload = value; return this } }
+  const events: Array<{ type: string; data: any }> = []
+  const headers: Record<string, string> = {}
+  const parse = createChatEventParser((type, data) => events.push({ type, data: JSON.parse(data) }))
+  const res = {
+    headersSent: false, writableEnded: false,
+    status(code: number) { status = code; return this },
+    json(value: unknown) { payload = value; return this },
+    setHeader(key: string, value: string) { headers[key] = value; return this },
+    write(chunk: string) { this.headersSent = true; parse(chunk); return true },
+    end() { this.writableEnded = true; return this },
+  }
   await layer.route.stack[0].handle({ body, query, userId } as express.Request, res, () => undefined)
-  return { status, ...payload }
+  return { status, ...payload, events, headers, ended: res.writableEnded }
 }
 
 async function fixture() {
@@ -271,4 +283,67 @@ test('action-only requests remain readable in later chat context and saved histo
   ])
   const history = await request('get', {}, { caseId: own.caseId }, own.userId)
   assert.equal(history.data.messages[0].text, '修改事故日期')
+})
+
+test('streaming deltas precede one atomic commit; replay uses the saved result without a second model call', async () => {
+  const own = await fixture()
+  const before = await db.readConversationSnapshot(own.userId, own.caseId)
+  provider.mock.mockImplementation(async () => ({ data: Readable.from((async function* () {
+    yield Buffer.from('data: {"choices":[{"delta":{"content":"第一段"}}]}\n\n')
+    assert.deepEqual(await db.readConversationSnapshot(own.userId, own.caseId), before)
+    yield Buffer.from('data: {"choices":[{"delta":{"content":"第二段"}}]}\n\n')
+    yield Buffer.from('data: {"choices":[{"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n')
+  })()) }))
+  const body = { caseId: own.caseId, text: '你好', requestId: 'stream-success', stream: true }
+  const result = await request('post', body, {}, own.userId)
+  assert.match(result.headers['Content-Type'], /text\/event-stream/)
+  assert.equal(result.headers['X-Accel-Buffering'], 'no')
+  assert.equal(result.ended, true)
+  assert.deepEqual(result.events.map((event: any) => event.type), ['start', 'delta', 'delta', 'done'])
+  const completed = result.events.at(-1).data.data
+  assert.equal(completed.message, '第一段第二段')
+  const history = await request('get', {}, { caseId: own.caseId }, own.userId)
+  assert.deepEqual(history.data.messages.map((message: any) => message.text), ['你好', '第一段第二段'])
+  const replay = await request('post', body, {}, own.userId)
+  assert.deepEqual(replay.events.map((event: any) => event.type), ['delta', 'done'])
+  assert.equal(replay.events.at(-1).data.data.message, completed.message)
+  const regularReplay = await request('post', { ...body, stream: false }, {}, own.userId)
+  assert.equal(regularReplay.data.message, completed.message)
+  assert.equal(provider.mock.callCount(), 1)
+  assert.equal((await request('get', {}, { caseId: own.caseId }, own.userId)).data.messages.length, 2)
+})
+
+test('an interrupted stream emits a safe error without committing partial messages and allows the same request to retry', async () => {
+  const own = await fixture()
+  const before = await db.readConversationSnapshot(own.userId, own.caseId)
+  provider.mock.mockImplementation(async () => ({ data: Readable.from(['data: {"choices":[{"delta":{"content":"未完成"}}]}\n\n']) }))
+  const body = { caseId: own.caseId, text: '你好', requestId: 'stream-failure', stream: true }
+  const result = await request('post', body, {}, own.userId)
+  assert.deepEqual(result.events.map((event: any) => event.type), ['start', 'delta', 'error'])
+  assert.equal(result.events.at(-1).data.statusCode, 503)
+  assert.equal(result.events.at(-1).data.code, 'MODEL_UNAVAILABLE')
+  assert.equal(result.ended, true)
+  assert.deepEqual(await db.readConversationSnapshot(own.userId, own.caseId), before)
+  provider.mock.mockImplementation(async () => ({ data: Readable.from(['data: {"choices":[{"delta":{"content":"完整回复"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n']) }))
+  const recovered = await request('post', body, {}, own.userId)
+  assert.equal(recovered.events.at(-1).type, 'done')
+  assert.equal(recovered.events.at(-1).data.data.message, '完整回复')
+  assert.equal((await request('get', {}, { caseId: own.caseId }, own.userId)).data.messages.length, 2)
+})
+
+test('streaming preserves conflict semantics and rejects unauthorized requests before starting SSE', async () => {
+  const own = await fixture()
+  const body = { caseId: own.caseId, text: '你好', stream: true }
+  const unauthorized = await request('post', body)
+  assert.equal(unauthorized.status, 401)
+  assert.deepEqual(unauthorized.events, [])
+  provider.mock.mockImplementation(async () => ({ data: Readable.from(['data: {"choices":[{"delta":{"content":"草稿"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n']) }))
+  const commit = mock.method(db, 'commitConversationTurn', async () => { throw new Error('CONVERSATION_STALE') })
+  try {
+    const result = await request('post', body, {}, own.userId)
+    assert.equal(result.events.at(-1).type, 'error')
+    assert.equal(result.events.at(-1).data.statusCode, 409)
+    assert.equal(result.events.at(-1).data.code, 'CONVERSATION_STALE')
+    assert.equal((await request('get', {}, { caseId: own.caseId }, own.userId)).data.messages.length, 0)
+  } finally { commit.mock.restore() }
 })

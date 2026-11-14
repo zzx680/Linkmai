@@ -11,6 +11,18 @@ import { harness } from '../harness/service'
 const router = express.Router()
 const persistence = db as typeof db & Record<string, any>
 
+function streamEvent(res: express.Response, type: string, data: unknown) {
+  if (res.destroyed || res.writableEnded) return
+  if (!res.headersSent) {
+    res.status(200)
+      .setHeader('Content-Type', 'text/event-stream; charset=utf-8')
+      .setHeader('Cache-Control', 'no-cache, no-transform')
+      .setHeader('Connection', 'keep-alive')
+      .setHeader('X-Accel-Buffering', 'no')
+  }
+  res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`)
+}
+
 type Readiness = Omit<ReturnType<typeof reportReadiness>, 'pending'> & {
   pending: number
   canGenerate: boolean
@@ -92,6 +104,7 @@ router.get('/current', async (req, res) => {
 router.post('/current/messages', async (req, res) => {
   try {
     const { caseId, text, action, artifactIds = [], images, imageUrl, url } = req.body || {}
+    const wantsStream = req.body?.stream === true
     const requestId = req.body?.requestId === undefined ? randomUUID() : req.body.requestId
     const caseData = await ownedCase(req, res, caseId)
     if (!caseData) return
@@ -126,7 +139,13 @@ router.post('/current/messages', async (req, res) => {
       const workspace = process.env.HARNESS_ENABLED === 'true' ? await harness.get(req.userId!, caseData.id) : undefined
       const snapshot = await persistence.readConversationSnapshot(req.userId!, caseData.id)
       const context = await caseContext(req.userId!, snapshot, workspace)
-      return res.json({ success: true, data: { ...replay, message: replay.assistantText, conversationState: replay.agentState.stage, readiness: readiness(snapshot.agentState, context) } })
+      const data = { ...replay, message: replay.assistantText, conversationState: replay.agentState.stage, readiness: readiness(snapshot.agentState, context) }
+      if (wantsStream) {
+        streamEvent(res, 'delta', { delta: replay.assistantText })
+        streamEvent(res, 'done', { success: true, data })
+        return res.end()
+      }
+      return res.json({ success: true, data })
     }
 
     const workspace = process.env.HARNESS_ENABLED === 'true' ? await harness.get(req.userId!, caseData.id) : undefined
@@ -134,7 +153,11 @@ router.post('/current/messages', async (req, res) => {
       await persistence.readConversationSnapshot(req.userId!, caseData.id)
     const state = snapshot.agentState || initialState()
     const context = await caseContext(req.userId!, snapshot, workspace)
-    const { agentState, assistantText } = await processUserMessage(state, text || '', materials, action, interpretUserMessage, context)
+    if (wantsStream) streamEvent(res, 'start', { model: 'deepseek' })
+    const { agentState, assistantText } = await processUserMessage(
+      state, text || '', materials, action, interpretUserMessage, context,
+      wantsStream ? delta => streamEvent(res, 'delta', { delta }) : undefined,
+    )
     const committed = await persistence.commitConversationTurn({
       userId: req.userId!, caseId: caseData.id, requestId, requestHash, text: conversationText(text || '', { action: action ? normalizeAgentAction(action) : undefined, attachedMaterials: materials.map(material => ({ type: material.type, confirmed: material.confirmed === true })) }),
       metadata: { ...(action ? { action: normalizeAgentAction(action) } : {}), ...(attachedIds.length ? { artifactIds: attachedIds } : {}) },
@@ -144,9 +167,19 @@ router.post('/current/messages', async (req, res) => {
     const currentSnapshot = await persistence.readConversationSnapshot(req.userId!, caseData.id)
     const currentContext = await caseContext(req.userId!, currentSnapshot, currentWorkspace)
     const data = { ...committed, message: committed.assistantText, conversationState: committed.agentState.stage, readiness: readiness(currentSnapshot.agentState, currentContext) }
+    if (wantsStream) {
+      streamEvent(res, 'done', { success: true, data })
+      return res.end()
+    }
     res.json({ success: true, data })
   } catch (err) {
     const code = safeErrorCode(err)
+    if (req.body?.stream === true && res.headersSent) {
+      const statusCode = code === 'MODEL_UNAVAILABLE' ? 503 : ['CONVERSATION_STALE', 'REQUEST_ID_CONFLICT'].includes(code || '') ? 409 : 500
+      if (statusCode === 500) console.error('流式回复错误:', safeError(err))
+      streamEvent(res, 'error', { error: code === 'MODEL_UNAVAILABLE' ? '模型暂时不可用，请稍后重试' : statusCode === 409 ? '案件信息已更新，请重新发送' : '发送消息失败', code, statusCode })
+      return res.end()
+    }
     if (code === 'MODEL_UNAVAILABLE') {
       return res.status(503).json({ success: false, error: '模型暂时不可用，请稍后重试', code })
     }

@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro'
 import { getApiBase } from '../config/env'
 import { readReportEnvelope, ReportContract, ReportEnvelope, ReportGenerationResult } from './report-contract'
+import { ChatStreamDecoder, createChatEventParser } from './chat-stream'
 
 const API_BASE = getApiBase()
 
@@ -310,6 +311,7 @@ export interface Message {
   images?: string[]
   quickReplies?: QuickReply[]
   timestamp: string
+  streaming?: boolean
 }
 
 export type ConversationState = 'collecting' | 'confirming' | 'analyzing' | 'ready'
@@ -380,6 +382,99 @@ export async function sendMessage(
     url: '/conversations/current/messages',
     method: 'POST',
     data: { caseId, text, action, artifactIds, requestId }
+  })
+}
+
+type StreamEvent = { delta?: string; error?: string; code?: string; statusCode?: number; data?: SendMessageResponse }
+
+/** 通过微信分块响应接收模型正文，结束事件仍返回与普通接口一致的完整结果。 */
+export function sendMessageStream(
+  caseId: string,
+  text: string,
+  action: string | undefined,
+  artifactIds: string[] | undefined,
+  requestId: string,
+  onDelta: (delta: string) => void,
+): Promise<SendMessageResponse> {
+  if (Taro.getEnv() !== Taro.ENV_TYPE.WEAPP || !Taro.canIUse('request.object.enableChunked')) {
+    return sendMessage(caseId, text, action, artifactIds, requestId)
+  }
+  return new Promise((resolve, reject) => {
+    const token = getToken()
+    let settled = false
+    let receivedChunks = false
+    const decoder = new ChatStreamDecoder()
+    const fail = (error: Error) => {
+      if (settled) return
+      settled = true
+      reject(error)
+    }
+    const consume = createChatEventParser((type, payload) => {
+      if (settled) return
+      const event = JSON.parse(payload) as StreamEvent
+      if (type === 'delta' && typeof event.delta === 'string') onDelta(event.delta)
+      if (type === 'error') {
+        fail(new ApiError(event.error || '发送失败', event.statusCode || 500, event.code))
+      }
+      if (type === 'done') {
+        if (typeof event.data?.message !== 'string') throw new Error('Invalid chat result')
+        settled = true
+        resolve(event.data)
+      }
+    })
+    const task = Taro.request({
+      url: `${API_BASE}/conversations/current/messages`,
+      method: 'POST',
+      timeout: 30_000,
+      enableChunked: true,
+      dataType: 'text',
+      responseType: 'text',
+      data: { caseId, text, action, artifactIds, requestId, stream: true },
+      header: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      success: response => {
+        if (settled) return
+        if (response.statusCode === 401) {
+          expireSession(token)
+          fail(new UnauthorizedError('登录已过期，请重新登录'))
+          return
+        }
+        try {
+          const raw = response.data as unknown
+          const body = typeof raw === 'string' && raw.trim().startsWith('{') ? JSON.parse(raw) : raw
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            fail(new ApiError(body?.message || body?.error || '发送失败', response.statusCode, body?.code))
+            return
+          }
+          // Old backends can ignore stream=true and still return the regular result.
+          if (body && typeof body === 'object' && typeof body.data?.message === 'string') {
+            settled = true
+            resolve(body.data)
+            return
+          }
+          if (!receivedChunks && typeof raw === 'string') consume(raw)
+          decoder.finish()
+          if (!settled) fail(new ApiError('回复连接已中断，请重试', 0))
+        } catch {
+          fail(new ApiError('回复数据异常，请重试', 0))
+        }
+      },
+      fail: error => fail(new ApiError(/timeout/i.test(error.errMsg) ? '连接超时，请重试' : '无法连接服务，请重试', 0)),
+    })
+    task.onChunkReceived?.(({ data }) => {
+      if (settled) return
+      receivedChunks = true
+      try {
+        consume(decoder.decode(data))
+      } catch {
+        fail(new ApiError('回复数据异常，请重试', 0))
+      }
+    })
+    // Taro also exposes a Promise; callbacks above handle failures for the caller.
+    void task.catch(() => undefined)
   })
 }
 

@@ -250,8 +250,10 @@ export default function Agent() {
             )}
 
             {isAiTyping && (
-              <View id="chat-pending" className="chat-message-row">
-                <AgentChatMessage pending />
+              <View id="chat-pending">
+                {!messages.some(message => message.streaming && message.content) && (
+                  <View className="chat-message-row"><AgentChatMessage pending /></View>
+                )}
               </View>
             )}
           </View>

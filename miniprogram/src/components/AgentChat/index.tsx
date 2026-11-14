@@ -67,7 +67,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
         animation="dots"
         content={content}
       />
-      {role === 'assistant' && <ChatMessageMeta text={text} timestamp={message?.timestamp} />}
+      {role === 'assistant' && !message?.streaming && <ChatMessageMeta text={text} timestamp={message?.timestamp} />}
     </View>
   }
   return <View className={`chat-message-wrapper chat-message-wrapper-${role}`}>
@@ -77,7 +77,7 @@ export function AgentChatMessage({ message, pending = false }: ChatMessageProps)
         <Text selectable>{text}</Text>
       </View>
     </View>
-    {role === 'assistant' && <ChatMessageMeta text={text} timestamp={message?.timestamp} />}
+    {role === 'assistant' && !message?.streaming && <ChatMessageMeta text={text} timestamp={message?.timestamp} />}
   </View>
 }
 

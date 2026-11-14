@@ -46,7 +46,7 @@ function setup(token: string | null = 'saved-token') {
     generateReport: async () => { reportCalls.generate++; return run },
     getMaterials: async () => [],
     getConversationHistory: () => history(),
-    sendMessage: async (...args: any[]) => { counters.messages++; sent.push(args); return send(...args) },
+    sendMessageStream: async (...args: any[]) => { counters.messages++; sent.push(args); return send(...args) },
   }
   const module = { exports: {} as any }
   vm.runInNewContext(compiled, {
@@ -63,6 +63,67 @@ function setup(token: string | null = 'saved-token') {
 }
 
 describe('conversation readiness recovery', () => {
+  it('shows only one incremental reply and replaces it with the committed result', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case' })
+    await test.store.getState().checkLoginStatus()
+    let complete!: (value: any) => void
+    let started!: () => void
+    const start = new Promise<void>(resolve => { started = resolve })
+    test.setSend(async (...args) => {
+      assert.equal(test.store.getState().messages.length, 1, 'no empty assistant placeholder')
+      args[5]('第一段')
+      args[5]('第二段')
+      return new Promise(done => { complete = done; started() })
+    })
+    const pending = test.store.getState().sendMessage('hello')
+    await start
+    assert.equal(test.store.getState().messages.length, 2)
+    assert.equal(test.store.getState().messages[1].content, '第一段第二段')
+    assert.equal(test.store.getState().messages[1].streaming, true)
+    assert.equal(test.store.getState().isAiTyping, true)
+    complete({ message: '完整回复' })
+    await pending
+    assert.equal(test.store.getState().messages.length, 2)
+    assert.equal(test.store.getState().messages[1].content, '完整回复')
+    assert.equal(test.store.getState().messages[1].streaming, undefined)
+    assert.equal(test.store.getState().isAiTyping, false)
+  })
+
+  it('removes interrupted partial output and reuses its request ID on retry', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case' })
+    await test.store.getState().checkLoginStatus()
+    test.setSend(async (...args) => { args[5]('未完成'); throw new test.ApiError('断线', 0) })
+    await assert.rejects(test.store.getState().sendMessage('hello'), /断线/)
+    assert.equal(test.store.getState().messages.length, 0)
+    test.setSend(async () => ({ message: '完整回复' }))
+    await test.store.getState().sendMessage('hello')
+    assert.equal(test.sent[0][4], test.sent[1][4])
+  })
+
+  it('ignores late deltas and completion after switching cases', async () => {
+    const test = setup()
+    test.setCurrentCase({ id: 'case-a' })
+    await test.store.getState().checkLoginStatus()
+    let delta!: (text: string) => void
+    let complete!: (value: any) => void
+    let started!: () => void
+    const start = new Promise<void>(resolve => { started = resolve })
+    test.setSend(async (...args) => { delta = args[5]; return new Promise(done => { complete = done; started() }) })
+    const pending = test.store.getState().sendMessage('hello')
+    await start
+    delta('案件A')
+    test.setCurrentCase({ id: 'case-b' })
+    await test.store.getState().loadCurrentCase()
+    delta('不得串案')
+    complete({ message: '旧案件回复' })
+    await pending
+    assert.equal(test.store.getState().messages.length, 0)
+    assert.equal(test.store.getState().currentCase.id, 'case-b')
+    assert.equal(test.store.getState().isAiTyping, false)
+  })
+
   it('restores readiness and clears it when switching cases', async () => {
     const test = setup()
     const readiness = { canGenerate: false, confirmed: 2, pending: 1, missing: [{ label: '事故地点' }] }

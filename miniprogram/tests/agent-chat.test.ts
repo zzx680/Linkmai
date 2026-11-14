@@ -80,6 +80,15 @@ test('pending replies use the shared thinking orb in native and H5 without rende
   }
 })
 
+test('partial replies render their body while withholding completed-message actions', () => {
+  for (const h5 of [false, true]) {
+    const node = loadChat(h5).AgentChatMessage({ message: { role: 'assistant', content: '正在输出', streaming: true, timestamp: '2026-11-14T00:00:00Z' } })
+    assert.equal(Boolean(node.props.children[1]), false)
+    if (h5) assert.match(renderToStaticMarkup(node), /正在输出/)
+    else assert.equal(find(node, 't-chat-message')!.props.content[0].data, '正在输出')
+  }
+})
+
 test('native sender bridges TDesign detail events and avoids unsupported stop/upload workflows', () => {
   const { AgentChatSender } = loadChat()
   const changed: string[] = [], sent: string[] = [], heights: number[] = []

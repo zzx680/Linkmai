@@ -72,6 +72,7 @@ export async function processUserMessage(
   action?: string,
   interpret: MessageInterpreter = interpretUserMessage,
   context?: CaseAgentContext,
+  onDelta?: (delta: string) => void,
 ): Promise<{ agentState: AgentState; assistantText: string }> {
   const text = userMessage.trim()
   const control = normalizeAgentAction(action || '')
@@ -132,7 +133,7 @@ export async function processUserMessage(
     editTarget: state.editingFactKey,
     attachedMaterials: materials.map(material => ({ id: material.artifactId, type: material.type, confirmed: material.confirmed === true })),
   }
-  const understood = await interpret(next, text, promptContext)
+  const understood = await interpret(next, text, promptContext, onDelta)
   if (!understood.reply?.trim()) throw new Error('MODEL_UNAVAILABLE')
   next.nextQuestion = understood.reply
   next.lastTurn = { mode: 'conversation', modelStatus: 'model' }

@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { StringDecoder } from 'node:string_decoder'
+import type { Readable } from 'node:stream'
 import { config } from '../config'
 
 interface DeepSeekMessage {
@@ -58,6 +60,82 @@ export async function callDeepSeek(
   )
 
   return response.data
+}
+
+/**
+ * 流式调用 DeepSeek Chat API。只把正文增量交给上层，完整文本仍由调用方负责提交。
+ */
+export async function streamDeepSeek(
+  messages: DeepSeekMessage[],
+  onDelta: (delta: string) => void,
+  options?: { temperature?: number; maxTokens?: number; timeoutMs?: number }
+): Promise<string> {
+  const timeoutMs = Math.min(config.deepseek.timeoutMs, options?.timeoutMs ?? config.deepseek.timeoutMs)
+  const controller = new AbortController()
+  // Bound the whole generation, including a provider that keeps sending keepalives.
+  const deadline = setTimeout(() => controller.abort(), timeoutMs)
+  let upstream: Readable | undefined
+  try {
+    const response = await axios.post(
+      `${config.deepseek.apiUrl}/chat/completions`,
+      {
+        model: config.deepseek.model,
+        messages,
+        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? 2000,
+        stream: true,
+      },
+      {
+        responseType: 'stream',
+        timeout: timeoutMs,
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.deepseek.apiKey}` },
+      }
+    )
+
+    upstream = response.data
+    const decoder = new StringDecoder('utf8')
+    let buffer = ''
+    let content = ''
+    let completed = false
+    let stopped = false
+    const consume = (line: string) => {
+      if (!line.startsWith('data:')) return
+      const data = line.slice(5).trim()
+      if (!data) return
+      if (data === '[DONE]') { completed = true; return }
+      const event = JSON.parse(data)
+      if (event.error) throw new Error('MODEL_UNAVAILABLE')
+      const choice = event.choices?.[0]
+      if (choice?.finish_reason) {
+        if (choice.finish_reason !== 'stop') throw new Error('MODEL_UNAVAILABLE')
+        stopped = true
+      }
+      const delta = choice?.delta?.content
+      if (typeof delta === 'string' && delta) {
+        content += delta
+        if (content.length > 100_000) throw new Error('MODEL_UNAVAILABLE')
+        onDelta(delta)
+      }
+    }
+    for await (const chunk of response.data as AsyncIterable<Buffer | string>) {
+      buffer += typeof chunk === 'string' ? chunk : decoder.write(chunk)
+      if (buffer.length > 1_000_000) throw new Error('MODEL_UNAVAILABLE')
+      let end: number
+      while ((end = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, end).replace(/\r$/, '')
+        buffer = buffer.slice(end + 1)
+        consume(line)
+        if (completed) break
+      }
+      if (completed) break
+    }
+    if (!completed || !stopped || !content.trim()) throw new Error('MODEL_UNAVAILABLE')
+    return content
+  } finally {
+    clearTimeout(deadline)
+    upstream?.destroy?.()
+  }
 }
 
 /**
