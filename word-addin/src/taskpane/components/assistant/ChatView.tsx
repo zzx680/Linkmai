@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { createMessageEditStateSelector, EMPTY_MESSAGE_EDIT_STATE } from "../../lib/messageEditState";
 import React, {
     useCallback,
@@ -15,7 +15,7 @@ import { ChatInput } from "./ChatInput";
 import type { ChatInputHandle } from "./ChatInput";
 import { InitialView } from "./InitialView";
 import { UserMessage } from "./UserMessage";
-import { ResponseSelectionMenuUI } from "@mike/ui";
+import { ResponseSelectionMenuUI } from "@linkmai/ui";
 import type {
     EditDecision,
     ReasoningLevel,
@@ -280,7 +280,7 @@ export function ChatView({
             notifyError(
                 new UserVisibleError(
                     status === "not-found"
-                        ? uiText("Mike couldn't find that passage in this document. It may have changed since the answer was written.")
+                        ? uiText("LinkMai couldn't find that passage in this document. It may have changed since the answer was written.")
                         : uiText("Word couldn't scroll to that passage. Try finding it with Word's search."),
                     { kind: status === "not-found" ? "not_found" : "unknown" },
                 ),

@@ -23,7 +23,7 @@ import {
     completeUserOnboarding,
     getUserProfile,
     isMfaRequiredError,
-    MikeApiError,
+    LinkMaiApiError,
     saveApiKey,
     setApiKeyEnabled,
     setUserProfilePhoto,
@@ -36,7 +36,7 @@ import {
     updateTabularChatReasoningLevel,
     updateLastSelectedChatSettings,
     parseTabularChatSelectionKey,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { apiKeyStateFromStatus, hasApiKeyStatus } from "@/app/lib/apiKeyState";
 import type { Message } from "@/app/components/shared/types";
 import { applyDarkMode } from "@/app/lib/theme";
@@ -48,7 +48,7 @@ import {
     routerProfileLists,
     type RouterProfileLists,
     type RouterSlug,
-} from "@mike/client";
+} from "@linkmai/client";
 import { publishTabularChatSettingsUpdate } from "@/app/lib/tabularChatSettingsEvents";
 import {
     clearConfiguredModels,
@@ -732,7 +732,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
                 // A 400 is the server rejecting the value (an unusable base
                 // URL, a malformed key file); the caller shows its reason
                 // instead of a "try again" a retry cannot fix.
-                if (error instanceof MikeApiError && error.status === 400) {
+                if (error instanceof LinkMaiApiError && error.status === 400) {
                     throw error;
                 }
                 // Not reported here: every caller is an ApiKeyField, which

@@ -23,15 +23,15 @@ begin
   insert into public.workflows(org_id,user_id,title,type,visibility) values(org,null,'Rescued','assistant','private') returning id into wid;
   insert into public.workflow_org_access_overrides(workflow_id,org_id,user_id,role) values(wid,org,member_id,'owner');
   insert into public.workflows(org_id,user_id,title,type,visibility,archived_at) values(org,null,'Archived','assistant','private',now());
-  perform set_config('mike.test_ownerless_orgs',array[org,other_org]::text,true);
+  perform set_config('linkmai.test_ownerless_orgs',array[org,other_org]::text,true);
 end;
 $$;
 create temporary table ownerless_expected as
   select 'project'::text kind,p.id item_id from public.projects p
-    where p.org_id=any(current_setting('mike.test_ownerless_orgs')::uuid[]) and p.visibility<>'organization'
+    where p.org_id=any(current_setting('linkmai.test_ownerless_orgs')::uuid[]) and p.visibility<>'organization'
       and public.project_is_ownerless(p.id,p.user_id,p.org_id)
   union all select 'workflow',w.id from public.workflows w
-    where w.org_id=any(current_setting('mike.test_ownerless_orgs')::uuid[]) and w.visibility<>'organization'
+    where w.org_id=any(current_setting('linkmai.test_ownerless_orgs')::uuid[]) and w.visibility<>'organization'
       and public.workflow_is_ownerless(w.id,w.user_id,w.org_id);
 -- From here on a per-item verdict call is a failure.
 create or replace function public.project_is_ownerless(p_project_id uuid,p_project_user_id uuid,p_org_id uuid)
@@ -47,7 +47,7 @@ declare actual jsonb; expected jsonb;
 begin
   select jsonb_agg(jsonb_build_array(kind,item_id) order by kind,item_id) into expected from ownerless_expected;
   select jsonb_agg(jsonb_build_array(kind,item_id) order by kind,item_id) into actual
-    from public.ownerless_org_item_ids(current_setting('mike.test_ownerless_orgs')::uuid[]);
+    from public.ownerless_org_item_ids(current_setting('linkmai.test_ownerless_orgs')::uuid[]);
   assert jsonb_array_length(expected)=205,format('fixture: %s ownerless items',jsonb_array_length(expected));
   assert actual=expected,'ownerless items changed';
 end;

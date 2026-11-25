@@ -2,7 +2,7 @@ import type {
   ConnectorApprovalItem,
   GoogleWorkspaceStatus,
   NativeConnectorTool,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import { z } from "zod";
 import type { Db } from "../supabase";
 import type { ConnectorOwner } from "../connectorOwner";
@@ -262,7 +262,7 @@ async function runWriteAction(
       error.status < 500;
     if (attempted && !definite)
       throw new GoogleWriteUncertainError(
-        `The outcome is uncertain. Check ${GOOGLE_PROVIDERS[provider].name} before trying again; Mike will not retry it.`,
+        `The outcome is uncertain. Check ${GOOGLE_PROVIDERS[provider].name} before trying again; LinkMai will not retry it.`,
         { cause: error },
       );
     throw error;
@@ -324,7 +324,7 @@ export async function planGoogleWorkspaceCall(
     };
     if (JSON.stringify(item).length > MAX_APPROVAL_CHARS)
       throw new GoogleWorkspaceError(
-        "This action is too large to review in Mike. Use Google directly.",
+        "This action is too large to review in LinkMai. Use Google directly.",
       );
     return { type: "approval", item };
   } catch (error) {

@@ -13,7 +13,7 @@ const { listQuickActions } = vi.hoisted(() => ({
     listQuickActions: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listQuickActions,
     createQuickAction: vi.fn(),
     updateQuickAction: vi.fn(),

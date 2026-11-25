@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
 import {
@@ -24,7 +24,7 @@ import {
     resolveProjectFolderPath,
     uploadProjectDocument,
     uploadProjectDocuments,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { Document } from "@/app/components/shared/types";
 import { AddDocumentsModal } from "@/app/components/modals/AddDocumentsModal";
 import {
@@ -33,7 +33,7 @@ import {
     type DocTableSelectionActions,
     type DocTableFolder,
 } from "@/app/components/documents/DocTable";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import { ProjectSectionToolbar, useProjectWorkspace } from "./ProjectWorkspace";
 
 interface Props {

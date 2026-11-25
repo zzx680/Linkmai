@@ -187,7 +187,7 @@ describe("BYOK page cloud-platform keys", () => {
         const serviceAccount = JSON.stringify({
             type: "service_account",
             project_id: "legal-prod",
-            client_email: "mike@legal-prod.iam.gserviceaccount.com",
+            client_email: "linkmai@legal-prod.iam.gserviceaccount.com",
             private_key: "-----BEGIN PRIVATE KEY-----",
         });
         await user.clear(key);

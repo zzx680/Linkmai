@@ -1,4 +1,4 @@
-import type { AuditActor, AuditActorPage } from "@mike/contracts";
+import type { AuditActor, AuditActorPage } from "@linkmai/contracts";
 import type { Db } from "../../lib/supabase";
 import { canReadOrgAudit, parseQuery } from "../../lib/auditExport";
 import {

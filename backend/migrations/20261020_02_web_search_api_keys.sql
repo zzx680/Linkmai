@@ -1,5 +1,5 @@
 -- Migration date: 2026-10-20
--- Tavily and DeepSeek API keys for Mike's own web search are saved like the
+-- Tavily and DeepSeek API keys for LinkMai's own web search are saved like the
 -- Brave Search key, per user or per organization. Existing keys, RLS and
 -- grants are unchanged.
 alter table public.user_api_keys

@@ -8,7 +8,7 @@ import {
     ROUTER_SLUGS,
     routerSelections,
     type RouterSelections,
-} from "@mike/client";
+} from "@linkmai/client";
 
 /** The server's per-router lists as the pickers' `RouterSelections`. */
 export function routerSelectionsFromLists(

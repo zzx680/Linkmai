@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";

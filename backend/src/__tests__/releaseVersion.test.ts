@@ -1,5 +1,5 @@
 // The product version lives in one place, /VERSION, and everything that names
-// a release derives from it: the publish workflow (mike@<version>+<sha12>
+// a release derives from it: the publish workflow (linkmai@<version>+<sha12>
 // releases and image tags) and the compose stack's default image tag, so a
 // fresh `docker compose pull` runs the images that match the checked-out
 // migrations. This keeps the copies in step. See docs/observability.md.
@@ -57,7 +57,7 @@ describe("product version", () => {
 
     it("is the default image tag for every published image in docker-compose.yml", () => {
         const compose = read("docker-compose.yml");
-        const tags = [...compose.matchAll(/mike-(backend|frontend):\$\{MIKE_IMAGE_TAG:-([^}]+)\}/g)];
+        const tags = [...compose.matchAll(/mike-(backend|frontend):\$\{LINKMAI_IMAGE_TAG:-([^}]+)\}/g)];
         expect(tags.map((m) => m[1]).sort()).toEqual(["backend", "frontend"]);
         for (const [, image, tag] of tags) {
             expect(tag, `default tag of the ${image} image`).toBe(version);
@@ -66,13 +66,13 @@ describe("product version", () => {
 
     it("is what the deployment docs tell operators to pin", () => {
         const deployment = read("docs/deployment.md");
-        expect(deployment).toContain(`MIKE_IMAGE_TAG=${version}`);
+        expect(deployment).toContain(`LINKMAI_IMAGE_TAG=${version}`);
     });
 
     it("preserves published image release identity when the sample env_file is applied", () => {
-        const imageEnv = { MIKE_VERSION: version, GIT_SHA: "0123456789abcdef" };
+        const imageEnv = { LINKMAI_VERSION: version, GIT_SHA: "0123456789abcdef" };
         const runtimeEnv = { ...imageEnv, ...parse(read(".env.example")) };
-        expect(runtimeEnv.MIKE_VERSION).toBe(version);
+        expect(runtimeEnv.LINKMAI_VERSION).toBe(version);
         expect(runtimeEnv.GIT_SHA).toBe(imageEnv.GIT_SHA);
     });
 

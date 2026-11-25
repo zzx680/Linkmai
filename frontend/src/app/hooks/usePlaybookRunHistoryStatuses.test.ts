@@ -3,11 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
     getPlaybookRunStatuses,
     type PlaybookRunHistoryItem,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { subscribePlaybookRunChanges } from "@/app/lib/playbookRunActivity";
 import { usePlaybookRunHistoryStatuses } from "./usePlaybookRunHistoryStatuses";
 
-vi.mock("@/app/lib/mikeApi", () => ({ getPlaybookRunStatuses: vi.fn() }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ getPlaybookRunStatuses: vi.fn() }));
 
 const run = (id: string, status: string) => ({
     id, playbookId: "pb", playbookName: "MSA", documentName: `${id}.docx`,

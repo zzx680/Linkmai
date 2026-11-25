@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -22,7 +22,7 @@ import {
     useEditorState,
 } from "@docx-editor.dev/react";
 import { X } from "lucide-react";
-import { TextButtonUI } from "@mike/ui";
+import { TextButtonUI } from "@linkmai/ui";
 import { DocxCommentComposer } from "./DocxCommentComposer";
 import { groupCommentThreads } from "./commentThreads";
 import { DocxReviewActions } from "./DocxReviewActions";
@@ -201,7 +201,7 @@ function CommentColumn({
         <aside
             ref={ref}
             aria-label={uiText("Document comments")}
-            className="flex min-h-0 w-[calc(var(--mike-docx-comment-width)+24px)] flex-none flex-col text-xs text-foreground"
+            className="flex min-h-0 w-[calc(var(--linkmai-docx-comment-width)+24px)] flex-none flex-col text-xs text-foreground"
             onKeyDown={(event) => {
                 event.stopPropagation();
                 // Escape in a portaled card menu closes only that menu.

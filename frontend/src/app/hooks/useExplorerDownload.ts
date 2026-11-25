@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useRef, useState } from "react";
-import { downloadDocumentsZip, getDocumentUrl } from "@/app/lib/mikeApi";
+import { downloadDocumentsZip, getDocumentUrl } from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import type { Document, Folder } from "@/app/components/shared/types";
 

@@ -67,7 +67,7 @@ vi.mock("@/app/contexts/WorkspaceContext", async (importOriginal) => ({
     useWorkspaceParam: () => workspace.current,
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     getProjectFilterOptions: vi.fn(() => new Promise(() => {})),
     setProjectMemoryEnabled: vi.fn(),
     updateProject: vi.fn(),

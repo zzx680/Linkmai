@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AuditEvent } from "@/app/lib/mikeApi";
+import type { AuditEvent } from "@/app/lib/linkmaiApi";
 import {
   auditAction,
   auditActor,

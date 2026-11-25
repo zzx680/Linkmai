@@ -25,7 +25,7 @@ import {
     listOrgs,
     type Org,
     type OrgApiKeySettings,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 
 export const PERSONAL_WORKSPACE = "personal";
 export const PERSONAL_WORKSPACE_LABEL = zhCN.navigation.personalWorkspace;

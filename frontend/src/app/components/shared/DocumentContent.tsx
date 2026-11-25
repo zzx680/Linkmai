@@ -16,7 +16,7 @@ import type { Citation, EditAnnotation, PanelDocument } from "./types";
 import { quoteVerificationState } from "../assistant/message/citationVerification";
 import { CaseView } from "../assistant/CaseView";
 import { useResolvedPanelDocument } from "../assistant/useResolvedPanelDocument";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import { DocumentTitleRow } from "./DocumentTitleRow";
 import { DocumentAnnotationLayer } from "./DocumentAnnotationLayer";
 import { resolveDocumentViewType } from "@/app/lib/documentViewType";

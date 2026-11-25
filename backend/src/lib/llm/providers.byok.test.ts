@@ -19,7 +19,7 @@ const SERVICE_ACCOUNT = JSON.stringify({
   project_id: "legal-prod",
   private_key_id: "key-1",
   private_key: "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n",
-  client_email: "mike@legal-prod.iam.gserviceaccount.com",
+  client_email: "linkmai@legal-prod.iam.gserviceaccount.com",
   token_uri: "https://attacker.example/token",
 });
 
@@ -144,7 +144,7 @@ describe("Google Vertex AI adapter", () => {
     // Only the parsed fields reach the auth client, never the file's token_uri.
     expect(vertexAuthClient).toHaveBeenCalledWith(
       expect.objectContaining({
-        clientEmail: "mike@legal-prod.iam.gserviceaccount.com",
+        clientEmail: "linkmai@legal-prod.iam.gserviceaccount.com",
         project: "legal-prod",
         privateKeyId: "key-1",
       }),

@@ -2,11 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mergeConfiguredModelOptions, ModelToggle } from "./ModelToggle";
-import { underlyingProviderGroup } from "@mike/client";
+import { underlyingProviderGroup } from "@linkmai/client";
 import type {
     ApiKeyState,
     ConfiguredModelOption,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 
 const { configuredModels, workspace } = vi.hoisted(() => ({
     configuredModels: [] as ConfiguredModelOption[],

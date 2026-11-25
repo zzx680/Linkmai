@@ -1,9 +1,9 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { useState, type ReactNode } from "react";
-import { EditCardsSectionUI, PillButtonUI } from "@mike/ui";
+import { EditCardsSectionUI, PillButtonUI } from "@linkmai/ui";
 import { RESPONSE_GLASS_SURFACE } from "./messageStyles";
-import { resolveDocumentEdit } from "@/app/lib/mikeApi";
+import { resolveDocumentEdit } from "@/app/lib/linkmaiApi";
 import type { EditAnnotation } from "../../shared/types";
 import { applyOptimisticResolution } from "../EditCard";
 

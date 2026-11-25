@@ -1,7 +1,7 @@
 
-export type { CourtlistenerToolEvent } from "@mike/contracts";
+export type { CourtlistenerToolEvent } from "@linkmai/contracts";
 
-export type { CaseCitationEvent } from "@mike/contracts";
+export type { CaseCitationEvent } from "@linkmai/contracts";
 
 export const COURTLISTENER_TOOL_NAMES = {
     searchCaseLaw: "courtlistener_search_case_law",

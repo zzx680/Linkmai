@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { Check, EyeOff, User } from "lucide-react";
-import { openSourceWorkflow } from "@/app/lib/mikeApi";
+import { openSourceWorkflow } from "@/app/lib/linkmaiApi";
 import type { WorkflowOpenSourceSubmission } from "@/app/components/shared/types";
 import { Modal } from "@/app/components/modals/Modal";
 import { ModalSegmentedToggle } from "@/app/components/modals/ModalSegmentedToggle";
@@ -13,7 +13,7 @@ import {
     FormTextInput,
 } from "@/app/components/ui/form-field";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { LIQUID_GLASS_FLAT_CLASS } from "@mike/ui";
+import { LIQUID_GLASS_FLAT_CLASS } from "@linkmai/ui";
 
 type OpenSourceContributorMode = "named" | "anonymous";
 type OpenSourceStatus = "idle" | "loading" | "complete";
@@ -321,7 +321,7 @@ export function OpenSourceWorkflowModal({
                                             className="cursor-pointer"
                                         >
                                             GitHub repository and on the
-                                            mikeoss.com website.
+                                            linkmai.com website.
                                         </label>
                                     </p>
                                 </div>

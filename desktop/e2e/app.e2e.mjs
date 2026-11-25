@@ -1,5 +1,5 @@
-// End-to-end proof that the packaged Mike.app hosts the real product against
-// a real local stack: launches the packaged Mike.app (dist/mac-arm64 on Apple
+// End-to-end proof that the packaged LinkMai.app hosts the real product against
+// a real local stack: launches the packaged LinkMai.app (dist/mac-arm64 on Apple
 // silicon, dist/mac on Intel) with a debugging port, drives it with Playwright
 // over CDP (the shell's window IS a Chromium page), signs up and onboards a
 // fresh user, creates a project, and screenshots each stage.
@@ -7,10 +7,10 @@
 // Prereqs: the docker-compose stack is up and the app has been packaged
 // (npm run dist). Run from desktop/:
 //   node e2e/app.e2e.mjs
-//   MIKE_E2E_URL=http://localhost:3100 node e2e/app.e2e.mjs   # shifted stack
+//   LINKMAI_E2E_URL=http://localhost:3100 node e2e/app.e2e.mjs   # shifted stack
 //
-// The app is launched with --server-url=$MIKE_E2E_URL (default
-// http://localhost:3000) plus MIKE_DOWNLOAD_DIR and MIKE_E2E_CAPTURE_EXTERNAL
+// The app is launched with --server-url=$LINKMAI_E2E_URL (default
+// http://localhost:3000) plus LINKMAI_DOWNLOAD_DIR and LINKMAI_E2E_CAPTURE_EXTERNAL
 // pointed into e2e/artifacts/, so a test run never reads or writes the user's
 // real settings.json, ~/Downloads, or default browser.
 //
@@ -36,14 +36,14 @@ const APP_BINARY = packagedAppBinary(path.join(here, ".."));
 const ARTIFACTS = path.join(here, "artifacts");
 // Where the app under test points. Trailing slash stripped so `${SERVER_URL}/x`
 // composes cleanly.
-const SERVER_URL = (process.env.MIKE_E2E_URL ?? "http://localhost:3000").replace(
+const SERVER_URL = (process.env.LINKMAI_E2E_URL ?? "http://localhost:3000").replace(
   /\/$/,
   "",
 );
 const DOWNLOAD_DIR = path.join(ARTIFACTS, "downloads");
 const CAPTURE_FILE = path.join(ARTIFACTS, "external-urls.txt");
 // Isolated userData: never touch the developer's real settings/window bounds,
-// and never collide with a running Mike.app on the single-instance lock.
+// and never collide with a running LinkMai.app on the single-instance lock.
 const USER_DATA_DIR = path.join(ARTIFACTS, "userdata");
 const CDP_PORT = 9223;
 const RUN_ID = Date.now().toString(36);
@@ -91,9 +91,9 @@ const app = spawn(
     // calls are captured to a file instead of spraying real browser tabs.
     env: {
       ...process.env,
-      MIKE_DOWNLOAD_DIR: DOWNLOAD_DIR,
-      MIKE_E2E_CAPTURE_EXTERNAL: CAPTURE_FILE,
-      MIKE_USER_DATA_DIR: USER_DATA_DIR,
+      LINKMAI_DOWNLOAD_DIR: DOWNLOAD_DIR,
+      LINKMAI_E2E_CAPTURE_EXTERNAL: CAPTURE_FILE,
+      LINKMAI_USER_DATA_DIR: USER_DATA_DIR,
     },
   },
 );
@@ -136,7 +136,7 @@ try {
   });
   await completeOnboardingIfRequired(page, {
     name: "Desktop E2E",
-    organisation: "Mike Desktop CI",
+    organisation: "LinkMai Desktop CI",
   });
   // ...and authenticated is when the app sidebar renders. Onboarding's own
   // shell has no sidebar, so this assertion only passes once the wizard has

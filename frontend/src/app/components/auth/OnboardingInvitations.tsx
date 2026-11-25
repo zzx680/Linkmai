@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { ConnectorCard } from "@/app/components/settings/ConnectorCard";
@@ -12,10 +12,10 @@ import {
     acceptOrgInvitation,
     listMyOrgInvitations,
     type OrgInvitation,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { ORG_ROLE_LABELS, type OrgRole } from "@/app/lib/permissions";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { GlassCardUI, PillButtonUI } from "@mike/ui";
+import { GlassCardUI, PillButtonUI } from "@linkmai/ui";
 
 /** The authenticated endpoint only exposes invitations for a verified email. */
 export function OnboardingInvitations({

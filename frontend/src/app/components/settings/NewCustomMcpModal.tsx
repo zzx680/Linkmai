@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Check, Loader2 } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
@@ -8,7 +8,7 @@ import {
     McpConnectorForm,
     type McpConnectorFormDraft,
 } from "@/app/components/settings/McpConnectorForm";
-import type { McpConnectorSummary } from "@/app/lib/mikeApi";
+import type { McpConnectorSummary } from "@/app/lib/linkmaiApi";
 
 export type NewCustomMcpDraft = McpConnectorFormDraft;
 

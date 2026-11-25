@@ -9,7 +9,7 @@ import {
     textStep,
     tick,
 } from "../../lib/llm/__tests__/mockLanguageModel";
-import type { AssistantEvent, ConnectorApprovalItem } from "@mike/contracts";
+import type { AssistantEvent, ConnectorApprovalItem } from "@linkmai/contracts";
 
 // #383's model-selection describes grew this file past the chat limiter's
 // 30-requests-per-window budget, so the last describe began answering 429
@@ -3065,7 +3065,7 @@ describe("chat grants, deletion and roster", () => {
 
         expect(res.status).toBe(400);
         expect(res.body.detail).toBe(
-            "future@example.com does not belong to a Mike user.",
+            "future@example.com does not belong to a LinkMai user.",
         );
     });
 

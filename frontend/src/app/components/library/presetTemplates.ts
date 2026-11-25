@@ -1,5 +1,5 @@
 import catalog from "./presetTemplates.json";
-import { uploadLibraryDocument } from "@/app/lib/mikeApi";
+import { uploadLibraryDocument } from "@/app/lib/linkmaiApi";
 import type { Document, LibraryFolder } from "@/app/components/shared/types";
 
 export type PresetTemplate = (typeof catalog)[number];

@@ -1,8 +1,8 @@
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
-import type { Operation } from "@mike/client";
-import { settleWithConcurrency } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
+import type { Operation } from "@linkmai/client";
+import { settleWithConcurrency } from "@linkmai/client";
 import type {
     TabularReviewHistoryStatus,
     AuditActor,
@@ -10,7 +10,7 @@ import type {
     OrgMemberHandover,
     OrgDepartureList,
     OrgDepartureResolution,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 export type {
     AuditActor,
     AuditActorPage,
@@ -19,18 +19,18 @@ export type {
     OrgDepartureItem,
     OrgDepartureList,
     OrgDepartureResolution,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 
 /**
- * Mike API client — all browser requests use the same-origin `/api` gateway.
+ * LinkMai API client — all browser requests use the same-origin `/api` gateway.
  * Authentication is carried only by the backend-managed HttpOnly cookie.
  */
 
 import { isPanelDocument } from "@/app/components/shared/types";
 import { authenticatedFetch } from "@/app/lib/authEvents";
 import { notifyTabularReviewsChanged } from "@/app/lib/tabularReviewChanges";
-import type { RouterProfileLists } from "@mike/client";
-import { reportedUpstreamMessage } from "@mike/client";
+import type { RouterProfileLists } from "@linkmai/client";
+import { reportedUpstreamMessage } from "@linkmai/client";
 import {
     reportApiFailure,
     reportGatewayLimit,
@@ -50,7 +50,7 @@ import {
     type UploadProgressStatus,
     type UploadSessionInput,
     type UploadSessionPurpose,
-} from "@mike/client";
+} from "@linkmai/client";
 // The role vocabulary is defined once, next to the capability matrix that
 // gives it meaning, and re-exported here so API consumers do not need two
 // imports to describe one row.
@@ -156,7 +156,7 @@ const devLog = (...args: Parameters<typeof console.log>) => {
     if (isDev) console.log(...args);
 };
 
-export class MikeApiError extends Error {
+export class LinkMaiApiError extends Error {
     status: number;
     code: string | null;
     requestId: string | null;
@@ -170,7 +170,7 @@ export class MikeApiError extends Error {
         reportingOwner?: typeof BACKEND_REPORTING_OWNER;
     }) {
         super(args.message);
-        this.name = "MikeApiError";
+        this.name = "LinkMaiApiError";
         this.status = args.status;
         this.code = args.code ?? null;
         this.requestId = args.requestId ?? null;
@@ -183,18 +183,18 @@ const MALFORMED_ERROR_RESPONSE_MESSAGE =
     uiText("The request could not be completed. Please try again.");
 // The 5xx codes the server side already reported, and their fixed messages,
 // are shared with the Word add-in (packages/client); they are re-exported
-// here because API consumers know them as mikeApi's answers.
+// here because API consumers know them as linkmaiApi's answers.
 export {
     SCHEMA_OUT_OF_DATE_CODE,
     SCHEMA_OUT_OF_DATE_MESSAGE,
     UPSTREAM_UNAVAILABLE_CODE,
     UPSTREAM_UNAVAILABLE_MESSAGE,
     reportedUpstreamMessage,
-} from "@mike/client";
+} from "@linkmai/client";
 
 export function isMfaRequiredError(error: unknown) {
     return (
-        error instanceof MikeApiError &&
+        error instanceof LinkMaiApiError &&
         error.status === 403 &&
         error.code === "mfa_verification_required"
     );
@@ -250,7 +250,7 @@ export async function uploadFilesWithSession<T>(args: {
             reportStorageFailure: reportError,
             shouldRetryControlRequest: createControlRequestRetryPolicy(
                 (error) =>
-                    error instanceof MikeApiError
+                    error instanceof LinkMaiApiError
                         ? { status: error.status, code: error.code }
                         : null,
             ),
@@ -299,7 +299,7 @@ async function toApiError(
             typeof parsed.request_id === "string"
                 ? parsed.request_id
                 : response.headers.get("x-request-id");
-        devLog("[mike-api] non-ok response", {
+        devLog("[linkmai-api] non-ok response", {
             path,
             status: response.status,
             code: parsed.code,
@@ -310,7 +310,7 @@ async function toApiError(
         // sentence for it (never the body's `detail`); reportApiFailure
         // below only marks it, so no screen files it a second time.
         const upstreamMessage = code ? reportedUpstreamMessage(code) : null;
-        const apiError = new MikeApiError({
+        const apiError = new LinkMaiApiError({
             status: response.status,
             code,
             requestId,
@@ -352,12 +352,12 @@ async function toApiError(
         }
         return apiError;
     } catch {
-        devLog("[mike-api] non-ok non-json response", {
+        devLog("[linkmai-api] non-ok non-json response", {
             path,
             status: response.status,
             requestId: response.headers.get("x-request-id"),
         });
-        const apiError = new MikeApiError({
+        const apiError = new LinkMaiApiError({
             status: response.status,
             requestId: response.headers.get("x-request-id"),
             message:
@@ -1455,7 +1455,7 @@ export async function setMcpToolEnabled(
 // Native Google Drive integration (first-party — not an MCP connector)
 // ---------------------------------------------------------------------------
 
-export type GoogleDriveStatus = import("@mike/contracts").GoogleDriveStatus;
+export type GoogleDriveStatus = import("@linkmai/contracts").GoogleDriveStatus;
 
 /**
  * Error code the backend attaches when a connector cannot start because the
@@ -1466,9 +1466,9 @@ export type GoogleDriveStatus = import("@mike/contracts").GoogleDriveStatus;
  */
 export const CONNECTOR_SETUP_REQUIRED_CODE = "connector_setup_required";
 
-export function isConnectorSetupError(error: unknown): error is MikeApiError {
+export function isConnectorSetupError(error: unknown): error is LinkMaiApiError {
     return (
-        error instanceof MikeApiError &&
+        error instanceof LinkMaiApiError &&
         error.code === CONNECTOR_SETUP_REQUIRED_CODE
     );
 }
@@ -1548,7 +1548,7 @@ export async function setGoogleDriveToolEnabled(
 }
 
 export type GoogleDrivePickerSession =
-    import("@mike/contracts").GoogleDrivePickerSession;
+    import("@linkmai/contracts").GoogleDrivePickerSession;
 
 /**
  * A short-lived Drive token plus the keys the Google Picker needs, for the
@@ -1572,7 +1572,7 @@ export async function createGoogleDrivePickerSession(
 // ---------------------------------------------------------------------------
 
 export type CourtListenerConnectorStatus =
-    import("@mike/contracts").CourtListenerConnectorStatus;
+    import("@linkmai/contracts").CourtListenerConnectorStatus;
 
 export async function getCourtListenerConnector(
     workspace?: string,
@@ -1849,9 +1849,9 @@ export async function listOrgs(): Promise<Org[]> {
     return apiRequest<Org[]>("organizations.manage", "/orgs");
 }
 
-export type { DeletedOrganization } from "@mike/contracts";
+export type { DeletedOrganization } from "@linkmai/contracts";
 
-export async function listDeletedOrganizations(): Promise<import("@mike/contracts").DeletedOrganization[]> {
+export async function listDeletedOrganizations(): Promise<import("@linkmai/contracts").DeletedOrganization[]> {
     return apiRequest("organizations.manage", "/orgs/deleted");
 }
 
@@ -1910,7 +1910,7 @@ export async function getOrgLogo(orgId: string): Promise<string | null> {
         );
         return logo.data_url || null;
     } catch (error) {
-        if (error instanceof MikeApiError && error.status === 404) return null;
+        if (error instanceof LinkMaiApiError && error.status === 404) return null;
         throw error;
     }
 }
@@ -2031,11 +2031,11 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
     return apiRequest<OrgMember[]>("organizations.manage", `/orgs/${orgId}/members`);
 }
 
-export type { OrgPrivateContentItem, OrgPrivateContentKind, OrgPrivateContentPage } from "@mike/contracts";
+export type { OrgPrivateContentItem, OrgPrivateContentKind, OrgPrivateContentPage } from "@linkmai/contracts";
 
 export async function listOrgPrivateContent(orgId: string, offset = 0, search = "") {
     const query = new URLSearchParams({ limit: "50", offset: String(offset), search });
-    return apiRequest<import("@mike/contracts").OrgPrivateContentPage>("organizations.manage", `/orgs/${orgId}/private-content?${query}`);
+    return apiRequest<import("@linkmai/contracts").OrgPrivateContentPage>("organizations.manage", `/orgs/${orgId}/private-content?${query}`);
 }
 
 export async function setOrgPrivateContentPermission(orgId: string, userId: string, enabled: boolean): Promise<void> {
@@ -2044,11 +2044,11 @@ export async function setOrgPrivateContentPermission(orgId: string, userId: stri
     });
 }
 
-export async function openOrgPrivateContent(orgId: string, kind: import("@mike/contracts").OrgPrivateContentKind, itemId: string): Promise<void> {
+export async function openOrgPrivateContent(orgId: string, kind: import("@linkmai/contracts").OrgPrivateContentKind, itemId: string): Promise<void> {
     await apiRequest("organizations.manage", `/orgs/${orgId}/private-content/${kind}/${itemId}/open`, { method: "POST" });
 }
 
-export async function closeOrgPrivateContent(orgId: string, kind: import("@mike/contracts").OrgPrivateContentKind, itemId: string): Promise<void> {
+export async function closeOrgPrivateContent(orgId: string, kind: import("@linkmai/contracts").OrgPrivateContentKind, itemId: string): Promise<void> {
     await apiRequest("organizations.manage", `/orgs/${orgId}/private-content/${kind}/${itemId}`, { method: "DELETE" });
 }
 
@@ -2821,7 +2821,7 @@ export async function getDocumentStatuses(documentIds: string[], signal?: AbortS
         // Self-hosted frontends and backends may be upgraded independently.
         // Only an unsupported endpoint selects the legacy reads: auth/server
         // failures must retain their normal handling and retry behavior.
-        if (!(error instanceof MikeApiError) || ![404, 405].includes(error.status)) throw error;
+        if (!(error instanceof LinkMaiApiError) || ![404, 405].includes(error.status)) throw error;
         signal?.throwIfAborted();
         const results = await settleWithConcurrency([...new Set(documentIds)], 2, async id => {
             signal?.throwIfAborted();
@@ -2832,7 +2832,7 @@ export async function getDocumentStatuses(documentIds: string[], signal?: AbortS
             if (result.status === "fulfilled") return [result.value];
             // The batch endpoint also omits deleted or no-longer-readable
             // documents. Other failures must not look like an empty result.
-            if (result.reason instanceof MikeApiError && result.reason.status === 404) return [];
+            if (result.reason instanceof LinkMaiApiError && result.reason.status === 404) return [];
             throw result.reason;
         });
     }
@@ -4104,15 +4104,15 @@ export async function deleteWorkflowAsset(
 }
 
 export async function getGoogleWorkspaceStatus(
-    provider: import("@mike/contracts").GoogleWorkspaceProvider,
+    provider: import("@linkmai/contracts").GoogleWorkspaceProvider,
     workspace?: string,
 ) {
-    return apiRequest<import("@mike/contracts").GoogleWorkspaceStatus>(
+    return apiRequest<import("@linkmai/contracts").GoogleWorkspaceStatus>(
         "google.workspace", connectorPath(`/user/integrations/${provider}`, workspace),
     );
 }
 export async function startGoogleWorkspaceOAuth(
-    provider: import("@mike/contracts").GoogleWorkspaceProvider,
+    provider: import("@linkmai/contracts").GoogleWorkspaceProvider,
     workspace?: string,
 ) {
     return apiRequest<{ authorizationUrl: string }>(
@@ -4121,7 +4121,7 @@ export async function startGoogleWorkspaceOAuth(
     );
 }
 export async function cancelGoogleWorkspaceOAuth(
-    provider: import("@mike/contracts").GoogleWorkspaceProvider,
+    provider: import("@linkmai/contracts").GoogleWorkspaceProvider,
     state: string,
     workspace?: string,
 ) {
@@ -4135,7 +4135,7 @@ export async function cancelGoogleWorkspaceOAuth(
     );
 }
 export async function disconnectGoogleWorkspace(
-    provider: import("@mike/contracts").GoogleWorkspaceProvider,
+    provider: import("@linkmai/contracts").GoogleWorkspaceProvider,
     workspace?: string,
 ) {
     return apiRequest<void>(
@@ -4144,11 +4144,11 @@ export async function disconnectGoogleWorkspace(
     );
 }
 export async function updateGoogleWorkspaceSettings(
-    provider: import("@mike/contracts").GoogleWorkspaceProvider,
+    provider: import("@linkmai/contracts").GoogleWorkspaceProvider,
     settings: { enabled?: boolean; requireWriteApproval?: boolean; readOnly?: boolean },
     workspace?: string,
 ) {
-    return apiRequest<import("@mike/contracts").GoogleWorkspaceStatus>(
+    return apiRequest<import("@linkmai/contracts").GoogleWorkspaceStatus>(
         "google.workspace", connectorPath(`/user/integrations/${provider}`, workspace),
         {
             method: "PATCH",
@@ -4158,12 +4158,12 @@ export async function updateGoogleWorkspaceSettings(
     );
 }
 export async function setGoogleWorkspaceToolEnabled(
-    provider: import("@mike/contracts").GoogleWorkspaceProvider,
+    provider: import("@linkmai/contracts").GoogleWorkspaceProvider,
     toolName: string,
     enabled: boolean,
     workspace?: string,
 ) {
-    return apiRequest<import("@mike/contracts").GoogleWorkspaceStatus>(
+    return apiRequest<import("@linkmai/contracts").GoogleWorkspaceStatus>(
         "google.workspace", connectorPath(
             `/user/integrations/${provider}/tools/${encodeURIComponent(toolName)}`,
             workspace,

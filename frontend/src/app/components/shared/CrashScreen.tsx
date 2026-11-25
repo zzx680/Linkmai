@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import type { ReactNode } from "react";
 import { useCrashBoundary } from "@/app/hooks/useCrashBoundary";
-import { PillButtonUI, textButtonUIClassName } from "@mike/ui";
+import { PillButtonUI, textButtonUIClassName } from "@linkmai/ui";
 
 /**
  * The body of `app/error.tsx` and `app/global-error.tsx`: one markup, so the

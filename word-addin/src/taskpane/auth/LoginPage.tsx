@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useState } from "react";
 import { getSignInOptions } from "../api/client";
 import { useAuth } from "./useAuth";
@@ -10,7 +10,7 @@ import {
   AuthDividerUI as AuthDivider,
   authGlassCardUIClassName,
   authInputUIClassName,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { Label } from "../../shared/ui/label";
 import { WordAddinLogo } from "../components/shell/WordAddinLogo";
 import { WEB_APP_URL, openExternalUrl } from "../lib/openExternalUrl";

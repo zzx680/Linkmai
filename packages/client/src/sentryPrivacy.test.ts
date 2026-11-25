@@ -13,7 +13,7 @@ describe('outbound telemetry privacy boundary', () => {
       transaction: privateName, fingerprint: [privateName], logger: privateName,
       request: { url: '/documents?filename=' + privateName, headers: { 'X-Custom-Secret': privateName }, query_string: privateName, data: privateName },
       user: { id: privateName }, server_name: privateName,
-      breadcrumbs: [{ message: privateName, data: { filename: privateName } }, { category: 'mike.stage', message: privateName, data: { filename: privateName } }],
+      breadcrumbs: [{ message: privateName, data: { filename: privateName } }, { category: 'linkmai.stage', message: privateName, data: { filename: privateName } }],
       extra: { detail: privateName, name: privateName, message: privateName, error_stack: privateName, document_id: privateName },
       contexts: { trace: { data: privateName }, os: { name: privateName } },
       tags: { component: privateName, stage: privateName, document_id: privateName, error_code: privateName, operation: privateName, error_kind: privateName, warning_name: privateName, warning_code: privateName, what: privateName, request_id: privateName, http_route: '/documents/' + privateName + '?q=' + privateName },
@@ -30,13 +30,13 @@ describe('outbound telemetry privacy boundary', () => {
 
   it('retains actionable controlled diagnostics, correlation IDs, stack lines and source-map IDs', () => {
     const out = diagnosticEvent({
-      event_id: eventId, timestamp: 123, level: 'error', platform: 'javascript', release: 'mike@abc123', environment: 'self-hosted',
-      tags: { service: 'mike-backend', component: 'upload-worker', stage: 'conversion', http_method: 'POST', http_route: '/api/projects/' + id + '/documents', http_status: '500', request_id: id, network: true, project: 'false', error_code: 'internal_error' },
+      event_id: eventId, timestamp: 123, level: 'error', platform: 'javascript', release: 'linkmai@abc123', environment: 'self-hosted',
+      tags: { service: 'linkmai-backend', component: 'upload-worker', stage: 'conversion', http_method: 'POST', http_route: '/api/projects/' + id + '/documents', http_status: '500', request_id: id, network: true, project: 'false', error_code: 'internal_error' },
       extra: { document_id: id, filename: 'Private NDA.pdf' },
-      exception: { values: [{ type: 'TypeError', value: 'Private NDA.pdf', mechanism: { handled: true, data: 'secret' }, stacktrace: { frames: [{ filename: '/Users/private/work/mike/backend/src/convert.ts', abs_path: '/Users/private/work/mike/backend/src/convert.ts', lineno: 42, colno: 7, in_app: true, function: 'convertDocument', context_line: 'privateName', vars: { secret: true } }] } }] },
-      debug_meta: { images: [{ type: 'sourcemap', code_file: '/Users/private/work/mike/backend/src/convert.ts', debug_id: id }] },
+      exception: { values: [{ type: 'TypeError', value: 'Private NDA.pdf', mechanism: { handled: true, data: 'secret' }, stacktrace: { frames: [{ filename: '/Users/private/work/linkmai-*/backend/src/convert.ts', abs_path: '/Users/private/work/linkmai-*/backend/src/convert.ts', lineno: 42, colno: 7, in_app: true, function: 'convertDocument', context_line: 'privateName', vars: { secret: true } }] } }] },
+      debug_meta: { images: [{ type: 'sourcemap', code_file: '/Users/private/work/linkmai-*/backend/src/convert.ts', debug_id: id }] },
     });
-    expect(out).toMatchObject({ event_id: eventId, timestamp: 123, level: 'error', release: 'mike@abc123', environment: 'self-hosted', extra: { document_id: id }, tags: { request_id: id, http_route: '/api/projects/:id/documents', http_status: 500 } });
+    expect(out).toMatchObject({ event_id: eventId, timestamp: 123, level: 'error', release: 'linkmai@abc123', environment: 'self-hosted', extra: { document_id: id }, tags: { request_id: id, http_route: '/api/projects/:id/documents', http_status: 500 } });
     expect(out.exception).toEqual({ values: [{ type: 'TypeError', value: 'Failure in upload-worker / conversion / POST / /api/projects/:id/documents / 500 / internal_error', mechanism: { type: 'generic', handled: true }, stacktrace: { frames: [{ filename: 'backend/src/convert.ts', abs_path: 'backend/src/convert.ts', lineno: 42, colno: 7, in_app: true, function: 'convertDocument' }] } }] });
     expect(out.debug_meta).toEqual({ images: [{ type: 'sourcemap', code_file: 'backend/src/convert.ts', debug_id: id }] });
     expect(JSON.stringify(out)).not.toContain('private');
@@ -51,7 +51,7 @@ describe('outbound telemetry privacy boundary', () => {
   });
 
   it('keeps nested console stack locations and Word bundle source-map links without their prose', () => {
-    const out = diagnosticEvent({ extra: { error_stack: 'Error: Private NDA.pdf\n    at convert (/work/mike/backend/src/convert.ts:42:7)\ninvalid' }, debug_meta: { images: [{ type: 'sourcemap', code_file: 'http://localhost:3100/taskpane.1234abcd.js', debug_id: id }] } });
+    const out = diagnosticEvent({ extra: { error_stack: 'Error: Private NDA.pdf\n    at convert (/work/linkmai-*/backend/src/convert.ts:42:7)\ninvalid' }, debug_meta: { images: [{ type: 'sourcemap', code_file: 'http://localhost:3100/taskpane.1234abcd.js', debug_id: id }] } });
     expect(out.stacktrace).toEqual({ frames: [{ filename: 'backend/src/convert.ts', lineno: 42, colno: 7 }] });
     expect(out.debug_meta).toEqual({ images: [{ type: 'sourcemap', code_file: 'taskpane.1234abcd.js', debug_id: id }] });
     expect(JSON.stringify(out)).not.toContain('Private NDA');
@@ -277,10 +277,10 @@ it('distinguishes real project endpoints while dropping IDs and query content', 
 it('keeps a captureMessage event a message when attachStacktrace added a synthetic exception', () => {
   const event = diagnosticEvent({
     message: 'PRIVATE_MESSAGE_TEXT',
-    tags: { component: 'mike-api', http_method: 'GET', http_route: '/workflows', http_status: 500, error_code: 'internal_error' },
+    tags: { component: 'linkmai-api', http_method: 'GET', http_route: '/workflows', http_status: 500, error_code: 'internal_error' },
     exception: { values: [{ type: 'Error', value: 'PRIVATE_MESSAGE_TEXT', mechanism: { type: 'generic', synthetic: true, handled: true }, stacktrace: { frames: [{ filename: 'src/taskpane/lib/errorReporting.ts', lineno: 213, colno: 5 }] } }] },
   });
-  expect(event.message).toBe('Failure in mike-api / GET / /workflows / 500 / internal_error');
+  expect(event.message).toBe('Failure in linkmai-api / GET / /workflows / 500 / internal_error');
   expect(event.exception).toBeUndefined();
   expect(event.stacktrace).toEqual({ frames: [{ filename: 'src/taskpane/lib/errorReporting.ts', lineno: 213, colno: 5 }] });
   expect(JSON.stringify(event)).not.toContain('PRIVATE_');
@@ -342,8 +342,8 @@ it('splits a mid-stream gateway failure from a connect-time one and keeps body t
   expect(timeout.fingerprint).toEqual(expect.arrayContaining(['{{ default }}', 'gateway-stream', 'UND_ERR_BODY_TIMEOUT']));
   expect(timeout.fingerprint).not.toContain('upstream-unavailable');
   // Other pinned conditions keep their fingerprint whatever their stage.
-  expect(diagnosticEvent({ fingerprint: ['api-unreachable'], tags: { component: 'mike-api', stage: 'api-unreachable', failure_code: 'fetch_failed' } }).fingerprint)
-    .toEqual(['api-unreachable', 'mike-api', 'fetch_failed']);
+  expect(diagnosticEvent({ fingerprint: ['api-unreachable'], tags: { component: 'linkmai-api', stage: 'api-unreachable', failure_code: 'fetch_failed' } }).fingerprint)
+    .toEqual(['api-unreachable', 'linkmai-api', 'fetch_failed']);
 });
 
 // MIKE-FRONTEND-J/4: an unreachable backend is one condition, not one issue
@@ -359,17 +359,17 @@ it('groups a pinned unreachable-dependency condition as one issue per cause', ()
   expect(gateway('GET', `/projects/${id}`).fingerprint).toEqual(gateway('POST', '/chat').fingerprint);
   expect(gateway('GET', '/chat', 'ENOTFOUND').fingerprint).not.toEqual(gateway('GET', '/chat').fingerprint);
   expect(gateway('POST', '/chat').level).toBe('warning');
-  expect(diagnosticEvent({ fingerprint: ['api-unreachable'], tags: { component: 'mike-api', stage: 'api-unreachable', failure_code: 'fetch_failed' } }))
-    .toMatchObject({ fingerprint: ['api-unreachable', 'mike-api', 'fetch_failed'], message: 'Failure in mike-api / api-unreachable / fetch_failed' });
+  expect(diagnosticEvent({ fingerprint: ['api-unreachable'], tags: { component: 'linkmai-api', stage: 'api-unreachable', failure_code: 'fetch_failed' } }))
+    .toMatchObject({ fingerprint: ['api-unreachable', 'linkmai-api', 'fetch_failed'], message: 'Failure in linkmai-api / api-unreachable / fetch_failed' });
   // A browser's direct storage PUT (MIKE-FRONTEND-28/3D/2Z): one issue per
   // deployment fault whatever screen, file or route; the target enum survives.
   // A refused signature, a missing bucket, an outage and a network failure
   // are different faults, so each status (or network code) is its own issue.
-  const storagePut = (tags: Record<string, unknown>) => diagnosticEvent({ fingerprint: ['upload-storage-put'], tags: { component: 'mike-api', operation: 'upload_session.storage', http_method: 'PUT', ...tags } });
-  expect(storagePut({ network: true, storage_target: 'loopback', failure_code: 'fetch_failed' })).toMatchObject({ fingerprint: ['upload-storage-put', 'mike-api', 'fetch_failed', ''], tags: { storage_target: 'loopback' } });
-  expect(storagePut({ http_status: 403 }).fingerprint).toEqual(['upload-storage-put', 'mike-api', '', '403']);
-  expect(storagePut({ http_status: 404 }).fingerprint).toEqual(['upload-storage-put', 'mike-api', '', '404']);
-  expect(storagePut({ http_status: 503 }).fingerprint).toEqual(['upload-storage-put', 'mike-api', '', '503']);
+  const storagePut = (tags: Record<string, unknown>) => diagnosticEvent({ fingerprint: ['upload-storage-put'], tags: { component: 'linkmai-api', operation: 'upload_session.storage', http_method: 'PUT', ...tags } });
+  expect(storagePut({ network: true, storage_target: 'loopback', failure_code: 'fetch_failed' })).toMatchObject({ fingerprint: ['upload-storage-put', 'linkmai-api', 'fetch_failed', ''], tags: { storage_target: 'loopback' } });
+  expect(storagePut({ http_status: 403 }).fingerprint).toEqual(['upload-storage-put', 'linkmai-api', '', '403']);
+  expect(storagePut({ http_status: 404 }).fingerprint).toEqual(['upload-storage-put', 'linkmai-api', '', '404']);
+  expect(storagePut({ http_status: 503 }).fingerprint).toEqual(['upload-storage-put', 'linkmai-api', '', '503']);
   expect((storagePut({ storage_target: 'storage.firm.example' }).tags as Record<string, unknown>).storage_target).toBeUndefined();
   // Unknown caller fingerprints keep the default, code-location grouping.
   expect((diagnosticEvent({ fingerprint: ['PRIVATE_TEXT'], tags: { component: 'api-gateway' } }).fingerprint as string[])[0]).toBe('{{ default }}');
@@ -471,12 +471,12 @@ describe('operation, error kind and stage trail', () => {
 
   it('keeps the stage trail and no other breadcrumb', () => {
     const out = diagnosticEvent({ breadcrumbs: [
-      { category: 'mike.stage', message: 'claim', timestamp: 1 },
-      { category: 'mike.stage', message: 'Private NDA.pdf', timestamp: 2 },
+      { category: 'linkmai.stage', message: 'claim', timestamp: 1 },
+      { category: 'linkmai.stage', message: 'Private NDA.pdf', timestamp: 2 },
       { category: 'http', message: 'GET /documents/Private.pdf', data: { url: 'x' }, timestamp: 3 },
-      { category: 'mike.stage', message: 'process-file', timestamp: 4, data: { filename: 'Private.pdf' } },
+      { category: 'linkmai.stage', message: 'process-file', timestamp: 4, data: { filename: 'Private.pdf' } },
     ] });
-    expect(out.breadcrumbs).toEqual([{ category: 'mike.stage', message: 'claim', timestamp: 1 }, { category: 'mike.stage', message: 'process-file', timestamp: 4 }]);
+    expect(out.breadcrumbs).toEqual([{ category: 'linkmai.stage', message: 'claim', timestamp: 1 }, { category: 'linkmai.stage', message: 'process-file', timestamp: 4 }]);
     expect(JSON.stringify(out)).not.toContain('Private');
     expect(diagnosticEvent({ breadcrumbs: [{ category: 'http', message: 'x' }] })).not.toHaveProperty('breadcrumbs');
   });

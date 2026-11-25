@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     useMemo,
@@ -45,7 +45,7 @@ import {
     localPeople,
 } from "@/app/components/shared/PersonFilter";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import { ChatSkeuoIcon } from "@/app/components/shared/AppSidebarSkeuoIcons";
 import type { Chat } from "@/app/components/shared/types";
 import { can, roleFrom } from "@/app/lib/permissions";

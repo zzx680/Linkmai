@@ -1,14 +1,14 @@
 "use client";
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import {
   DropdownButton,
   DropdownSurface,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { OptionPill } from "@/app/components/ui/option-pill";
 import { FieldLabel, FormTextInput } from "@/app/components/ui/form-field";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
@@ -21,12 +21,12 @@ import {
   getVercelModels,
   type ApiKeySettings,
   type RouterCatalogModel,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
   routerSelections,
   type RouterSelections,
   type RouterSlug,
-} from "@mike/client";
+} from "@linkmai/client";
 import {
   type AccountModelProvider,
   isSafeAccountModelId,

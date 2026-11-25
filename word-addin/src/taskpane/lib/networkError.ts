@@ -4,12 +4,12 @@
  * ("Failed to fetch" on Chromium). That tells a user nothing, so transport
  * failures are rewritten into one concise sentence.
  *
- * The sentence still names the server origin: Mike is self-hostable, and
+ * The sentence still names the server origin: LinkMai is self-hostable, and
  * "check your connection" is useless advice to someone whose own API
  * container is down. The host's original wording is kept on `cause` for the
  * console, never for the screen.
  */
-import { UserVisibleError, networkMessage } from "@mike/client";
+import { UserVisibleError, networkMessage } from "@linkmai/client";
 
 /** The origin a request was aimed at, for the message and for the console. */
 export function requestOrigin(url: string): string {

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo, useState } from "react";
 import type {
@@ -8,8 +8,8 @@ import type {
     OrgMember,
     ProjectPeople,
     UserLookupResult,
-} from "@/app/lib/mikeApi";
-import { getOrg, listOrgMembers } from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
+import { getOrg, listOrgMembers } from "@/app/lib/linkmaiApi";
 import type { ContentVisibility } from "@/app/components/shared/types";
 import { isOrgOwner, type ProjectRole } from "@/app/lib/permissions";
 import { userFacingApiError } from "@/app/lib/userFacingError";

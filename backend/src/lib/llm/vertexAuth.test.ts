@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { resetVertexAuthClients, vertexAuthClient } from "./vertexAuth";
 
 const account = {
-  clientEmail: "mike@legal-prod.iam.gserviceaccount.com",
+  clientEmail: "linkmai@legal-prod.iam.gserviceaccount.com",
   privateKey: "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n",
   privateKeyId: "key-1",
   project: "legal-prod",

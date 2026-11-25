@@ -6,17 +6,17 @@ import {
   openOrgPrivateContent,
   closeOrgPrivateContent,
   getWorkflow,
-  MikeApiError,
+  LinkMaiApiError,
   type AuditEvent,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { PanelDocument } from "@/app/components/shared/types";
 import { HistoryEventModal } from "./HistoryEventModal";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
 
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-  ...(await original<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+  ...(await original<typeof import("@/app/lib/linkmaiApi")>()),
   getDocument: vi.fn(),
   openOrgPrivateContent: vi.fn(),
   closeOrgPrivateContent: vi.fn(),
@@ -202,7 +202,7 @@ describe("HistoryEventModal", () => {
       const user = userEvent.setup();
       vi.mocked(getDocument)
         .mockRejectedValueOnce(
-          new MikeApiError({ status, message: "database secret stack trace" }),
+          new LinkMaiApiError({ status, message: "database secret stack trace" }),
         )
         .mockResolvedValueOnce({
           ...file,
@@ -304,7 +304,7 @@ describe("private content from audit events", () => {
   it("does not fetch or navigate if privileged opening is refused", async () => {
     const user = userEvent.setup();
     vi.mocked(openOrgPrivateContent).mockRejectedValueOnce(
-      new MikeApiError({ status: 403, message: "private database detail" }),
+      new LinkMaiApiError({ status: 403, message: "private database detail" }),
     );
     render(
       <HistoryEventModal

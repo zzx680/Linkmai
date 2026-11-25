@@ -1,11 +1,11 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
-import type { ConnectorApprovalItem } from "@mike/contracts";
+import type { ConnectorApprovalItem } from "@linkmai/contracts";
 import { ChevronRight } from "lucide-react";
 
-// Readable labels for the argument names Mike's built-in connectors use.
+// Readable labels for the argument names LinkMai's built-in connectors use.
 // Anything else (for example an MCP server's own parameters) shows its key.
 const labels: Record<string, string> = {
   to: "To",

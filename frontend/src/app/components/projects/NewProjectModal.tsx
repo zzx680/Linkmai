@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
@@ -13,21 +13,21 @@ import {
     setProjectMemoryEnabled,
     updateProject,
     uploadProjectDocuments,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { FileDirectory } from "../shared/FileDirectory";
 import type { ContentVisibility, Document, Project } from "../shared/types";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
 import { Modal } from "../modals/Modal";
 import { FieldLabel, FormTextInput } from "../ui/form-field";
-import { ToggleSwitchUI } from "@mike/ui";
+import { ToggleSwitchUI } from "@linkmai/ui";
 import { ProjectPracticeField } from "./ProjectPracticeField";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import {
     PERSONAL_WORKSPACE as ACTIVE_PERSONAL_WORKSPACE,
     useWorkspace,
 } from "@/app/contexts/WorkspaceContext";
-import { createSecureUuid } from "@mike/client";
+import { createSecureUuid } from "@linkmai/client";
 import {
     CreateAccessStep,
     type PendingDirectGrant,

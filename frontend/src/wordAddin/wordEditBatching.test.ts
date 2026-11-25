@@ -47,7 +47,7 @@ describe("Word edit anchor lookup", () => {
     const touched = new Set<PropertyKey>();
     const anchors = new Proxy(entries, { get: (target, key) => { touched.add(key); return Reflect.get(target, key); } });
     // The fixture's get() returns the stored object itself, as Office does for its working copy.
-    values.set("mike.wordEditAnchors.v1", { version: 1, anchors });
+    values.set("linkmai.wordEditAnchors.v1", { version: 1, anchors });
     expect(getWordEditAnchor("edit-7")).toEqual(entries["edit-7"]);
     expect(getWordEditAnchor("missing")).toBeNull();
     expect([...touched].filter(key => typeof key === "string" && key.startsWith("edit-"))).toEqual(["edit-7"]);

@@ -1,11 +1,11 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { QuoteIcon } from "@radix-ui/react-icons";
-import { PillButtonUI, TextButtonUI, TextSlabUI } from "@mike/ui";
+import { PillButtonUI, TextButtonUI, TextSlabUI } from "@linkmai/ui";
 import type { PanelDocument, PanelDocumentQuote } from "../shared/types";
 import {
     CitationVerificationBadge,

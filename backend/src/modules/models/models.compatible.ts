@@ -108,7 +108,7 @@ export async function listXaiModels(
     userId: string,
     orgId?: string | null,
 ): Promise<CatalogResult> {
-    // Reading the user's keys is Mike's own work: a failure there is an
+    // Reading the user's keys is LinkMai's own work: a failure there is an
     // internal error to log, not a provider outage.
     let key: string | undefined;
     let userOwned = false;

@@ -25,9 +25,9 @@ const config = {
             // The shared packages themselves. vite-tsconfig-paths only maps
             // imports from files tsconfig.json includes relative to this
             // directory, which leaves a package importing its sibling
-            // (@mike/ui -> @mike/client) unresolved; alias both outright.
-            { find: /^@mike\/ui$/, replacement: here("../../packages/ui/src/index.ts") },
-            { find: /^@mike\/client$/, replacement: here("../../packages/client/src/index.ts") },
+            // (@linkmai/ui -> @linkmai/client) unresolved; alias both outright.
+            { find: /^@linkmai\/ui$/, replacement: here("../../packages/ui/src/index.ts") },
+            { find: /^@linkmai\/client$/, replacement: here("../../packages/client/src/index.ts") },
             ...SHARED_DEPENDENCIES.flatMap((name) => [
                 // The package entry, and any subpath (react/jsx-runtime,
                 // react-dom/client), from frontend/node_modules.

@@ -1,4 +1,4 @@
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * Simplified Chinese copy for the mainland China web experience.
  * Keep display text separate from API values, persisted names and permissions.

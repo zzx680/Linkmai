@@ -14,7 +14,7 @@ import type {
   StreamChatParams,
   StreamChatResult,
 } from "./types";
-import type { WebSource } from "@mike/contracts";
+import type { WebSource } from "@linkmai/contracts";
 import { providerDeadlines } from "./providerDeadlines";
 import {
   loadToolInputChecker,
@@ -841,7 +841,7 @@ export async function streamAiSdk(
           // `dynamic: true` = the SDK synthesized this part for a call it could
           // not dispatch (unknown tool / unparseable input); it already queued
           // the error as that call's result and continues the loop so the
-          // model can recover. Mike's tools are static, so only a genuine
+          // model can recover. LinkMai's tools are static, so only a genuine
           // execute() failure reaches the throw.
           if ((part as { dynamic?: boolean }).dynamic === true) break;
           runToolsFailure.first ??= { error: part.error };

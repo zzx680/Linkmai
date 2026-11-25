@@ -25,14 +25,14 @@ import {
     streamTabularGeneration,
     updateTabularReview,
     uploadReviewDocument,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type {
     ColumnConfig,
     TabularCell,
     TabularReviewRow,
 } from "../shared/types";
 import { TRView } from "./TabularReviewView";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 const { tableProps } = vi.hoisted(() => ({
     tableProps: {
@@ -48,8 +48,8 @@ const { tableProps } = vi.hoisted(() => ({
     },
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     clearTabularCells: vi.fn(),
     getTabularReview: vi.fn(),
     listProjects: vi.fn(),

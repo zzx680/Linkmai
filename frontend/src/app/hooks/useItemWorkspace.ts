@@ -6,8 +6,8 @@ import {
     PERSONAL_WORKSPACE_LABEL,
     useWorkspace,
 } from "@/app/contexts/WorkspaceContext";
-import { showToast } from "@mike/client";
-import { uiText } from "@mike/client";
+import { showToast } from "@linkmai/client";
+import { uiText } from "@linkmai/client";
 import { zhCN } from "@/app/lib/localization";
 
 /** One notice for a switch, however many things on the page ask for it. */

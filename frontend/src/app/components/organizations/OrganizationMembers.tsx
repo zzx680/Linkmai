@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { UserAvatar } from "@/app/components/ui/user-avatar";
 
@@ -55,7 +55,7 @@ import {
   DropdownContent,
   DropdownItem,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { LIQUID_GLASS_HOVER_CLASS } from "@/app/components/ui/liquid-surface";
 import {
   getOrg,
@@ -65,7 +65,7 @@ import {
   type Org,
   type OrgInvitation,
   type OrgMember,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
   ORG_ROLE_LABELS,
   ORG_ROLES,

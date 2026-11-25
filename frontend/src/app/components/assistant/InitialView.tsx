@@ -6,7 +6,7 @@ import quickActionsIcon from "../../../../public/icons/features/quick-actions.sv
 import { MoreHorizontal } from "lucide-react";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
-import { MikeIcon, LIQUID_GLASS_HOVER_CLASS, LIQUID_GLASS_SUBTLE_CLASS } from "@mike/ui";
+import { LinkMaiIcon, LIQUID_GLASS_HOVER_CLASS, LIQUID_GLASS_SUBTLE_CLASS } from "@linkmai/ui";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
 import type { Document, Message, QuickAction } from "../shared/types";
 import { zhCN } from "@/app/lib/localization";
@@ -62,7 +62,7 @@ export function InitialView({
             <div className="flex min-h-0 items-end justify-center pb-6">
                 <div className="flex w-full max-w-4xl items-center justify-center gap-3 px-0 xl:px-8">
                     <div className="h-[30px] w-[30px] shrink-0" aria-hidden="true">
-                        <MikeIcon size={ICON_SIZE} />
+                        <LinkMaiIcon size={ICON_SIZE} />
                     </div>
                     <h1 className="min-w-0 text-2xl font-serif font-light leading-relaxed text-gray-900 [overflow-wrap:anywhere] sm:text-4xl">
                         {zhCN.assistant.greeting}{username ? `，${username}` : ""}

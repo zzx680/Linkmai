@@ -287,10 +287,10 @@ WPS、各桌面版本及网页版本具有相同能力；在实测通过前不�
 当前 checkout 的远端仍是 `open-legal-products/mike`，根许可证为 AGPL-3.0。
 因此产品路线与品牌可以独立发展，代码出处和继承的许可义务仍须明确。
 
-建议当前走 **基于 Mike 代码的公开衍生项目，建设独立产品与社区** 的路径：
+建议当前走 **基于 LinkMai 代码的公开衍生项目，建设独立产品与社区** 的路径：
 
 - 在 README、LICENSE/NOTICE 和项目说明中保留依法需要的上游版权与来源；
-- 对外明确灵迈独立维护的范围，以及与 Mike 无官方隶属或背书关系；
+- 对外明确灵迈独立维护的范围，以及与 LinkMai 无官方隶属或背书关系；
 - 根据实际复制、修改和组合范围履行适用开源义务；AGPL 第 13 条涉及修改后程序
   的远程网络使用及对应源码提供；不能只换名称就改成 MIT/Apache；
 - 模板、图片、图标、知识资料和场景包分别盘点来源与许可，不能把上游品牌资产
@@ -396,7 +396,7 @@ documents 所属模块管理，跨领域交付由 application 协调。
 | 暂缓 | 架构大重写、应用/包的全局改名、与首条交付流程无关的集成 |
 
 产品发布的独立身份应首先体现在 README、安装入口、文档、场景包、路线图、界面
-任务组织和维护治理。内部 `@mike/*`、数据库对象或 API 路径的统一改名另开范围，
+任务组织和维护治理。内部 `@linkmai/*`、数据库对象或 API 路径的统一改名另开范围，
 不与首发工作台混成一次高风险重构。
 
 **建议下一份实现规格：合同审阅工作台。** 先画清上传、确认范围、定位问题、逐项
@@ -408,7 +408,7 @@ documents 所属模块管理，跨领域交付由 application 协调。
 
 - 当前仓库：`README.md`、`LICENSE`、`docs/backend-architecture.md`、
   `docs/playbooks.md`、`docs/document-text-search.md`、`packages/contracts/README.md`。
-- Mike 上游：[Open Legal Products / mike](https://github.com/open-legal-products/mike)。
+- LinkMai 上游：[Open Legal Products / linkmai](https://github.com/open-legal-products/mike)。
 - Harvey 官方：
   [Agents](https://www.harvey.ai/platform/agents)、
   [Vault](https://www.harvey.ai/platform/vault)。2026-11-25 检查时，旧 Assistant/Workflows

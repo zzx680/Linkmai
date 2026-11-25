@@ -1,8 +1,8 @@
 {
-  "name": "@mike/client",
+  "name": "@linkmai/client",
   "version": "0.0.0",
   "private": true,
-  "description": "Framework-free client behavior shared by the Mike web app and the Word add-in.",
+  "description": "Framework-free client behavior shared by the LinkMai web app and the Word add-in.",
   "exports": {
     ".": "./src/index.ts"
   },

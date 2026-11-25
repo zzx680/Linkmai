@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 import { ChatHistoryList } from "./ChatHistoryList";

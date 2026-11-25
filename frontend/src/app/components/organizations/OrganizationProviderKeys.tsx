@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MfaVerificationPopup } from "@/app/components/popups/MfaVerificationPopup";
@@ -17,7 +17,7 @@ import {
 import { useWorkspace } from "@/app/contexts/WorkspaceContext";
 import { routerSelectionsFromLists } from "@/app/hooks/useModelRouterSelections";
 import {
-  MikeApiError,
+  LinkMaiApiError,
   getOrgApiKeys,
   isMfaRequiredError,
   saveOrgApiKey,
@@ -26,10 +26,10 @@ import {
   type ApiKeyProvider,
   type ApiKeySettings,
   type OrgApiKeySettings,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import type { RouterSlug } from "@mike/client";
-import { PillButtonUI, ToggleSwitchUI } from "@mike/ui";
+import type { RouterSlug } from "@linkmai/client";
+import { PillButtonUI, ToggleSwitchUI } from "@linkmai/ui";
 
 // An organization's model providers: the keys its work runs on and the
 // models each may run. A member's own keys never stand in where it has none.
@@ -123,7 +123,7 @@ export function OrganizationProviderKeys({
       return true;
     } catch (error) {
       if (isMfaRequiredError(error)) throw error;
-      if (error instanceof MikeApiError && error.status === 400) throw error;
+      if (error instanceof LinkMaiApiError && error.status === 400) throw error;
       return false;
     }
   }

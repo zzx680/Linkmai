@@ -10,7 +10,7 @@ import { restoreDomExceptionType, retainExceptionTypes, diagnosticErrorTags } fr
  *
  * Two jobs:
  *
- *  1. SCRUB. Mike handles privileged legal documents. An event may carry a
+ *  1. SCRUB. LinkMai handles privileged legal documents. An event may carry a
  *     user id and a route; it must never carry a request body, a cookie, an
  *     auth header, or anything under a key that looks like a secret.
  *  2. DEDUPE. Every remaining `console.error` is bridged into Sentry so no
@@ -251,13 +251,13 @@ export function redactShaped(value: unknown, depth = 0): unknown {
 }
 
 /**
-  * The Mike project's own Sentry projects. A DSN is a write-only address:
+  * The LinkMai project's own Sentry projects. A DSN is a write-only address:
   * it lets an SDK post events and nothing else, so it is public by design
   * (it ships in every browser bundle). Community installs report here by
   * default so the project learns what forks run into; the opt-out and the
   * override are one variable each (see resolveDsn).
   */
-export const MIKE_SENTRY_DSN = {
+export const LINKMAI_SENTRY_DSN = {
     backend:
         "https://d0d66029ed783707289c965cd3d5c868@o4512288166510592.ingest.us.sentry.io/4512288204718080",
     frontend:
@@ -269,7 +269,7 @@ export const MIKE_SENTRY_DSN = {
 export type DsnResolution = {
     dsn: string;
     /**
-     * Where the DSN came from; "default" means the Mike project's Sentry and
+     * Where the DSN came from; "default" means the LinkMai project's Sentry and
      * "development" means off because this is a development build.
      */
     source: "disabled" | "env" | "default" | "development";
@@ -277,7 +277,7 @@ export type DsnResolution = {
 
 /**
   * Off if the runtime's *_SENTRY_DISABLED is "true"; the runtime's own DSN
-  * when one is set (a self-hoster's own Sentry); otherwise the built-in Mike
+  * when one is set (a self-hoster's own Sentry); otherwise the built-in LinkMai
   * project DSN. Test processes are guarded separately by the caller.
   */
 export function resolveDsn(input: {
@@ -287,7 +287,7 @@ export function resolveDsn(input: {
     /**
      * A development build (`next dev`, `tsx watch`, the add-in's webpack dev
      * server): a contributor's laptop, not an install. It never falls back to
-     * the Mike project; only a DSN set on purpose (your own project, or the
+     * the LinkMai project; only a DSN set on purpose (your own project, or the
      * local sink in scripts/sentry-sink.mjs) turns it on.
      */
     development?: boolean;
@@ -415,7 +415,7 @@ function mapStringLeaves(
 }
 
 /**
-  * COMMUNITY INSTALLS: a fork or self-hosted Mike reporting to the Mike
+  * COMMUNITY INSTALLS: a fork or self-hosted LinkMai reporting to the LinkMai
   * project's Sentry sends only what our own code owns and what is too broad
   * to identify anyone. Removed: the machine name, the user id, request
   * headers and host, every breadcrumb, device / app / locale contexts, local
@@ -428,10 +428,10 @@ export function minimiseForCommunity<T extends CommunityEvent>(event: T): T {
     delete event.server_name;
     delete event.user;
     // Breadcrumbs are request history; only our own stage trail stays
-    // (category mike.stage, message a stage name), the privacy boundary
+    // (category linkmai.stage, message a stage name), the privacy boundary
     // checks each one against the diagnostic label format.
     const trail = Array.isArray(event.breadcrumbs)
-      ? event.breadcrumbs.filter((crumb) => (crumb as { category?: unknown })?.category === "mike.stage")
+      ? event.breadcrumbs.filter((crumb) => (crumb as { category?: unknown })?.category === "linkmai.stage")
       : [];
     if (trail.length) event.breadcrumbs = trail;
     else delete event.breadcrumbs;
@@ -759,7 +759,7 @@ export const UNVERSIONED = "0.0.0";
 // Semver core plus optional prerelease; the commit is the build metadata.
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 
-/** `MIKE_VERSION` as a semver string, or 0.0.0 when unset or malformed. */
+/** `LINKMAI_VERSION` as a semver string, or 0.0.0 when unset or malformed. */
 export function normalizeVersion(raw: string | undefined): string {
     const trimmed = (raw ?? "").trim().replace(/^v/, "");
     return VERSION_PATTERN.test(trimmed) ? trimmed : UNVERSIONED;
@@ -769,10 +769,10 @@ export function normalizeVersion(raw: string | undefined): string {
  * The release every event is tagged with, and the one the build plugins
  * upload source maps under (releaseName.cjs is the CommonJS twin for the
  * build configs). An explicit SENTRY_RELEASE wins; otherwise
- * `mike@<version>+<sha12>` from the MIKE_VERSION and GIT_SHA build
+ * `linkmai@<version>+<sha12>` from the LINKMAI_VERSION and GIT_SHA build
  * arguments. Sentry reads `package@version+build` as semver, so releases
  * order by version while the build metadata keeps the exact commit. A build
- * without a version is `mike@0.0.0...`: valid, and visibly not a release.
+ * without a version is `linkmai@0.0.0...`: valid, and visibly not a release.
  */
 export function releaseName(
     explicit: string | undefined,
@@ -782,6 +782,6 @@ export function releaseName(
     const named = explicit?.trim();
     if (named) return named;
     const sha = gitSha?.trim().slice(0, 12);
-    const base = `mike@${normalizeVersion(version)}`;
+    const base = `linkmai@${normalizeVersion(version)}`;
     return sha ? `${base}+${sha}` : base;
 }

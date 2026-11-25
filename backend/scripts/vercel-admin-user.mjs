@@ -4,7 +4,7 @@
 // this deployment and its built-in mailer delivers only to the project's team,
 // two messages an hour, so the normal "sign up, confirm your email" path cannot
 // work until the operator configures Supabase Auth. Instead, the deploy form
-// asks for MIKE_ADMIN_EMAIL and MIKE_ADMIN_PASSWORD and this script creates
+// asks for LINKMAI_ADMIN_EMAIL and LINKMAI_ADMIN_PASSWORD and this script creates
 // that one account already confirmed, through the Auth admin API, so the
 // person who deployed can sign in immediately.
 //
@@ -12,8 +12,8 @@
 // password is never reset from the environment). Exits 0 when nothing is
 // configured; a failure is logged and does not stop the server.
 
-const email = process.env.MIKE_ADMIN_EMAIL?.trim().toLowerCase();
-const password = process.env.MIKE_ADMIN_PASSWORD ?? "";
+const email = process.env.LINKMAI_ADMIN_EMAIL?.trim().toLowerCase();
+const password = process.env.LINKMAI_ADMIN_PASSWORD ?? "";
 const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
 const secretKey = process.env.SUPABASE_SECRET_KEY;
 
@@ -28,7 +28,7 @@ async function main() {
     return;
   }
   if (password.length < 10) {
-    log("skipped: MIKE_ADMIN_PASSWORD must be at least 10 characters");
+    log("skipped: LINKMAI_ADMIN_PASSWORD must be at least 10 characters");
     return;
   }
 

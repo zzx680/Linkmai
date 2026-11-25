@@ -5,7 +5,7 @@ import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
 import {
     listPlaybookRunHistory,
     type PlaybookRunHistoryItem,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 
 const PAGE_SIZE = 25;
 const MAX_REFRESH = 100;

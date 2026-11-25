@@ -6,15 +6,15 @@ import {
     getTabularChatMessages,
     streamTabularChat,
     streamTabularChatTurn,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { Message } from "@/app/components/shared/types";
 import { TRChatPanel } from "./TRChatPanel";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     getTabularChats: vi.fn(),
     getTabularChatMessages: vi.fn(),
     streamTabularChat: vi.fn(),
@@ -112,13 +112,13 @@ describe("TRChatPanel terminal error frame", () => {
         // The server's own wording is internal: it is never shown.
         expect(alert).not.toHaveTextContent("0xdeadbeef");
         expect(alert).toHaveTextContent(
-            "Mike couldn't finish this answer. Try again.",
+            "LinkMai couldn't finish this answer. Try again.",
         );
 
         // What already streamed is kept, and the bubble says the turn failed.
         expect(await screen.findByText(/Clause 4 says/)).toBeVisible();
         expect(
-            screen.getByText("Mike couldn't finish this answer. Try again.", {
+            screen.getByText("LinkMai couldn't finish this answer. Try again.", {
                 selector: "p",
             }),
         ).toBeVisible();

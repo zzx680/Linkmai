@@ -3,8 +3,8 @@
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import assert from "node:assert/strict";
-const container = process.env.MIKE_TEST_POSTGRES_CONTAINER;
-const database = process.env.MIKE_TEST_POSTGRES_DATABASE;
+const container = process.env.LINKMAI_TEST_POSTGRES_CONTAINER;
+const database = process.env.LINKMAI_TEST_POSTGRES_DATABASE;
 const url = new URL(process.env.SUPABASE_TEST_DB_URL ?? "postgres://invalid");
 if (container ? !database?.startsWith("mike_sql_") : !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
   throw new Error("Use a disposable loopback database or an explicitly named mike_sql_ test database");

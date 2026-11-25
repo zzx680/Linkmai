@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -8,7 +8,7 @@ import {
   restoreOrganization,
   isMfaRequiredError,
   type DeletedOrganization,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import { useWorkspace } from "@/app/contexts/WorkspaceContext";
 import {
@@ -22,7 +22,7 @@ import {
   SettingsLabel,
 } from "@/app/components/settings/SettingsText";
 import { SettingsRow } from "@/app/components/settings/SettingsRow";
-import { GlassCardUI, PillButtonUI } from "@mike/ui";
+import { GlassCardUI, PillButtonUI } from "@linkmai/ui";
 
 export function DeletedOrganizations({
   onRestored,

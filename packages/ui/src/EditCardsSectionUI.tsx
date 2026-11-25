@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Children, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";

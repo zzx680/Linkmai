@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { UserAvatar } from "@/app/components/ui/user-avatar";
 
 import { useState, type ReactNode } from "react";
 import { Check, ChevronDown, Info, Loader2 } from "lucide-react";
-import type { UserLookupResult } from "@/app/lib/mikeApi";
-import type { AccessAssignmentRole } from "@/app/lib/mikeApi";
+import type { UserLookupResult } from "@/app/lib/linkmaiApi";
+import type { AccessAssignmentRole } from "@/app/lib/linkmaiApi";
 import type { ContentVisibility } from "@/app/components/shared/types";
 import {
     PROJECT_ROLE_DESCRIPTIONS,
@@ -25,7 +25,7 @@ import {
     LIQUID_GLASS_FLOAT_CLASS,
     LIQUID_GLASS_HOVER_CLASS,
     LIQUID_GLASS_MODAL_ROW_HOVER_CLASS,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 export type AccessScope = "direct" | "project";
 

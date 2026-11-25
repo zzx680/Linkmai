@@ -2,9 +2,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Chat } from "@/app/components/shared/types";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import { ChatAccessModal } from "./ChatAccessModal";
 
 const { getChatAccess, getChatPeople, grantChatAccess, revokeChatAccess } =
@@ -19,10 +19,10 @@ vi.mock("@/app/contexts/AuthContext", () => ({
     useAuth: () => ({ user: { id: "user-1", email: "me@example.com" } }),
 }));
 
-// importOriginal so MikeApiError stays the real class — userFacingApiError
+// importOriginal so LinkMaiApiError stays the real class — userFacingApiError
 // picks the server's own wording with an `instanceof` test.
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     getChatAccess: (...args: unknown[]) => getChatAccess(...args),
     getChatPeople: (...args: unknown[]) => getChatPeople(...args),
     grantChatAccess: (...args: unknown[]) => grantChatAccess(...args),
@@ -209,7 +209,7 @@ describe("ChatAccessModal", () => {
         // owner got a modal that was read-only for no stated reason —
         // indistinguishable from genuinely not being allowed to manage it.
         getChatAccess.mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "Access details are unavailable",
                 status: 409,
             }),
@@ -260,7 +260,7 @@ describe("ChatAccessModal", () => {
             ],
         });
         getChatAccess.mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "You do not have access to manage this chat",
                 status: 403,
             }),
@@ -286,7 +286,7 @@ describe("ChatAccessModal", () => {
 
     it("still reports a roster failure through the modal's error channel", async () => {
         getChatPeople.mockRejectedValue(
-            new MikeApiError({ message: "Chat not found", status: 404 }),
+            new LinkMaiApiError({ message: "Chat not found", status: 404 }),
         );
 
         render(

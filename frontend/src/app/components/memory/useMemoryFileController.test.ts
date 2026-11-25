@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { MemoryCurrent } from "@/app/lib/mikeApi";
+import type { MemoryCurrent } from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
 import { useMemoryFileController } from "./useMemoryFileController";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, X } from "lucide-react";
@@ -23,7 +23,7 @@ import {
     LIQUID_GLASS_MODAL_ROW_HOVER_CLASS,
     LIQUID_GLASS_MODAL_ROW_SELECTED_CLASS,
 } from "@/app/components/ui/liquid-surface";
-import { LIQUID_GLASS_SUBTLE_CLASS } from "@mike/ui";
+import { LIQUID_GLASS_SUBTLE_CLASS } from "@linkmai/ui";
 
 type WorkflowPreviewMode = "auto" | "prompt" | "columns";
 type MobilePickerPane = "list" | "details";

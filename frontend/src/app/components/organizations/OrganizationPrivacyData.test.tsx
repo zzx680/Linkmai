@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MikeApiError, type Org } from "@/app/lib/mikeApi";
+import { LinkMaiApiError, type Org } from "@/app/lib/linkmaiApi";
 import { OrganizationPrivacyData } from "./OrganizationPrivacyData";
 
 // The Privacy & Data section of an organization's settings. What this pins:
@@ -44,8 +44,8 @@ vi.mock("./OrganizationSettingsShell", () => ({
 vi.mock("@/app/contexts/WorkspaceContext", () => ({
   useWorkspace: () => ({ refreshOrganizations: mocks.refreshOrganizations }),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   deleteOrgData: mocks.deleteOrgData,
   setOrgMemberDataPolicy: mocks.setOrgMemberDataPolicy,
 }));
@@ -215,7 +215,7 @@ describe("deleting organization data", () => {
   it("reports a failed delete without the server's wording", async () => {
     const user = userEvent.setup();
     mocks.deleteOrgData.mockRejectedValue(
-      new MikeApiError({ message: "relation boom", status: 500 }),
+      new LinkMaiApiError({ message: "relation boom", status: 500 }),
     );
     render(<OrganizationPrivacyData />);
 
@@ -271,7 +271,7 @@ describe("OrganizationPrivacyData member data policy", () => {
     const user = userEvent.setup();
     mocks.setOrgMemberDataPolicy
       .mockRejectedValueOnce(
-        new MikeApiError({
+        new LinkMaiApiError({
           message: "MFA required",
           status: 403,
           code: "mfa_verification_required",

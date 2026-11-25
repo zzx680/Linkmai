@@ -23,26 +23,26 @@ afterEach(() => {
 describe("pane preferences without OfficeRuntime", () => {
     it("read and write the edit-apply mode through localStorage", async () => {
         expect("OfficeRuntime" in globalThis).toBe(false);
-        localStorage.setItem("mike_word_edit_apply_mode", "direct");
+        localStorage.setItem("linkmai_word_edit_apply_mode", "direct");
 
         const { result } = renderHook(() => useWordEditApplyMode());
         await waitFor(() => expect(result.current.mode).toBe("direct"));
 
         act(() => result.current.setMode("approval"));
         await waitFor(() =>
-            expect(localStorage.getItem("mike_word_edit_apply_mode")).toBe("approval"),
+            expect(localStorage.getItem("linkmai_word_edit_apply_mode")).toBe("approval"),
         );
     });
 
     it("read and write the chat storage choice through localStorage", async () => {
-        localStorage.setItem("mike_word_chat_storage_mode:user-1", "local");
+        localStorage.setItem("linkmai_word_chat_storage_mode:user-1", "local");
 
         const { result } = renderHook(() => useWordChatStoragePreference("user-1"));
         await waitFor(() => expect(result.current.loading).toBe(false));
         expect(result.current.mode).toBe("local");
 
         await act(() => result.current.setMode("cloud"));
-        expect(localStorage.getItem("mike_word_chat_storage_mode:user-1")).toBe("cloud");
+        expect(localStorage.getItem("linkmai_word_chat_storage_mode:user-1")).toBe("cloud");
     });
 });
 
@@ -52,11 +52,11 @@ describe("pane preferences inside Office", () => {
         vi.stubGlobal("OfficeRuntime", {
             storage: { getItem, setItem: vi.fn(async () => {}), removeItem: vi.fn(async () => {}) },
         });
-        localStorage.setItem("mike_word_edit_apply_mode", "approval");
+        localStorage.setItem("linkmai_word_edit_apply_mode", "approval");
 
         const { result } = renderHook(() => useWordEditApplyMode());
         await waitFor(() => expect(result.current.mode).toBe("direct"));
-        expect(getItem).toHaveBeenCalledWith("mike_word_edit_apply_mode");
+        expect(getItem).toHaveBeenCalledWith("linkmai_word_edit_apply_mode");
     });
 });
 
@@ -81,7 +81,7 @@ describe("pane preferences when localStorage is blocked", () => {
         const restore = blockLocalStorage();
         try {
             expect("OfficeRuntime" in globalThis).toBe(false);
-            const read = paneStorage.getItem("mike_word_edit_apply_mode");
+            const read = paneStorage.getItem("linkmai_word_edit_apply_mode");
             await expect(read).rejects.toMatchObject({ name: "SecurityError" });
 
             // The chat-storage read fails, so it fails closed to "local":

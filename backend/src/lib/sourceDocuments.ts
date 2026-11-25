@@ -1,20 +1,20 @@
-export type { SourceDocumentType } from "@mike/contracts";
-import type { SourceDocumentType } from "@mike/contracts";
+export type { SourceDocumentType } from "@linkmai/contracts";
+import type { SourceDocumentType } from "@linkmai/contracts";
 
-export type { SourceDocumentMetadata } from "@mike/contracts";
-import type { SourceDocumentMetadata } from "@mike/contracts";
+export type { SourceDocumentMetadata } from "@linkmai/contracts";
+import type { SourceDocumentMetadata } from "@linkmai/contracts";
 
-export type { SourceDocumentAction } from "@mike/contracts";
-import type { SourceDocumentAction } from "@mike/contracts";
+export type { SourceDocumentAction } from "@linkmai/contracts";
+import type { SourceDocumentAction } from "@linkmai/contracts";
 
-export type { SourceDocumentQuote } from "@mike/contracts";
-import type { SourceDocumentQuote } from "@mike/contracts";
+export type { SourceDocumentQuote } from "@linkmai/contracts";
+import type { SourceDocumentQuote } from "@linkmai/contracts";
 
-export type { SourceSubdocument } from "@mike/contracts";
-import type { SourceSubdocument } from "@mike/contracts";
+export type { SourceSubdocument } from "@linkmai/contracts";
+import type { SourceSubdocument } from "@linkmai/contracts";
 
-export type { SourceDocument } from "@mike/contracts";
-import type { SourceDocument } from "@mike/contracts";
+export type { SourceDocument } from "@linkmai/contracts";
+import type { SourceDocument } from "@linkmai/contracts";
 
 /**
  * A provider-backed source read during one request, for example a document a

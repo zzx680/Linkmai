@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -15,7 +15,7 @@ import type {
     Project,
     TabularReview,
 } from "@/app/components/shared/types";
-import { listProjectChats, listTabularReviews } from "@/app/lib/mikeApi";
+import { listProjectChats, listTabularReviews } from "@/app/lib/linkmaiApi";
 import { cn } from "@/app/lib/utils";
 import {
     LIQUID_GLASS_HOVER_CLASS,

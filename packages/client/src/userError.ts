@@ -104,7 +104,7 @@ const KIND_TITLES: Record<UserErrorKind, string> = {
 /**
  * The one sentence shown when a request never reached the server.
  *
- * Both clients say this. The add-in passes the origin because Mike is
+ * Both clients say this. The add-in passes the origin because LinkMai is
  * self-hostable and "check your connection" is useless advice to someone
  * whose own API container is down; the web app omits it because the API is
  * same-origin there and naming it would add noise, not information.
@@ -113,9 +113,9 @@ export function networkMessage(origin?: string): string {
     // Naming the origin is for self-hosters, whose own server may be the
     // thing that is down, so that variant also says to check the server.
     if (origin) {
-        return `Mike couldn't reach the server at ${origin}. Check your connection and that the server is running, then try again.`;
+        return `LinkMai couldn't reach the server at ${origin}. Check your connection and that the server is running, then try again.`;
     }
-    return uiText("Mike couldn't reach the server. Check your connection and try again.");
+    return uiText("LinkMai couldn't reach the server. Check your connection and try again.");
 }
 
 /**
@@ -138,7 +138,7 @@ const KIND_MESSAGES: Record<UserErrorKind, string> = {
     payload_too_large: uiText("That's too large to upload."),
     rate_limited: uiText("Too many requests. Wait a moment and try again."),
     unavailable:
-        uiText("Mike is temporarily unavailable. Try again in a moment."),
+        uiText("LinkMai is temporarily unavailable. Try again in a moment."),
     server: SERVER_FAILURE_MESSAGE,
     unknown: GENERIC_FAILURE_MESSAGE,
 };

@@ -14,7 +14,7 @@ beforeAll(async () => {
   process.env.R2_PUBLIC_ENDPOINT_URL = "";
   process.env.R2_ACCESS_KEY_ID = "test-access-key";
   process.env.R2_SECRET_ACCESS_KEY = "test-secret-key";
-  process.env.R2_BUCKET_NAME = "mike";
+  process.env.R2_BUCKET_NAME = "linkmai";
   vi.resetModules();
   ({ getSignedUploadUrl, getSignedUrl } = await import("../storage.js"));
 });

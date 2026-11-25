@@ -6,7 +6,7 @@
  *   R2_ENDPOINT_URL      — https://<account-id>.r2.cloudflarestorage.com
  *   R2_ACCESS_KEY_ID     — API token (Access Key ID)
  *   R2_SECRET_ACCESS_KEY — API token (Secret Access Key)
- *   R2_BUCKET_NAME       — bucket name (default: "mike")
+ *   R2_BUCKET_NAME       — bucket name (default: "linkmai")
  *   R2_PUBLIC_ENDPOINT_URL — origin browsers reach, when it differs from the
  *                            server-side endpoint (presigned uploads and downloads)
  */
@@ -39,7 +39,7 @@ const CHECKSUM_DEFAULTS = {
 } as const;
 
 export function createS3StorageAdapter(): StorageAdapter {
-  const bucket = process.env.R2_BUCKET_NAME ?? "mike";
+  const bucket = process.env.R2_BUCKET_NAME ?? "linkmai";
   const enabled = Boolean(
     process.env.R2_ENDPOINT_URL &&
       process.env.R2_ACCESS_KEY_ID &&

@@ -1,7 +1,7 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCloudWordChat } from "../api/mikeApi";
+import { getCloudWordChat } from "../api/linkmaiApi";
 import { getLocalWordChat } from "../lib/localWordChats";
 import { reportFault } from "../lib/notify";
 import type { WordChatStorageMode } from "../lib/wordChatSettings";

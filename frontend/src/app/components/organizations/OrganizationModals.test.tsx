@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { Org } from "@/app/lib/mikeApi";
+import type { Org } from "@/app/lib/linkmaiApi";
 import { InviteOrganizationMemberModal } from "./OrganizationModals";
 
 // What this file pins:
@@ -23,8 +23,8 @@ const mocks = vi.hoisted(() => ({
   createOrg: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   createOrgInvitation: mocks.createOrgInvitation,
   cancelOrgInvitation: mocks.cancelOrgInvitation,
   resendOrgInvitation: mocks.resendOrgInvitation,

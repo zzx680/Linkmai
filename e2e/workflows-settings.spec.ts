@@ -1,7 +1,7 @@
 /**
  * E2E tests for Workflows and Settings features.
  *
- * Test user: this worker's account (e2eAccount; e2e@mike.local on worker 0)
+ * Test user: this worker's account (e2eAccount; e2e@linkmai.local on worker 0)
  *
  * Key source facts used by these selectors:
  *  - WorkflowList.tsx: h1 "Workflows"; Plus icon button (no aria-label) opens NewWorkflowModal

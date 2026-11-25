@@ -15,8 +15,8 @@ import type {
     Message,
 } from "@/app/components/shared/types";
 import ProjectAssistantChatPage from "./page";
-import { getProject } from "@/app/lib/mikeApi";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { getProject } from "@/app/lib/linkmaiApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import type { DocxCloseGuard } from "@/app/components/shared/views/DocxRenderer.types";
 
 const state = vi.hoisted(() => ({
@@ -52,8 +52,8 @@ vi.mock("next/navigation", () => ({
     useRouter: () => ({ replace: state.replace, push: state.push }),
     usePathname: () => window.location.pathname,
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     getProject: vi.fn().mockResolvedValue({
         id: "p1",
         name: "Matter",
@@ -375,7 +375,7 @@ describe("closing document tabs", () => {
             screen.getByRole("region", { name: "Document viewer" }),
             {
                 dataTransfer: {
-                    types: ["application/mike-doc"],
+                    types: ["application/linkmai-doc"],
                     getData: () => "notes",
                 },
             },
@@ -424,9 +424,9 @@ describe("document viewer drops", () => {
         await renderWorkspace();
         const viewer = screen.getByRole("region", { name: "Document viewer" });
         const dataTransfer = {
-            types: ["application/mike-doc"],
+            types: ["application/linkmai-doc"],
             getData: vi.fn((type) =>
-                type === "application/mike-doc" ? "doc1" : "",
+                type === "application/linkmai-doc" ? "doc1" : "",
             ),
         };
         fireEvent.dragOver(viewer, { dataTransfer });
@@ -455,9 +455,9 @@ describe("document viewer drops", () => {
             screen.getByRole("region", { name: "Document viewer" }),
             {
                 dataTransfer: {
-                    types: ["application/mike-docs"],
+                    types: ["application/linkmai-docs"],
                     getData: (type: string) =>
-                        type === "application/mike-docs"
+                        type === "application/linkmai-docs"
                             ? JSON.stringify(["doc1", "excel"])
                             : "",
                 },
@@ -547,9 +547,9 @@ describe("document viewer drops", () => {
             screen.getByRole("region", { name: "Document viewer" }),
             {
                 dataTransfer: {
-                    types: ["application/mike-doc"],
+                    types: ["application/linkmai-doc"],
                     getData: (type: string) =>
-                        type === "application/mike-doc" ? "missing" : "",
+                        type === "application/linkmai-doc" ? "missing" : "",
                 },
             },
         );
@@ -565,7 +565,7 @@ describe("document viewer drops", () => {
         await renderWorkspace();
         const viewer = screen.getByRole("region", { name: "Document viewer" });
         for (const type of [
-            "application/mike-folder",
+            "application/linkmai-folder",
             "application/mike-project-tab",
         ]) {
             const dataTransfer = { types: [type], getData: vi.fn() };
@@ -1383,9 +1383,9 @@ describe("project explorer root drop", () => {
             fireEvent.drop(explorer.parentElement!, {
                 dataTransfer: {
                     getData: (type: string) =>
-                        type === "application/mike-doc" ? "doc1" : "",
+                        type === "application/linkmai-doc" ? "doc1" : "",
                     files: [],
-                    types: ["application/mike-doc"],
+                    types: ["application/linkmai-doc"],
                 },
             });
         });

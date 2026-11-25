@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useState } from "react";
 import { Check, Eye, Pen } from "lucide-react";
 import type { WordEditApplyMode } from "../../lib/wordChatSettings";
@@ -8,7 +8,7 @@ import {
   DropdownContent,
   DropdownItem,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 interface ApplyModeOption {
   mode: WordEditApplyMode;

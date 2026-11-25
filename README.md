@@ -1,16 +1,16 @@
-# Mike
+# LinkMai
 
-![Mike](docs/assets/link-image.jpg)
+![LinkMai](docs/assets/link-image.jpg)
 
-Mike (MikeOSS) is an open-source legal AI platform for document review,
+LinkMai (LinkMaiOSS) is an open-source legal AI platform for document review,
 drafting, and legal research.
 
 It combines a Next.js frontend, an Express backend, Supabase Auth/Postgres,
 and Cloudflare R2-compatible object storage.
 
-Website: [mikeoss.com](https://mikeoss.com)
+Website: [linkmai.com](https://linkmai.com)
 
-![Mike assistant home screen](docs/assets/mike-home.png)
+![LinkMai assistant home screen](docs/assets/linkmai-home.png)
 
 ## Features
 
@@ -24,7 +24,7 @@ Website: [mikeoss.com](https://mikeoss.com)
 
 ## Quick start
 
-The included Docker Compose stack runs Mike, Supabase, RustFS object storage,
+The included Docker Compose stack runs LinkMai, Supabase, RustFS object storage,
 and local email capture without requiring managed infrastructure.
 
 1. Copy the local environment templates:
@@ -48,7 +48,7 @@ and local email capture without requiring managed infrastructure.
    their Sentry source maps and release) by pinning a version in `.env`:
 
    ```bash
-   echo "MIKE_IMAGE_TAG=$(cat VERSION)" >> .env
+   echo "LINKMAI_IMAGE_TAG=$(cat VERSION)" >> .env
    docker compose pull && docker compose up --no-build -d
    ```
 
@@ -70,7 +70,7 @@ authentication behavior, Ollama setup, and first-run guidance.
 
 ### Deploy on Vercel
 
-To run Mike without Docker or servers of your own, deploy it to Vercel with a
+To run LinkMai without Docker or servers of your own, deploy it to Vercel with a
 Marketplace Supabase project for the database, sign-in and files. See
 [Deploy on Vercel](docs/vercel.md) for the one-click button and its limits.
 Open your new deployment as soon as it is ready: its first visitor creates
@@ -78,7 +78,7 @@ the first account.
 
 ### Telemetry
 
-Mike sends scrubbed error reports (no document content, user identities, or
+LinkMai sends scrubbed error reports (no document content, user identities, or
 request data) to the project's Sentry by default. Development builds (`next dev`,
 the backend run from source, the add-in's dev server) send nothing unless you
 set a DSN yourself. Set `SENTRY_DISABLED=true` to
@@ -122,13 +122,13 @@ variables, and the [Sentry data audit](docs/sentry-data-audit.md).
 
 ## System workflows
 
-Mike's system assistant and tabular-review workflows are maintained in the
+LinkMai's system assistant and tabular-review workflows are maintained in the
 [`Open-Legal-Products/mike-workflows`](https://github.com/Open-Legal-Products/mike-workflows)
 repository. See [Contributing](CONTRIBUTING.md#mike-workflows) for how they are
 packaged and synchronized with this application.
 
 ## License
 
-Mike is available under the [GNU Affero General Public License v3.0](LICENSE).
+LinkMai is available under the [GNU Affero General Public License v3.0](LICENSE).
 Bundled [public contract templates](docs/preset-templates.md#maintaining-the-catalog)
 retain their publishers' separate licenses and notices.

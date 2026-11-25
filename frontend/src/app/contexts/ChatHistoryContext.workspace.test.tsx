@@ -19,7 +19,7 @@ const workspace = vi.hoisted(() => ({
 const STABLE_USER = vi.hoisted(() => ({ id: "u1", email: "u1@example.com" }));
 const auth = vi.hoisted(() => ({ user: STABLE_USER as typeof STABLE_USER | null }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     createChat: (...args: unknown[]) => createChat(...args),
     listChats: (...args: unknown[]) => listChats(...args),
     renameChat: (...args: unknown[]) => renameChat(...args),

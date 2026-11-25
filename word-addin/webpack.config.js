@@ -94,14 +94,14 @@ module.exports = async (_env, options) => {
     }
 
     // Word loads the task pane over HTTPS, and its WebView blocks "mixed content"
-    // (HTTP requests from an HTTPS page). Proxy the local Mike API through this
+    // (HTTP requests from an HTTPS page). Proxy the local LinkMai API through this
     // HTTPS dev server so authentication and API calls stay same-origin and the
     // HttpOnly session cookie works consistently across Word hosts.
     const apiTarget = process.env.API_PROXY_TARGET || "http://localhost:3001";
     const objectStorageTarget =
       process.env.OBJECT_STORAGE_PROXY_TARGET || "http://localhost:9000";
     const objectStorageBucketName =
-      process.env.OBJECT_STORAGE_BUCKET_NAME || "mike";
+      process.env.OBJECT_STORAGE_BUCKET_NAME || "linkmai";
     if (!/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(objectStorageBucketName)) {
       throw new Error("OBJECT_STORAGE_BUCKET_NAME is not a valid bucket name");
     }
@@ -145,7 +145,7 @@ module.exports = async (_env, options) => {
           release: {
             name: releaseName(
               process.env.REACT_APP_SENTRY_RELEASE,
-              process.env.REACT_APP_MIKE_VERSION,
+              process.env.REACT_APP_LINKMAI_VERSION,
               process.env.REACT_APP_GIT_SHA,
             ),
           },
@@ -197,8 +197,8 @@ module.exports = async (_env, options) => {
         // Shared UI primitives and the framework-free client behavior behind
         // them (error presentation, the model catalog, uploads, excerpts,
         // Sentry hygiene): one implementation for the web app and the add-in.
-        "@mike/ui": sharedPackage("ui"),
-        "@mike/client": sharedPackage("client"),
+        "@linkmai/ui": sharedPackage("ui"),
+        "@linkmai/client": sharedPackage("client"),
       },
     },
     module: {
@@ -247,7 +247,7 @@ module.exports = async (_env, options) => {
         // Development defaults stay on the HTTPS dev-server origin, whose
         // proxies reach the HTTP backends without mixed-content failures.
         // Production hosting must reverse-proxy this same-origin path to the
-        // Mike backend so HttpOnly auth cookies are never third-party cookies.
+        // LinkMai backend so HttpOnly auth cookies are never third-party cookies.
         REACT_APP_API_BASE_URL:
           process.env.REACT_APP_API_BASE_URL || "/api",
         // Deployment override only. Leaving it empty makes DEFAULT_MODEL_ID in
@@ -255,7 +255,7 @@ module.exports = async (_env, options) => {
         // model — this config file cannot import that TypeScript constant, so
         // repeating its value here would be a second copy that silently drifts.
         REACT_APP_DEFAULT_MODEL: process.env.REACT_APP_DEFAULT_MODEL || "",
-        // The Mike web app origin — the task pane links here (e.g. the
+        // The LinkMai web app origin — the task pane links here (e.g. the
         // account/api-keys page); it never fetches from it.
         REACT_APP_WEB_APP_URL: isDev
           ? process.env.REACT_APP_WEB_APP_URL || "https://localhost:3000"
@@ -269,7 +269,7 @@ module.exports = async (_env, options) => {
           process.env.REACT_APP_SENTRY_ENVIRONMENT || "",
         REACT_APP_SENTRY_RELEASE: process.env.REACT_APP_SENTRY_RELEASE || "",
         REACT_APP_GIT_SHA: process.env.REACT_APP_GIT_SHA || "",
-        REACT_APP_MIKE_VERSION: process.env.REACT_APP_MIKE_VERSION || "",
+        REACT_APP_LINKMAI_VERSION: process.env.REACT_APP_LINKMAI_VERSION || "",
         REACT_APP_SENTRY_MAX_REPEAT_EVENTS_PER_DAY: process.env.REACT_APP_SENTRY_MAX_REPEAT_EVENTS_PER_DAY || "",
         REACT_APP_SENTRY_TRACES_SAMPLE_RATE:
           process.env.REACT_APP_SENTRY_TRACES_SAMPLE_RATE || "",

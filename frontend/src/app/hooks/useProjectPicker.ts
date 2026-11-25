@@ -1,11 +1,11 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import type { Project } from "@/app/components/shared/types";
 import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
-import { listProjects } from "@/app/lib/mikeApi";
+import { listProjects } from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 
 type PickerState = {

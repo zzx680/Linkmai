@@ -1,12 +1,12 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Workflow } from "../../types";
 import { Spinner } from "../../../shared/ui/spinner";
 import {
   listWorkflows,
   updateWorkflow,
-} from "../../api/mikeApi";
+} from "../../api/linkmaiApi";
 import { WorkflowList } from "./WorkflowList";
 import { PageTitle } from "../primitives/PageTitle";
 import { WorkflowAssets } from "./WorkflowAssets";
@@ -206,7 +206,7 @@ export function WorkflowPicker({
           setSaveError(
             reportFault(reason, {
               fallback:
-                uiText("Mike couldn't save these instructions. Try again."),
+                uiText("LinkMai couldn't save these instructions. Try again."),
               operation: "workflows.run",
             }).message
           );

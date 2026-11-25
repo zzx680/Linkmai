@@ -17,17 +17,17 @@ STACK="$ROOT/scripts/stack.sh"
 node --test "$ROOT/scripts/stack-plan.test.mjs"
 # Confine every sweep to the fixtures so the test never touches real stacks.
 RUN_ID="$(date +%s)-$$"
-STOPPED="mike-gctest-$RUN_ID-stopped"
-GONE="mike-gctest-$RUN_ID-gone"
-RUNNING="mike-gctest-$RUN_ID-running"
-OTHER="mike-gctest-$RUN_ID-other"
-PAUSED="mike-gctest-$RUN_ID-paused"
+STOPPED="linkmai-gctest-$RUN_ID-stopped"
+GONE="linkmai-gctest-$RUN_ID-gone"
+RUNNING="linkmai-gctest-$RUN_ID-running"
+OTHER="linkmai-gctest-$RUN_ID-other"
+PAUSED="linkmai-gctest-$RUN_ID-paused"
 SUPA="gctest-$RUN_ID-supa"
-export MIKE_GC_ONLY="*gctest-$RUN_ID-*"
-export MIKE_GC_SUPABASE_PROJECTS="$SUPA"
+export LINKMAI_GC_ONLY="*gctest-$RUN_ID-*"
+export LINKMAI_GC_SUPABASE_PROJECTS="$SUPA"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/stack-gc-test.XXXXXX")"
-export MIKE_GC_STATE_DIR="$WORK/state"
-export MIKE_GC_VOLUME_AGE_DAYS=7
+export LINKMAI_GC_STATE_DIR="$WORK/state"
+export LINKMAI_GC_VOLUME_AGE_DAYS=7
 FAILED=0
 
 pass() { printf '  ok    %s\n' "$1"; }
@@ -53,7 +53,7 @@ fixture() {
     local dir=$1 marker=$2
     mkdir -p "$dir"
     {
-        [ "$marker" = mike ] && echo "# MikeOSS — test fixture (marker line recognised by scripts/stack.sh)"
+        [ "$marker" = linkmai ] && echo "# LinkMaiOSS — test fixture (marker line recognised by scripts/stack.sh)"
         cat <<'EOF'
 services:
   job:
@@ -92,11 +92,11 @@ echo "Creating fixtures in $WORK"
 docker info >/dev/null 2>&1 || { echo "Docker is not running" >&2; exit 1; }
 docker image inspect alpine:3.20 >/dev/null 2>&1 || docker pull -q alpine:3.20 >/dev/null
 
-fixture "$WORK/stopped" mike
-fixture "$WORK/gone"    mike
-fixture "$WORK/running" mike
+fixture "$WORK/stopped" linkmai
+fixture "$WORK/gone"    linkmai
+fixture "$WORK/running" linkmai
 fixture "$WORK/other"   none
-fixture "$WORK/paused"  mike
+fixture "$WORK/paused"  linkmai
 
 (cd "$WORK/stopped" && docker compose -p "$STOPPED" up -d >/dev/null 2>&1 && docker compose -p "$STOPPED" stop -t 1 >/dev/null 2>&1)
 (cd "$WORK/gone"    && docker compose -p "$GONE"    up -d >/dev/null 2>&1 && docker compose -p "$GONE"    stop -t 1 >/dev/null 2>&1)
@@ -122,18 +122,18 @@ check "dry run plans the orphan"          '[ "$(containers $GONE)" = 2 ] && grep
 check "dry run lists the running stack"   'grep -q "active, left alone: $RUNNING" <<<"$OUT"'
 check "dry run ignores the foreign stack" '! grep -q "$OTHER" <<<"$OUT"'
 
-check "dry run does not create a cleanup record" '[ ! -e "$MIKE_GC_STATE_DIR" ]'
-OUT_ZERO="$(cd "$ROOT" && MIKE_GC_VOLUME_AGE_DAYS=0 bash "$STACK" gc --dry-run)"
+check "dry run does not create a cleanup record" '[ ! -e "$LINKMAI_GC_STATE_DIR" ]'
+OUT_ZERO="$(cd "$ROOT" && LINKMAI_GC_VOLUME_AGE_DAYS=0 bash "$STACK" gc --dry-run)"
 check "dry run includes currently attached eligible volume" 'grep -q "docker volume rm ${STOPPED}_data" <<<"$OUT_ZERO" && [ "$(containers $STOPPED)" = 2 ]'
 check "dry run protects paused stack" '! grep -q "docker volume rm ${PAUSED}_data" <<<"$OUT_ZERO" && [ "$(containers $PAUSED)" = 2 ]'
 check "dry run protects foreign dangling volume" '! grep -q "docker volume rm ${OTHER}_unused" <<<"$OUT_ZERO"'
 
 echo "State failures must not remove containers:"
 printf 'not a directory\n' >"$WORK/blocked-state"
-check "unwritable record location aborts before teardown" '! MIKE_GC_STATE_DIR="$WORK/blocked-state" bash "$STACK" gc >"$WORK/blocked.log" 2>&1 && [ "$(containers $STOPPED)" = 2 ]'
-mkdir -p "$MIKE_GC_STATE_DIR"
+check "unwritable record location aborts before teardown" '! LINKMAI_GC_STATE_DIR="$WORK/blocked-state" bash "$STACK" gc >"$WORK/blocked.log" 2>&1 && [ "$(containers $STOPPED)" = 2 ]'
+mkdir -p "$LINKMAI_GC_STATE_DIR"
 DAEMON="$(docker info --format '{{.ID}}' | tr -d '\n' | tr -c '[:alnum:]_-' '_')"
-STATE_FILE="$MIKE_GC_STATE_DIR/$DAEMON.json"
+STATE_FILE="$LINKMAI_GC_STATE_DIR/$DAEMON.json"
 printf 'invalid json\n' >"$STATE_FILE"
 check "malformed record aborts before teardown" '! bash "$STACK" gc >"$WORK/corrupt.log" 2>&1 && [ "$(containers $STOPPED)" = 2 ]'
 rm "$STATE_FILE"
@@ -161,11 +161,11 @@ check "paused stack remains paused" '[ "$(docker ps -q --filter label=com.docker
 
 # The saved plan now describes dangling volumes. Preview and execution must
 # agree, and preview must leave the persisted cleanup record byte-for-byte.
-cp "$MIKE_GC_STATE_DIR/"*.json "$WORK/before.json"
-OUT_ZERO="$(cd "$ROOT" && MIKE_GC_VOLUME_AGE_DAYS=0 bash "$STACK" gc --dry-run)"
-check "dry run leaves existing cleanup record unchanged" 'cmp -s "$WORK/before.json" "$MIKE_GC_STATE_DIR/"*.json'
+cp "$LINKMAI_GC_STATE_DIR/"*.json "$WORK/before.json"
+OUT_ZERO="$(cd "$ROOT" && LINKMAI_GC_VOLUME_AGE_DAYS=0 bash "$STACK" gc --dry-run)"
+check "dry run leaves existing cleanup record unchanged" 'cmp -s "$WORK/before.json" "$LINKMAI_GC_STATE_DIR/"*.json'
 echo "Sweep with a 0-day threshold removes idle data volumes:"
-(cd "$ROOT" && MIKE_GC_VOLUME_AGE_DAYS=0 bash "$STACK" gc >"$WORK/gc0.log" 2>&1) || { cat "$WORK/gc0.log"; fail "gc exited non-zero"; }
+(cd "$ROOT" && LINKMAI_GC_VOLUME_AGE_DAYS=0 bash "$STACK" gc >"$WORK/gc0.log" 2>&1) || { cat "$WORK/gc0.log"; fail "gc exited non-zero"; }
 check "stopped stack: data volume removed"    '[ "$(volumes $STOPPED)" = 0 ]'
 check "orphan stack: data volume removed"     '[ "$(volumes $GONE)" = 0 ]'
 check "supabase stack: data volume removed"   '[ "$(volumes $SUPA)" = 0 ]'

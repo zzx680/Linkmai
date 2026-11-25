@@ -32,11 +32,11 @@ const CLOUD_DEEPSEEK: ConfiguredModel = {
 };
 
 function configure(value: unknown) {
-    process.env.MIKE_MODEL_CONFIG_JSON = JSON.stringify(value);
+    process.env.LINKMAI_MODEL_CONFIG_JSON = JSON.stringify(value);
     resetModelRegistryCache();
 }
 
-const originalConfig = process.env.MIKE_MODEL_CONFIG_JSON;
+const originalConfig = process.env.LINKMAI_MODEL_CONFIG_JSON;
 const originalKey = process.env.DEEPSEEK_API_KEY;
 
 beforeEach(() => {
@@ -44,8 +44,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    if (originalConfig === undefined) delete process.env.MIKE_MODEL_CONFIG_JSON;
-    else process.env.MIKE_MODEL_CONFIG_JSON = originalConfig;
+    if (originalConfig === undefined) delete process.env.LINKMAI_MODEL_CONFIG_JSON;
+    else process.env.LINKMAI_MODEL_CONFIG_JSON = originalConfig;
     if (originalKey === undefined) delete process.env.DEEPSEEK_API_KEY;
     else process.env.DEEPSEEK_API_KEY = originalKey;
     resetModelRegistryCache();
@@ -53,16 +53,16 @@ afterEach(() => {
 
 describe("loadModelRegistry", () => {
     it("returns an empty registry when nothing is configured", () => {
-        delete process.env.MIKE_MODEL_CONFIG_JSON;
+        delete process.env.LINKMAI_MODEL_CONFIG_JSON;
         resetModelRegistryCache();
         expect(loadModelRegistry()).toEqual({ models: [], committees: [] });
     });
 
     it("rejects invalid JSON with an actionable message", () => {
-        process.env.MIKE_MODEL_CONFIG_JSON = "{not json";
+        process.env.LINKMAI_MODEL_CONFIG_JSON = "{not json";
         resetModelRegistryCache();
         expect(() => loadModelRegistry()).toThrow(
-            /MIKE_MODEL_CONFIG_JSON is not valid JSON/,
+            /LINKMAI_MODEL_CONFIG_JSON is not valid JSON/,
         );
     });
 

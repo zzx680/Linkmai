@@ -5,7 +5,7 @@ import {
   updatePlaybook,
   type Playbook,
   type PlaybookContent,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
 
 type Change = {

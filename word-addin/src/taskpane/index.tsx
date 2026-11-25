@@ -1,9 +1,9 @@
 /// <reference types="office-js" />
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { notifyError } from "./lib/notify";
-import { ToastViewportUI } from "@mike/ui";
+import { ToastViewportUI } from "@linkmai/ui";
 import "./styles.css";
 import {
   ErrorBoundary,

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -10,7 +10,7 @@ import {
   listProjectSummaries,
   type LibraryKind,
   type LibraryScope,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { notifyError } from "@/app/lib/userFacingError";
 import { useAssignLatest } from "@/app/hooks/useLatestRef";

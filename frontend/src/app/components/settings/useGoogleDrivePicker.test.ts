@@ -6,15 +6,15 @@ const mocks = vi.hoisted(() => ({
   open: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-  ...(await original<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+  ...(await original<typeof import("@/app/lib/linkmaiApi")>()),
   createGoogleDrivePickerSession: mocks.session,
 }));
 vi.mock("@/app/lib/googlePicker", () => ({
   openGoogleDrivePicker: mocks.open,
 }));
 
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import { useGoogleDrivePicker } from "./useGoogleDrivePicker";
 
 const session = {
@@ -43,7 +43,7 @@ describe("useGoogleDrivePicker", () => {
       { id: "3", name: "c.pdf", mimeType: "application/pdf" },
     ]);
     expect(await addFiles()).toBe(
-      "Added 3 files. Mike can now search and read them.",
+      "Added 3 files. LinkMai can now search and read them.",
     );
     expect(mocks.open).toHaveBeenCalledWith(session);
   });
@@ -61,7 +61,7 @@ describe("useGoogleDrivePicker", () => {
 
   it("shows intentional 4xx text but never a raw failure", async () => {
     mocks.session.mockRejectedValueOnce(
-      new MikeApiError({
+      new LinkMaiApiError({
         status: 409,
         message: "Google Drive is not connected for this account.",
       }),
@@ -76,7 +76,7 @@ describe("useGoogleDrivePicker", () => {
   });
 
   it("leaves an MFA challenge to the page's step-up flow", async () => {
-    const mfa = new MikeApiError({
+    const mfa = new LinkMaiApiError({
       status: 403,
       code: "mfa_verification_required",
       message: "Verify",

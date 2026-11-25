@@ -1,8 +1,8 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useState } from "react";
 import type { Workflow } from "../../types";
-import { listWorkflows } from "../../api/mikeApi";
+import { listWorkflows } from "../../api/linkmaiApi";
 import { Modal } from "../primitives/Modal";
 import { WorkflowList } from "./WorkflowList";
 import { reportFault } from "../../lib/notify";
@@ -45,7 +45,7 @@ export function WorkflowModal({
         setWorkflows([]);
         setError(
           reportFault(reason, {
-            fallback: uiText("Mike couldn't load your workflows. Try again."),
+            fallback: uiText("LinkMai couldn't load your workflows. Try again."),
             operation: "workflows.run",
           }).message
         );

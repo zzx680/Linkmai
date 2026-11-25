@@ -5,10 +5,10 @@ import {
     getTabularReview,
     streamTabularGeneration,
     updateTabularReview,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { TabularReview } from "@/app/components/shared/types";
 import { TRView } from "./TabularReviewView";
-import { ToastViewportUI } from "@mike/ui";
+import { ToastViewportUI } from "@linkmai/ui";
 
 const { apiKeyState } = vi.hoisted(() => ({
     apiKeyState: {
@@ -29,8 +29,8 @@ vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
     useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock("@/app/lib/mikeApi", () => ({
-    MikeApiError: class MikeApiError extends Error {},
+vi.mock("@/app/lib/linkmaiApi", () => ({
+    LinkMaiApiError: class LinkMaiApiError extends Error {},
     clearTabularCells: vi.fn(),
     deleteTabularReview: vi.fn(),
     getTabularReview: vi.fn(),

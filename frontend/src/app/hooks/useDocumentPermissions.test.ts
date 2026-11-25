@@ -1,10 +1,10 @@
 import { StrictMode, createElement, type ReactNode } from "react";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-import { getDocument } from "@/app/lib/mikeApi";
+import { getDocument } from "@/app/lib/linkmaiApi";
 import type { Document } from "@/app/components/shared/types";
 import { useDocumentPermissions } from "./useDocumentPermissions";
-vi.mock("@/app/lib/mikeApi", () => ({ getDocument: vi.fn() }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ getDocument: vi.fn() }));
 beforeEach(() => vi.resetAllMocks());
 it("fails closed while loading and uses document rights independently", async () => {
     vi.mocked(getDocument).mockImplementation(async (id) => ({ can_edit: id === "editable", can_delete: false }) as Document);

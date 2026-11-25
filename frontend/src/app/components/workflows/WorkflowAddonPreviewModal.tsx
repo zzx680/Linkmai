@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, Code2, Plus } from "lucide-react";
@@ -11,12 +11,12 @@ import {
   LIQUID_GLASS_HOVER_CLASS,
   LIQUID_SUBTLE_PANEL_SURFACE_CLASS,
 } from "@/app/components/ui/liquid-surface";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import { Modal } from "../modals/Modal";
 import { FileTypeIcon } from "../shared/FileTypeIcon";
 import { PdfView } from "../shared/views/PdfView";
 import { SpreadsheetView } from "../shared/views/SpreadsheetView";
-import { workflowAddonAssetDisplayUrl } from "@/app/lib/mikeApi";
+import { workflowAddonAssetDisplayUrl } from "@/app/lib/linkmaiApi";
 import { resolveDocumentViewType } from "@/app/lib/documentViewType";
 
 type DetailView = "columns" | "skill" | "assets";

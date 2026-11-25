@@ -6,8 +6,8 @@ const path = require("path");
 
 const ROOT_DIR = path.resolve(__dirname, "..");
 const WORKSPACE_DIR = path.resolve(ROOT_DIR, "..");
-const WORKFLOWS_DIR = process.env.MIKE_WORKFLOWS_DIR
-  ? path.resolve(process.env.MIKE_WORKFLOWS_DIR)
+const WORKFLOWS_DIR = process.env.LINKMAI_WORKFLOWS_DIR
+  ? path.resolve(process.env.LINKMAI_WORKFLOWS_DIR)
   : path.join(WORKSPACE_DIR, "mike-workflows");
 const WORKFLOW_COLLECTIONS = [
   { directory: "assistant-workflows", type: "assistant" },

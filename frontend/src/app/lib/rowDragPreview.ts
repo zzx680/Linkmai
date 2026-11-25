@@ -1,4 +1,4 @@
-import { LIQUID_GLASS_FLOAT_CLASS } from "@mike/ui";
+import { LIQUID_GLASS_FLOAT_CLASS } from "@linkmai/ui";
 
 /** Capture an explorer row in a rounded surface without its hover/selection fill. */
 export function setRowDragPreview({

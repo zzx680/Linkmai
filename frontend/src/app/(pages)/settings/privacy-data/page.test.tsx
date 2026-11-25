@@ -7,15 +7,15 @@ import {
     downloadUserExport,
     getUserExportStatus,
     startUserExport,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import PrivacyDataPage from "./page";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 // The export buttons drive the async job flow: schedule → poll → download.
 // These tests pin that wiring (start called with the right type, download
 // only after the poll reports done) — the job itself is backend-tested.
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     deleteAllChats: vi.fn(),
     deleteAllMemories: vi.fn(),
     deleteAllProjects: vi.fn(),
@@ -135,7 +135,7 @@ describe("privacy-data async exports", () => {
         const toast = await screen.findByRole("alert");
         expect(toast).toHaveTextContent("Couldn't export your chats");
         expect(toast).toHaveTextContent(
-            "Mike couldn't build the export. Try again, and contact support if it keeps happening.",
+            "LinkMai couldn't build the export. Try again, and contact support if it keeps happening.",
         );
         expect(
             screen.getByRole("button", { name: "Retry" }),
@@ -152,11 +152,11 @@ describe("privacy-data async exports", () => {
         mockedStart.mockResolvedValue({ export_id: "job-memory" });
         mockedStatus.mockResolvedValue({
             status: "done",
-            filename: "mike-memory-export.zip",
+            filename: "linkmai-memory-export.zip",
         });
         mockedDownload.mockResolvedValue({
             blob: new Blob(["zip"], { type: "application/zip" }),
-            filename: "mike-memory-export.zip",
+            filename: "linkmai-memory-export.zip",
         });
         globalThis.URL.createObjectURL = vi.fn(() => "blob:memory");
         globalThis.URL.revokeObjectURL = vi.fn();

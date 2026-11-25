@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { listProjectChats, listTabularReviews } from "@/app/lib/mikeApi";
+import { listProjectChats, listTabularReviews } from "@/app/lib/linkmaiApi";
 import type {
   Chat,
   Project,
@@ -18,7 +18,7 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
   listProjectChats: vi.fn(),
   listTabularReviews: vi.fn(),
 }));

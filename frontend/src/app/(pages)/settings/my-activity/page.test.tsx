@@ -16,7 +16,7 @@ import {
   getUserExportStatus,
   startUserExport,
   type AuditEvent,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import MyActivitySettingsPage from "./page";
 
 const push = vi.fn();
@@ -26,7 +26,7 @@ vi.mock("next/navigation", () => ({
 
 // The CSV now comes from the durable export job, so the page drives the
 // start/poll/download wrappers instead of one blob request.
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
   getAuditHistory: vi.fn(),
   getAuditActors: vi.fn(),
   startUserExport: vi.fn(),

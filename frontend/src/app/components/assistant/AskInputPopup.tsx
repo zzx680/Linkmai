@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
-import { CloseButton, PillButtonUI, TabPillButtonUI } from "@mike/ui";
+import { CloseButton, PillButtonUI, TabPillButtonUI } from "@linkmai/ui";
 import type { AssistantEvent, Document, MessageFile } from "../shared/types";
 import { FileTypeIcon } from "../shared/FileTypeIcon";
 import { ConnectorActionCard } from "../shared/ConnectorActionCard";
@@ -367,7 +367,7 @@ export function AskInputPopup({
         const onlyApprovals = response.responses.every(
             (item) => item.kind === "approval",
         );
-        return `${onlyApprovals ? "Decisions on Mike's requested actions" : "Responses to Mike's questions"}:\n${lines.join("\n\n")}`;
+        return `${onlyApprovals ? "Decisions on LinkMai's requested actions" : "Responses to LinkMai's questions"}:\n${lines.join("\n\n")}`;
     };
 
     // Called straight from the handler that resolves the last outstanding
@@ -492,7 +492,7 @@ export function AskInputPopup({
                                             <DocumentPrompt />
                                         ) : activeItem.kind === "approval" ? (
                                             <p className="text-sm text-gray-800">
-                                                {uiText("Mike wants to run this action. Approve it to run it now.")}
+                                                {uiText("LinkMai wants to run this action. Approve it to run it now.")}
                                             </p>
                                         ) : (
                                             <p className="text-sm text-gray-800">

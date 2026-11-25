@@ -5,7 +5,7 @@ import {
     useWorkspace,
 } from "@/app/contexts/WorkspaceContext";
 import { apiKeyStateFromStatus } from "@/app/lib/apiKeyState";
-import type { ApiKeyState } from "@/app/lib/mikeApi";
+import type { ApiKeyState } from "@/app/lib/linkmaiApi";
 
 /**
  * The provider keys the model pickers judge availability against.

@@ -35,13 +35,13 @@ function signJwt(payload, secret) {
 }
 
 // The local guest account: a real GoTrue user, but one the shell owns the
-// credentials for, so "use Mike without signing up" is one click on the
+// credentials for, so "use LinkMai without signing up" is one click on the
 // login page. Random per install — a guest session on one Mac says nothing
 // about any other. Lives beside the other secrets (same trust boundary:
 // whoever can read this file can read pgdata anyway).
 function mintGuestCredentials() {
   return {
-    guestEmail: "guest@mike.local",
+    guestEmail: "guest@linkmai.local",
     guestPassword: crypto.randomBytes(18).toString("base64url"),
   };
 }

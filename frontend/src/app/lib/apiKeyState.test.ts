@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { API_KEY_PROVIDERS, apiKeyStateFromStatus } from "./apiKeyState";
-import type { ApiKeyStatus } from "./mikeApi";
+import type { ApiKeyStatus } from "./linkmaiApi";
 
 const status = (overrides: Partial<ApiKeyStatus>): ApiKeyStatus =>
     ({

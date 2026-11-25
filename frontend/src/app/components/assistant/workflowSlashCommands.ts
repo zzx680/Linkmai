@@ -3,7 +3,7 @@ import {
     slashCommandQueryFromValue,
     withoutSlashCommand,
     workflowSlashCommandFromTitle,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 export { withoutSlashCommand };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
@@ -12,9 +12,9 @@ import { Modal } from "../modals/Modal";
 import { ModalSelect } from "../modals/ModalSelect";
 import { ModalTextarea } from "../modals/ModalTextarea";
 import { FieldLabel, FormTextInput } from "../ui/form-field";
-import { ToggleSwitchUI } from "@mike/ui";
+import { ToggleSwitchUI } from "@linkmai/ui";
 import { SearchBar } from "../ui/search-bar";
-import { listWorkflows } from "@/app/lib/mikeApi";
+import { listWorkflows } from "@/app/lib/linkmaiApi";
 import { reportFault, userFacingApiError } from "@/app/lib/userFacingError";
 import { LIQUID_GLASS_MODAL_ROW_HOVER_CLASS } from "@/app/components/ui/liquid-surface";
 

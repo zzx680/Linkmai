@@ -109,7 +109,7 @@ begin
   perform * from public.organization_audit_events(org,admin_id,'',array(select id from public.audit_events where org_id=org limit 1));
   assert pg_temp.rel_work('public.audit_events')-before<=10,
     format('one event id read %s audit rows',pg_temp.rel_work('public.audit_events')-before);
-  perform set_config('mike.test_audit_org',org::text,true);perform set_config('mike.test_audit_actor',admin_id::text,true);
+  perform set_config('linkmai.test_audit_org',org::text,true);perform set_config('linkmai.test_audit_actor',admin_id::text,true);
 end;
 $$;
 alter function public.project_access_role(uuid,uuid,uuid,text,text) rename to audit_project_oracle;
@@ -124,7 +124,7 @@ $$;
 do $$
 declare result jsonb;
 begin
-  result:=public.organization_audit_events_page(current_setting('mike.test_audit_org')::uuid,current_setting('mike.test_audit_actor')::uuid,'',jsonb_build_object('title_pattern','%Private%'));
+  result:=public.organization_audit_events_page(current_setting('linkmai.test_audit_org')::uuid,current_setting('linkmai.test_audit_actor')::uuid,'',jsonb_build_object('title_pattern','%Private%'));
   assert result->>'total'='0','hidden titles must not affect search count';
   assert (select last_value=0 and is_called from pg_temp.audit_project_calls),'1,000 events for one project must produce one project verdict';
 end;

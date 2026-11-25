@@ -27,7 +27,7 @@ classes or separate deployed services are unnecessary for these boundaries.
 | Account-delete and export-build queue adapters | `application/jobs/`, imported directly by `jobs/registry.ts` |
 | Tabular extraction and maintenance dependencies | Direct sibling implementation imports, without the tabular facade |
 | Model catalog and playbook contracts | `models.types.ts`, `playbooks.types.ts` and `playbooks.schemas.ts` below their callers |
-| Assistant event contract | Existing `@mike/contracts` definition |
+| Assistant event contract | Existing `@linkmai/contracts` definition |
 | Web stream sink and live-turn contracts | `assistantTurnTypes.ts`, shared by transport and registry |
 | Word reasoning level contract | `modelSelectionTypes.ts`, shared by message and chat declarations |
 

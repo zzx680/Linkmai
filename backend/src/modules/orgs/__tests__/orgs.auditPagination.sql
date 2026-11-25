@@ -54,8 +54,8 @@ begin
   perform pg_temp.assert_true(result=jsonb_build_object('events','[]'::jsonb,'total',0),'ordinary members cannot read or count organization events');
   perform pg_temp.assert_true(not has_function_privilege('authenticated','organization_audit_events_page(uuid,uuid,text,jsonb,text,text,integer,integer)','EXECUTE'),'browser cannot impersonate an audit actor');
   perform pg_temp.assert_true(not has_function_privilege('authenticated','organization_audit_events(uuid,uuid,text,uuid[])','EXECUTE'),'selected-row helper remains service-only');
-  perform set_config('mike.test_audit_org',org::text,true);
-  perform set_config('mike.test_audit_actor',admin_id::text,true);
+  perform set_config('linkmai.test_audit_org',org::text,true);
+  perform set_config('linkmai.test_audit_actor',admin_id::text,true);
 end; $$;
 
 -- Fail if a regular page resolves access for more events than it returns.
@@ -68,9 +68,9 @@ begin
   return query select * from public.test_audit_redaction(p_org_id,p_actor_id,p_actor_email,p_event_ids);
 end; $$;
 select pg_temp.assert_true(
-  organization_audit_events_page(current_setting('mike.test_audit_org')::uuid,current_setting('mike.test_audit_actor')::uuid,'','{}','created_at','desc',10,2)->>'total'='21',
+  organization_audit_events_page(current_setting('linkmai.test_audit_org')::uuid,current_setting('linkmai.test_audit_actor')::uuid,'','{}','created_at','desc',10,2)->>'total'='21',
   'ordinary pagination counts all candidates but only resolves access for two events');
 select pg_temp.assert_true(
-  organization_audit_events_page(current_setting('mike.test_audit_org')::uuid,current_setting('mike.test_audit_actor')::uuid,'','{}','created_at','desc',100,2)->'events'='[]'::jsonb,
+  organization_audit_events_page(current_setting('linkmai.test_audit_org')::uuid,current_setting('linkmai.test_audit_actor')::uuid,'','{}','created_at','desc',100,2)->'events'='[]'::jsonb,
   'empty pages never fall back to resolving the whole organization');
 rollback;

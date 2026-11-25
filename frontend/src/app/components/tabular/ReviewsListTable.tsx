@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { Loader2 } from "lucide-react";
@@ -39,7 +39,7 @@ import {
     type PersonOption,
 } from "@/app/components/shared/PersonFilter";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 import { TabularReviewSkeuoIcon } from "@/app/components/shared/AppSidebarSkeuoIcons";
 import type { Project, TabularReview } from "@/app/components/shared/types";

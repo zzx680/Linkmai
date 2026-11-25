@@ -1,5 +1,5 @@
 /// <reference types="office-js" />
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { networkFailure } from "../lib/networkError";
 import { responseError } from "../api/client";
 import { reportNetworkFailure } from "../lib/errorReporting";
@@ -170,7 +170,7 @@ export function initialize(): void {
       _user = null;
       _error = reportFault(error, {
         action: uiText("sign in"),
-        fallback: uiText("Mike couldn't sign you in. Try again."),
+        fallback: uiText("LinkMai couldn't sign you in. Try again."),
         operation: "word.session",
       }).message;
     })
@@ -210,7 +210,7 @@ export async function signIn(email: string, password: string): Promise<void> {
     _user = null;
     _error = reportFault(error, {
       action: uiText("sign in"),
-      fallback: uiText("Mike couldn't sign you in. Try again."),
+      fallback: uiText("LinkMai couldn't sign you in. Try again."),
       operation: "word.session",
       codeMessages: {
         invalid_credentials: "That email and password don't match an account.",
@@ -307,7 +307,7 @@ export async function signInWithGoogle(): Promise<void> {
                   if (generation === _sessionGeneration) {
                     _error = reportFault(error, {
                       action: uiText("complete Google sign-in"),
-                      fallback: uiText("Mike couldn't complete Google sign-in."),
+                      fallback: uiText("LinkMai couldn't complete Google sign-in."),
                       operation: "word.session",
                     }).message;
                   }
@@ -338,7 +338,7 @@ export async function signInWithGoogle(): Promise<void> {
       // to a URL..."), which means nothing to a user.
       fail(
         reportFault(error, {
-          fallback: uiText("Mike couldn't open Google sign-in. Try again."),
+          fallback: uiText("LinkMai couldn't open Google sign-in. Try again."),
           operation: "word.session",
         }).message,
       );
@@ -377,7 +377,7 @@ export async function signOut(): Promise<void> {
     // out again, not the sign-in screen's error state.
     notifyError(error, {
       action: uiText("sign out"),
-      fallback: uiText("Mike couldn't sign you out. Try again."),
+      fallback: uiText("LinkMai couldn't sign you out. Try again."),
       dedupeKey: "sign-out",
       operation: "word.session",
       onRetry: signOut,

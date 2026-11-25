@@ -43,7 +43,7 @@ export async function handleDocumentExtractText(db: Db, job: DbJob): Promise<voi
         // The source hash matched, so the parser saw the same bytes it will
         // see on every retry: an unreadable file fails once, not three times.
         // The runner's failure hook marks the text failed. The bytes are the
-        // user's (corrupt, encrypted) and nothing in Mike can fix them, so
+        // user's (corrupt, encrypted) and nothing in LinkMai can fix them, so
         // the runner logs this instead of reporting it.
         if (err instanceof ExtractionParseError) throw new NonRetryableJobError("document_text_unreadable", { cause: err, reportLevel: null });
         if (!(err instanceof ExtractionLimitError)) throw err;

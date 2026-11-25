@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { listProjects, MikeApiError } from "@/app/lib/mikeApi";
+import { listProjects, LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import type { TabularReview } from "@/app/components/shared/types";
 import TabularReviewsPage from "./page";
 
@@ -19,11 +19,11 @@ const { createTabularReview, grantTabularReviewAccess, push, retry } =
         retry: vi.fn(),
     }));
 
-// importOriginal so MikeApiError stays the real class: userFacingApiError
+// importOriginal so LinkMaiApiError stays the real class: userFacingApiError
 // decides with an `instanceof` test whether the server's own message may be
 // shown, and a stubbed class would silently take the generic branch.
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     createTabularReview: (...args: unknown[]) => createTabularReview(...args),
     grantTabularReviewAccess: (...args: unknown[]) =>
         grantTabularReviewAccess(...args),
@@ -259,7 +259,7 @@ describe("Tabular reviews page creation", () => {
     it("keeps the created review and reports the refused grant instead of creating a second review", async () => {
         createTabularReview.mockResolvedValue(createdReview);
         grantTabularReviewAccess.mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "That address is not in your organization.",
                 status: 400,
             }),
@@ -292,7 +292,7 @@ describe("Tabular reviews page creation", () => {
         // them.
         createTabularReview.mockResolvedValue(createdReview);
         grantTabularReviewAccess.mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "That address is not in your organization.",
                 status: 400,
             }),
@@ -313,7 +313,7 @@ describe("Tabular reviews page creation", () => {
     it("navigates once the retried grant succeeds", async () => {
         createTabularReview.mockResolvedValue(createdReview);
         grantTabularReviewAccess.mockRejectedValueOnce(
-            new MikeApiError({ message: "Rate limited", status: 429 }),
+            new LinkMaiApiError({ message: "Rate limited", status: 429 }),
         );
         grantTabularReviewAccess.mockResolvedValue({});
 
@@ -333,7 +333,7 @@ describe("Tabular reviews page creation", () => {
     it("reports one refusal per recipient without losing the others", async () => {
         createTabularReview.mockResolvedValue(createdReview);
         grantTabularReviewAccess.mockRejectedValue(
-            new MikeApiError({ message: "No such user.", status: 404 }),
+            new LinkMaiApiError({ message: "No such user.", status: 404 }),
         );
 
         render(<TabularReviewsPage />);
@@ -372,7 +372,7 @@ describe("Tabular reviews page creation", () => {
         // grant was invisible until a reload.
         createTabularReview.mockResolvedValue(createdReview);
         grantTabularReviewAccess.mockRejectedValue(
-            new MikeApiError({ message: "No such user.", status: 404 }),
+            new LinkMaiApiError({ message: "No such user.", status: 404 }),
         );
 
         const create = await openDialogAndReachCreate();

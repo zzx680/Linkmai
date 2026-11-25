@@ -303,11 +303,11 @@ export function unenrollMfaFactor(
 
 /**
  * First-run setup is offered only where the deployment asks for it
- * (backend/scripts/vercel-start.sh sets MIKE_FIRST_RUN_SETUP=true): an
+ * (backend/scripts/vercel-start.sh sets LINKMAI_FIRST_RUN_SETUP=true): an
  * install that creates its accounts some other way never exposes it.
  */
 export function firstRunSetupEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.MIKE_FIRST_RUN_SETUP?.trim().toLowerCase() === "true";
+  return env.LINKMAI_FIRST_RUN_SETUP?.trim().toLowerCase() === "true";
 }
 
 /**
@@ -316,17 +316,17 @@ export function firstRunSetupEnabled(env: NodeJS.ProcessEnv = process.env): bool
  * working confirmation email (no Site URL for this deployment, and a mailer
  * that delivers only to the project's own team), so sign-up stays closed
  * there until the operator configures email and sets
- * MIKE_SIGNUP_EMAIL_CONFIGURED=true (docs/vercel.md). Every other install is
+ * LINKMAI_SIGNUP_EMAIL_CONFIGURED=true (docs/vercel.md). Every other install is
  * unchanged.
  */
 export function emailSignupOpen(env: NodeJS.ProcessEnv = process.env): boolean {
   if (!firstRunSetupEnabled(env)) return true;
-  return env.MIKE_SIGNUP_EMAIL_CONFIGURED?.trim().toLowerCase() === "true";
+  return env.LINKMAI_SIGNUP_EMAIL_CONFIGURED?.trim().toLowerCase() === "true";
 }
 
 /** The sentence a would-be user sees while sign-up is closed. */
 export const SIGNUP_EMAIL_NOT_CONFIGURED_DETAIL =
-  "Sign-up isn't open on this Mike deployment yet, because it can't send " +
+  "Sign-up isn't open on this LinkMai deployment yet, because it can't send " +
   "confirmation emails. Ask the person who set it up to configure email, or " +
   "log in if you already have an account.";
 
@@ -420,7 +420,7 @@ export type FirstAccountResult =
  * the same instant on a brand-new deployment could both pass that check and
  * each create an account. That is accepted: the first account has no
  * special rights, and closing the gap would need a database claim that
- * every Mike deployment would carry for a one-time Vercel step.
+ * every LinkMai deployment would carry for a one-time Vercel step.
  */
 export async function createFirstAccount(
   db: Db,

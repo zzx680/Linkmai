@@ -4,7 +4,7 @@ import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { listWorkflows } from "@/app/lib/mikeApi";
+import { listWorkflows } from "@/app/lib/linkmaiApi";
 import { Modal } from "../modals/Modal";
 import type { Workflow } from "../shared/types";
 import { WorkflowPickerContent } from "./WorkflowPickerContent";

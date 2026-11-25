@@ -18,7 +18,7 @@
     "resolveJsonModule": true,
     "types": ["node", "express", "cors"],
     "paths": {
-      "@mike/contracts": ["../packages/contracts/index.d.ts"],
+      "@linkmai/contracts": ["../packages/contracts/index.d.ts"],
       "@/*": ["./src/*"]
     }
   },

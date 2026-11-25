@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { createPortal } from "react-dom";
 import { expect, it, vi } from "vitest";
 import type { Document } from "@/app/components/shared/types";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import { DocumentSidePanel } from "./DocumentSidePanel";
 
 // Stand in for a viewer whose context menu portals to document.body.

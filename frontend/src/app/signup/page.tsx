@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { PolicyNotice } from "@/app/components/auth/PolicyNotice";
 
@@ -15,7 +15,7 @@ import {
     authGlassCardUIClassName,
     authInputUIClassName,
     AuthDividerUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import Link from "next/link";
 import { SiteLogo } from "@/app/components/site-logo";
 import { useAuth } from "@/app/contexts/AuthContext";

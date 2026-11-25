@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 export const SUPPORTED_DOCUMENT_ACCEPT =
     ".pdf,.docx,.doc,.xlsx,.xlsm,.xls,.pptx,.ppt";
 export const UNSUPPORTED_DOCUMENT_WARNING_MESSAGE =

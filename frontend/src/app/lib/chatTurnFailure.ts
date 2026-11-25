@@ -1,6 +1,6 @@
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER, CODE_KINDS } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER, CODE_KINDS } from "@linkmai/client";
 import { UserVisibleError, describeError } from "@/app/lib/userFacingError";
 
 // What a chat surface says, and offers, when a turn fails. The assistant chat
@@ -9,7 +9,7 @@ import { UserVisibleError, describeError } from "@/app/lib/userFacingError";
 // here once instead of drifting apart in each.
 
 /** A turn the server failed; re-sending it is honest. */
-export const TURN_FAILED_MESSAGE = uiText("Mike couldn't finish this answer. Try again.");
+export const TURN_FAILED_MESSAGE = uiText("LinkMai couldn't finish this answer. Try again.");
 
 /** The bubble line for an answer whose stream broke part-way. */
 export const TURN_INTERRUPTED_MESSAGE = uiText("The answer stopped before it finished.");
@@ -45,7 +45,7 @@ export function errorFrameFailure(
         retryable: !verbatim,
     });
     // The frame's code and request id ride on the error the way they ride on
-    // a MikeApiError, so the report of this failure carries them as tags and
+    // a LinkMaiApiError, so the report of this failure carries them as tags and
     // the support email can quote the id. Neither is ever rendered.
     return Object.assign(failure, {
         ...(frame.reportingOwner === BACKEND_REPORTING_OWNER ? { reportingOwner: BACKEND_REPORTING_OWNER } : {}),

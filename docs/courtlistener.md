@@ -1,6 +1,6 @@
 # CourtListener integration
 
-Mike can use CourtListener for US case-law citation verification, case fetching,
+LinkMai can use CourtListener for US case-law citation verification, case fetching,
 targeted opinion search, and case-law panels in assistant responses.
 
 ## Enable live access
@@ -8,7 +8,7 @@ targeted opinion search, and case-law panels in assistant responses.
 CourtListener is a connector, and like every connector it is per workspace
 (see [Connectors](connectors.md#workspace-availability)). A user adds it from
 **Settings > Connectors > Discover > CourtListener** by saving their own API
-token for the selected workspace; Mike stores it encrypted in
+token for the selected workspace; LinkMai stores it encrypted in
 `user_courtlistener_connections`, separately for Personal and each
 organization. An organization can also hold a token for its members, which
 its admins save with its other API keys; it takes precedence over a member's
@@ -36,7 +36,7 @@ Live requests remain subject to CourtListener's API limits.
 
 ## Optional bulk data
 
-Set `COURTLISTENER_BULK_DATA_ENABLED=true` to make Mike try local Supabase and
+Set `COURTLISTENER_BULK_DATA_ENABLED=true` to make LinkMai try local Supabase and
 R2 data before falling back to CourtListener's API. CourtListener is then
 installed for every user without a token, and while it is switched on its
 **Manage** dialog reads "Bulk data installed and in use". Switched off without
@@ -66,5 +66,5 @@ If bulk lookup does not return local results, confirm that:
 - both CourtListener index tables contain data; and
 - opinion JSON exists beneath `courtlistener/opinions/by-cluster/` in R2.
 
-Mike falls back to the live API when local bulk data is unavailable and the
+LinkMai falls back to the live API when local bulk data is unavailable and the
 user or their organization has saved a token.

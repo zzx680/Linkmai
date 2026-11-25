@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { MikeIcon } from "../../../../shared/chat/mike-icon";
+import { LinkMaiIcon } from "../../../../shared/chat/linkmai-icon";
 
 export type StatusState = "active" | "error" | null;
 
 /**
- * Mirrors the web assistant's response marker: Mike spins while the response
+ * Mirrors the web assistant's response marker: LinkMai spins while the response
  * is active, flashes green when it finishes, and turns red on an error.
  */
 export function ResponseStatus({
@@ -49,11 +49,11 @@ export function ResponseStatus({
       data-testid="assistant-response-status"
       className="mb-2 flex h-9 w-full items-center"
     >
-      <MikeIcon
+      <LinkMaiIcon
         spin={isActive}
         done={showDone && doneVisible}
         error={isError}
-        mike={!isError && !(showDone && doneVisible)}
+        linkmai={!isError && !(showDone && doneVisible)}
         size={22}
       />
     </div>

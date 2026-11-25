@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TabularReview } from "@/app/components/shared/types";
-import { getTabularReviewHistoryStatuses } from "@/app/lib/mikeApi";
+import { getTabularReviewHistoryStatuses } from "@/app/lib/linkmaiApi";
 import { notifyTabularReviewsChanged } from "@/app/lib/tabularReviewChanges";
 
 type Status = "loading" | "complete";

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
@@ -12,7 +12,7 @@ import {
     LIQUID_GLASS_HOVER_CLASS,
     LIQUID_GLASS_SELECTED_CLASS,
 } from "@/app/components/ui/liquid-surface";
-import type { PlaybookRunHistoryItem } from "@/app/lib/mikeApi";
+import type { PlaybookRunHistoryItem } from "@/app/lib/linkmaiApi";
 import { playbookRunPath } from "@/app/lib/playbookRunActivity";
 import { cn } from "@/app/lib/utils";
 import {

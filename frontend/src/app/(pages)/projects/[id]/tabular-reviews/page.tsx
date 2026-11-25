@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { use, useCallback, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,7 +8,7 @@ import {
     deleteTabularReview,
     listProjectReviewCreators,
     updateTabularReview,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
     distinctPeople,
     localPeople,

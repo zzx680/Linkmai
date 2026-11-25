@@ -1,13 +1,13 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Plus, X } from "lucide-react";
 import type { ColumnConfig, ColumnFormat } from "../shared/types";
-import { generateTabularColumnPrompt } from "@/app/lib/mikeApi";
+import { generateTabularColumnPrompt } from "@/app/lib/linkmaiApi";
 import { FORMAT_OPTIONS } from "../tabular/columnFormat";
 import { TAG_COLORS } from "../tabular/pillUtils";
 import { getPresetConfig, PROMPT_PRESETS } from "../tabular/columnPresets";
@@ -15,7 +15,7 @@ import { Modal } from "../modals/Modal";
 import { ModalSelect } from "../modals/ModalSelect";
 import { ModalTextarea } from "../modals/ModalTextarea";
 import { FieldLabel, FormTextInput } from "../ui/form-field";
-import { LIQUID_GLASS_FLOAT_CLASS } from "@mike/ui";
+import { LIQUID_GLASS_FLOAT_CLASS } from "@linkmai/ui";
 
 interface ColumnDraft {
     name: string;
@@ -290,7 +290,7 @@ export function WFEditColumnModal({ column, onClose, onSave, onDelete }: Props) 
                             rows={6}
                             value={draft.prompt}
                             onChange={(e) => update({ prompt: e.target.value })}
-                            placeholder={uiText("Write the analysis prompt — describe what Mike should extract from each document for this column…")}
+                            placeholder={uiText("Write the analysis prompt — describe what LinkMai should extract from each document for this column…")}
                             className="mt-2 min-h-36"
                         />
                 </div>

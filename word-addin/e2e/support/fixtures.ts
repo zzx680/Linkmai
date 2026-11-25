@@ -1,5 +1,5 @@
 /**
- * Shared Playwright fixture for the Mike Word add-in E2E suite.
+ * Shared Playwright fixture for the LinkMai Word add-in E2E suite.
  *
  * Spec authors import `{ test, expect }` from this module and drive the task
  * pane through the typed `addin` fixture — they should NEVER need to touch the
@@ -149,14 +149,14 @@ export interface Addin {
     chunks: string[],
     opts?: ChatStreamOpts,
   ): Promise<{ release: () => void }>;
-  /** Mock any Mike API endpoint returning JSON for the given METHOD + URL glob. */
+  /** Mock any LinkMai API endpoint returning JSON for the given METHOD + URL glob. */
   mockApiJson(
     method: HttpMethod,
     urlGlob: string,
     json: unknown,
     opts?: MockJsonOpts,
   ): Promise<void>;
-  /** Mock any Mike API endpoint returning an error status for METHOD + URL glob. */
+  /** Mock any LinkMai API endpoint returning an error status for METHOD + URL glob. */
   mockApiError(
     method: HttpMethod,
     urlGlob: string,
@@ -236,7 +236,7 @@ export const test = base.extend<{ addin: Addin }>({
         body: JSON.stringify({
           user: {
             id: "test-user-id",
-            email: "e2e@mike.local",
+            email: "e2e@linkmai.local",
             pendingEmail: null,
             createdWithGoogle: false,
           },
@@ -276,7 +276,7 @@ export const test = base.extend<{ addin: Addin }>({
         body: JSON.stringify({
           user: {
             id: "test-user-id",
-            email: "e2e@mike.local",
+            email: "e2e@linkmai.local",
             pendingEmail: null,
             createdWithGoogle: true,
           },
@@ -632,7 +632,7 @@ export const test = base.extend<{ addin: Addin }>({
               body: JSON.stringify({
                 user: {
                   id: "test-user-id",
-                  email: "e2e@mike.local",
+                  email: "e2e@linkmai.local",
                   pendingEmail: null,
                   createdWithGoogle: false,
                 },

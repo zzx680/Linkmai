@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useMemo } from "react";
 import type { Workflow } from "../../types";
 import { PickerList } from "../primitives/PickerList";

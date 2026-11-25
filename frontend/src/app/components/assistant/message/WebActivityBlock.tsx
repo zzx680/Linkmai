@@ -1,7 +1,7 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { useState, type ReactNode } from "react";
-import type { WebSource } from "@mike/contracts";
+import type { WebSource } from "@linkmai/contracts";
 import { WebSkeuoIcon } from "@/app/components/shared/WebSkeuoIcon";
 import type { AssistantEvent } from "../../shared/types";
 import { EventBlock } from "./EventBlocks";

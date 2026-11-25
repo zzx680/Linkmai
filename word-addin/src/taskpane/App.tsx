@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "./auth/useAuth";
 import { LoginPage } from "./auth/LoginPage";

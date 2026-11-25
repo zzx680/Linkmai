@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import type { TabularReview } from "@/app/components/shared/types";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import TabularReviewsPage from "./page";
 
 const { data, push, deleteReview } = vi.hoisted(() => ({
@@ -20,8 +20,8 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/app/contexts/AuthContext", () => ({
     useAuth: () => ({ user: { id: "owner" } }),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     listProjects: vi.fn(async () => []),
     deleteTabularReview: deleteReview,
 }));

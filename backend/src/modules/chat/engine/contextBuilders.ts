@@ -35,7 +35,7 @@ import {
 } from "../../../lib/userTime";
 import { ACTIVE_WORD_DOCUMENT_LIVE_FILENAME } from "./wordPrompt";
 import { parseCitations, createCitation, limitCitationPayload } from "./citations";
-import type { AssistantEvent } from "@mike/contracts";
+import type { AssistantEvent } from "@linkmai/contracts";
 import { queryFailureCause } from "../../../lib/batchedQuery";
 import { activeAssistantPrompts, catalogWorkflowId, ensureDefaultWorkflows } from "../../../lib/workflowCatalog";
 

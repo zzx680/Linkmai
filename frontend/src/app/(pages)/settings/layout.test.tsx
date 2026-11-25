@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { listMyOrgInvitations, type OrgInvitation } from "@/app/lib/mikeApi";
+import { listMyOrgInvitations, type OrgInvitation } from "@/app/lib/linkmaiApi";
 import SettingsLayout from "./layout";
 
 const push = vi.fn();
@@ -20,7 +20,7 @@ vi.mock("@/app/contexts/AuthContext", () => ({
     }),
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listMyOrgInvitations: vi.fn(),
 }));
 

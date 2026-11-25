@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -12,7 +12,7 @@ import { SettingsTextInput } from "@/app/components/settings/SettingsTextInput";
 import { FieldLabel, FormTextInput } from "@/app/components/ui/form-field";
 import { SettingsRow } from "./SettingsRow";
 import { SettingsDescription, SettingsLabel } from "./SettingsText";
-import { isMfaRequiredError } from "@/app/lib/mikeApi";
+import { isMfaRequiredError } from "@/app/lib/linkmaiApi";
 import {
   UserVisibleError,
   notifyError,
@@ -172,7 +172,7 @@ export function ApiKeyField({
         // The caller reports failure as `false`, with no error to classify.
         notifyError(
           new UserVisibleError(
-            uiText`Mike couldn't save your ${label}. The key was not changed.`,
+            uiText`LinkMai couldn't save your ${label}. The key was not changed.`,
             { retryable: true },
           ),
           {
@@ -211,7 +211,7 @@ export function ApiKeyField({
       } else {
         notifyError(
           new UserVisibleError(
-            uiText`Mike couldn't remove your ${label}. The key is still saved.`,
+            uiText`LinkMai couldn't remove your ${label}. The key is still saved.`,
             { retryable: true },
           ),
           {

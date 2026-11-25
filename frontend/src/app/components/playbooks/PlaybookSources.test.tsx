@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearToasts } from "@/app/components/ui/toast";
-import type { PlaybookSupplementarySource } from "@/app/lib/mikeApi";
+import type { PlaybookSupplementarySource } from "@/app/lib/linkmaiApi";
 import { PlaybookSources } from "./PlaybookSources";
 
 const api = vi.hoisted(() => ({
@@ -11,8 +11,8 @@ const api = vi.hoisted(() => ({
   addPlaybookSourceFromDocument: vi.fn(),
   deletePlaybookSource: vi.fn(),
 }));
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-  ...(await original<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+  ...(await original<typeof import("@/app/lib/linkmaiApi")>()),
   ...api,
 }));
 const viewers = vi.hoisted(() => ({ docx: vi.fn(), pdf: vi.fn() }));

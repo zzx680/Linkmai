@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { SkeletonLine } from "@/app/components/shared/TablePrimitive";
 import { TableToolbar } from "@/app/components/shared/TableToolbar";

@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { DocumentSearchEvent } from "@mike/contracts";
+import type { DocumentSearchEvent } from "@linkmai/contracts";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getAccessibleChat, getChatMessages, leaveChat, listChats } from "../../modules/chat/chat.service";
 

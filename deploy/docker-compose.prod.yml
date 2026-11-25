@@ -21,7 +21,7 @@ x-backend-build: &backend-build
   context: ..
   dockerfile: backend/Dockerfile
   args:
-    MIKE_VERSION: ${MIKE_VERSION:-linkmai}
+    LINKMAI_VERSION: ${LINKMAI_VERSION:-linkmai}
     GIT_SHA: ${GIT_SHA:-}
 
 x-logging: &default-logging
@@ -72,7 +72,7 @@ x-backend-env: &backend-env
   # Default model: DeepSeek through its OpenAI-compatible endpoint.
   DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:?}"
   DEEPSEEK_SEARCH_API_KEY: "${DEEPSEEK_SEARCH_API_KEY:-}"
-  MIKE_MODEL_CONFIG_JSON: "${MIKE_MODEL_CONFIG_JSON:-}"
+  LINKMAI_MODEL_CONFIG_JSON: "${LINKMAI_MODEL_CONFIG_JSON:-}"
 
   SENTRY_DSN: "${SENTRY_DSN:-}"
   SENTRY_DISABLED: "${SENTRY_DISABLED:-true}"
@@ -148,7 +148,7 @@ services:
   # triggers on auth.users (see deploy/rds/bootstrap.sql).
   db-init:
     build: *backend-build
-    image: "${MIKE_IMAGE_REPO:-linkmai}/mike-backend:${MIKE_IMAGE_TAG:-prod}"
+    image: "${LINKMAI_IMAGE_REPO:-linkmai}/linkmai-backend:${LINKMAI_IMAGE_TAG:-prod}"
     depends_on:
       auth:
         condition: service_started
@@ -181,7 +181,7 @@ services:
   #   ./scripts/compose.sh --profile workflows run --rm workflow-sync
   workflow-sync:
     build: *backend-build
-    image: "${MIKE_IMAGE_REPO:-linkmai}/mike-backend:${MIKE_IMAGE_TAG:-prod}"
+    image: "${LINKMAI_IMAGE_REPO:-linkmai}/linkmai-backend:${LINKMAI_IMAGE_TAG:-prod}"
     profiles: ["workflows"]
     depends_on:
       db-init:
@@ -204,7 +204,7 @@ services:
 
   backend:
     build: *backend-build
-    image: "${MIKE_IMAGE_REPO:-linkmai}/mike-backend:${MIKE_IMAGE_TAG:-prod}"
+    image: "${LINKMAI_IMAGE_REPO:-linkmai}/linkmai-backend:${LINKMAI_IMAGE_TAG:-prod}"
     env_file: .env.prod
     environment:
       <<: *backend-env
@@ -237,13 +237,13 @@ services:
       context: ..
       dockerfile: frontend/Dockerfile
       args:
-        MIKE_VERSION: ${MIKE_VERSION:-linkmai}
+        LINKMAI_VERSION: ${LINKMAI_VERSION:-linkmai}
         GIT_SHA: ${GIT_SHA:-}
         NEXT_PUBLIC_LINKMAI_SITE_URL: "${LINKMAI_SITE_URL:?}"
         NEXT_PUBLIC_LINKMAI_SUPPORT_EMAIL: "${LINKMAI_SUPPORT_EMAIL:?}"
         NEXT_PUBLIC_LINKMAI_TERMS_URL: "${LINKMAI_TERMS_URL:-}"
         NEXT_PUBLIC_LINKMAI_PRIVACY_URL: "${LINKMAI_PRIVACY_URL:-}"
-    image: "${MIKE_IMAGE_REPO:-linkmai}/mike-frontend:${MIKE_IMAGE_TAG:-prod}"
+    image: "${LINKMAI_IMAGE_REPO:-linkmai}/linkmai-frontend:${LINKMAI_IMAGE_TAG:-prod}"
     environment:
       API_BASE_URL: http://backend:3001
       SENTRY_DSN: "${SENTRY_DSN:-}"
@@ -274,7 +274,7 @@ services:
         REACT_APP_WEB_APP_URL: "${FRONTEND_URL:?}"
         WORD_ADDIN_PUBLIC_URL: "${WORD_ADDIN_URL:?}"
         REACT_APP_LINKMAI_SUPPORT_EMAIL: "${LINKMAI_SUPPORT_EMAIL:?}"
-    image: "${MIKE_IMAGE_REPO:-linkmai}/mike-word-addin:${MIKE_IMAGE_TAG:-prod}"
+    image: "${LINKMAI_IMAGE_REPO:-linkmai}/linkmai-word-addin:${LINKMAI_IMAGE_TAG:-prod}"
     environment:
       PORT: "3200"
       WORD_ADDIN_BACKEND_ORIGIN: http://backend:3001

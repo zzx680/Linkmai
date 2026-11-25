@@ -381,7 +381,7 @@ describe("auth routes", () => {
   });
 
   it("refuses sign-up on a first-run deployment until email is configured", async () => {
-    process.env.MIKE_FIRST_RUN_SETUP = "true";
+    process.env.LINKMAI_FIRST_RUN_SETUP = "true";
     try {
       const response = await request(app)
         .post("/auth/signup")
@@ -395,7 +395,7 @@ describe("auth routes", () => {
       });
       expect(authClient.auth.signUp).not.toHaveBeenCalled();
     } finally {
-      delete process.env.MIKE_FIRST_RUN_SETUP;
+      delete process.env.LINKMAI_FIRST_RUN_SETUP;
     }
   });
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -12,7 +12,7 @@ import { createPortal } from "react-dom";
 import { MessageSquarePlus } from "lucide-react";
 import type { Editor } from "@docx-editor.dev/core/contracts/editor";
 import { useEditorSnapshot } from "@docx-editor.dev/react";
-import { PillButtonUI, TextButtonUI } from "@mike/ui";
+import { PillButtonUI, TextButtonUI } from "@linkmai/ui";
 import {
   Popover,
   PopoverAnchor,
@@ -21,7 +21,7 @@ import {
 } from "@/app/components/ui/popover";
 import { openReviewPane } from "./docxReviewPane";
 
-/** Mike-owned comment UI, using only the public open-source Editor contract. */
+/** LinkMai-owned comment UI, using only the public open-source Editor contract. */
 export function DocxCommentComposer({
   editor,
   author,

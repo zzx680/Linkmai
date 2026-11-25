@@ -32,7 +32,7 @@ before(async () => {
   staticRoot = await mkdtemp(path.join(os.tmpdir(), "mike-word-host-"));
   await writeFile(
     path.join(staticRoot, "taskpane.html"),
-    "<!doctype html><title>Mike Word</title>",
+    "<!doctype html><title>LinkMai Word</title>",
   );
   await writeFile(path.join(staticRoot, "taskpane.js"), "void 0;");
 
@@ -46,8 +46,8 @@ before(async () => {
     res.writeHead(200, {
       "content-type": "text/event-stream",
       "set-cookie": [
-        "__Host-mike-session=one; Path=/; Secure; HttpOnly",
-        "__Host-mike-session.1=two; Path=/; Secure; HttpOnly",
+        "__Host-linkmai-session=one; Path=/; Secure; HttpOnly",
+        "__Host-linkmai-session.1=two; Path=/; Secure; HttpOnly",
       ],
     });
     res.write("data: first\n\n");
@@ -72,7 +72,7 @@ test("serves health and the task pane", async () => {
 
   const taskpane = await fetch(`${addinOrigin}/`);
   assert.equal(taskpane.status, 200);
-  assert.match(await taskpane.text(), /Mike Word/);
+  assert.match(await taskpane.text(), /LinkMai Word/);
 });
 
 test("asks crawlers not to index the add-in pages", async () => {
@@ -89,7 +89,7 @@ test("asks crawlers not to index the add-in pages", async () => {
 test("streams the API while preserving auth headers and cookies", async () => {
   const response = await fetch(`${addinOrigin}/api/chat?mode=word`, {
     headers: {
-      cookie: "__Host-mike-session=incoming",
+      cookie: "__Host-linkmai-session=incoming",
       origin: "https://word.example.test",
     },
   });
@@ -97,13 +97,13 @@ test("streams the API while preserving auth headers and cookies", async () => {
   assert.equal(await response.text(), "data: first\n\ndata: second\n\n");
   assert.deepEqual(observedRequest, {
     url: "/chat?mode=word",
-    cookie: "__Host-mike-session=incoming",
+    cookie: "__Host-linkmai-session=incoming",
     origin: "https://word.example.test",
     forwardedHost: new URL(addinOrigin).host,
   });
   assert.deepEqual(response.headers.getSetCookie(), [
-    "__Host-mike-session=one; Path=/; Secure; HttpOnly",
-    "__Host-mike-session.1=two; Path=/; Secure; HttpOnly",
+    "__Host-linkmai-session=one; Path=/; Secure; HttpOnly",
+    "__Host-linkmai-session.1=two; Path=/; Secure; HttpOnly",
   ]);
 });
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useRef, useState } from "react";
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/app/components/shared/PageHeader";
 import { FileTypeIcon } from "@/app/components/shared/FileTypeIcon";
 import type { Project } from "@/app/components/shared/types";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import { RowActions } from "@/app/components/shared/RowActions";
 import { HeaderActionsMenu } from "@/app/components/shared/HeaderActionsMenu";
 import { DocumentUploadMenu } from "@/app/components/shared/DocumentUploadMenu";

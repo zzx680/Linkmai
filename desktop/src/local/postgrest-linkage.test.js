@@ -8,7 +8,7 @@ const { execFileSync } = require('node:child_process');
 
 // Input is fetched/staged/packaged output, already relocated by the build.
 // Audit it in place before any mutable-copy regression can repair a defect.
-const nativeOptions = { skip: process.platform !== 'darwin' || !process.env.MIKE_NATIVE_BIN };
+const nativeOptions = { skip: process.platform !== 'darwin' || !process.env.LINKMAI_NATIVE_BIN };
 const original = '/opt/homebrew/opt/libpq/lib/libpq.5.dylib';
 const bundled = '@loader_path/pg/lib/libpq.5.dylib';
 
@@ -40,7 +40,7 @@ test('Postgres test copy preserves relative links after moving without its sourc
 
 test('actual PostgREST input has only bundled dependencies', nativeOptions, async () => {
   const { auditDependencies, dependencies } = await import('../../scripts/relocate-postgrest.mjs');
-  const bin = process.env.MIKE_NATIVE_BIN;
+  const bin = process.env.LINKMAI_NATIVE_BIN;
   assert.ok(auditDependencies(bin).length > 1);
   assert.ok(dependencies(path.join(bin, 'postgrest')).includes(bundled));
   execFileSync('/usr/bin/codesign', ['--verify', '--strict', path.join(bin, 'postgrest')]);
@@ -49,12 +49,12 @@ test('actual PostgREST input has only bundled dependencies', nativeOptions, asyn
 test('PostgREST uses only bundled libraries after moving the package', nativeOptions, async () => {
   const { relocatePostgrest, auditDependencies, dependencies } = await import('../../scripts/relocate-postgrest.mjs');
   // Do not let relocation of the test copy hide broken build output.
-  auditDependencies(process.env.MIKE_NATIVE_BIN);
+  auditDependencies(process.env.LINKMAI_NATIVE_BIN);
   const temp = mkdtempSync(path.join(tmpdir(), 'mike-linkage-'));
   try {
     const bin = path.join(temp, 'original/bin');
-    copyPostgresBundle(process.env.MIKE_NATIVE_BIN + '/pg', bin + '/pg');
-    cpSync(process.env.MIKE_NATIVE_BIN + '/postgrest', bin + '/postgrest');
+    copyPostgresBundle(process.env.LINKMAI_NATIVE_BIN + '/pg', bin + '/pg');
+    cpSync(process.env.LINKMAI_NATIVE_BIN + '/postgrest', bin + '/postgrest');
     // Recreate the pinned upstream load command even from already-relocated
     // fetched input, so CI always exercises the repair and rejection paths.
     execFileSync('/usr/bin/install_name_tool', ['-change', bundled, original, bin + '/postgrest']);

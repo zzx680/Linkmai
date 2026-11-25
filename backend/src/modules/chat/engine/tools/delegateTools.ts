@@ -5,7 +5,7 @@ import type {
     DelegationEffort,
     DelegationEvent,
     DelegationModelTier,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import type {
     NormalizedToolCall,
     NormalizedToolResult,

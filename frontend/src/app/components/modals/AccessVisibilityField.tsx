@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useId } from "react";
 import type { ContentVisibility } from "@/app/components/shared/types";

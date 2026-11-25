@@ -1,14 +1,14 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Loader2, MoreHorizontal, Plus, X } from "lucide-react";
 import type { ColumnConfig, ColumnFormat } from "../shared/types";
-import { generateTabularColumnPrompt } from "@/app/lib/mikeApi";
+import { generateTabularColumnPrompt } from "@/app/lib/linkmaiApi";
 import { FORMAT_OPTIONS, formatLabel, formatIcon } from "./columnFormat";
 import { TAG_COLORS } from "./pillUtils";
 import {
@@ -21,7 +21,7 @@ import {
     PillButtonUI,
     LIQUID_GLASS_FLOAT_CLASS,
     LIQUID_GLASS_SUBTLE_CLASS,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { FieldLabel } from "@/app/components/ui/form-field";
 
 // Liquid-glass field styling shared by the menu's inputs/controls, matching the

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 /**
  * Web adapter for the shared toast system. Mount `<AppToasts />` once in the
@@ -17,7 +17,7 @@ import {
     showToast,
     toastHasActions,
     useToasts,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
 
 export {
@@ -30,7 +30,7 @@ export {
     type ToastInput,
     type ToastRecord,
     type ToastTone,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 export const OFFLINE_TOAST_KEY = "connectivity";
 

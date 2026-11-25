@@ -151,7 +151,7 @@ const SERVICE_ACCOUNT_EMAIL_RE = /^[^\s@]{1,100}@[a-z0-9.-]{1,150}\.gserviceacco
 const MAX_SERVICE_ACCOUNT_KEY_LENGTH = 16_000;
 
 /**
- * The fields Mike uses from a Google Cloud service-account key file, or null
+ * The fields LinkMai uses from a Google Cloud service-account key file, or null
  * when the value is not one. Only these fields are read: a key file's own
  * `token_uri` and `universe_domain` are ignored, so a crafted file cannot
  * redirect the token exchange to another host.
@@ -450,7 +450,7 @@ export function vertexCredentials(
 
 /**
  * A user's own OpenAI-compatible endpoint. There is no environment fallback:
- * deployments declare shared endpoints in MIKE_MODEL_CONFIG_JSON instead.
+ * deployments declare shared endpoints in LINKMAI_MODEL_CONFIG_JSON instead.
  */
 export function customEndpointCredentials(
     apiKeys?: UserApiKeys,

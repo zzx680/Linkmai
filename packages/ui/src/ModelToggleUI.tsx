@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import * as React from "react";
 import {
@@ -28,7 +28,7 @@ import {
   LIQUID_GLASS_SUBTLE_CLASS,
 } from "./LiquidGlassUI";
 
-import type { ModelToggleGroup, ModelToggleOption } from "@mike/client";
+import type { ModelToggleGroup, ModelToggleOption } from "@linkmai/client";
 
 export type { ModelToggleGroup, ModelToggleOption };
 

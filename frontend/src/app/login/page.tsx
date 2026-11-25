@@ -1,11 +1,11 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthApiError, login, signup } from "@/app/lib/authApi";
-import { completeUserOnboarding, getUserProfile } from "@/app/lib/mikeApi";
+import { completeUserOnboarding, getUserProfile } from "@/app/lib/linkmaiApi";
 import {
     InputUI,
     PillButtonUI,
@@ -13,7 +13,7 @@ import {
     authInputUIClassName,
     AuthDividerUI,
     noticeActionClassName,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import Link from "next/link";
 import { SiteLogo } from "@/app/components/site-logo";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -77,7 +77,7 @@ function describeLoginError(error: unknown): UserFacingError {
 type GuestCredentials = { email: string; password: string };
 declare global {
     interface Window {
-        mikeDesktop?: {
+        linkmaiDesktop?: {
             guestCredentials?: () => Promise<GuestCredentials | null>;
         };
     }
@@ -132,7 +132,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         let cancelled = false;
-        window.mikeDesktop
+        window.linkmaiDesktop
             ?.guestCredentials?.()
             .then((creds) => {
                 if (!cancelled && creds?.email && creds?.password) {

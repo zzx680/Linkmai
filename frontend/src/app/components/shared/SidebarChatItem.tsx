@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ import {
     DropdownContent,
     DropdownItem,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { useChatHistoryContext } from "@/app/contexts/ChatHistoryContext";
 import { RenameModal } from "@/app/components/modals/RenameModal";
 import { LeaveChatPopup } from "@/app/components/assistant/LeaveChatPopup";

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useDocumentViewers } from "@/app/hooks/useDocumentViewers";
 import { useDocumentPermissions } from "@/app/hooks/useDocumentPermissions";
@@ -38,7 +38,7 @@ import {
     moveSubfolderToFolder,
     resolveProjectFolderPath,
     type UploadProgress,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
     chatActivityAt,
     sortChatsByActivity,
@@ -113,7 +113,7 @@ import {
 import { can, roleFromLoaded } from "@/app/lib/permissions";
 import { LIQUID_GLASS_FLAT_CLASS } from "@/app/components/ui/liquid-surface";
 import { cn } from "@/app/lib/utils";
-import type { MessageExcerpt } from "@mike/client";
+import type { MessageExcerpt } from "@linkmai/client";
 import { readDocumentDragPayload } from "@/app/lib/docTableSelection";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import {
@@ -1482,10 +1482,10 @@ export default function ProjectAssistantChatPage({ params }: Props) {
                             onDrop={async (e) => {
                                 e.preventDefault();
                                 const docId = e.dataTransfer.getData(
-                                    "application/mike-doc",
+                                    "application/linkmai-doc",
                                 );
                                 const folderId = e.dataTransfer.getData(
-                                    "application/mike-folder",
+                                    "application/linkmai-folder",
                                 );
                                 if (docId) {
                                     e.stopPropagation();

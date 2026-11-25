@@ -103,7 +103,7 @@ boundary. A custom DSN changes the recipient, not necessarily the data policy.
 | Breadcrumbs | Removed | Retained with field/pattern scrubbing; can include console/navigation/click metadata |
 | Host/machine name and URL origin | Removed from the fields handled by community minimization | Can remain |
 | Device/app/locale contexts | Removed; OS/runtime/browser reduced to name/version, trace context retained | SDK context retained with sensitive-key/text filtering |
-| Exception-frame local variables | Removed | Not removed by Mike's scrubber if present; local-variable collection is not enabled by current SDK options |
+| Exception-frame local variables | Removed | Not removed by LinkMai's scrubber if present; local-variable collection is not enabled by current SDK options |
 | In-app source lines | Retained | Retained |
 
 **This table applies to error events, not sessions.** Removing `event.user`
@@ -168,7 +168,7 @@ that no legal text, filename, customer name, or arbitrary secret can be sent.
 ## What Sentry can know beyond the JSON
 
 The receiving service sees the network source IP of the sender/proxy as part
-of accepting the connection. Browser events routed through Mike's tunnel
+of accepting the connection. Browser events routed through LinkMai's tunnel
 have a different network path from direct SDK submissions. Removing an IP
 field from JSON does not make the connection anonymous. In the earlier live
 verification, Sentry displayed geographic enrichment even though the
@@ -182,7 +182,7 @@ retention or that no IP-derived information is retained.
 Build-time source-map uploads are distinct from runtime reports. When the
 three upload settings are present, application artifacts can include original
 source via `sourcesContent`; deleting local maps after upload does not delete
-the copies in Sentry. The prior upload exercise used Mike's organization and
+the copies in Sentry. The prior upload exercise used LinkMai's organization and
 synthetic code. See [Sentry's source-map documentation](https://docs.sentry.io/platforms/javascript/guides/hono/sourcemaps/troubleshooting_js).
 
 ## Recommended acceptance criteria before privacy sign-off

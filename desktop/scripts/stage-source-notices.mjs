@@ -1,4 +1,4 @@
-// Keep Mike's license and exact source identity beside its packaged servers.
+// Keep LinkMai's license and exact source identity beside its packaged servers.
 import fs from "node:fs/promises";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -23,10 +23,10 @@ await fs.cp(nativeNotices, path.join(destination, "service-notices"), { recursiv
 const commit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: repo, encoding: "utf8" }).trim();
 const dirty = execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], { cwd: repo, encoding: "utf8" }).trim().length > 0;
 await fs.writeFile(path.join(destination, "SOURCE.json"), JSON.stringify({
-  product: "Mike", license: "AGPL-3.0-only",
+  product: "LinkMai", license: "AGPL-3.0-only",
   repository: "https://github.com/Open-Legal-Products/mike",
   commit, source: `https://github.com/Open-Legal-Products/mike/tree/${commit}`,
   sourceArchive: `https://github.com/Open-Legal-Products/mike/archive/${commit}.tar.gz`,
   workingTreeModified: dirty, nativeServices: manifest.sources,
 }, null, 2) + "\n");
-console.log(`Staged Mike license, source identity and ${manifest.sources.length} service notices`);
+console.log(`Staged LinkMai license, source identity and ${manifest.sources.length} service notices`);

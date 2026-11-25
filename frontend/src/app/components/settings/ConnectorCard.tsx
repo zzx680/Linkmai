@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import type { ReactNode } from "react";
-import { GlassCardUI } from "@mike/ui";
+import { GlassCardUI } from "@linkmai/ui";
 import { SkeletonLine } from "@/app/components/shared/TablePrimitive";
 import { SettingsLabel } from "./SettingsText";
 

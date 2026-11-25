@@ -1,9 +1,9 @@
-# Plan: fully self-contained Mike.app
+# Plan: fully self-contained LinkMai.app
 
-**Goal.** A user downloads `Mike.app` and everything runs locally on their Mac —
+**Goal.** A user downloads `LinkMai.app` and everything runs locally on their Mac —
 no Docker, no separate server, no cloud dependency (except LLM API calls, which
 are supplied per-user via Settings → API Keys, env vars, or a local Ollama).
-This complements the hosted default (`https://app.mikeoss.com`): hosted stays
+This complements the hosted default (`https://app.linkmai.com`): hosted stays
 the zero-friction path; "Run locally on this Mac" becomes a third mode next to
 hosted and self-hosted-URL on the connect screen.
 
@@ -92,12 +92,12 @@ service_role tokens).
 - Secrets bootstrap (above).
 - Fixed uncommon loopback ports (deterministic because `NEXT_PUBLIC_*` URLs
   are baked); clear error page on port conflict.
-- Connect screen (`desktop/src/pages/connect.html` + `mike:*` IPC in
+- Connect screen (`desktop/src/pages/connect.html` + `linkmai:*` IPC in
   `main.js`) gains **"Run locally on this Mac"** alongside the server URL;
   `serverUrl()` gains a `local` mode that boots the supervisor then loads the
   local frontend URL. Hosted/self-host modes unchanged.
-- Data dir: `~/Library/Application Support/Mike/local/{pgdata,storage,secrets,logs}`
-  (the `MIKE_USER_DATA_DIR` test seam already exists).
+- Data dir: `~/Library/Application Support/LinkMai/local/{pgdata,storage,secrets,logs}`
+  (the `LINKMAI_USER_DATA_DIR` test seam already exists).
 - Dev mode first: supervisor over repo-built artifacts + Homebrew binaries,
   before packaging.
 

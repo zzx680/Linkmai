@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,10 +13,10 @@ import { PageChromeContext } from "@/app/contexts/PageChromeContext";
 import { AppSidebar } from "@/app/components/shared/AppSidebar";
 import { preloadSidebarIcons } from "@/app/components/shared/AppSidebarSkeuoIcons";
 import { FullScreenLoader } from "@/app/components/shared/FullScreenLoader";
-import { HeaderButtonUI, HeaderButtonsUI } from "@mike/ui";
+import { HeaderButtonUI, HeaderButtonsUI } from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 
-export default function MikeLayout({
+export default function LinkMaiLayout({
     children,
 }: {
     children: React.ReactNode;

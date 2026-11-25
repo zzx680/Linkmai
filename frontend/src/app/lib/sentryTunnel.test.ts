@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { MIKE_SENTRY_DSN, diagnosticEvent } from "@mike/client";
+import { LINKMAI_SENTRY_DSN, diagnosticEvent } from "@linkmai/client";
 import { rewriteEnvelope, tunnelDecision, browserReportBudget } from "./sentryTunnel";
 
 const encoder = new TextEncoder();
@@ -44,14 +44,14 @@ describe("tunnelDecision", () => {
         });
     });
 
-    it("forwards to the built-in Mike project otherwise, with runtime tags", () => {
+    it("forwards to the built-in LinkMai project otherwise, with runtime tags", () => {
         const decision = tunnelDecision({
             SENTRY_ENVIRONMENT: "production",
             SENTRY_INSTALL: "official",
         } as unknown as NodeJS.ProcessEnv);
         expect(decision).toMatchObject({
             kind: "forward",
-            dsn: MIKE_SENTRY_DSN.frontend,
+            dsn: LINKMAI_SENTRY_DSN.frontend,
             environment: "production",
             install: "official",
         });
@@ -207,10 +207,10 @@ it("applies the runtime destination's repeat policy in the tunnel", () => {
     expect(rewriteEnvelope(raw, { dsn: OWN_DSN }, own)!.byteLength).toBeGreaterThan(0);
 });
 
-it("caps explicitly configured Mike destinations after final envelope reconstruction", () => {
+it("caps explicitly configured LinkMai destinations after final envelope reconstruction", () => {
     for (const env of [
-        { SENTRY_DSN: MIKE_SENTRY_DSN.frontend },
-        { NEXT_PUBLIC_SENTRY_DSN: MIKE_SENTRY_DSN.backend },
+        { SENTRY_DSN: LINKMAI_SENTRY_DSN.frontend },
+        { NEXT_PUBLIC_SENTRY_DSN: LINKMAI_SENTRY_DSN.backend },
         { SENTRY_DSN: "https://custom@sentry.invalid/73" },
     ]) {
         const accepts = browserReportBudget({ NODE_ENV: "production", ...env });

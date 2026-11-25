@@ -1,8 +1,8 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useMemo, useState } from "react";
 import type { Playbook } from "../../types";
-import { listPlaybooks } from "../../api/mikeApi";
+import { listPlaybooks } from "../../api/linkmaiApi";
 import { Modal } from "../primitives/Modal";
 import { PickerList } from "../primitives/PickerList";
 import { reportFault } from "../../lib/notify";
@@ -52,7 +52,7 @@ export function PlaybookModal({
         setPlaybooks([]);
         setError(
           reportFault(reason, {
-            fallback: uiText("Mike couldn't load your playbooks. Try again."),
+            fallback: uiText("LinkMai couldn't load your playbooks. Try again."),
             operation: "playbooks.review",
           }).message,
         );

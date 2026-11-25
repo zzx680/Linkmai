@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import { EditCardsSectionUI } from "@mike/ui";
+import { EditCardsSectionUI } from "@linkmai/ui";
 import { EDIT_SECTION_SURFACE } from "./messageStyles";
 
 interface EditCardsSectionProps {

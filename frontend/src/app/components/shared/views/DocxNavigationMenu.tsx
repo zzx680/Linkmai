@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -12,7 +12,7 @@ import {
     DropdownCheckboxItem,
     DropdownContent,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 /** Extend EigenPal's overflow panel; keep navigation available when nothing overflows. */
 export function DocxNavigationMenu({ toolbar, open, onToggle }: {

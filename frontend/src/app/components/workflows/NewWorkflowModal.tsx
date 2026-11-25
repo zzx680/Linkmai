@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Upload } from "lucide-react";
@@ -9,7 +9,7 @@ import {
     createWorkflow,
     shareWorkflow,
     updateWorkflow,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import type {
     ContentVisibility,
@@ -22,7 +22,7 @@ import { Modal } from "../modals/Modal";
 import { ModalSegmentedToggle } from "../modals/ModalSegmentedToggle";
 import { ModalSelect } from "../modals/ModalSelect";
 import { FieldLabel, FormTextInput } from "../ui/form-field";
-import { WorkflowSlashCommandUI } from "@mike/ui";
+import { WorkflowSlashCommandUI } from "@linkmai/ui";
 import {
     ChatSkeuoIcon,
     TabularReviewSkeuoIcon,

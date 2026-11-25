@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useState } from "react";
 import { AccessModal } from "@/app/components/modals/AccessModal";
@@ -11,7 +11,7 @@ import {
     grantChatAccess,
     revokeChatAccess,
     type ContentAccess,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { can, roleFrom } from "@/app/lib/permissions";
 import { notifyError, userFacingApiError } from "@/app/lib/userFacingError";
 import type { Chat } from "@/app/components/shared/types";

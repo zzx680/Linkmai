@@ -1,11 +1,11 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { listDocumentVersions, replaceDocumentVersionFile } from "@/app/lib/mikeApi";
+import { listDocumentVersions, replaceDocumentVersionFile } from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { UploadBatchError } from "@mike/client";
+import { UploadBatchError } from "@linkmai/client";
 import { invalidateDocxBytes } from "./useFetchDocxBytes";
 
 export const DOCX_AUTOSAVE_DELAY = 1500;

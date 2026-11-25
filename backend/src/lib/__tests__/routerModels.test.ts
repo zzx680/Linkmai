@@ -263,14 +263,14 @@ describe("router slugs", () => {
 });
 
 // PR #608 regression: the new prefixes (azure/, bedrock/, custom/, …) are
-// ordinary names an operator may already use in MIKE_MODEL_CONFIG_JSON.
+// ordinary names an operator may already use in LINKMAI_MODEL_CONFIG_JSON.
 // providerForModel lets configured models win; router gating must agree, or
 // the operator's model is rejected as "not in your saved Azure OpenAI models".
 describe("operator-configured models that share a router prefix", () => {
-    const original = process.env.MIKE_MODEL_CONFIG_JSON;
+    const original = process.env.LINKMAI_MODEL_CONFIG_JSON;
 
     beforeEach(() => {
-        process.env.MIKE_MODEL_CONFIG_JSON = JSON.stringify({
+        process.env.LINKMAI_MODEL_CONFIG_JSON = JSON.stringify({
             models: [
                 {
                     id: "azure/gpt-internal",
@@ -284,8 +284,8 @@ describe("operator-configured models that share a router prefix", () => {
     });
 
     afterEach(() => {
-        if (original === undefined) delete process.env.MIKE_MODEL_CONFIG_JSON;
-        else process.env.MIKE_MODEL_CONFIG_JSON = original;
+        if (original === undefined) delete process.env.LINKMAI_MODEL_CONFIG_JSON;
+        else process.env.LINKMAI_MODEL_CONFIG_JSON = original;
         resetModelRegistryCache();
     });
 

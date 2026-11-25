@@ -27,7 +27,7 @@ export function resetProviderWarningsForTests(): void { seen.clear(); }
 
 export function logProviderWarnings({ warnings = [], provider }: WarningOptions): void {
   for (const warning of warnings) {
-    addBreadcrumb({ category: "mike.stage", message: "provider.compatibility", level: "warning" });
+    addBreadcrumb({ category: "linkmai.stage", message: "provider.compatibility", level: "warning" });
     // A cooldown bounds per-request warnings without hiding a recurring
     // warning forever. Raw identity stays local and never becomes a tag.
     const key = JSON.stringify([provider, warning.type, warning.feature, warning.setting, warning.message, warning.details]);

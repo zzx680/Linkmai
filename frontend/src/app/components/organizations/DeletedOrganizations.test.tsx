@@ -8,8 +8,8 @@ const mocks = vi.hoisted(() => ({
   refresh: vi.fn(),
   mfa: vi.fn(),
 }));
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-  ...(await original<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+  ...(await original<typeof import("@/app/lib/linkmaiApi")>()),
   listDeletedOrganizations: mocks.list,
   restoreOrganization: mocks.restore,
 }));

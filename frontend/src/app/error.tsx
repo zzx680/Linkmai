@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import Link from "next/link";
-import { pillButtonUIClassName } from "@mike/ui";
+import { pillButtonUIClassName } from "@linkmai/ui";
 import { CrashScreen } from "@/app/components/shared/CrashScreen";
 
 export default function Error({

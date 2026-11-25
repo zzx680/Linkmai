@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getDocumentStatuses } from "../lib/mikeApi";
+import { getDocumentStatuses } from "../lib/linkmaiApi";
 import { useDocumentConversionPolling } from "./useDocumentConversionPolling";
 import type { Document } from "../components/shared/types";
-vi.mock("../lib/mikeApi", () => ({ getDocumentStatuses: vi.fn() }));
+vi.mock("../lib/linkmaiApi", () => ({ getDocumentStatuses: vi.fn() }));
 const doc = (id: string, status = "processing") => ({id, status} as Document);
 afterEach(() => { vi.useRealTimers(); vi.resetAllMocks(); });
 describe("conversion polling", () => {

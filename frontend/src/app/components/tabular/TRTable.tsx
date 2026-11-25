@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     forwardRef,
@@ -28,7 +28,7 @@ import {
     TableRow,
 } from "../shared/TablePrimitive";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import { TabularReviewSkeuoIcon } from "@/app/components/shared/AppSidebarSkeuoIcons";
 import type { ReviewCellStore } from "./reviewCellStore";
 import { indexReviewCells } from "./reviewCellIndex";

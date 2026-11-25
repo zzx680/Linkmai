@@ -175,7 +175,7 @@ describe("requireAuth with GoTrue unreachable", () => {
   const exp = Math.floor(Date.now() / 1000) + 3600;
   const user = { id: "u1", aud: "authenticated", email: "lawyer@example.test" };
   const session = { access_token: jwt(exp), refresh_token: "r1", expires_in: 3600, expires_at: exp, token_type: "bearer", user };
-  const cookie = `mike-session=base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`;
+  const cookie = `linkmai-session=base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`;
 
   it.each([
     ["a cookie session", (req: request.Test) => req.set("Cookie", cookie)],

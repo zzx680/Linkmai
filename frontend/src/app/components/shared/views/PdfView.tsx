@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, ZoomIn, ZoomOut } from "lucide-react";
@@ -17,7 +17,7 @@ import {
 } from "./highlightQuote";
 import { createPdfQuoteMatcher, normalizePdfQuoteText } from "./pdfQuoteSearch";
 import { orderTextItemLines, type TextItemGeometry } from "./pdfTextOrder";
-import { LIQUID_GLASS_TRANSLUCENT_CLASS } from "@mike/ui";
+import { LIQUID_GLASS_TRANSLUCENT_CLASS } from "@linkmai/ui";
 import { viewRoundingClass, type ViewRounding } from "./viewRounding";
 
 interface Props {

@@ -7,7 +7,7 @@ const planner = fileURLToPath(new URL('./stack-volumes.jq', import.meta.url));
 const day = 86400;
 const now = 1800000000;
 const stamp = seconds => new Date(seconds * 1000).toISOString();
-const project = 'mike-test';
+const project = 'linkmai-*test';
 const volume = (name = 'data', labels = {}) => ({ Name: name, CreatedAt: stamp(now - 30 * day),
   Labels: { 'com.docker.compose.project': project, ...labels } });
 const container = (status = 'exited', finished = now - 60) => ({ Id: 'db',
@@ -18,7 +18,7 @@ const record = (idle = now - 60, v = volume()) => ({ version: 1, volumes: { [v.N
   created: v.CreatedAt, project, supabase: '', idle_since: idle,
 } } });
 function plan({ cs = [container()], vs = [volume()], previous = { version: 1, volumes: {} },
-  kind = 'mike', scope = true, time = now, age = 7 * day, only = 'mike-*', allowed = '' } = {}) {
+  kind = 'linkmai', scope = true, time = now, age = 7 * day, only = 'linkmai-**', allowed = '' } = {}) {
   const args = ['-n'];
   for (const [key, value] of Object.entries({ containers: [cs], volumes: [vs], previous: [previous], now: time, age })) {
     args.push('--argjson', key, JSON.stringify(value));
@@ -52,14 +52,14 @@ test('second sweep retains recent use; data expires only after the idle threshol
   const expired = plan({ cs: [], kind: 'unknown', previous: second.state, time: now + 8 * day });
   assert.deepEqual(expired.remove, ['data']);
 });
-test('known foreign project vetoes a saved record and a mike-prefixed name', () => {
+test('known foreign project vetoes a saved record and a linkmai-*prefixed name', () => {
   const foreign = { ...container(), Mounts: [] };
   const p = plan({ cs: [foreign], kind: 'other', previous: record(now - 30 * day), age: 0 });
   assert.deepEqual(p.containers, []);
   assert.deepEqual(p.remove, []);
   assert.deepEqual(p.state.volumes, {});
 });
-test('unknown named volumes are kept even with a mike project prefix', () => {
+test('unknown named volumes are kept even with a linkmai project prefix', () => {
   assert.deepEqual(plan({ cs: [], kind: 'unknown', age: 0 }).remove, []);
 });
 test('preview includes a volume attached only to an eligible stopped stack', () => {
@@ -93,7 +93,7 @@ test('out-of-scope projects retain records but schedule no operations', () => {
   assert.deepEqual(p.containers, []);
   assert.deepEqual(p.state, old);
 });
-test('anonymous orphans get an observation grace period and respect MIKE_GC_ONLY', () => {
+test('anonymous orphans get an observation grace period and respect LINKMAI_GC_ONLY', () => {
   const v = volume('anon', { 'com.docker.compose.project': null, 'com.docker.volume.anonymous': '' });
   const first = plan({ cs: [], vs: [v], only: '' });
   assert.deepEqual(first.remove, []);

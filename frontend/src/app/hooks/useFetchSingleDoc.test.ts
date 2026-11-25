@@ -83,7 +83,7 @@ it("reports a 5xx under documents.open with its request id, and keeps the generi
     expect(reporting.reportError).toHaveBeenCalledTimes(1);
     expect(reporting.reportError.mock.calls[0]![1]).toMatchObject({
         tags: {
-            component: "mike-api",
+            component: "linkmai-api",
             operation: "documents.open",
             http_method: "GET",
             http_status: 500,

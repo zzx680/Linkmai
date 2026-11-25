@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -15,7 +15,7 @@ import {
     DropdownContent,
     DropdownItem,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
 import { docxCommentEditable } from "./docxCommentEditing";
 import {

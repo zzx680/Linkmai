@@ -1,7 +1,7 @@
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { Spinner } from "../../../shared/ui/spinner";

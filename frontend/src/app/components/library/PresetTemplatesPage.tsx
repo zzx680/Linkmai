@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -19,7 +19,7 @@ import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMe
 import { TableToolbar } from "@/app/components/shared/TableToolbar";
 import type { Document } from "@/app/components/shared/types";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import { useLibraryWorkspace } from "./LibraryWorkspace";
 import {
   addPresetTemplate,

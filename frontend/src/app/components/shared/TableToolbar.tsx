@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import React, { useSyncExternalStore } from "react";
 import { Settings2 } from "lucide-react";
@@ -12,7 +12,7 @@ import {
     DropdownTrigger,
     LIQUID_GLASS_HOVER_CLASS,
     LIQUID_GLASS_SUBTLE_CLASS,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 const DESKTOP_QUERY = "(min-width: 768px)";
 

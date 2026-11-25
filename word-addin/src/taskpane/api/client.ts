@@ -1,4 +1,4 @@
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 import type {
   ApiKeyStatus,
   Document,
@@ -13,7 +13,7 @@ import type {
 // parity tests) never pull this module, and its runtime imports, into
 // the web app's type-check graph.
 export type { ApiKeyStatus } from "../types";
-import type { RouterProfileLists } from "@mike/client";
+import type { RouterProfileLists } from "@linkmai/client";
 import { networkFailure } from "../lib/networkError";
 import { sessionHandledError } from "../lib/sessionRefresh";
 import {
@@ -31,20 +31,20 @@ import {
   uploadFilesWithSessionCore,
   type UploadOutcome,
   type UploadProgress,
-} from "@mike/client";
+} from "@linkmai/client";
 
 export {
   UploadBatchError,
   failedUploadMessage,
-} from "@mike/client";
+} from "@linkmai/client";
 export type {
   UploadOutcome,
   UploadProgress,
-} from "@mike/client";
+} from "@linkmai/client";
 
 type AuthHeaderProvider = () => Promise<Record<string, string>>;
 
-interface MikeApiClientConfig {
+interface LinkMaiApiClientConfig {
   baseUrl?: string;
   getAuthHeaders?: AuthHeaderProvider;
   fetchImpl?: typeof fetch;
@@ -67,7 +67,7 @@ const devLog = (...args: Parameters<typeof console.log>): void => {
  * logs (`requestId`). `message` is only ever safe-to-show text: the
  * backend's own 4xx `detail`, or a generic line for 5xx.
  */
-export class MikeApiError extends Error {
+export class LinkMaiApiError extends Error {
   readonly status: number;
   readonly code: string | null;
   readonly requestId: string | null;
@@ -81,7 +81,7 @@ export class MikeApiError extends Error {
     reportingOwner?: typeof BACKEND_REPORTING_OWNER;
   }) {
     super(args.message);
-    this.name = "MikeApiError";
+    this.name = "LinkMaiApiError";
     this.status = args.status;
     this.code = args.code ?? null;
     this.requestId = args.requestId ?? null;
@@ -170,7 +170,7 @@ let clientConfig: ResolvedMikeApiClientConfig = {
   fetchImpl: (...args: Parameters<typeof fetch>) => fetch(...args),
 };
 
-export function configureMikeApiClient(config: MikeApiClientConfig): void {
+export function configureMikeApiClient(config: LinkMaiApiClientConfig): void {
   clientConfig = {
     baseUrl: config.baseUrl ?? clientConfig.baseUrl,
     getAuthHeaders: config.getAuthHeaders ?? clientConfig.getAuthHeaders,
@@ -219,14 +219,14 @@ export async function responseError(
   method = "GET",
   /** The user-level flow the request belonged to, for a 5xx's report. */
   operation?: AddinOperation,
-): Promise<MikeApiError> {
+): Promise<LinkMaiApiError> {
   const text = await response.text().catch(() => "");
   const parsed = parseApiErrorBody({
     status: response.status,
     body: text,
     requestId: response.headers.get("x-request-id"),
   });
-  devLog("[mike-api] non-ok response", {
+  devLog("[linkmai-api] non-ok response", {
     path: path ?? response.url,
     status: response.status,
     code: parsed.code,
@@ -237,7 +237,7 @@ export async function responseError(
   // session toast or login gate said what happened, and the body's "Not
   // authenticated" would only contradict it.
   const handled = sessionHandledError(response);
-  const apiError = new MikeApiError({
+  const apiError = new LinkMaiApiError({
     status: response.status,
     code: handled?.code ?? parsed.code,
     requestId: parsed.requestId,
@@ -323,7 +323,7 @@ async function uploadSessionFiles<T>(args: {
       fetchStorage: (...fetchArgs) => clientConfig.fetchImpl(...fetchArgs),
       reportStorageFailure: reportError,
       shouldRetryControlRequest: createControlRequestRetryPolicy((error) =>
-        error instanceof MikeApiError
+        error instanceof LinkMaiApiError
           ? { status: error.status, code: error.code }
           : null,
       ),

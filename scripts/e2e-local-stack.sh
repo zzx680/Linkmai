@@ -36,8 +36,8 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 # Sweep stacks left behind by earlier runs, worktrees, and reviews before
-# adding another one (see scripts/stack.sh; MIKE_GC=0 skips it).
-if [ "${MIKE_GC:-1}" != 0 ]; then
+# adding another one (see scripts/stack.sh; LINKMAI_GC=0 skips it).
+if [ "${LINKMAI_GC:-1}" != 0 ]; then
     bash "$ROOT/scripts/stack.sh" gc
 fi
 

@@ -7,7 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MikeApiError, type Org } from "@/app/lib/mikeApi";
+import { LinkMaiApiError, type Org } from "@/app/lib/linkmaiApi";
 import { clearOrganizationLogoCache } from "@/app/hooks/useOrganizationLogo";
 import { OrganizationGeneralSettings } from "./OrganizationGeneralSettings";
 
@@ -53,8 +53,8 @@ vi.mock("./OrganizationSettingsShell", () => ({
     reload: vi.fn(),
   }),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   updateOrg: mocks.updateOrg,
   deleteOrg: mocks.deleteOrg,
   removeOrgMember: mocks.removeOrgMember,
@@ -254,7 +254,7 @@ describe("renaming", () => {
   it("shows why a rename was refused, beside the field", async () => {
     const user = userEvent.setup();
     mocks.updateOrg.mockRejectedValue(
-      new MikeApiError({
+      new LinkMaiApiError({
         message: "An organization with that name already exists.",
         status: 409,
       }),
@@ -314,7 +314,7 @@ describe("leaving", () => {
   it("says why the last owner cannot leave, and stays put", async () => {
     const user = userEvent.setup();
     mocks.removeOrgMember.mockRejectedValue(
-      new MikeApiError({
+      new LinkMaiApiError({
         message: "An organization must keep at least one owner.",
         status: 409,
       }),
@@ -414,7 +414,7 @@ describe("deleting", () => {
   it("names the failure a failed delete, with the server's reason", async () => {
     const user = userEvent.setup();
     mocks.deleteOrg.mockRejectedValue(
-      new MikeApiError({
+      new LinkMaiApiError({
         message: "Only an organization owner can do that.",
         status: 403,
       }),
@@ -598,7 +598,7 @@ describe("the organization's logo", () => {
   it("keeps the dialog up when the save is refused, in the server's words, and without them when unexpected", async () => {
     const user = userEvent.setup();
     mocks.saveOrgLogo.mockRejectedValueOnce(
-      new MikeApiError({
+      new LinkMaiApiError({
         message: "The logo is too large. Use an image under 512 KB.",
         status: 400,
       }),

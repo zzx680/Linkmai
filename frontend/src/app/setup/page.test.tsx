@@ -36,7 +36,7 @@ vi.mock("@/app/hooks/useSignInOptions", () => ({
 }));
 
 vi.mock("@/app/components/site-logo", () => ({
-    SiteLogo: () => <div>Mike</div>,
+    SiteLogo: () => <div>LinkMai</div>,
 }));
 
 async function fillForm(password = "correct-horse-battery", confirm = password) {
@@ -61,7 +61,7 @@ describe("SetupPage", () => {
 
     it("creates the first account, signs it in and continues to onboarding", async () => {
         render(<SetupPage />);
-        expect(screen.getByRole("heading", { name: "Set up Mike" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Set up LinkMai" })).toBeInTheDocument();
         await fillForm();
         expect(setupFirstAccount).toHaveBeenCalledWith("owner@example.com", "correct-horse-battery");
         expect(refreshSession).toHaveBeenCalled();
@@ -77,12 +77,12 @@ describe("SetupPage", () => {
 
     it("explains when someone else finished setup first and offers log in", async () => {
         setupFirstAccount.mockRejectedValue(
-            new AuthApiError(409, "setup_complete", "This Mike instance is already set up. Log in instead."),
+            new AuthApiError(409, "setup_complete", "This LinkMai instance is already set up. Log in instead."),
         );
         render(<SetupPage />);
         await fillForm();
         expect(
-            await screen.findByText("This Mike instance is already set up. Log in instead."),
+            await screen.findByText("This LinkMai instance is already set up. Log in instead."),
         ).toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/login");
         expect(push).not.toHaveBeenCalled();

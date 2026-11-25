@@ -5,7 +5,7 @@ import {
     listPlaybookRunHistory,
     listTabularReviews,
     type PlaybookRunHistoryItem,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifyPlaybookRunsChanged } from "@/app/lib/playbookRunActivity";
 import { notifyTabularReviewsChanged } from "@/app/lib/tabularReviewChanges";
 import { useSidebarHistory } from "./useSidebarHistory";
@@ -20,7 +20,7 @@ vi.mock("@/app/contexts/WorkspaceContext", () => ({ useWorkspaceParam: () => sta
 vi.mock("@/app/contexts/ChatHistoryContext", () => ({
     useChatHistoryContext: () => ({ ...state, loadingMoreChats: false }),
 }));
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listTabularReviews: vi.fn(),
     listTabularReviewIds: vi.fn(),
     listPlaybookRunHistory: vi.fn(),

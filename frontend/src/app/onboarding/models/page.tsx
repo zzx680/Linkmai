@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,8 +16,8 @@ import {
     readStoredWorkspace,
 } from "@/app/contexts/WorkspaceContext";
 import { apiKeyStateFromStatus } from "@/app/lib/apiKeyState";
-import { getOrgApiKeys, listOrgs, type ApiKeyState } from "@/app/lib/mikeApi";
-import { PillButtonUI } from "@mike/ui";
+import { getOrgApiKeys, listOrgs, type ApiKeyState } from "@/app/lib/linkmaiApi";
+import { PillButtonUI } from "@linkmai/ui";
 
 export default function OnboardingModelsPage() {
     const router = useRouter();
@@ -107,7 +107,7 @@ function stepDescription(
     if (hasUsableProvider(keys, "env")) {
         return "This deployment already provides models, so you can finish now. A key you add here replaces the deployment's for your Personal workspace.";
     }
-    return uiText("Add an API key for at least one provider to start using Mike in your Personal workspace. You can add or change keys later in Settings.");
+    return uiText("Add an API key for at least one provider to start using LinkMai in your Personal workspace. You can add or change keys later in Settings.");
 }
 
 function ModelStep({ userId }: { userId: string }) {

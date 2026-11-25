@@ -6,7 +6,7 @@ is required.
 
 The stack includes:
 
-- the Mike frontend and backend;
+- the LinkMai frontend and backend;
 - Supabase Postgres, Auth, data API, and gateway;
 - RustFS for S3-compatible object storage; and
 - Mailpit for local authentication email.
@@ -59,29 +59,29 @@ npm run stack:gc                # sweep leftovers (runs automatically before
 
 The sweep removes containers and networks from fully stopped Compose projects
 identified by this repository's Compose marker (or a missing checkout with a
-`mike` project prefix), and Supabase CLI stacks for this checkout's `project_id`
-plus ids in `MIKE_GC_SUPABASE_PROJECTS`. Only `created`, `exited`, and `dead`
+`linkmai` project prefix), and Supabase CLI stacks for this checkout's `project_id`
+plus ids in `LINKMAI_GC_SUPABASE_PROJECTS`. Only `created`, `exited`, and `dead`
 containers qualify. Running, paused, restarting, and other active states are
 protected; removal is never forced if a container starts during the sweep.
 
-Data volumes require verified ownership and at least `MIKE_GC_VOLUME_AGE_DAYS`
+Data volumes require verified ownership and at least `LINKMAI_GC_VOLUME_AGE_DAYS`
 (default 7) of recorded idle time. A shared cleanup record preserves ownership
 and observed activity after containers are removed, so repeated sweeps keep
 recently used data. Volume creation age is never treated as last use. Known
 foreign projects and volumes still referenced by other containers are kept.
-Unknown named volumes are kept even if their project name starts with `mike`;
+Unknown named volumes are kept even if their project name starts with `linkmai`;
 remove these explicitly after inspecting them. Allowed Supabase and anonymous
 orphans without history start a fresh grace period when first observed.
 
 Records live under `${XDG_STATE_HOME:-$HOME/.local/state}/mike/stack-gc`, shared
 across checkouts but isolated by Docker daemon and volume creation timestamp.
-`MIKE_GC_STATE_DIR` overrides that directory. Keep the same directory across
+`LINKMAI_GC_STATE_DIR` overrides that directory. Keep the same directory across
 runs. Missing history causes conservative retention; malformed records or a
 write failure stop cleanup before containers are removed. A lock prevents
 concurrent sweeps; after an interrupted process, remove its reported `.lock`
 directory only once no sweep is running. Activity is observed during sweeps;
 reuse followed by removal entirely between sweeps cannot be detected. Use
-`MIKE_GC=0` to disable automatic cleanup when managing volumes outside this
+`LINKMAI_GC=0` to disable automatic cleanup when managing volumes outside this
 workflow.
 
 `npm run stack:gc -- --dry-run` previews the same container and volume plan as
@@ -89,7 +89,7 @@ execution, including volumes that become unreferenced after teardown, without
 changing cleanup records. Docker still refuses removal if a new container
 references a volume after planning. Dangling images and old build cache are
 also pruned; `-- --deep` removes all unused images and build cache. Set
-`MIKE_GC=0` to skip the automatic sweep in `stack:up` and the e2e setup script.
+`LINKMAI_GC=0` to skip the automatic sweep in `stack:up` and the e2e setup script.
 
 For the Supabase CLI stack used by `npm run test:e2e:local` and
 `npm run test:stack`, `supabase stop` removes the containers and keeps the
@@ -97,7 +97,7 @@ data; `supabase stop --no-backup` removes both.
 
 ## Supabase CLI stack
 
-`supabase start`, run from `backend/`, starts only the services Mike uses:
+`supabase start`, run from `backend/`, starts only the services LinkMai uses:
 Postgres, Auth, the data API, the gateway, and the local mail catcher. The
 others are disabled in `backend/supabase/config.toml`. To browse tables in
 Supabase Studio, set `enabled = true` under `[studio]` there and restart the
@@ -107,7 +107,7 @@ stack; Studio is then at `http://localhost:54323`.
 
 | Service | Address | Notes |
 | --- | --- | --- |
-| Mike | `http://localhost:3000` | Main application |
+| LinkMai | `http://localhost:3000` | Main application |
 | Supabase API | `http://localhost:54321` | Auth and data API gateway |
 | Postgres | `localhost:54322` | Host access for database tools |
 | RustFS console | `http://localhost:9001` | `rustfsadmin` / `rustfsadmin` |
@@ -120,7 +120,7 @@ localhost but must be regenerated before exposing an instance anywhere.
 ## Local registration and email
 
 A new email-and-password registration must confirm its address before it can
-sign in. Supabase Auth sends authentication email; the Mike backend does not
+sign in. Supabase Auth sends authentication email; the LinkMai backend does not
 send it directly. Open [Mailpit](http://localhost:8025) to read the
 confirmation message. Mailpit also captures local email-change and
 password-reset messages, and no email leaves your machine. These links pass
@@ -183,7 +183,7 @@ Google account as an OAuth test user while the Google app remains in testing.
 ## Local models with Ollama
 
 [Ollama](https://ollama.com) models are discovered dynamically. Anything shown
-by `ollama list` appears in Mike's model pickers under **Local**, without an API
+by `ollama list` appears in LinkMai's model pickers under **Local**, without an API
 key.
 
 The Dockerized backend reaches Ollama on the host at
@@ -191,14 +191,14 @@ The Dockerized backend reaches Ollama on the host at
 available elsewhere.
 
 Choose a model that fits the host's available memory, pull it, then refresh
-Mike. Replace `MODEL_TAG` with a tag from the Ollama library:
+LinkMai. Replace `MODEL_TAG` with a tag from the Ollama library:
 
 ```bash
 ollama pull MODEL_TAG
 ```
 
 Models with tool-calling support can drive the full assistant. If a local model
-rejects tools, Mike retries without them so plain chat can continue. Model size
+rejects tools, LinkMai retries without them so plain chat can continue. Model size
 has a significant effect on speed and memory use, especially during tabular
 review where the model may run across many cells.
 
@@ -216,7 +216,7 @@ data flows. See [Safe local testing](safe-local-testing.md) for guidance.
 
 ## Error tracking locally
 
-Error reporting is enabled by default using Mike's community Sentry project.
+Error reporting is enabled by default using LinkMai's community Sentry project.
 Set `SENTRY_DISABLED=true` to opt out on the backend, and use
 `NEXT_PUBLIC_SENTRY_DISABLED=true` or `REACT_APP_SENTRY_DISABLED=true` for the
 web app or Word add-in. To watch events locally instead, run

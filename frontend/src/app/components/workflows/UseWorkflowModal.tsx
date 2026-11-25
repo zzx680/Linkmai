@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Document, Workflow } from "../shared/types";
-import { createTabularReview, listWorkflows } from "@/app/lib/mikeApi";
+import { createTabularReview, listWorkflows } from "@/app/lib/linkmaiApi";
 import { useRouter } from "next/navigation";
 import { useDirectoryData } from "../shared/useDirectoryData";
 import { FileDirectory } from "../shared/FileDirectory";
@@ -24,7 +24,7 @@ import { ModelToggle } from "../assistant/ModelToggle";
 import {
     isRouterModelSelected,
     type NoModelsReason,
-} from "@mike/client";
+} from "@linkmai/client";
 import { NoModelsWarningPopup } from "../popups/NoModelsWarningPopup";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
 import { useModelApiKeys } from "@/app/hooks/useModelApiKeys";

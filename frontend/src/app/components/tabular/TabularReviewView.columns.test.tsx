@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { getTabularReview } from "@/app/lib/mikeApi";
+import { getTabularReview } from "@/app/lib/linkmaiApi";
 import type { TabularReview, TabularReviewRow, Document } from "@/app/components/shared/types";
 import { TRView } from "./TabularReviewView";
 
@@ -13,8 +13,8 @@ vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
     useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock("@/app/lib/mikeApi", () => ({
-    MikeApiError: class MikeApiError extends Error {},
+vi.mock("@/app/lib/linkmaiApi", () => ({
+    LinkMaiApiError: class LinkMaiApiError extends Error {},
     // main's model registry (#339) makes the view fetch the model catalog on
     // mount; the mock has to answer or every render throws before the gate
     // this file is about is even reached.

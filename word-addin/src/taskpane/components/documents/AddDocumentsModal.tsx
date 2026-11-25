@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, Loader2, Search, Upload, X } from "lucide-react";
 import type { Document, LibraryFolder, Project } from "../../types";
@@ -11,14 +11,14 @@ import {
   listProjects,
   uploadStandaloneDocuments,
   type UploadProgress,
-} from "../../api/mikeApi";
+} from "../../api/linkmaiApi";
 import {
   partitionSupportedDocumentFiles,
   SUPPORTED_DOCUMENT_ACCEPT,
 } from "../../lib/documentUpload";
 import { Modal } from "../primitives/Modal";
 import { Spinner } from "../../../shared/ui/spinner";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import {
   FileTypeIcon,
   ProjectSvgIcon,

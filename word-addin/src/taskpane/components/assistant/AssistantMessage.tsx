@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React from "react";
 import { LoaderCircle } from "lucide-react";
 import { ProseBlock } from "./message/ProseBlock";
@@ -11,8 +11,8 @@ import type {
   WordThinkingEvent,
   WordTextCardEvent,
 } from "../../types";
-import { PillButtonUI as PillButton } from "@mike/ui";
-import { TextCardUI } from "@mike/ui";
+import { PillButtonUI as PillButton } from "@linkmai/ui";
+import { TextCardUI } from "@linkmai/ui";
 import { EditCard } from "./EditCard";
 import { PreResponseWrapper } from "./PreResponseWrapper";
 import { EditCardsSection } from "./message/EditCardsSection";
@@ -102,7 +102,7 @@ function persistedEditStatus(
   if (edit.applyStatus === "applied") return "restoring";
   if (edit.applyStatus === "unmanaged") return "unmanaged";
   // Checked before the generic "error" fallback below: a reopened pane must
-  // not turn "Mike couldn't confirm this" into "couldn't apply this".
+  // not turn "LinkMai couldn't confirm this" into "couldn't apply this".
   if (edit.errorCode === "unverified") return "unverified";
   if (edit.errorCode === "ambiguous") return "ambiguous";
   if (edit.errorCode === "unsearchable") return "unsearchable";
@@ -129,7 +129,7 @@ function AssistantMessageImpl({
   const handleCitationClick = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       const target = event.target as HTMLElement;
-      const citationControl = target.closest?.("[data-mike-citation]");
+      const citationControl = target.closest?.("[data-linkmai-citation]");
       const href =
         citationControl?.getAttribute("data-citation-href") ??
         citationControl?.getAttribute("href");

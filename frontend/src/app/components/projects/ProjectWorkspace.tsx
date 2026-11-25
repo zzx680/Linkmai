@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     createContext,
@@ -26,7 +26,7 @@ import {
     revokeProjectAccess,
     updateProject,
     type ProjectGrant,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type {
     Chat,
     ColumnConfig,
@@ -35,7 +35,7 @@ import type {
     Project,
 } from "@/app/components/shared/types";
 import { TableToolbar } from "@/app/components/shared/TableToolbar";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import { NewTRModal } from "@/app/components/tabular/NewTRModal";
 import { ConfirmPopup } from "@/app/components/popups/ConfirmPopup";
 import {
@@ -438,7 +438,7 @@ export function ProjectWorkspaceProvider({
         model: string,
         _accessAssignments: {
             email: string;
-            role: import("@/app/lib/mikeApi").AccessAssignmentRole;
+            role: import("@/app/lib/linkmaiApi").AccessAssignmentRole;
         }[],
     ) {
         // Project-owned reviews inherit their project's organization and

@@ -4,7 +4,7 @@ import { authenticatedFetch } from "@/app/lib/authEvents";
 import { invalidateDocxBytes, useFetchDocxBytes } from "./useFetchDocxBytes";
 
 vi.mock("@/app/lib/authEvents", () => ({ authenticatedFetch: vi.fn() }));
-vi.mock("@/app/lib/mikeApi", () => ({ getDocumentFileUrl: (id: string) => `/file/${id}` }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ getDocumentFileUrl: (id: string) => `/file/${id}` }));
 
 it("does not let a pre-save fetch repopulate the cache with stale document bytes", async () => {
     let finishOld!: (value: Response) => void;

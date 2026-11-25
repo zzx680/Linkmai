@@ -1,8 +1,8 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { CircleAlert } from "lucide-react";
 import type { Citation, DocumentCitationQuote } from "../../shared/types";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import {
   Popover,
   PopoverContent,

@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 
 interface SsoAuthButtonProps {
     disabled?: boolean;

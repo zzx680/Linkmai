@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { listDocumentVersions, type DocumentVersion } from "@/app/lib/mikeApi";
+import { listDocumentVersions, type DocumentVersion } from "@/app/lib/linkmaiApi";
 import {
     Dropdown,
     DropdownContent,
@@ -12,7 +12,7 @@ import {
     DropdownRadioItem,
     DropdownTrigger,
     TextButtonUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { VersionChip } from "./VersionChip";
 
 export function DocumentVersionPicker({

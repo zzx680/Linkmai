@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     useCallback,
@@ -12,7 +12,7 @@ import {
 import { useDocumentViewers } from "@/app/hooks/useDocumentViewers";
 import { useDocumentPermissions } from "@/app/hooks/useDocumentPermissions";
 import { type DocumentActions } from "../shared/DocumentTabActions";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import { LegalSourceIcon } from "../shared/LegalSourceIcon";
 import { documentCapabilities } from "../shared/documentCapabilities";
 import { BookOpenText } from "lucide-react";

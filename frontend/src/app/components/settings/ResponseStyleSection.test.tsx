@@ -4,11 +4,11 @@ import {
   getResponseStyle,
   updateResponseStyle,
   type ResponseStyle,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { ResponseStyleSection } from "./ResponseStyleSection";
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getResponseStyle: vi.fn(),
   updateResponseStyle: vi.fn(),
 }));
@@ -63,7 +63,7 @@ describe("ResponseStyleSection", () => {
     await waitFor(() => expect(trigger("Language")).toBeEnabled());
     expect(trigger("Language")).toHaveTextContent("Automatic");
     expect(
-      screen.getByText("Mike replies in the language you write in."),
+      screen.getByText("LinkMai replies in the language you write in."),
     ).toBeInTheDocument();
 
     fireEvent.pointerDown(
@@ -87,7 +87,7 @@ describe("ResponseStyleSection", () => {
     await waitFor(() =>
       expect(trigger("Language")).toHaveTextContent("English (UK)"),
     );
-    expect(screen.getByText("Mike replies in English (UK).")).toBeInTheDocument();
+    expect(screen.getByText("LinkMai replies in English (UK).")).toBeInTheDocument();
   });
 
   it("saves only the setting that changed", async () => {

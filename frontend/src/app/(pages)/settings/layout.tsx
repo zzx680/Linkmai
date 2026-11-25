@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";

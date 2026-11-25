@@ -5,9 +5,9 @@ import {
   updatePlaybook,
   type Playbook,
   type PlaybookContent,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
-vi.mock("@/app/lib/mikeApi", () => ({ updatePlaybook: vi.fn() }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ updatePlaybook: vi.fn() }));
 vi.mock("@/app/lib/userFacingError", () => ({ notifyError: vi.fn() }));
 const change = (name: string) => ({
   id: "book",

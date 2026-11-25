@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   useEffect,
@@ -19,7 +19,7 @@ import {
   unenrollMfa,
   verifyMfa,
 } from "@/app/lib/authApi";
-import { PillButtonUI, ToggleSwitchUI, GlassCardUI } from "@mike/ui";
+import { PillButtonUI, ToggleSwitchUI, GlassCardUI } from "@linkmai/ui";
 import { PasswordSettingsSection } from "@/app/components/settings/PasswordSettingsSection";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
 import { SettingsRow } from "@/app/components/settings/SettingsRow";
@@ -28,7 +28,7 @@ import {
   SettingsLabel,
 } from "@/app/components/settings/SettingsText";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
-import { isMfaRequiredError } from "@/app/lib/mikeApi";
+import { isMfaRequiredError } from "@/app/lib/linkmaiApi";
 import { Modal } from "@/app/components/modals/Modal";
 import {
   MfaVerificationPopup,
@@ -204,7 +204,7 @@ export default function SecurityPage() {
     const described = describeError(error, {
       action,
       codeMessages: MFA_ERROR_MESSAGES,
-      fallback: uiText`Mike couldn't ${action}. Try again.`,
+      fallback: uiText`LinkMai couldn't ${action}. Try again.`,
     });
     setStatus(described.message);
     setStatusError(described);
@@ -280,13 +280,13 @@ export default function SecurityPage() {
 
       let data;
       try {
-        data = await enrollMfa("Mike");
+        data = await enrollMfa("LinkMai");
       } catch (error) {
         if (!isDuplicateFriendlyNameError(error)) throw error;
         traceMfa("[security/mfa] retrying enrollment with unique name", {
           error: error instanceof Error ? error.message : String(error),
         });
-        data = await enrollMfa(`Mike ${Date.now()}`);
+        data = await enrollMfa(`LinkMai ${Date.now()}`);
       }
       traceMfa("[security/mfa] enrollment created", {
         factorId: data.id,

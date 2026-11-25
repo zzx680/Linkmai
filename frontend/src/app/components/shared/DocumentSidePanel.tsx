@@ -1,10 +1,10 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -26,9 +26,9 @@ import { DocumentPaneTitle } from "@/app/components/shared/DocumentPaneTitle";
 import { PdfView } from "@/app/components/shared/views/PdfView";
 import { DocxView } from "@/app/components/shared/views/DocxView";
 import { SpreadsheetView } from "@/app/components/shared/views/SpreadsheetView";
-import { CloseButton, PillButtonUI } from "@mike/ui";
+import { CloseButton, PillButtonUI } from "@linkmai/ui";
 import type { Document } from "@/app/components/shared/types";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import { cn } from "@/app/lib/utils";
 import { reportFault,
     UserVisibleError,

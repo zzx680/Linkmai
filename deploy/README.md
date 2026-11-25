@@ -267,7 +267,7 @@ chmod 600 deploy/.env.rds
 ```
 
 密码含 `#`、空格、`$` 时用单引号包住。模板里的 `SMTP_SENDER_NAME` 和
-`MIKE_MODEL_CONFIG_JSON` 引号不要删。
+`LINKMAI_MODEL_CONFIG_JSON` 引号不要删。
 
 ## 7. 初始化 RDS 并启动
 

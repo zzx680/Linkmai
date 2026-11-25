@@ -17,7 +17,7 @@ const CHAT_ID = "chat-client-tools";
 const ASSISTANT_MESSAGE_ID = "assistant-client-tools";
 const TOOL_CALL_ID = "5f0e19cf-9be0-4b53-a1c4-2f2ffb92e601";
 const TOOL_RESULT_GLOB = "**/word-chat/tool-result";
-const ANCHOR_SETTINGS_KEY = "mike.wordEditAnchors.v1";
+const ANCHOR_SETTINGS_KEY = "linkmai.wordEditAnchors.v1";
 /** First card key a tool edit claims; see TOOL_EDIT_INDEX_BASE. */
 const FIRST_TOOL_BLOCK_INDEX = 1000;
 
@@ -218,7 +218,7 @@ test("reports an ambiguous match without touching the document", async ({
 
   await expect(
     page.getByText(
-      "Skipped — this text appears 2 times in the document. Tell Mike which one to change.",
+      "Skipped — this text appears 2 times in the document. Tell LinkMai which one to change.",
     ),
   ).toBeVisible();
   expect((await addin.wordCalls()).trackedChanges).toEqual([]);
@@ -704,7 +704,7 @@ test("a reloaded failed tool edit still explains itself", async ({
 
   await expect(
     page.getByText(
-      "Skipped — this text appears 2 times in the document. Tell Mike which one to change.",
+      "Skipped — this text appears 2 times in the document. Tell LinkMai which one to change.",
     ),
   ).toBeVisible();
 });

@@ -8,7 +8,7 @@ Unmodified 96×96 transparent PNG assets from Google's product branding CDN:
 
 Used to identify their respective optional integrations. Served locally so
 viewing Settings does not send a request to Google. Google product marks
-remain the property of Google; they are not Mike artwork.
+remain the property of Google; they are not LinkMai artwork.
 
 `courtlistener.svg` is CourtListener's favicon, unmodified, from Free Law
 Project's CourtListener repository

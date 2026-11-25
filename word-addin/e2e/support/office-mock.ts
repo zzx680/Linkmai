@@ -184,8 +184,8 @@ export function installOfficeMock(seed: OfficeSeed): void {
   const officeStorageKey = "__mike_word_e2e_office_storage_v1";
   const accessTokenKey = "mike_token";
   const refreshTokenKey = "mike_refresh_token";
-  const editApplyModeKey = "mike_word_edit_apply_mode";
-  const chatStorageModePrefix = "mike_word_chat_storage_mode:";
+  const editApplyModeKey = "linkmai_word_edit_apply_mode";
+  const chatStorageModePrefix = "linkmai_word_chat_storage_mode:";
 
   const clone = <T>(value: T): T => {
     if (value === undefined) return value;
@@ -377,7 +377,7 @@ export function installOfficeMock(seed: OfficeSeed): void {
   let settingsWorkingCopy = clone(documentState.settings);
   const settings = {
     get: (key: string) => {
-      if (key === "mike.wordEditAnchors.v1") wordCalls.anchorRegistryReads++;
+      if (key === "linkmai.wordEditAnchors.v1") wordCalls.anchorRegistryReads++;
       return clone(settingsWorkingCopy[key]);
     },
     set: (key: string, value: unknown) => {

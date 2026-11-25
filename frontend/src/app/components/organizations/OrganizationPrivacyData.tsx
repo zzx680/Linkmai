@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -27,10 +27,10 @@ import {
   setOrgMemberDataPolicy,
   type OrgDataKind,
   type OrgMemberDataPolicy,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { isOrgOwner } from "@/app/lib/permissions";
 import { notifyError } from "@/app/lib/userFacingError";
-import { GlassCardUI, PillButtonUI, ToggleSwitchUI } from "@mike/ui";
+import { GlassCardUI, PillButtonUI, ToggleSwitchUI } from "@linkmai/ui";
 import {
   organizationSettingsHref,
   useOrganizationSettings,

@@ -37,7 +37,7 @@ vi.mock("../../../../lib/mcpConnectors", () => ({ buildUserMcpTools }));
 
 vi.mock("../tools/toolDispatcher", () => ({ runToolCalls }));
 
-import type { DelegationEvent } from "@mike/contracts";
+import type { DelegationEvent } from "@linkmai/contracts";
 import { buildMessages, spotlight } from "../contextBuilders";
 import { runLLMStream } from "../streaming";
 import {

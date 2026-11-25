@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import type { AssistantEvent } from "../../shared/types";
 
 export function isRenderableEvent(event: AssistantEvent): boolean {

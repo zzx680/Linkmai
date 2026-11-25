@@ -3,9 +3,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-// Opt in with MIKE_TEST_POSTGRES_CONTAINER=supabase_db_backend. All writes
+// Opt in with LINKMAI_TEST_POSTGRES_CONTAINER=supabase_db_backend. All writes
 // target a disposable database; the container's application DB is untouched.
-const container = process.env.MIKE_TEST_POSTGRES_CONTAINER;
+const container = process.env.LINKMAI_TEST_POSTGRES_CONTAINER;
 const database = `mike_test_departure_${process.pid}_${Date.now()}`;
 const uid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const q = (n: number) => `'${uid(n)}'`;

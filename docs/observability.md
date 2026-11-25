@@ -1,6 +1,6 @@
 # Error tracking with Sentry
 
-Every Mike runtime can report unexpected failures to [Sentry](https://sentry.io)
+Every LinkMai runtime can report unexpected failures to [Sentry](https://sentry.io)
 (or any Sentry-compatible endpoint, including a self-hosted instance):
 
 | Runtime | SDK | Enabled by |
@@ -11,7 +11,7 @@ Every Mike runtime can report unexpected failures to [Sentry](https://sentry.io)
 | Web app, Next.js server (the `/api` gateway) | `@sentry/nextjs` | `SENTRY_DSN` in the frontend's runtime environment |
 | Word add-in (task pane, ribbon commands, OAuth dialog) | `@sentry/react` | `REACT_APP_SENTRY_DSN` at **build** time |
 
-**On by default.** Error reports are sent to the Mike project's own Sentry by default, so the
+**On by default.** Error reports are sent to the LinkMai project's own Sentry by default, so the
 maintainers can fix failures encountered by forks and self-hosted installs.
 Before network transmission, every runtime rebuilds reports from an explicit
 allowlist: code locations and line numbers, controlled operation labels,
@@ -33,7 +33,7 @@ filenames identify the failing code; client document filenames are excluded.
 
 Resolution order, per runtime: `*_SENTRY_DISABLED=true` → off;
 `*_SENTRY_DSN` set → that DSN; a development build → off; otherwise the
-built-in Mike project DSN. A development build is `next dev` (the Next
+built-in LinkMai project DSN. A development build is `next dev` (the Next
 server's `NODE_ENV=development`), the backend run from its TypeScript source
 (`tsx watch src/index.ts`, `npm run dev`; the compiled image is never one,
 whatever `NODE_ENV` compose sets; the rule is `backend/src/lib/buildMode.ts`,
@@ -41,7 +41,7 @@ and the backend's `build_mode` tag follows it rather than `NODE_ENV`;
 `SENTRY_SOURCE_RUN_IS_INSTALL=true` declares a source run in production an
 install, so it reports like the compiled image), and the
 add-in's webpack dev server. It
-never falls back to the Mike project, and `*_SENTRY_DISABLED=false` does not
+never falls back to the LinkMai project, and `*_SENTRY_DISABLED=false` does not
 change that; to see a development build's events, point its DSN at your own
 project or at `node scripts/sentry-sink.mjs`. For the
 web app one rule, `reportingDestination` in `frontend/src/app/lib/errorReporting.ts`,
@@ -50,7 +50,7 @@ decides for the Next server's own events and for every browser envelope alike
 which forwards): `SENTRY_DISABLED=true` → off (when unset or empty, the baked
 `NEXT_PUBLIC_SENTRY_DISABLED` supplies this default); `SENTRY_DSN` (`FRONTEND_SENTRY_DSN`
 in compose) → that project; `NEXT_PUBLIC_SENTRY_DSN` baked at image build →
-that project; otherwise the built-in Mike project. `SENTRY_ENVIRONMENT` and
+that project; otherwise the built-in LinkMai project. `SENTRY_ENVIRONMENT` and
 `SENTRY_INSTALL` at runtime override what the bundle was built with. The rule
 that applied is printed once at boot (`[sentry] web app reports → ...`) and
 answered by `GET /monitoring` (`{"reports":"runtime"}` etc., plus
@@ -65,14 +65,14 @@ the deployment sets `SENTRY_INSTALL=official` (env, all three runtimes), and
 that has a DSN set; an explicit `SENTRY_ENVIRONMENT` always wins), so the
 official deployment, the community and contributors' checkouts are separable
 in Sentry. The boot log says which applies:
-`[sentry] enabled for api → Mike project Sentry (community install). Opt out
+`[sentry] enabled for api → LinkMai project Sentry (community install). Opt out
 with SENTRY_DISABLED=true or point SENTRY_DSN at your own project.`
 
 ### Public DSNs and default-on reporting
 
 **Public DSN does not mean public error reports.** A DSN lets an SDK submit
 events; it does not grant access to read stored events or administer the
-Sentry organization. Mike's default reports go to the maintainers' `open-legal-products`
+Sentry organization. LinkMai's default reports go to the maintainers' `open-legal-products`
 organization. The source-map upload token (`SENTRY_AUTH_TOKEN`) is a separate,
 privileged secret and must never appear in source or browser bundles. See
 [Sentry's explanation of public DSNs](https://www.sentry.help/en/articles/13964341-my-dsn-key-is-publicly-visible-is-this-a-security-vulnerability).
@@ -84,10 +84,10 @@ installing their underlying libraries automatically reports to their authors:
 | Project | What its own source or documentation establishes |
 | --- | --- |
 | [Zulip Desktop](https://github.com/zulip/zulip-desktop/blob/1cc112def5cd4b0b3ffe15c0857258c527b4421a/app/main/sentry.ts) (Apache-2.0) | Publishes a Sentry DSN. Packaged builds report unless the user disables `errorReporting`; development builds are excluded. |
-| [Element Web](https://github.com/element-hq/element-web/blob/5fc4f4090cea4357bf101e051e9864cde7610145/apps/web/element.io/develop/config.json) (AGPL/GPL options) | Publishes a Sentry DSN in its develop deployment configuration. Its [integration](https://github.com/element-hq/element-web/blob/5fc4f4090cea4357bf101e051e9864cde7610145/apps/web/src/sentry.ts) explicitly submits bug reports; this is not evidence of Mike's same automatic reporting policy. |
+| [Element Web](https://github.com/element-hq/element-web/blob/5fc4f4090cea4357bf101e051e9864cde7610145/apps/web/element.io/develop/config.json) (AGPL/GPL options) | Publishes a Sentry DSN in its develop deployment configuration. Its [integration](https://github.com/element-hq/element-web/blob/5fc4f4090cea4357bf101e051e9864cde7610145/apps/web/src/sentry.ts) explicitly submits bug reports; this is not evidence of LinkMai's same automatic reporting policy. |
 | [GitLab Service Ping](https://docs.gitlab.com/development/internal_analytics/service_ping/) | Documents default-on telemetry sending a weekly usage payload to GitLab. This is a precedent for default-on usage reporting, not proof of default-on Sentry crash reporting from self-managed instances. GitLab's [Sentry setup](https://docs.gitlab.com/omnibus/settings/configuration/#error-reporting-and-logging-with-sentry) asks administrators to enable it and supply their own DSNs. |
 
-Mike's policy remains explicit: automatic error reporting is on by default,
+LinkMai's policy remains explicit: automatic error reporting is on by default,
 with the exclusions above, an opt-out, and an alternative destination under
 the operator's control. Other projects' choices do not imply identical data
 collection, privacy guarantees, or consent policies.
@@ -99,7 +99,7 @@ cannot stop that sender. The controls below protect different things:
 
 | Control | Current implementation / verified state | Limit |
 | --- | --- | --- |
-| Repeat budget after privacy filtering | Pinned fingerprints use their complete controlled fingerprint and severity; fingerprints containing `{{ default }}` also use exception type and top frame. Only the first accepted observation of an issue/severity that day bypasses the repeat allowance; repeats send at power-of-two occurrences. One quiet hour resets occurrence sampling, never first-observation eligibility. Mike's projects have a hard ceiling of **50 total events/day** per budget, including new issues, escalations and diagnostic probes. Repeats use at most 25 slots, reserving the rest for new failures/escalations. Matching uses the resolved host/project, even for explicitly configured DSNs or rotated keys. Other projects have no daily cap by default. | SDK budgets are per process/thread/task pane. Browser budgets live in each Next tunnel process, where the runtime destination is known. Occurrence and daily-identity caches are each bounded to 1,000 issue/severity keys; daily-identity overflow conservatively uses repeat capacity. Quiet resets and eviction never reset daily counters or restore new-issue capacity; process restarts do. A fixed local warning is emitted once when the daily ceiling rejects an event. This is not a hard account quota or protection against direct public-DSN submissions. |
+| Repeat budget after privacy filtering | Pinned fingerprints use their complete controlled fingerprint and severity; fingerprints containing `{{ default }}` also use exception type and top frame. Only the first accepted observation of an issue/severity that day bypasses the repeat allowance; repeats send at power-of-two occurrences. One quiet hour resets occurrence sampling, never first-observation eligibility. LinkMai's projects have a hard ceiling of **50 total events/day** per budget, including new issues, escalations and diagnostic probes. Repeats use at most 25 slots, reserving the rest for new failures/escalations. Matching uses the resolved host/project, even for explicitly configured DSNs or rotated keys. Other projects have no daily cap by default. | SDK budgets are per process/thread/task pane. Browser budgets live in each Next tunnel process, where the runtime destination is known. Occurrence and daily-identity caches are each bounded to 1,000 issue/severity keys; daily-identity overflow conservatively uses repeat capacity. Quiet resets and eviction never reset daily counters or restore new-issue capacity; process restarts do. A fixed local warning is emitted once when the daily ceiling rejects an event. This is not a hard account quota or protection against direct public-DSN submissions. |
 | Duplicate and expected-error suppression | Explicit reports mark the same error object to prevent a later console/unhandled duplicate. API 4xx and deliberate client cancellations are excluded from the API reporting paths. | New error objects or independent console messages can still produce events. Grouping several events into one issue does not make them one quota unit. |
 | Non-error telemetry | The final transport rejects sessions, transactions, spans, logs, replay, attachments and every other non-error item. | Adding a new telemetry category requires an explicit privacy-reviewed policy change. |
 | Sentry spike protection | Enabled on all three projects of the `open-legal-products` organization when checked on 2026-10-20 UTC; no project notification actions are attached. | Uses historical volume; Sentry explicitly says it must not be the sole defense. |
@@ -110,7 +110,7 @@ cannot stop that sender. The controls below protect different things:
 Volume policy is separate from `privacyBoundaryIntegration`, which always rebuilds
 the outbound allowlist. `SENTRY_MAX_REPEAT_EVENTS_PER_DAY` configures the backend,
 Next server and browser tunnel; `REACT_APP_SENTRY_MAX_REPEAT_EVENTS_PER_DAY`
-configures the add-in at build time. A nonnegative integer sets the repeat allowance, limited to 25 for Mike projects;
+configures the add-in at build time. A nonnegative integer sets the repeat allowance, limited to 25 for LinkMai projects;
 `0` keeps only first observations, severity changes and diagnostic probes, all
 subject to the 50-event ceiling. Power-of-two repeat sampling also applies to
 custom projects. These are per-runtime limits, not a guaranteed 5,000-event
@@ -144,7 +144,7 @@ For stronger protection, maintainers should:
    when the allowance is consumed. No plan upgrade was made for this audit.
 4. Review accepted, filtered, and dropped events in Stats & Usage. Keep noise
    filters narrow; specifically review whether dropping hydration and chunk
-   loading failures is appropriate for Mike's supported browsers and deploys.
+   loading failures is appropriate for LinkMai's supported browsers and deploys.
 5. During abuse, disable the affected key, investigate, then rotate and ship
    the replacement. Older installs using the revoked key will stop reporting.
    A replacement public key is discoverable again. Allowed-origin filters can
@@ -227,7 +227,7 @@ however many users hit it.
   now dropped and the warning object, whose stack names the module that
   raised it, is reported instead. `--no-warnings` silences this too.
 
-Backend events carry `service=mike-backend` and `role` (`api`, `worker`,
+Backend events carry `service=linkmai-backend` and `role` (`api`, `worker`,
 `worker-thread`, or `job`). Every API request starts its own isolation scope
 before parsing, authentication or routing, with `component=http`, the fallback
 `operation=http.request`, HTTP method, sanitized route and generated request ID.
@@ -327,7 +327,7 @@ the backend, Next server/edge, browser, and all Word add-in entries.
   only fixed endpoint vocabulary; other segments become `:id`.
 - User objects, machine details, arbitrary contexts, source snippets, frame
   locals, custom tags and free-form extras are absent. Of breadcrumbs only
-  the stage trail survives (`markStage`, category `mike.stage`): static stage labels, with timestamps, never a message or data. Correlation/domain IDs are allowed only under named keys and
+  the stage trail survives (`markStage`, category `linkmai.stage`): static stage labels, with timestamps, never a message or data. Correlation/domain IDs are allowed only under named keys and
   only in UUID format. IDs remain linkable to internal records; this is data
   minimization, not a claim of anonymity.
 - Finite failure codes, dependency HTTP status, storage operation, file type,
@@ -444,10 +444,10 @@ Backend (`backend/.env`, read at process start):
 
 ```
 SENTRY_DISABLED=                       # empty = image default; true = off; false = explicitly on
-SENTRY_DSN=                            # your own Sentry; empty = image default, then Mike project
-SENTRY_INSTALL=                        # "official" only on Mike's own deployment
+SENTRY_DSN=                            # your own Sentry; empty = image default, then LinkMai project
+SENTRY_INSTALL=                        # "official" only on LinkMai's own deployment
 SENTRY_ENVIRONMENT=production          # defaults to self-hosted (development when run from source)
-SENTRY_RELEASE=mike@1.4.0              # optional; defaults to mike@<MIKE_VERSION>+<sha12>
+SENTRY_RELEASE=linkmai@1.4.0              # optional; defaults to linkmai@<LINKMAI_VERSION>+<sha12>
 SENTRY_TRACES_SAMPLE_RATE=0            # optional, 0..1
 SENTRY_ENABLE_TEST_ROUTE=false         # see "Verifying" below
 ```
@@ -457,12 +457,12 @@ Do not add `SENTRY_DSN` to the `environment:` block of the backend service in
 variable would blank the value from `.env`. Put it in `backend/.env` or the
 compose-root `.env`.
 
-The backend image stores its reporting defaults in `MIKE_BUILD_SENTRY_DSN`
-and `MIKE_BUILD_SENTRY_DISABLED`. A non-empty runtime `SENTRY_DSN` or
+The backend image stores its reporting defaults in `LINKMAI_BUILD_SENTRY_DSN`
+and `LINKMAI_BUILD_SENTRY_DISABLED`. A non-empty runtime `SENTRY_DSN` or
 `SENTRY_DISABLED` overrides the corresponding default; empty values preserve
-it. Leave `MIKE_VERSION` and `GIT_SHA` commented in the sample `.env` when
+it. Leave `LINKMAI_VERSION` and `GIT_SHA` commented in the sample `.env` when
 using published images so their baked release identity survives `env_file`.
-Without a version the release is `mike@0.0.0` (plus `+<sha12>` if available).
+Without a version the release is `linkmai@0.0.0` (plus `+<sha12>` if available).
 
 Web app. One runtime setting on the Next server decides where every web-app
 report goes, the server's own and the browser's: the browser SDK always starts
@@ -475,7 +475,7 @@ published images therefore need no build-time configuration at all:
 SENTRY_DISABLED=                       # empty = image default; true = off; false = explicitly on
 FRONTEND_SENTRY_DSN=https://<key>@<org>.ingest.sentry.io/<project>
 SENTRY_ENVIRONMENT=production
-SENTRY_INSTALL=                        # "official" only on Mike's own deployment
+SENTRY_INSTALL=                        # "official" only on LinkMai's own deployment
 
 # building the frontend yourself (optional): build-time defaults
 NEXT_PUBLIC_SENTRY_DISABLED=true       # server/tunnel default to off; runtime false re-enables both
@@ -501,7 +501,7 @@ streams, separate source maps, and the frontend DSN is public in the bundle.
 
 Every event carries a release so Sentry can flag a regression in a release and
 resolve an issue "until the next release". The release is
-`mike@<version>+<sha12>`: the product version from `/VERSION` plus the commit,
+`linkmai@<version>+<sha12>`: the product version from `/VERSION` plus the commit,
 in Sentry's `package@version+build` form, so releases order by version (an old
 self-hosted install reporting late sorts where it belongs, not after the fix)
 while the build metadata still names the exact commit. The same string is
@@ -514,14 +514,14 @@ Where the parts come from:
 
 | Build | Release | Image tags |
 | --- | --- | --- |
-| `v<VERSION>` tag, published by CI | `mike@2.1.0+<sha12>` | `2.1.0`, `latest` |
-| push to `main`, published by CI | `mike@2.1.0-dev.<run>+<sha12>` | `2.1.0-dev.<run>`, `main` |
-| your own `docker compose build` with `MIKE_VERSION=$(cat VERSION) GIT_SHA=$(git rev-parse HEAD)` | `mike@2.1.0+<sha12>` | local |
-| your own build without them | `mike@0.0.0+<sha12>` or `mike@0.0.0` | local |
+| `v<VERSION>` tag, published by CI | `linkmai@2.1.0+<sha12>` | `2.1.0`, `latest` |
+| push to `main`, published by CI | `linkmai@2.1.0-dev.<run>+<sha12>` | `2.1.0-dev.<run>`, `main` |
+| your own `docker compose build` with `LINKMAI_VERSION=$(cat VERSION) GIT_SHA=$(git rev-parse HEAD)` | `linkmai@2.1.0+<sha12>` | local |
+| your own build without them | `linkmai@0.0.0+<sha12>` or `linkmai@0.0.0` | local |
 
 `0.0.0` is deliberate: a build that did not come from the release workflow is
 valid but visibly not a release, and the backend warns about it at boot in
-production. Set `MIKE_VERSION` and `GIT_SHA` as build arguments for images you
+production. Set `LINKMAI_VERSION` and `GIT_SHA` as build arguments for images you
 build yourself; leave them unset at runtime when using published images so
 the baked identity is preserved. Runtime `SENTRY_RELEASE` overrides the whole
 string for the backend and Next server only. In a pulled web image the browser
@@ -533,7 +533,7 @@ on published images to keep all runtimes on their baked release. Release
 overrides must not contain customer information.
 
 Each release uses the original image digests. The workflow retains each build
-in GHCR as `mike-{backend,frontend}:build-<version>`, with the source commit and
+in GHCR as `linkmai-{backend,frontend}:build-<version>`, with the source commit and
 version in its image labels. It builds only after a registry lookup confirms
 the image is absent; authentication, network and unexpected registry errors
 stop the run. An existing version must match its saved build exactly.
@@ -556,7 +556,7 @@ Word add-in (build time, `word-addin/.env` or the Docker build arguments):
 
 ```
 REACT_APP_SENTRY_DISABLED=true         # opt-out
-REACT_APP_SENTRY_DSN=...               # your own Sentry; empty = Mike project Sentry
+REACT_APP_SENTRY_DSN=...               # your own Sentry; empty = LinkMai project Sentry
 REACT_APP_SENTRY_ENVIRONMENT=...       # optional
 REACT_APP_SENTRY_RELEASE=...           # optional
 ```
@@ -591,7 +591,7 @@ and `NODE_OPTIONS` in the Dockerfile), so backend frames already read
 
 The build plugin stamps each bundle with a debug ID and uploads the maps
 under it, so frames resolve regardless of the release name; the release tag on
-events still comes from `MIKE_VERSION` and `GIT_SHA`, or the explicit
+events still comes from `LINKMAI_VERSION` and `GIT_SHA`, or the explicit
 `SENTRY_RELEASE` override, as described above.
 
 #### Setting it up in Sentry
@@ -623,7 +623,7 @@ organization or project fails the build instead of silently skipping upload.
 A cache hit skips that step and its credential validation.
 
 Docker Compose (Dokploy and similar): put these non-secret settings, plus
-`MIKE_VERSION` and `GIT_SHA` for the release identity, in the compose-root
+`LINKMAI_VERSION` and `GIT_SHA` for the release identity, in the compose-root
 `.env` or the platform's environment; `docker-compose.yml` forwards them to the
 frontend build:
 
@@ -631,7 +631,7 @@ frontend build:
 SENTRY_UPLOAD_ENABLED=1
 SENTRY_ORG=<org slug>
 SENTRY_PROJECT=<web app project slug>
-MIKE_VERSION=<contents of VERSION>
+LINKMAI_VERSION=<contents of VERSION>
 GIT_SHA=<commit being deployed>
 SENTRY_ENVIRONMENT=production
 ```
@@ -661,7 +661,7 @@ docker build -f frontend/Dockerfile \
   --secret id=SENTRY_AUTH_TOKEN,src=/secure/path/sentry-token \
   --build-arg SENTRY_UPLOAD_ENABLED=1 \
   --build-arg SENTRY_ORG=<org> --build-arg SENTRY_PROJECT=<project> \
-  --build-arg MIKE_VERSION=$(cat VERSION) \
+  --build-arg LINKMAI_VERSION=$(cat VERSION) \
   --build-arg GIT_SHA=$(git rev-parse HEAD) \
   --build-arg NEXT_PUBLIC_SENTRY_DSN=... .
 ```
@@ -697,11 +697,11 @@ fails the run if not.
 
 Where events go is decided together with where maps go, so a fork never
 reports upstream by accident. The image owner is the repository owner, so a
-fork publishes to `ghcr.io/<owner>/mike-*` with no setup, and:
+fork publishes to `ghcr.io/<owner>/linkmai-**` with no setup, and:
 
 | Repository | Events | Source maps |
 | --- | --- | --- |
-| `open-legal-products` | built-in Mike DSNs | required; missing configuration stops publication before building |
+| `open-legal-products` | built-in LinkMai DSNs | required; missing configuration stops publication before building |
 | fork with `FORK_SENTRY_DSN_FRONTEND` and `FORK_SENTRY_DSN_BACKEND` variables | the fork's own projects (baked as defaults, overridable at runtime) | uploaded to the fork's org when its own secret and variables are set |
 | fork without them | reporting disabled in every runtime (`SENTRY_DISABLED=true` baked as the image default; the stock `.env.example` preserves it, while explicit runtime `false` re-enables reporting) | none |
 
@@ -737,7 +737,7 @@ when it receives an event, so earlier issues keep their minified frames.
 
 1. Set a local or deployment-owned DSN and restart. The backend logs
    `[sentry] enabled for api (environment ...)` for an explicit DSN. An unset
-   DSN uses Mike's project and logs that destination; only
+   DSN uses LinkMai's project and logs that destination; only
    `SENTRY_DISABLED=true` (or the test-process guard) disables reporting.
    Rebuild browser bundles after changing their `*_SENTRY_*` variables.
 2. Backend: set `SENTRY_ENABLE_TEST_ROUTE=true`, restart, and run
@@ -751,7 +751,7 @@ when it receives an event, so earlier issues keep their minified frames.
    route is unauthenticated and exists only to prove the pipeline.
 3. Web app: open the app, and in the browser console run
    `setTimeout(() => { throw new Error("Sentry web test") })`. The error
-   arrives tagged `service=mike-frontend runtime=browser`. To see the
+   arrives tagged `service=linkmai-frontend runtime=browser`. To see the
    request-id correlation, stop the backend and click anything that loads
    data: the Next server reports the gateway failure. Its explicit
    `reporting_owner: "backend"` response prevents a second browser event.
@@ -768,9 +768,9 @@ each event, and serves them at `http://localhost:9999/`:
 ```bash
 node scripts/sentry-sink.mjs
 # then, in the runtime you want to check:
-SENTRY_DSN=http://mike@localhost:9999/1              # backend
-NEXT_PUBLIC_SENTRY_DSN=http://mike@localhost:9999/2  # web app (browser)
-REACT_APP_SENTRY_DSN=http://mike@localhost:9999/3    # add-in
+SENTRY_DSN=http://linkmai@localhost:9999/1              # backend
+NEXT_PUBLIC_SENTRY_DSN=http://linkmai@localhost:9999/2  # web app (browser)
+REACT_APP_SENTRY_DSN=http://linkmai@localhost:9999/3    # add-in
 ```
 
 The project number is arbitrary; it only appears in the ingest path. This is
@@ -853,7 +853,7 @@ not evidence that another owner handled the failure. Expected outcomes are
 marked explicitly with `markErrorHandled` at that boundary. The registry means
 the reporting decision was made; it does not guarantee delivery to Sentry.
 Keep unowned terminal failures visible, including response-body failures after
-`fetch` resolves and plain proxy errors without a Mike ownership marker.
+`fetch` resolves and plain proxy errors without a LinkMai ownership marker.
 
 Development reporting stays off unless a destination is explicitly configured;
 opted-in errors are not filtered using compiler or framework filenames.
@@ -964,7 +964,7 @@ after taking responsibility for a failure. Clients propagate that field on the
 original error; a status, request ID or recognized UI code alone is insufficient.
 Old servers without the field remain observable, with potentially redundant
 reports until upgraded. These copies use the same repeat budget as other
-events, and on Mike's own projects the same hard daily ceiling (a custom
+events, and on LinkMai's own projects the same hard daily ceiling (a custom
 destination has no daily ceiling unless one is configured; see the quota
 table); a recognized code alone cannot safely suppress an unowned failure. Stream protocols keep their existing owner field. The marker
 also covers expected refusals explicitly handled at their source, independent

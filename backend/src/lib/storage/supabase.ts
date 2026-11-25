@@ -10,7 +10,7 @@
  *   SUPABASE_URL        — https://<project-ref>.supabase.co
  *   SUPABASE_SECRET_KEY — service-role / secret key (server-side only)
  * Optional:
- *   SUPABASE_STORAGE_BUCKET — bucket name (default: "mike"). The bucket must
+ *   SUPABASE_STORAGE_BUCKET — bucket name (default: "linkmai"). The bucket must
  *                             exist and be private; the Vercel bootstrap
  *                             (backend/scripts/vercel-start.sh) creates it.
  *
@@ -88,7 +88,7 @@ function encodeKey(key: string): string {
 export function createSupabaseStorageAdapter(): StorageAdapter {
   const baseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
   const secretKey = process.env.SUPABASE_SECRET_KEY;
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET || "mike";
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET || "linkmai";
   const enabled = Boolean(baseUrl && secretKey);
 
   let cachedClient: ReturnType<typeof createClient> | undefined;

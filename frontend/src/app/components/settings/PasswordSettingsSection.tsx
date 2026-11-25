@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
-import { authInputUIClassName, InputUI, PillButtonUI, GlassCardUI } from "@mike/ui";
+import { authInputUIClassName, InputUI, PillButtonUI, GlassCardUI } from "@linkmai/ui";
 import {
   MIN_PASSWORD_LENGTH,
   isPasswordTooLong,
@@ -93,7 +93,7 @@ export function PasswordSettingsSection() {
         return;
       }
       // GoTrue's own wording ("Password should be at least 6 characters")
-      // contradicts Mike's policy, so the code decides the text instead.
+      // contradicts LinkMai's policy, so the code decides the text instead.
       setPasswordSetError(
         describeError(error, {
           action: uiText("set your password"),

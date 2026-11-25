@@ -2,13 +2,13 @@ import { webcrypto, createHash } from "node:crypto";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { DOCX_AUTOSAVE_DELAY, useDocxAutosave } from "./useDocxAutosave";
-import { listDocumentVersions, replaceDocumentVersionFile } from "@/app/lib/mikeApi";
-import { UploadBatchError } from "@mike/client";
+import { listDocumentVersions, replaceDocumentVersionFile } from "@/app/lib/linkmaiApi";
+import { UploadBatchError } from "@linkmai/client";
 import { invalidateDocxBytes } from "./useFetchDocxBytes";
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listDocumentVersions: vi.fn(), replaceDocumentVersionFile: vi.fn(),
-    MikeApiError: class extends Error {},
+    LinkMaiApiError: class extends Error {},
 }));
 vi.mock("./useFetchDocxBytes", () => ({ invalidateDocxBytes: vi.fn() }));
 const original = new Uint8Array([1]).buffer;

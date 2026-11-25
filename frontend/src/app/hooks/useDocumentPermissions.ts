@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getDocument } from "@/app/lib/mikeApi";
+import { getDocument } from "@/app/lib/linkmaiApi";
 
 export type DocumentPermissions = { canEdit: boolean; canDelete: boolean };
 type Permissions = DocumentPermissions;

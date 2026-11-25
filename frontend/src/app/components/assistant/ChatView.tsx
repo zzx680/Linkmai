@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { findPendingAskInput } from "@/app/lib/pendingAskInput";
 import {
@@ -42,8 +42,8 @@ import {
     HeaderButtonUI,
     HeaderButtonsUI,
     headerButtonClassName,
-} from "@mike/ui";
-import type { MessageExcerpt } from "@mike/client";
+} from "@linkmai/ui";
+import type { MessageExcerpt } from "@linkmai/client";
 import { assistantSidePanelTabId } from "./AssistantSidePanel";
 import { AssistantDocumentPanelHost } from "./AssistantDocumentPanelHost";
 import {
@@ -88,7 +88,7 @@ import { can, roleFrom } from "@/app/lib/permissions";
 import { AssistantChatHistoryMenu } from "./AssistantChatHistoryMenu";
 import { cn } from "@/app/lib/utils";
 import { notifyError, userFacingApiError } from "@/app/lib/userFacingError";
-import { getPlaybook } from "@/app/lib/mikeApi";
+import { getPlaybook } from "@/app/lib/linkmaiApi";
 import { LINKED_PLAYBOOK_PARAM } from "@/app/lib/assistantPlaybookLink";
 
 interface Props {

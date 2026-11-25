@@ -31,7 +31,7 @@ concurrency:
 jobs:
   build:
     # Runs here and in forks; skipped in copies such as the Vercel Deploy button makes (docs/vercel.md).
-    if: github.repository == 'open-legal-products/mike' || github.event.repository.fork
+    if: github.repository == 'open-legal-products/linkmai-*' || github.event.repository.fork
     name: ${{ matrix.image }} image
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -66,7 +66,7 @@ jobs:
           push: false
           # The backend image is loaded so the next step can run it.
           load: ${{ matrix.image == 'backend' }}
-          tags: mike-${{ matrix.image }}:ci
+          tags: linkmai-${{ matrix.image }}:ci
           # GIT_SHA becomes the Sentry release (docs/observability.md); an
           # image without it reports events nobody can map to a commit.
           build-args: |
@@ -86,11 +86,11 @@ jobs:
           policy=$(docker run --rm --network none \
             -v "$PWD/docker/storage-cors.mjs:/storage-cors.mjs:ro" \
             -e NODE_ENV=production \
-            -e FRONTEND_URL=https://mike.example.com \
+            -e FRONTEND_URL=https://linkmai.example.com \
             -e ALLOWED_ORIGINS=https://word.example.com \
-            -e MIKE_ORIGINS_MODULE=/app/dist/lib/origins.js \
-            --entrypoint node mike-backend:ci /storage-cors.mjs 2>stderr.txt)
+            -e LINKMAI_ORIGINS_MODULE=/app/dist/lib/origins.js \
+            --entrypoint node linkmai-backend:ci /storage-cors.mjs 2>stderr.txt)
           cat stderr.txt
           echo "$policy"
           test ! -s stderr.txt
-          echo "$policy" | jq -e '.CORSRules[0].AllowedOrigins == ["https://mike.example.com","https://word.example.com"]'
+          echo "$policy" | jq -e '.CORSRules[0].AllowedOrigins == ["https://linkmai.example.com","https://word.example.com"]'

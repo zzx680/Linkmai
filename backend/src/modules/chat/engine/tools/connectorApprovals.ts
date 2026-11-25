@@ -14,7 +14,7 @@ import type {
   AskInputResponseItem,
   ConnectorApprovalItem,
   McpToolEvent,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import { AppError } from "../../../../lib/appError";
 import { reportError } from "../../../../lib/observability/sentry";
 import type { Db } from "../../../../lib/supabase";
@@ -65,7 +65,7 @@ export async function planConnectorToolCall(
 }
 
 export const APPROVAL_UNAVAILABLE_MESSAGE =
-  'This connector asks for permission before write actions, and approvals are only available in the Mike assistant. Tell the user to run this from the Mike assistant, or to turn off "Ask for permission for write actions" for this connector in Settings → Connectors.';
+  'This connector asks for permission before write actions, and approvals are only available in the LinkMai assistant. Tell the user to run this from the LinkMai assistant, or to turn off "Ask for permission for write actions" for this connector in Settings → Connectors.';
 
 function isApprovalItem(
   item: AskInputsEvent["items"][number],

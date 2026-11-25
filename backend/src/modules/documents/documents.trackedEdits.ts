@@ -4,7 +4,7 @@
 // reviews both write through here, so version creation stays in this module.
 
 import crypto from "node:crypto";
-import type { EditAnnotation } from "@mike/contracts";
+import type { EditAnnotation } from "@linkmai/contracts";
 import { can, ensureDocAccess } from "../../lib/access";
 import { applyTrackedEdits, type EditInput } from "../../lib/docxTrackedChanges";
 import { contentSha256, loadActiveVersion } from "../../lib/documentVersions";
@@ -138,7 +138,7 @@ export async function applyTrackedEditsToDocument(params: {
     .select("display_name, email")
     .eq("user_id", userId)
     .maybeSingle();
-  const author = profileAttributionName(authorProfile, "Mike");
+  const author = profileAttributionName(authorProfile, "LinkMai");
 
   const {
     bytes: editedBytes,

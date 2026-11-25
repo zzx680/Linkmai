@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
-import { GlassCardUI, PillButtonUI } from "@mike/ui";
+import { GlassCardUI, PillButtonUI } from "@linkmai/ui";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
 import { SettingsRow } from "@/app/components/settings/SettingsRow";
 import {
@@ -17,7 +17,7 @@ import {
   updateResponseStyle,
   type ResponseStyle,
   type ResponseStyleField,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 
 type OptionCopy = Omit<SettingsSelectOption, "value">;
@@ -31,13 +31,13 @@ function languageOptions(
   const options = {
     auto: {
       label: uiText("Automatic"),
-      description: uiText("Mike replies in the language you write in."),
+      description: uiText("LinkMai replies in the language you write in."),
     },
   } as Record<ResponseLanguage, OptionCopy>;
   for (const [code, name] of Object.entries(names)) {
     options[code as ResponseLanguage] = {
       label: name,
-      description: uiText`Mike replies in ${name}.`,
+      description: uiText`LinkMai replies in ${name}.`,
     };
   }
   return options;
@@ -73,7 +73,7 @@ const SETTINGS: {
     options: {
       balanced: {
         label: uiText("Balanced"),
-        description: uiText("Mike picks the layout that suits each answer."),
+        description: uiText("LinkMai picks the layout that suits each answer."),
       },
       less: {
         label: uiText("Less"),
@@ -94,7 +94,7 @@ const SETTINGS: {
       },
       balanced: {
         label: uiText("Balanced"),
-        description: uiText("Mike's usual professional tone."),
+        description: uiText("LinkMai's usual professional tone."),
       },
       plain: {
         label: uiText("Plain and Simple"),
@@ -202,7 +202,7 @@ export function ResponseStyleSection() {
     <section className="space-y-3" aria-labelledby="response-style-heading">
       <SettingsHeading id="response-style-heading">{uiText("Response style")}</SettingsHeading>
       <SettingsDescription>
-        {uiText("Choose how Mike shapes its answers in chats.")}
+        {uiText("Choose how LinkMai shapes its answers in chats.")}
       </SettingsDescription>
       <GlassCardUI>
         {loadError ? (

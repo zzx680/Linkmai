@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     useEffect,
@@ -21,7 +21,7 @@ import {
     HeaderButtonUI,
     HeaderButtonsUI,
     headerButtonClassName,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import {
     LIQUID_GLASS_SELECTED_CLASS,
 } from "@/app/components/ui/liquid-surface";

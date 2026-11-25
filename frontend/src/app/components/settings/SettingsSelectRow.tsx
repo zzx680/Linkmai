@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { ChevronDown } from "lucide-react";
 import {
@@ -10,7 +10,7 @@ import {
   DropdownRadioGroup,
   DropdownRadioItem,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { SettingsRow } from "@/app/components/settings/SettingsRow";
 import {
   SettingsDescription,

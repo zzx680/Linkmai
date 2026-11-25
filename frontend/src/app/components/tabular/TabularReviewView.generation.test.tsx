@@ -7,7 +7,7 @@ import {
     stopTabularGeneration,
     streamTabularGeneration,
     streamTabularGenerationResume,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type {
     TabularCell,
     TabularReview,
@@ -16,7 +16,7 @@ import type {
 import type { ReviewCellStore } from "./reviewCellStore";
 import { TRView } from "./TabularReviewView";
 import * as Sentry from "@sentry/react";
-import { clearToasts, privacyBoundaryIntegration } from "@mike/client";
+import { clearToasts, privacyBoundaryIntegration } from "@linkmai/client";
 import { scrubEvent } from "@/app/lib/errorReporting";
 
 const { apiKeyState } = vi.hoisted(() => ({
@@ -39,9 +39,9 @@ vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
     useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock("@/app/lib/mikeApi", async () => ({
-    reportedUpstreamMessage: (await import("@mike/client")).reportedUpstreamMessage,
-    MikeApiError: class MikeApiError extends Error {
+vi.mock("@/app/lib/linkmaiApi", async () => ({
+    reportedUpstreamMessage: (await import("@linkmai/client")).reportedUpstreamMessage,
+    LinkMaiApiError: class LinkMaiApiError extends Error {
         status: number;
         code: string | null;
         constructor(args: {
@@ -50,7 +50,7 @@ vi.mock("@/app/lib/mikeApi", async () => ({
             code?: string | null;
         }) {
             super(args.message);
-            this.name = "MikeApiError";
+            this.name = "LinkMaiApiError";
             this.status = args.status;
             this.code = args.code ?? null;
         }
@@ -333,12 +333,12 @@ describe("TabularReviewView server-owned generation", () => {
     it("falls back to dropping the stream when the server has no run to stop", async () => {
         // An async (queue-backed) deployment, or another replica's run: there
         // is nothing in this process to stop, so Stop means what it used to.
-        const { MikeApiError } = await import("@/app/lib/mikeApi");
+        const { LinkMaiApiError } = await import("@/app/lib/linkmaiApi");
         mockDetail({});
         const stream = openStream();
         vi.mocked(streamTabularGeneration).mockResolvedValue(stream.response);
         vi.mocked(stopTabularGeneration).mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "no run",
                 status: 404,
                 code: "generation_not_found",
@@ -556,8 +556,8 @@ describe("TabularReviewView single-cell regeneration", () => {
 
     it("follow-up regression: Check again keeps reconciling a running review", async () => {
         const regenerate = await openCell();
-        const { MikeApiError } = await import("@/app/lib/mikeApi");
-        vi.mocked(regenerateTabularCell).mockRejectedValue(new MikeApiError({ message: "running", status: 409, code: "review_running" }));
+        const { LinkMaiApiError } = await import("@/app/lib/linkmaiApi");
+        vi.mocked(regenerateTabularCell).mockRejectedValue(new LinkMaiApiError({ message: "running", status: 409, code: "review_running" }));
         vi.useFakeTimers();
         try {
             serverRunsFor(100);
@@ -580,8 +580,8 @@ describe("TabularReviewView single-cell regeneration", () => {
         const { rerender } = render(<TRView reviewId="r1" />);
         fireEvent.click(await screen.findByRole("button", { name: "Open first cell" }));
         const regenerate = await screen.findByRole("button", { name: "Regenerate cell" });
-        const { MikeApiError } = await import("@/app/lib/mikeApi");
-        vi.mocked(regenerateTabularCell).mockRejectedValue(new MikeApiError({ message: "running", status: 409, code: "review_running" }));
+        const { LinkMaiApiError } = await import("@/app/lib/linkmaiApi");
+        vi.mocked(regenerateTabularCell).mockRejectedValue(new LinkMaiApiError({ message: "running", status: 409, code: "review_running" }));
         vi.useFakeTimers();
         try {
             serverRunsFor(1);

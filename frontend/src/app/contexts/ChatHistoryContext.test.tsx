@@ -1,13 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 const { createChat, listChats } = vi.hoisted(() => ({
     createChat: vi.fn(),
     listChats: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     createChat: (...args: unknown[]) => createChat(...args),
     listChats: (...args: unknown[]) => listChats(...args),
     renameChat: vi.fn(async () => undefined),

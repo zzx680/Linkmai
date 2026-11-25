@@ -103,13 +103,13 @@ async function apiProcess(): Promise<express.Express> {
 function expiredSessionCookie(refreshToken: string): string {
   const expired = Math.floor(Date.now() / 1000) - 60;
   const session = { access_token: jwt(expired), refresh_token: refreshToken, expires_in: 3600, expires_at: expired, token_type: "bearer", user };
-  return `mike-session=base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`;
+  return `linkmai-session=base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`;
 }
 
 function liveSessionCookie(signature: string): string {
   const exp = Math.floor(Date.now() / 1000) + 3600;
   const session = { access_token: jwt(exp, signature), refresh_token: "live-token", expires_in: 3600, expires_at: exp, token_type: "bearer", user };
-  return `mike-session=base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`;
+  return `linkmai-session=base64-${Buffer.from(JSON.stringify(session)).toString("base64url")}`;
 }
 
 function writtenCookies(res: request.Response): string[] {
@@ -148,7 +148,7 @@ describe("page-load fan-out with an expired cookie session", () => {
     // Every response carries the one rotated session, none a cleared cookie.
     for (const res of responses) {
       const [written] = writtenCookies(res);
-      expect(written).toMatch(/^mike-session=base64-/);
+      expect(written).toMatch(/^linkmai-session=base64-/);
       expect(written).not.toContain("Max-Age=0");
     }
   });
@@ -199,7 +199,7 @@ describe("a cookie session GoTrue cannot vouch for", () => {
     expect(refreshAnswers).toEqual([400]);
     expect(res.status).toBe(401);
     expect(res.body).toEqual({ code: "session_expired", detail: "Invalid or expired session" });
-    expect(writtenCookies(res).some((cookie) => cookie.startsWith("mike-session=") && cookie.includes("Max-Age=0"))).toBe(true);
+    expect(writtenCookies(res).some((cookie) => cookie.startsWith("linkmai-session=") && cookie.includes("Max-Age=0"))).toBe(true);
   });
 
   it("answers GoTrue being unreachable 503 and keeps the session cookie", async () => {

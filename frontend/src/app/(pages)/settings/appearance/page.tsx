@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
@@ -9,7 +9,7 @@ import {
   SettingsDescription,
   SettingsLabel,
 } from "@/app/components/settings/SettingsText";
-import { GlassCardUI, ToggleSwitchUI } from "@mike/ui";
+import { GlassCardUI, ToggleSwitchUI } from "@linkmai/ui";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
 import { SettingsRow } from "@/app/components/settings/SettingsRow";
 
@@ -46,7 +46,7 @@ export default function AppearancePage() {
           <div className="min-w-0 space-y-1">
             <SettingsLabel>{uiText("Dark mode")}</SettingsLabel>
             <SettingsDescription>
-              {uiText("Use a darker color palette throughout Mike.")}
+              {uiText("Use a darker color palette throughout LinkMai.")}
             </SettingsDescription>
             {darkModeError && (
               <p role="alert" className="text-xs text-red-600">

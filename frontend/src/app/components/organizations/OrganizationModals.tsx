@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { Loader2, RotateCw, X } from "lucide-react";
@@ -16,7 +16,7 @@ import {
   resendOrgInvitation,
   type Org,
   type OrgInvitation,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
   INVITABLE_ORG_ROLES,
   ORG_ROLE_DESCRIPTIONS,

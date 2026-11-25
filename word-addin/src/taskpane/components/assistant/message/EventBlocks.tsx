@@ -1,7 +1,7 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useState, type ReactNode } from "react";
-import { useReasoningDisclosure, DocFindBlockUI, DocReadBlockUI } from "@mike/ui";
+import { useReasoningDisclosure, DocFindBlockUI, DocReadBlockUI } from "@linkmai/ui";
 import { ChevronDown } from "lucide-react";
 import { Markdown } from "../../../../shared/chat/Markdown";
 

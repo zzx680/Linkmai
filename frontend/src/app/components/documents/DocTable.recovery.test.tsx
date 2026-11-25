@@ -8,11 +8,11 @@ import {
     type DocTableFolder,
     type DocTableSelectionActions,
 } from "./DocTable";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
-import { deleteDocument, downloadDocumentsZip } from "@/app/lib/mikeApi";
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...await importOriginal<typeof import("@/app/lib/mikeApi")>(),
+import { deleteDocument, downloadDocumentsZip } from "@/app/lib/linkmaiApi";
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/app/lib/linkmaiApi")>(),
   downloadDocumentsZip: vi.fn().mockRejectedValue(new Error("download failed")),
   deleteDocument: vi.fn(),
 }));
@@ -274,7 +274,7 @@ describe("DocTable failure reporting", () => {
         );
         expect(folderRow).not.toBeNull();
         const payload: Record<string, string> = {
-            "application/mike-docs": JSON.stringify(["doc-1", "doc-2"]),
+            "application/linkmai-docs": JSON.stringify(["doc-1", "doc-2"]),
         };
         fireEvent.drop(folderRow!, {
             dataTransfer: {

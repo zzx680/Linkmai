@@ -61,7 +61,7 @@ export function toolActivityEnabled(
 }
 
 /**
- * The name a tool is counted under. Mike's own tools have names written in
+ * The name a tool is counted under. LinkMai's own tools have names written in
  * its source. A connector tool's name is built from what a user called the
  * connector and what its server called the tool, so all of them share one
  * label.

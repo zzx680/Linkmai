@@ -11,7 +11,7 @@ Sentry.init(
         install: process.env.NEXT_PUBLIC_SENTRY_INSTALL,
         environment: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT,
         release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
-        version: process.env.NEXT_PUBLIC_MIKE_VERSION,
+        version: process.env.NEXT_PUBLIC_LINKMAI_VERSION,
         gitSha: process.env.NEXT_PUBLIC_GIT_SHA,
         tracesSampleRate: process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
         nodeEnv: process.env.NODE_ENV,

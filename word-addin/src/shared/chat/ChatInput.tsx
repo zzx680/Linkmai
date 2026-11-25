@@ -1,11 +1,11 @@
 "use client";
 
-import { isImeComposing, uiText } from "@mike/client";
+import { isImeComposing, uiText } from "@linkmai/client";
 
 import * as React from "react";
 import { ArrowRight, Square } from "lucide-react";
 
-import { COMPOSER_SEND_BUTTON_CLASS } from "@mike/ui";
+import { COMPOSER_SEND_BUTTON_CLASS } from "@linkmai/ui";
 
 import { cn } from "../lib/utils";
 

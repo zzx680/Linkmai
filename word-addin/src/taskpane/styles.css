@@ -9,7 +9,7 @@
 
 /* Tailwind v4 content detection: scan all add-in component sources. */
 @source "../";
-/* The shared primitives (@mike/ui) live outside this application. */
+/* The shared primitives (@linkmai/ui) live outside this application. */
 @source "../../../packages/ui/src";
 
 /* The web supplies these font variables via next/font; the add-in supplies

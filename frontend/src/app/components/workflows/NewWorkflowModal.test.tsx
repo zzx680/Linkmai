@@ -6,10 +6,10 @@ import {
     createWorkflow,
     listOrgMembers,
     lookupUserByEmail,
-    MikeApiError,
+    LinkMaiApiError,
     shareWorkflow,
     updateWorkflow,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { Document, Workflow } from "../shared/types";
 import { NewWorkflowModal } from "./NewWorkflowModal";
 
@@ -17,8 +17,8 @@ const { useUserProfile } = vi.hoisted(() => ({
     useUserProfile: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     copyDocumentsToWorkflowAssets: vi.fn(),
     createWorkflow: vi.fn(),
     listOrgMembers: vi.fn(),
@@ -545,7 +545,7 @@ describe("NewWorkflowModal editing", () => {
         const onCreated = vi.fn();
         const onClose = vi.fn();
         vi.mocked(shareWorkflow).mockRejectedValueOnce(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "Only owners can share this workflow.",
                 status: 403,
             }),
@@ -586,7 +586,7 @@ describe("NewWorkflowModal editing", () => {
         const user = userEvent.setup({ delay: null });
         const onClose = vi.fn();
         vi.mocked(shareWorkflow).mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "Only owners can share this workflow.",
                 status: 403,
             }),

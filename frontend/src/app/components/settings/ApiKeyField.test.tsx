@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MikeApiError } from "@/app/lib/mikeApi";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import { ApiKeyField } from "./ApiKeyField";
 
 afterEach(clearToasts);
@@ -106,7 +106,7 @@ describe("ApiKeyField", () => {
     renderField({
       onSave: vi
         .fn()
-        .mockRejectedValue(new MikeApiError({ message: reason, status: 400 })),
+        .mockRejectedValue(new LinkMaiApiError({ message: reason, status: 400 })),
     });
 
     await user.type(

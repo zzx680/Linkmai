@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import { OrganizationsOverview } from "./OrganizationsOverview";
 import SettingsLayout from "@/app/(pages)/settings/layout";
 
@@ -38,11 +38,11 @@ vi.mock("@/app/contexts/WorkspaceContext", () => ({
     refreshOrganizations: mocks.refreshOrganizations,
   }),
 }));
-// Spread the real module: userFacingApiError resolves MikeApiError from this
+// Spread the real module: userFacingApiError resolves LinkMaiApiError from this
 // same module, so a bare object mock leaves its `instanceof` check with an
 // undefined right-hand side.
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   listOrgs: mocks.listOrgs,
   listDeletedOrganizations: vi.fn(async () => []),
   listMyOrgInvitations: mocks.listMyOrgInvitations,
@@ -376,7 +376,7 @@ describe("OrganizationsOverview", () => {
     const user = userEvent.setup();
     mocks.listMyOrgInvitations
       .mockRejectedValueOnce(
-        new MikeApiError({ status: 503, message: "upstream down" }),
+        new LinkMaiApiError({ status: 503, message: "upstream down" }),
       )
       .mockResolvedValue([INVITATION]);
     render(<OrganizationsOverview />);
@@ -399,7 +399,7 @@ describe("OrganizationsOverview", () => {
   it("shows the server's own wording when the organizations fetch is refused, with a retry", async () => {
     const user = userEvent.setup();
     mocks.listOrgs.mockRejectedValueOnce(
-      new MikeApiError({
+      new LinkMaiApiError({
         status: 403,
         message: "Your account is not permitted to list organizations",
       }),

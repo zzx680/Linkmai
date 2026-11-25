@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ConnectorApprovalItem } from "@mike/contracts";
+import type { ConnectorApprovalItem } from "@linkmai/contracts";
 
 const mocks = vi.hoisted(() => ({
   google: vi.fn(),

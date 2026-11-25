@@ -382,10 +382,10 @@ describe("storagePublicEndpointWarnings", () => {
     } as NodeJS.ProcessEnv);
 
   it.each([
-    ["https://mike.firm.example", "http://localhost:9000", /loopback/],
+    ["https://linkmai.firm.example", "http://localhost:9000", /loopback/],
     ["http://192.168.1.20:3000", "http://127.0.0.1:9000", /loopback/],
-    ["https://mike.firm.example", "", /internal service name/],
-    ["https://mike.firm.example", "http://storage.firm.example:9000", /mixed content/],
+    ["https://linkmai.firm.example", "", /internal service name/],
+    ["https://linkmai.firm.example", "http://storage.firm.example:9000", /mixed content/],
   ])("warns for FRONTEND_URL %s with public storage %s", (frontend, endpoint, reason) => {
     const warnings = at(frontend, endpoint);
     expect(warnings).toHaveLength(1);
@@ -394,8 +394,8 @@ describe("storagePublicEndpointWarnings", () => {
 
   it.each([
     ["http://localhost:3000", "http://localhost:9000"],
-    ["https://mike.firm.example", "https://storage.firm.example"],
-    ["https://mike.firm.example", "https://mike.firm.example"],
+    ["https://linkmai.firm.example", "https://storage.firm.example"],
+    ["https://linkmai.firm.example", "https://linkmai.firm.example"],
   ])("is quiet for FRONTEND_URL %s with public storage %s", (frontend, endpoint) => {
     expect(at(frontend, endpoint)).toEqual([]);
   });

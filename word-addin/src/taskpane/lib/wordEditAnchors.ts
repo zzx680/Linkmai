@@ -9,7 +9,7 @@
  */
 import { rememberAppliedEditId } from "./editApplyOutcome";
 
-const WORD_EDIT_ANCHORS_SETTING = "mike.wordEditAnchors.v1";
+const WORD_EDIT_ANCHORS_SETTING = "linkmai.wordEditAnchors.v1";
 
 /**
  * Stable edit IDs this document has already had applied to it, newest last.

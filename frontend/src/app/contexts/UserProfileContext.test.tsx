@@ -6,7 +6,7 @@ import {
     within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 const {
     setUserProfilePhoto,
@@ -41,8 +41,8 @@ vi.mock("@/app/contexts/AuthContext", () => ({
     }),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     setUserProfilePhoto: (...args: unknown[]) => setUserProfilePhoto(...args),
     getUserProfile: (...args: unknown[]) => getUserProfile(...args),
     updateUserProfile: (...args: unknown[]) => updateUserProfile(...args),
@@ -66,7 +66,7 @@ import { useState } from "react";
 import { UserProfileProvider, useUserProfile } from "./UserProfileContext";
 import { useModelApiKeys } from "@/app/hooks/useModelApiKeys";
 import { ModelToggle } from "@/app/components/assistant/ModelToggle";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import { subscribeToTabularChatSettingsUpdates } from "@/app/lib/tabularChatSettingsEvents";
 
 function apiProfile(darkMode: boolean) {
@@ -227,7 +227,7 @@ it("passes a rejected key's 400 to the caller and reports other failures as fals
                         baseUrl: "https://10.0.0.1/v1",
                     }).then(
                         (ok) => outcomes.push(`resolved:${ok}`),
-                        (error: MikeApiError) =>
+                        (error: LinkMaiApiError) =>
                             outcomes.push(`rejected:${error.status}`),
                     )
                 }
@@ -238,7 +238,7 @@ it("passes a rejected key's 400 to the caller and reports other failures as fals
     }
     saveApiKey
         .mockRejectedValueOnce(
-            new MikeApiError({ message: "A public https base URL is required.", status: 400 }),
+            new LinkMaiApiError({ message: "A public https base URL is required.", status: 400 }),
         )
         .mockRejectedValueOnce(new Error("network down"));
     render(<UserProfileProvider><SaveKey /></UserProfileProvider>);
@@ -556,7 +556,7 @@ function ProfileSummary() {
 describe("UserProfileProvider when the server omits apiKeyStatus", () => {
     // Sentry MIKE-FRONTEND-4H: a profile answered 200 without
     // `apiKeyStatus`; normalising it threw, the throw was filed as a fault
-    // and the user got the placeholder profile. Every Mike backend sends the
+    // and the user got the placeholder profile. Every LinkMai backend sends the
     // field, so the sender was a forked server or a proxy/misroute.
     const withoutKeyStatus = () => {
         const body: Partial<ReturnType<typeof apiProfile>> = apiProfile(false);

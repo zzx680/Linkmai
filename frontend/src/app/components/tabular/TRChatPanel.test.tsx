@@ -10,15 +10,15 @@ import {
     streamTabularChat,
     streamTabularChatTurn,
     type TRChat,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { TRChatPanel } from "./TRChatPanel";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn() }),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     getTabularChats: vi.fn(),
     getTabularChatMessages: vi.fn(),
     deleteTabularChat: vi.fn(),

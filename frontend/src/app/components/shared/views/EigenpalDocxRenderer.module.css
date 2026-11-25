@@ -1,19 +1,19 @@
 @reference "../../../globals.css";
 
 /* EigenPal 2.21.1 has no title-row or frame-border option. Scope these
-   overrides to its packaged chrome; Mike owns the filename and file actions. */
+   overrides to its packaged chrome; LinkMai owns the filename and file actions. */
 .host {
-    --mike-docx-comment-width: 240px;
-    /* Capture Mike's semantic tokens before EigenPal shadows them with HSL. */
-    --mike-docx-focus-color: var(--ring);
-    --mike-docx-foreground: var(--foreground);
-    --mike-docx-muted-foreground: var(--muted-foreground);
-    --mike-docx-button-color: var(--muted-foreground);
-    --mike-docx-border: var(--border);
+    --linkmai-docx-comment-width: 240px;
+    /* Capture LinkMai's semantic tokens before EigenPal shadows them with HSL. */
+    --linkmai-docx-focus-color: var(--ring);
+    --linkmai-docx-foreground: var(--foreground);
+    --linkmai-docx-muted-foreground: var(--muted-foreground);
+    --linkmai-docx-button-color: var(--muted-foreground);
+    --linkmai-docx-border: var(--border);
 }
 
 :global(.dark) .host {
-    --mike-docx-button-color: var(--foreground);
+    --linkmai-docx-button-color: var(--foreground);
 }
 
 .host :global(.docx-editor) {
@@ -35,23 +35,23 @@
 }
 
 .host :global(.docx-toolbar) {
-    /* Reuse Mike's text utilities and the same material/state tokens as
+    /* Reuse LinkMai's text utilities and the same material/state tokens as
        TextButtonUI, Dropdown and the flat dropdown inputs. */
-    --foreground: var(--mike-docx-foreground);
-    --muted-foreground: var(--mike-docx-muted-foreground);
-    --ring: var(--mike-docx-focus-color);
+    --foreground: var(--linkmai-docx-foreground);
+    --muted-foreground: var(--linkmai-docx-muted-foreground);
+    --ring: var(--linkmai-docx-focus-color);
     --doc-text: var(--foreground);
     --doc-text-muted: var(--muted-foreground);
     --doc-surface: var(--liquid-glass-background-float);
-    --doc-border: var(--mike-docx-border);
-    --doc-border-dark: var(--mike-docx-border);
+    --doc-border: var(--linkmai-docx-border);
+    --doc-border-dark: var(--linkmai-docx-border);
     --doc-bg-hover: var(--liquid-glass-hover-background);
     --doc-surface-hover: var(--liquid-glass-hover-background);
     --doc-toggle-active-bg: var(--liquid-glass-selected-background);
     --doc-toggle-active-fg: var(--foreground);
     --doc-primary-light: var(--liquid-glass-selected-background);
     --doc-primary: var(--foreground);
-    --doc-accent: var(--mike-docx-focus-color);
+    --doc-accent: var(--linkmai-docx-focus-color);
     background: transparent;
     border: 0;
     box-shadow: none;
@@ -61,7 +61,7 @@
 }
 
 .host :global(.docx-toolbar) button {
-    color: var(--mike-docx-button-color);
+    color: var(--linkmai-docx-button-color);
 }
 
 /* The portaled New comment action follows Comments, before the mode picker. */
@@ -92,12 +92,12 @@
 /* Color swatches represent document colors, not interactive surface fills. */
 .host :global(.docx-toolbar) button:not(:global(.docx-toolbar__swatch)):not(:disabled):not([aria-disabled="true"]):is(:hover, :focus-visible) {
     background: var(--liquid-glass-hover-background);
-    color: var(--mike-docx-button-color);
+    color: var(--linkmai-docx-button-color);
 }
 
 .host :global(.docx-toolbar) button:not(:global(.docx-toolbar__swatch)):not(:disabled):not([aria-disabled="true"]):is([data-active]:not([data-active="false"]), [aria-pressed="true"], [aria-selected="true"], [aria-checked="true"]) {
     background: var(--liquid-glass-selected-background);
-    color: var(--mike-docx-button-color);
+    color: var(--linkmai-docx-button-color);
 }
 
 .host :global(.docx-toolbar) :global(.docx-toolbar__font-size-input) {
@@ -113,7 +113,7 @@
 }
 
 .host :global(.docx-toolbar) :is(button, input, textarea):focus-visible {
-    outline: 2px solid var(--mike-docx-focus-color);
+    outline: 2px solid var(--linkmai-docx-focus-color);
     outline-offset: -2px;
 }
 
@@ -136,7 +136,7 @@
     box-shadow: var(--liquid-glass-shadow-float);
 }
 
-/* Match Mike's dropdown rows, preserving font/style previews and swatch colors. */
+/* Match LinkMai's dropdown rows, preserving font/style previews and swatch colors. */
 .host :global(.docx-toolbar) :global(.docx-toolbar__font-search) {
     border-radius: 0.75rem;
 }
@@ -191,7 +191,7 @@
     :global(.docx-toolbar__swatch-popup),
     :global(.docx-table-chrome__panel)
 ) :focus-visible {
-    outline: 2px solid var(--mike-docx-focus-color);
+    outline: 2px solid var(--linkmai-docx-focus-color);
     outline-offset: -2px;
 }
 
@@ -256,7 +256,7 @@
 }
 
 .host :is(:global(.docx-font-notice__dismiss), :global(.docx-notification-toast) > div > button:last-child):focus-visible {
-    outline: 2px solid var(--mike-docx-focus-color);
+    outline: 2px solid var(--linkmai-docx-focus-color);
     outline-offset: 2px;
 }
 

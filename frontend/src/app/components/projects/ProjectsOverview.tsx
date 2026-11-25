@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -12,7 +12,7 @@ import {
     type ProjectFilterOptions,
     updateProject,
     deleteProject,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { deleteTabularReviewsWithConcurrency } from "@/app/lib/deleteTabularReviewsWithConcurrency";
 import { restoreOptimisticallyDeletedRows } from "@/app/lib/optimisticRows";
 import { useDebouncedValue } from "@/app/hooks/useDebouncedValue";
@@ -82,7 +82,7 @@ import {
     type PersonOption,
 } from "@/app/components/shared/PersonFilter";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import { useQueryParamTab } from "@/app/hooks/useQueryParamTab";
 import { AccessScopeLabel } from "@/app/components/shared/AccessScopeLabel";
 import { useIdSet } from "@/app/hooks/useIdSet";

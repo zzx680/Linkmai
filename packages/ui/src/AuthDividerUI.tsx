@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 export function AuthDividerUI() {
     return (
         <div className="flex items-center gap-3 py-1" aria-hidden="true">

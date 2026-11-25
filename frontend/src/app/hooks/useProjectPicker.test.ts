@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { listProjects } from "@/app/lib/mikeApi";
+import { listProjects } from "@/app/lib/linkmaiApi";
 import type { Project } from "@/app/components/shared/types";
 import { useProjectPicker } from "./useProjectPicker";
 
@@ -8,8 +8,8 @@ const workspace = vi.hoisted(() => ({ current: "personal" }));
 vi.mock("@/app/contexts/WorkspaceContext", () => ({
     useWorkspaceParam: () => workspace.current,
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     listProjects: vi.fn(),
 }));
 beforeEach(() => {

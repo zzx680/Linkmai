@@ -21,7 +21,7 @@ vi.mock("next/navigation", () => ({
     usePathname: () => window.location.pathname,
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     getChat: (...args: unknown[]) => getChat(...args),
 }));
 vi.mock("@/app/contexts/ChatHistoryContext", () => ({

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { ConfirmPopup } from "@/app/components/popups/ConfirmPopup";

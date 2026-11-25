@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { OrgMember } from "@/app/lib/mikeApi";
+import type { OrgMember } from "@/app/lib/linkmaiApi";
 import { MemberDepartureDialog } from "./MemberDepartureDialog";
 
 // What becomes of a member's work when they leave an organization: the
@@ -15,8 +15,8 @@ const mocks = vi.hoisted(() => ({
   listOrgMembers: vi.fn(),
   removeOrgMember: vi.fn(),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getOrgMemberHandover: mocks.getOrgMemberHandover,
   listOrgMembers: mocks.listOrgMembers,
   removeOrgMember: mocks.removeOrgMember,

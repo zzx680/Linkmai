@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Fragment, useMemo, useState, type ReactNode } from "react";
 import { ChevronDown, X } from "lucide-react";
@@ -13,12 +13,12 @@ import {
   DropdownRadioGroup,
   DropdownRadioItem,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { OptionPill } from "@/app/components/ui/option-pill";
 import { FieldLabel } from "@/app/components/ui/form-field";
 import { cn } from "@/app/lib/utils";
 import { professionalLabel } from "@/app/lib/professionalLabels";
-import type { PersonalisationDetails } from "@/app/lib/mikeApi";
+import type { PersonalisationDetails } from "@/app/lib/linkmaiApi";
 import {
   COUNTRY_OPTIONS,
   OTHER_JURISDICTION_OPTION,

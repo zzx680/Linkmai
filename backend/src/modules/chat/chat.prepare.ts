@@ -24,7 +24,7 @@ import { resolveRequestTimeZone } from "../../lib/userTime";
 import { createAssistantHistoryLoader, attachPriorReasoning, buildDocContext, buildMessages, buildUserPersonalisationPrompt, devLog, enrichWithPriorEvents, loadUserMessageSentTimes, buildWorkflowStore, appendAskInputsResponseToAssistantMessage, runApprovedConnectorActions, generateSpotlightNonce, type AskInputsResponseRequest, type ChatMessage, type SubagentDefaults } from "./engine/index";
 import type { ExternalSource } from "../../lib/sourceDocuments";
 import { registerExternalSource } from "./engine/tools/externalSources";
-import type { McpToolEvent } from "@mike/contracts";
+import type { McpToolEvent } from "@linkmai/contracts";
 import { getUserModelSettings, resolveUserChatSelection } from "../user/user.service";
 import {
     checkProjectAccess,

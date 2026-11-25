@@ -32,7 +32,7 @@ const settingsFetch = (body: unknown, ok = true) =>
   vi.fn(async () => new Response(JSON.stringify(body), { status: ok ? 200 : 500 })) as unknown as typeof fetch;
 
 beforeEach(() => {
-  process.env.MIKE_FIRST_RUN_SETUP = "true";
+  process.env.LINKMAI_FIRST_RUN_SETUP = "true";
   process.env.SUPABASE_URL = "https://project.supabase.test";
   process.env.SUPABASE_PUBLISHABLE_KEY = "publishable";
   delete process.env.SSO_ENABLED;
@@ -40,15 +40,15 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  delete process.env.MIKE_FIRST_RUN_SETUP;
+  delete process.env.LINKMAI_FIRST_RUN_SETUP;
 });
 
 describe("firstRunSetupEnabled", () => {
   it("is on only when the deployment asks for it", () => {
-    expect(firstRunSetupEnabled({ MIKE_FIRST_RUN_SETUP: "true" })).toBe(true);
-    expect(firstRunSetupEnabled({ MIKE_FIRST_RUN_SETUP: "TRUE " })).toBe(true);
+    expect(firstRunSetupEnabled({ LINKMAI_FIRST_RUN_SETUP: "true" })).toBe(true);
+    expect(firstRunSetupEnabled({ LINKMAI_FIRST_RUN_SETUP: "TRUE " })).toBe(true);
     expect(firstRunSetupEnabled({})).toBe(false);
-    expect(firstRunSetupEnabled({ MIKE_FIRST_RUN_SETUP: "1" })).toBe(false);
+    expect(firstRunSetupEnabled({ LINKMAI_FIRST_RUN_SETUP: "1" })).toBe(false);
   });
 });
 
@@ -58,9 +58,9 @@ describe("emailSignupOpen", () => {
   });
 
   it("keeps sign-up closed on a first-run deployment until email is configured", () => {
-    expect(emailSignupOpen({ MIKE_FIRST_RUN_SETUP: "true" })).toBe(false);
+    expect(emailSignupOpen({ LINKMAI_FIRST_RUN_SETUP: "true" })).toBe(false);
     expect(
-      emailSignupOpen({ MIKE_FIRST_RUN_SETUP: "true", MIKE_SIGNUP_EMAIL_CONFIGURED: "true" }),
+      emailSignupOpen({ LINKMAI_FIRST_RUN_SETUP: "true", LINKMAI_SIGNUP_EMAIL_CONFIGURED: "true" }),
     ).toBe(true);
   });
 });
@@ -82,7 +82,7 @@ describe("createFirstAccount", () => {
   });
 
   it("is unavailable unless the deployment enabled first-run setup", async () => {
-    delete process.env.MIKE_FIRST_RUN_SETUP;
+    delete process.env.LINKMAI_FIRST_RUN_SETUP;
     const { db, listUsers, createUser } = fakeDb();
     await expect(createFirstAccount(db, credentials)).resolves.toEqual({
       ok: false,
@@ -155,7 +155,7 @@ describe("signInOptions", () => {
   });
 
   it("never offers setup unless the deployment enabled it", async () => {
-    delete process.env.MIKE_FIRST_RUN_SETUP;
+    delete process.env.LINKMAI_FIRST_RUN_SETUP;
     const { db, listUsers } = fakeDb();
     await expect(
       signInOptions(db, settingsFetch({ external: { google: true } })),

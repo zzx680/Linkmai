@@ -1,9 +1,9 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useMemo, useState } from "react";
 import { History } from "lucide-react";
 import chatIcon from "@icons/features/chat.svg";
-import { ChatHistoryDropdownUI } from "@mike/ui";
+import { ChatHistoryDropdownUI } from "@linkmai/ui";
 import { LiquidIconButton } from "../primitives/LiquidActionRow";
 import { chatTitle, formatRelativeDate } from "./ChatHistoryList";
 import { useOpenWordChat } from "../../hooks/useOpenWordChat";

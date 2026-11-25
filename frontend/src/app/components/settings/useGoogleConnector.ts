@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   GoogleWorkspaceProvider,
   NativeConnectorTool,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import {
   cancelGoogleDriveOAuth,
   cancelGoogleWorkspaceOAuth,
@@ -18,7 +18,7 @@ import {
   startGoogleWorkspaceOAuth,
   updateGoogleDriveSettings,
   updateGoogleWorkspaceSettings,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { reportFault, type Operation } from "@/app/lib/userFacingError";
 
 export type GoogleConnectorProvider = "google-drive" | GoogleWorkspaceProvider;
@@ -169,7 +169,7 @@ export function useGoogleConnector(
     try {
       if (!popup)
         throw new GoogleConnectorFlowError(
-          "Allow popups for Mike, then try adding the connector again.",
+          "Allow popups for LinkMai, then try adding the connector again.",
         );
       const { authorizationUrl } = await api.start();
       pending = new URL(authorizationUrl).searchParams.get("state");

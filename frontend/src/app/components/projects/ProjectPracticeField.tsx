@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useMemo } from "react";
 import { PRACTICE_OPTIONS } from "../workflows/practices";

@@ -1,18 +1,18 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { Download, ExternalLink, SquarePen } from "lucide-react";
 import { downloadDocumentFile } from "@/app/lib/downloadDocument";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { TextButtonUI, textButtonUIClassName } from "@mike/ui";
+import { TextButtonUI, textButtonUIClassName } from "@linkmai/ui";
 import { WarningPopup } from "../popups/WarningPopup";
 import { FileTypeIcon } from "./FileTypeIcon";
 import { DocumentVersionPicker } from "./DocumentVersionPicker";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import { VersionChip } from "./VersionChip";
 import type { PanelDocument } from "./types";
 import { documentCapabilities } from "./documentCapabilities";

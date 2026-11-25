@@ -1,9 +1,9 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getGoogleDriveStatus, getGoogleWorkspaceStatus } from "@/app/lib/mikeApi";
+import { getGoogleDriveStatus, getGoogleWorkspaceStatus } from "@/app/lib/linkmaiApi";
 import { useGoogleConnector } from "./useGoogleConnector";
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     cancelGoogleDriveOAuth: vi.fn(),
     cancelGoogleWorkspaceOAuth: vi.fn(),
     disconnectGoogleDrive: vi.fn(),

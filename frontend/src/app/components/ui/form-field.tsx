@@ -7,7 +7,7 @@ import {
     type ReactNode,
 } from "react";
 import { cn } from "@/app/lib/utils";
-import { LIQUID_GLASS_SUBTLE_CLASS } from "@mike/ui";
+import { LIQUID_GLASS_SUBTLE_CLASS } from "@linkmai/ui";
 
 // `outline-none` removes the browser's focus indicator, so every variant has to
 // supply its own `focus-visible:` ring or the field becomes unusable by keyboard.

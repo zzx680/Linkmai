@@ -421,7 +421,7 @@ describe("runScriptCall", () => {
     expect(inside).not.toContain(nonce);
     expect(JSON.parse(inside).value.id).toBe("doc-0");
     expect(JSON.parse(inside).value.body).toContain("IGNORE PREVIOUS INSTRUCTIONS");
-    // A refusal before any script ran is Mike's own text and stays plain.
+    // A refusal before any script ran is LinkMai's own text and stays plain.
     expect(
       await runScriptCall(call(""), { innerTools: INNER, dispatch, nonce }),
     ).toMatch(/^\{"ok":false/);

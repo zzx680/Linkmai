@@ -1,12 +1,12 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useRef, type ReactNode } from "react";
 import { cn } from "@/app/lib/utils";
 import { ROW_ACTION_MENU_CLASS } from "./RowActions";
 import { ChevronDown } from "lucide-react";
-import { Dropdown, DropdownContent, DropdownTrigger, TabPillButtonUI } from "@mike/ui";
+import { Dropdown, DropdownContent, DropdownTrigger, TabPillButtonUI } from "@linkmai/ui";
 
 function SelectionMenuContent({
     renderItems,

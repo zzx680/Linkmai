@@ -15,14 +15,14 @@ for (const width of [390, 1280]) {
           status: 400,
           json: {
             code: "connector_setup_required",
-            detail: `${provider} needs an OAuth client. Create one in Google Cloud Console with authorized redirect URI https://mike.example.com/api/user/integrations/${provider}/oauth/callback, then set the client ID and secret in backend/.env and restart.`,
+            detail: `${provider} needs an OAuth client. Create one in Google Cloud Console with authorized redirect URI https://linkmai.example.com/api/user/integrations/${provider}/oauth/callback, then set the client ID and secret in backend/.env and restart.`,
           },
         });
       }
       if (path.includes("/integrations/")) return route.fulfill({ json: {
         configured: false, schemaReady: true, connected: false, writeEnabled: false,
         enabled: true, requireWriteApproval: false, tools: [],
-        redirectUri: `https://mike.example.com/api/user/integrations/${path.split("/").pop()}/oauth/callback`,
+        redirectUri: `https://linkmai.example.com/api/user/integrations/${path.split("/").pop()}/oauth/callback`,
       } });
       return route.fulfill({ json: [] });
     });

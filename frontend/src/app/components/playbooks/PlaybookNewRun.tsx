@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useId, useState } from "react";
 import { AlertCircle, Loader2, Play } from "lucide-react";
@@ -10,10 +10,10 @@ import { NoModelsWarningPopup } from "@/app/components/popups/NoModelsWarningPop
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
 import { useModelApiKeys } from "@/app/hooks/useModelApiKeys";
 import { useModelRouterSelections } from "@/app/hooks/useModelRouterSelections";
-import type { NoModelsReason } from "@mike/client";
-import type { PlaybookReviewScope } from "@/app/lib/mikeApi";
+import type { NoModelsReason } from "@linkmai/client";
+import type { PlaybookReviewScope } from "@/app/lib/linkmaiApi";
 import { EDITOR_SURFACE_CLASS } from "@/app/components/ui/liquid-surface";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import {
   PLAYBOOK_HELP_CLASS,
   PLAYBOOK_LABEL_CLASS,

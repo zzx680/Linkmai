@@ -1,5 +1,5 @@
 // Only the backend's Supabase clients use this gateway. The browser uses
-// Mike's same-origin API and HttpOnly cookies, never direct Supabase access.
+// LinkMai's same-origin API and HttpOnly cookies, never direct Supabase access.
 // Require per-install keys and reject browser requests so an unrelated
 // website cannot exercise local auth endpoints (including signup).
 

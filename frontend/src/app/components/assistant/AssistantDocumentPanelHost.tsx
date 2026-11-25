@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { AddDocumentsModal } from "@/app/components/modals/AddDocumentsModal";
@@ -11,7 +11,7 @@ import {
     getDocument,
     renameLibraryDocument,
     renameProjectDocument,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { panelDocumentAtVersion } from "@/app/lib/panelDocumentAtVersion";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import { cn } from "@/app/lib/utils";

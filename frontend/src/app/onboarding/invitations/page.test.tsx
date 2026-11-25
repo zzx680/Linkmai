@@ -18,12 +18,12 @@ vi.mock("@/app/contexts/AuthContext", () => ({
 vi.mock("@/app/contexts/UserProfileContext", () => ({
     useUserProfile: () => ({ profile: { onboardingComplete: false }, loading: false, completeOnboarding: mocks.completeOnboarding }),
 }));
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-    ...await original<typeof import("@/app/lib/mikeApi")>(),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+    ...await original<typeof import("@/app/lib/linkmaiApi")>(),
     listMyOrgInvitations: mocks.list,
     acceptOrgInvitation: mocks.accept,
 }));
-vi.mock("@/app/components/site-logo", () => ({ SiteLogo: () => <div>Mike</div> }));
+vi.mock("@/app/components/site-logo", () => ({ SiteLogo: () => <div>LinkMai</div> }));
 
 const invitation = { id: "invite", org_name: "Example LLP", role: "member" };
 

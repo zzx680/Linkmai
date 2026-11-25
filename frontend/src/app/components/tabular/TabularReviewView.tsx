@@ -1,7 +1,7 @@
 "use client";
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 
 import { RowActionMenuItems } from "@/app/components/shared/RowActions";
 import { rowActionSelectionIds } from "@/app/components/shared/TablePrimitive";
@@ -44,9 +44,9 @@ import {
     updateTabularReview,
     revokeTabularReviewAccess,
     uploadReviewDocument,
-    MikeApiError,
+    LinkMaiApiError,
     type ContentAccessGrant,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type {
     ColumnConfig,
     Document,
@@ -108,12 +108,12 @@ import {
 } from "@/app/contexts/WorkspaceContext";
 import { PageHeader } from "../shared/PageHeader";
 import { TableToolbar } from "../shared/TableToolbar";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import { LIQUID_GLASS_SUBTLE_CLASS } from "@/app/components/ui/liquid-surface";
 import { ModelToggle } from "../assistant/ModelToggle";
 import {
     type NoModelsReason,
-} from "@mike/client";
+} from "@linkmai/client";
 import { SUPPORTED_DOCUMENT_ACCEPT } from "@/app/lib/documentUploadValidation";
 import { useConfiguredModels } from "@/app/hooks/useConfiguredModels";
 import { useItemWorkspace } from "@/app/hooks/useItemWorkspace";
@@ -174,7 +174,7 @@ export function TRView({ reviewId, projectId }: Props) {
     const [grants, setGrants] = useState<ContentAccessGrant[] | null>(null);
     // The organization whose members a standalone review can be shared with,
     // as the server says: null for a personal review, which can go to any
-    // Mike user. Undefined until the access summary has loaded.
+    // LinkMai user. Undefined until the access summary has loaded.
     const [accessOrgId, setAccessOrgId] = useState<string | null | undefined>(
         undefined,
     );
@@ -362,7 +362,7 @@ export function TRView({ reviewId, projectId }: Props) {
                             notifyError(err, {
                                 action: "reconnect to the running review",
                                 fallback:
-                                    uiText("Mike lost contact with the run in progress. Results already saved are still here."),
+                                    uiText("LinkMai lost contact with the run in progress. Results already saved are still here."),
                                 dedupeKey: `tr-resume:${reviewId}`,
                                 // Returned, so a failed retry is reported
                                 // again by notifyError's Retry wrapper.
@@ -712,7 +712,7 @@ export function TRView({ reviewId, projectId }: Props) {
                     notifyError(err, {
                         action: "follow this cell's regeneration",
                         fallback:
-                            uiText("The cell is still being generated, but Mike lost contact with the run. Reload to see the result."),
+                            uiText("The cell is still being generated, but LinkMai lost contact with the run. Reload to see the result."),
                         dedupeKey: `tr-resume:${reviewId}`,
                     }),
                 );
@@ -732,7 +732,7 @@ export function TRView({ reviewId, projectId }: Props) {
             );
         } catch (err) {
             if (
-                err instanceof MikeApiError &&
+                err instanceof LinkMaiApiError &&
                 (err.code === "review_running" || err.code === "review_stale")
             ) {
                 await loadLatestReview();
@@ -858,7 +858,7 @@ export function TRView({ reviewId, projectId }: Props) {
                 notifyError(err, {
                     action: "show a generated cell",
                     fallback:
-                        uiText("A result arrived that Mike couldn't display. Reload to see it."),
+                        uiText("A result arrived that LinkMai couldn't display. Reload to see it."),
                     dedupeKey: `tr-cell-update:${reviewId}`,
                 });
             }
@@ -1222,7 +1222,7 @@ export function TRView({ reviewId, projectId }: Props) {
             // worse than detaching, so it ends the same way.
             if (
                 !(
-                    err instanceof MikeApiError &&
+                    err instanceof LinkMaiApiError &&
                     err.code === "generation_not_found"
                 )
             )
@@ -1459,7 +1459,7 @@ export function TRView({ reviewId, projectId }: Props) {
             );
         } catch (err) {
             if (
-                err instanceof MikeApiError &&
+                err instanceof LinkMaiApiError &&
                 (err.code === "review_running" || err.code === "review_stale")
             ) {
                 await loadLatestReview();

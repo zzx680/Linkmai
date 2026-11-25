@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Cloud, FolderUp, Upload } from "lucide-react";
 import {
@@ -10,7 +10,7 @@ import {
     DropdownTrigger,
     HeaderButtonUI,
     TabPillButtonUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 interface DocumentUploadMenuProps {
     onSavedFiles?: (() => void) | null;

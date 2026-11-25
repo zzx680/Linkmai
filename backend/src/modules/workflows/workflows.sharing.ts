@@ -319,7 +319,7 @@ export async function shareWorkflow(
     return {
       ok: false,
       kind: "missing_user",
-      detail: `${missingEmails[0]} does not belong to a Mike user.`,
+      detail: `${missingEmails[0]} does not belong to a LinkMai user.`,
     };
 
   const rows = normalizedEmails.map((email: string) => ({

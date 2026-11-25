@@ -21,8 +21,8 @@ vi.mock("@/app/contexts/WorkspaceContext", () => ({
         setWorkspace: state.setWorkspace,
     }),
 }));
-vi.mock("@mike/client", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@mike/client")>()),
+vi.mock("@linkmai/client", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@linkmai/client")>()),
     showToast: state.showToast,
 }));
 

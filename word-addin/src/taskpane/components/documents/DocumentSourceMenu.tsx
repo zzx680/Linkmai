@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React from "react";
 import { ClipboardCheck, Loader2, Plus, Waypoints } from "lucide-react";
 import { ComposerButton } from "../primitives/ComposerButton";
@@ -8,7 +8,7 @@ import {
   DropdownContent,
   DropdownItem,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import desktopIcon from "@icons/desktop.svg";
 import cloudIcon from "@icons/cloud.svg";
 

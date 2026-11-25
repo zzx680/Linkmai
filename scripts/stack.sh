@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Lifecycle for Mike's Docker stacks: start, stop, and garbage-collect.
+# Lifecycle for LinkMai's Docker stacks: start, stop, and garbage-collect.
 #
 #   scripts/stack.sh up [compose up args…]      # gc, then `docker compose up`
 #   scripts/stack.sh down [--purge]             # `docker compose down` (+ -v --rmi local)
@@ -16,16 +16,16 @@
 # What `gc` removes — only resources it can attribute to this repository:
 #   1. Fully stopped Compose projects whose compose file is this repo's
 #      docker-compose.yml (or whose checkout directory no longer exists and
-#      whose project name starts with "mike"): containers + network go
+#      whose project name starts with "linkmai"): containers + network go
 #      (non-forced `docker rm`); named volumes are kept until the
-#      project has been idle for MIKE_GC_VOLUME_AGE_DAYS (default 7).
+#      project has been idle for LINKMAI_GC_VOLUME_AGE_DAYS (default 7).
 #   2. Fully stopped Supabase CLI stacks for this checkout's project_id
-#      (backend/supabase/config.toml) or any id in MIKE_GC_SUPABASE_PROJECTS
+#      (backend/supabase/config.toml) or any id in LINKMAI_GC_SUPABASE_PROJECTS
 #      (comma-separated): same rule, data volumes kept until idle long enough.
 #   3. Volumes unreferenced after planned teardown with verified ownership
 #      and enough recorded idle time. Unknown named volumes are kept. Allowed
 #      Supabase and anonymous orphans start a grace period when first observed.
-#   4. Dangling images, plus build cache older than MIKE_GC_VOLUME_AGE_DAYS.
+#   4. Dangling images, plus build cache older than LINKMAI_GC_VOLUME_AGE_DAYS.
 #   --deep additionally removes ALL unused images and ALL build cache
 #   (machine-wide, Docker's own `prune -a` semantics; the next start re-pulls).
 #
@@ -36,25 +36,25 @@
 #
 # Options: -p/--project NAME selects the Compose project (default:
 # COMPOSE_PROJECT_NAME, else the checkout directory name — Compose's default).
-# MIKE_GC=0 skips the sweep in `up` and in the e2e setup script.
-# MIKE_GC_ONLY=<glob> restricts the sweep to matching project names and skips
+# LINKMAI_GC=0 skips the sweep in `up` and in the e2e setup script.
+# LINKMAI_GC_ONLY=<glob> restricts the sweep to matching project names and skips
 # the machine-wide parts (anonymous volumes, images, build cache).
-# MIKE_GC_STATE_DIR overrides the shared cleanup record directory (default:
+# LINKMAI_GC_STATE_DIR overrides the shared cleanup record directory (default:
 # ${XDG_STATE_HOME:-$HOME/.local/state}/mike/stack-gc). Records are isolated by
 # Docker daemon and volume creation timestamp. Dry runs do not change them.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE_FILE="$ROOT/docker-compose.yml"
-AGE_DAYS="${MIKE_GC_VOLUME_AGE_DAYS:-7}"
-case "$AGE_DAYS" in ''|*[!0-9]*) printf '%s\n' 'MIKE_GC_VOLUME_AGE_DAYS must be a non-negative integer.' >&2; exit 1;; esac
+AGE_DAYS="${LINKMAI_GC_VOLUME_AGE_DAYS:-7}"
+case "$AGE_DAYS" in ''|*[!0-9]*) printf '%s\n' 'LINKMAI_GC_VOLUME_AGE_DAYS must be a non-negative integer.' >&2; exit 1;; esac
 AGE_SECS=$((10#$AGE_DAYS * 86400))
 DRY_RUN=0
 DEEP=0
 PROJECT="${COMPOSE_PROJECT_NAME:-}"
-ONLY="${MIKE_GC_ONLY:-}"
+ONLY="${LINKMAI_GC_ONLY:-}"
 
-# True when NAME is inside the MIKE_GC_ONLY filter (or no filter is set).
+# True when NAME is inside the LINKMAI_GC_ONLY filter (or no filter is set).
 in_scope() { [ -z "$ONLY" ] || case "$1" in $ONLY) true;; *) false;; esac; }
 
 log()  { printf '%s\n' "$*"; }
@@ -80,7 +80,7 @@ default_project() {
 
 # Is this compose file ours? It is identified by the marker on its first lines
 # rather than by path, so worktrees and renamed checkouts are all recognised.
-is_mike_compose_file() { [ -f "$1" ] && head -5 "$1" | grep -q 'MikeOSS'; }
+is_mike_compose_file() { [ -f "$1" ] && head -5 "$1" | grep -q 'LinkMaiOSS'; }
 
 # Inventories print "-" for empty fields (a bare tab would be collapsed by
 # `read`); blank() maps it back to the empty string.
@@ -106,7 +106,7 @@ list_compose_containers() {
 }
 
 # Classify a compose project. Prints one of:
-#   mike      — this repo's docker-compose.yml, checkout still exists
+#   linkmai      — this repo's docker-compose.yml, checkout still exists
 #   orphan    — checkout directory is gone and the name looks like ours
 #   supabase  — Supabase CLI stack (handled separately)
 #   other     — not ours; never touched
@@ -117,16 +117,16 @@ classify_project() {
     # config_files may list several paths separated by commas; use the first.
     local first=${config%%,*}
     if [ -e "$first" ]; then
-        if is_mike_compose_file "$first"; then echo mike; else echo other; fi
+        if is_mike_compose_file "$first"; then echo linkmai; else echo other; fi
     else
-        case "$project" in mike*) echo orphan;; *) echo other;; esac
+        case "$project" in linkmai*) echo orphan;; *) echo other;; esac
     fi
 }
 
 supabase_allowed() {
     local id=$1 allowed
     allowed="$(sed -n 's/^project_id *= *"\(.*\)"/\1/p' "$ROOT/backend/supabase/config.toml" 2>/dev/null | head -1)"
-    allowed="$allowed,${MIKE_GC_SUPABASE_PROJECTS:-}"
+    allowed="$allowed,${LINKMAI_GC_SUPABASE_PROJECTS:-}"
     case ",$allowed," in *",$id,"*) return 0;; *) return 1;; esac
 }
 
@@ -138,7 +138,7 @@ gc() (
     local work state_dir state_file daemon lock_owned=0 state_tmp=""
     work="$(mktemp -d)"
     trap 'rm -rf "$work"; [ -z "$state_tmp" ] || rm -f "$state_tmp"; [ "$lock_owned" = 0 ] || rmdir "$state_file.lock"' EXIT
-    state_dir="${MIKE_GC_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/mike/stack-gc}"
+    state_dir="${LINKMAI_GC_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/mike/stack-gc}"
     daemon="$(docker info --format '{{.ID}}')"
     [ -n "$daemon" ] || die "Cannot identify the Docker daemon; refusing cleanup."
     state_file="$state_dir/$(printf '%s' "$daemon" | tr -c '[:alnum:]_-' '_').json"
@@ -190,7 +190,7 @@ gc() (
         printf '%s\t%s\t%s\n' "$project" "$classification" "$scope" >>"$work/projects.tsv"
     done <"$work/projects.txt"
     local allowed
-    allowed="$(sed -n 's/^project_id *= *"\(.*\)"/\1/p' "$ROOT/backend/supabase/config.toml" | head -1),${MIKE_GC_SUPABASE_PROJECTS:-}"
+    allowed="$(sed -n 's/^project_id *= *"\(.*\)"/\1/p' "$ROOT/backend/supabase/config.toml" | head -1),${LINKMAI_GC_SUPABASE_PROJECTS:-}"
     jq -n --slurpfile containers "$work/containers.json" --slurpfile volumes "$work/volumes.json" \
         --slurpfile previous "$work/state.json" --rawfile classifications "$work/projects.tsv" \
         --arg allowed "$allowed" --arg only "$ONLY" --argjson now "$(date -u +%s)" \
@@ -247,7 +247,7 @@ gc() (
     # --- 4. Images and build cache ----------------------------------------
     log "Images and build cache:"
     if [ -n "$ONLY" ]; then
-        note "skipped (MIKE_GC_ONLY is set)"
+        note "skipped (LINKMAI_GC_ONLY is set)"
     elif [ "$DEEP" = 1 ]; then
         act "docker image prune -a -f          # all unused images (machine-wide)"
         act "docker builder prune -a -f        # all build cache"
@@ -312,7 +312,7 @@ done
 case "$CMD" in
     up)
         docker_ready || die "Docker is not running — start it first (open -a Docker) and retry."
-        if [ "${MIKE_GC:-1}" != 0 ]; then gc; log; fi
+        if [ "${LINKMAI_GC:-1}" != 0 ]; then gc; log; fi
         log "Starting compose project '$PROJECT'"
         # The commit becomes the Sentry release of every image compose builds
         # (GIT_SHA build arg, docs/observability.md); without it an event

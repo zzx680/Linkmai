@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SETTINGS_MODELS } from "@mike/client";
-import type { ApiKeyState } from "./mikeApi";
+import { SETTINGS_MODELS } from "@linkmai/client";
+import type { ApiKeyState } from "./linkmaiApi";
 import {
     getModelProvider,
     isModelAvailable,

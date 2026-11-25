@@ -5,7 +5,7 @@
 @import "../../../packages/ui/styles/DesignTokensUI.css";
 
 /* Tailwind v4 scans this application's sources automatically; the shared
-   primitives in @mike/ui live outside it and are registered here. */
+   primitives in @linkmai/ui live outside it and are registered here. */
 @source "../../../packages/ui/src";
 
 /* Table surfaces are transparent. Sticky layers retain an opaque page-color
@@ -44,7 +44,7 @@
     border: 1px solid var(--table-grid-border);
 }
 
-/* Most of Mike predates semantic color tokens and uses Tailwind's neutral
+/* Most of LinkMai predates semantic color tokens and uses Tailwind's neutral
    palette directly. These mappings make those existing surfaces participate
    in the user-selected dark theme without requiring page-by-page forks. */
 .dark .bg-white,

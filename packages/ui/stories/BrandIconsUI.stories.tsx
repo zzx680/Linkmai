@@ -1,31 +1,31 @@
 import { GoogleIconUI } from "../src/GoogleIconUI";
-import { MIKE_ICON_TINTS, MikeIcon } from "../src/MikeIconUI";
+import { LINKMAI_ICON_TINTS, LinkMaiIcon } from "../src/LinkMaiIconUI";
 
 const meta = { title: "Shared UI / BrandIcons" };
 export default meta;
 
-export const MikeStates = () => (
+export const LinkMaiStates = () => (
     <div className="flex items-end gap-6 text-xs text-gray-500">
         <span className="flex flex-col items-center gap-2">
-            <MikeIcon size={32} /> Default
+            <LinkMaiIcon size={32} /> Default
         </span>
         <span className="flex flex-col items-center gap-2">
-            <MikeIcon size={32} spin /> Working
+            <LinkMaiIcon size={32} spin /> Working
         </span>
         <span className="flex flex-col items-center gap-2">
-            <MikeIcon size={32} done /> Done
+            <LinkMaiIcon size={32} done /> Done
         </span>
         <span className="flex flex-col items-center gap-2">
-            <MikeIcon size={32} error /> Error
+            <LinkMaiIcon size={32} error /> Error
         </span>
     </div>
 );
 
-export const MikeTints = () => (
+export const LinkMaiTints = () => (
     <div className="flex items-end gap-6 text-xs text-gray-500">
-        {MIKE_ICON_TINTS.map((tint, i) => (
+        {LINKMAI_ICON_TINTS.map((tint, i) => (
             <span key={tint} className="flex flex-col items-center gap-2">
-                <MikeIcon size={32} tint={tint} spin={i === 0} /> {tint}
+                <LinkMaiIcon size={32} tint={tint} spin={i === 0} /> {tint}
             </span>
         ))}
     </div>

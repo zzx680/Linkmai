@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { SiteLogo } from "@/app/components/site-logo";
-import { pillButtonUIClassName, authGlassCardUIClassName } from "@mike/ui";
+import { pillButtonUIClassName, authGlassCardUIClassName } from "@linkmai/ui";
 import { authErrorDescription, safeAuthNext } from "@/app/lib/authRedirects";
 import { exchangeAuthCode, getAuthSession } from "@/app/lib/authApi";
 import { useAuth } from "@/app/contexts/AuthContext";

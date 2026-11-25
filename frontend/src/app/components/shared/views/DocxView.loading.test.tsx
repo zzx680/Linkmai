@@ -15,11 +15,11 @@ const clearTextSelection = vi.hoisted(() => vi.fn());
 const replaceVersion = vi.hoisted(() => vi.fn());
 
 vi.mock("@/app/lib/authEvents", () => ({ authenticatedFetch: vi.fn() }));
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     getDocumentFileUrl: (id: string) => "/api/document/" + id,
     replaceDocumentVersionFile: replaceVersion,
     listDocumentVersions: vi.fn().mockResolvedValue({ current_version_id: "v1", versions: [] }),
-    MikeApiError: class extends Error {},
+    LinkMaiApiError: class extends Error {},
 }));
 vi.mock("./EigenpalDocxRenderer", () => ({
     default: (props: DocxRendererProps) => <MockRenderer {...props} />,
@@ -193,7 +193,7 @@ it("does not show old bytes while switching documents", async () => {
     expect(await screen.findByText("Document revision 2")).toBeVisible();
 });
 
-it.each(["edit", "view"] as const)("passes the initial %s mode to the native toolbar without a Mike mode toggle", async (mode) => {
+it.each(["edit", "view"] as const)("passes the initial %s mode to the native toolbar without a LinkMai mode toggle", async (mode) => {
     const { rerender } = render(<DocxView documentId="modes" cacheBytes={false} defaultMode={mode} />);
     await screen.findByText("EigenPal preview");
     const surface = screen.getByTestId("renderer-scroll");

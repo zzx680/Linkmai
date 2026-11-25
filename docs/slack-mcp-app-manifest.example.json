@@ -1,7 +1,7 @@
 {
     "display_information": {
-        "name": "Mike MCP Client",
-        "description": "OAuth client for Mike's Slack MCP connector"
+        "name": "LinkMai MCP Client",
+        "description": "OAuth client for LinkMai's Slack MCP connector"
     },
     "features": {
         "bot_user": {
@@ -9,7 +9,7 @@
             "always_online": false
         },
         "assistant_view": {
-            "assistant_description": "OAuth client for Mike's Slack MCP connector",
+            "assistant_description": "OAuth client for LinkMai's Slack MCP connector",
             "suggested_prompts": []
         }
     },

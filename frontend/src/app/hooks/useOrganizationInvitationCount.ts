@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listMyOrgInvitations } from "@/app/lib/mikeApi";
+import { listMyOrgInvitations } from "@/app/lib/linkmaiApi";
 
-const INVITATIONS_CHANGED_EVENT = "mike:organization-invitations-changed";
+const INVITATIONS_CHANGED_EVENT = "linkmai:organization-invitations-changed";
 
 export function notifyOrganizationInvitationsChanged() {
     window.dispatchEvent(new Event(INVITATIONS_CHANGED_EVENT));

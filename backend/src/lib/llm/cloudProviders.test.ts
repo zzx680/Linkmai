@@ -174,14 +174,14 @@ describe("parseVertexServiceAccount", () => {
     project_id: "legal-prod",
     private_key_id: "key-1",
     private_key: FAKE_PRIVATE_KEY,
-    client_email: "mike@legal-prod.iam.gserviceaccount.com",
+    client_email: "linkmai@legal-prod.iam.gserviceaccount.com",
     token_uri: "https://attacker.example/token",
     universe_domain: "attacker.example",
   };
 
-  it("reads only the fields Mike uses", () => {
+  it("reads only the fields LinkMai uses", () => {
     expect(parseVertexServiceAccount(JSON.stringify(file))).toEqual({
-      clientEmail: "mike@legal-prod.iam.gserviceaccount.com",
+      clientEmail: "linkmai@legal-prod.iam.gserviceaccount.com",
       privateKey: file.private_key,
       privateKeyId: "key-1",
       project: "legal-prod",
@@ -194,7 +194,7 @@ describe("parseVertexServiceAccount", () => {
     ["a user credential", JSON.stringify({ ...file, type: "authorized_user" })],
     [
       "an email outside gserviceaccount.com",
-      JSON.stringify({ ...file, client_email: "mike@attacker.example" }),
+      JSON.stringify({ ...file, client_email: "linkmai@attacker.example" }),
     ],
     ["a missing private key", JSON.stringify({ ...file, private_key: "" })],
     [
@@ -253,7 +253,7 @@ describe("credentials for a request", () => {
     type: "service_account",
     project_id: "legal-prod",
     private_key: FAKE_PRIVATE_KEY,
-    client_email: "mike@legal-prod.iam.gserviceaccount.com",
+    client_email: "linkmai@legal-prod.iam.gserviceaccount.com",
   });
 
   it("needs a user key and its own setting together", () => {

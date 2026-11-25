@@ -310,7 +310,7 @@ export function storageFailureReport(failure: StorageFailure): StorageFailureRep
     return {
         ...(network ? { level: "warning" as const } : {}),
         tags: {
-            component: "mike-api",
+            component: "linkmai-api",
             operation: "upload_session.storage",
             http_method: "PUT",
             ...(status !== undefined ? { http_status: status } : {}),

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { setUiLocale } from "@mike/client";
+import { setUiLocale } from "@linkmai/client";
 import { ChatInput } from "../../../word-addin/src/shared/chat/ChatInput";
 
 afterEach(() => setUiLocale("en"));

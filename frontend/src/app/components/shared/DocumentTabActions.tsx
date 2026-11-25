@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     useEffect,
@@ -23,7 +23,7 @@ import {
     DropdownContent,
     DropdownItem,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import type { HeaderActionsMenuItem } from "./HeaderActionsMenu";

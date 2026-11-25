@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_KEY_PROVIDERS } from "@/app/lib/apiKeyState";
-import { MikeApiError, type OrgApiKeySettings } from "@/app/lib/mikeApi";
+import { LinkMaiApiError, type OrgApiKeySettings } from "@/app/lib/linkmaiApi";
 
 const mocks = vi.hoisted(() => ({
   getOrgApiKeys: vi.fn(),
@@ -80,8 +80,8 @@ vi.mock("@/app/contexts/UserProfileContext", () => ({
     updateApiKey: mocks.updateApiKey,
   }),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getOrgApiKeys: mocks.getOrgApiKeys,
   saveOrgApiKey: mocks.saveOrgApiKey,
   setOrgApiKeyEnabled: mocks.setOrgApiKeyEnabled,
@@ -299,7 +299,7 @@ describe("an owner or admin", () => {
     mocks.getOrgApiKeys.mockResolvedValue(orgSettings({ openrouter: {} }));
     mocks.saveOrgRouterModels
       .mockRejectedValueOnce(
-        new MikeApiError({
+        new LinkMaiApiError({
           message: "MFA required",
           status: 403,
           code: "mfa_verification_required",
@@ -392,7 +392,7 @@ describe("an owner or admin", () => {
     mocks.getOrgApiKeys.mockResolvedValue(orgSettings({ openai: {} }));
     mocks.setOrgApiKeyEnabled
       .mockRejectedValueOnce(
-        new MikeApiError({
+        new LinkMaiApiError({
           message: "MFA required",
           status: 403,
           code: "mfa_verification_required",

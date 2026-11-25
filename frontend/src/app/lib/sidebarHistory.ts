@@ -1,5 +1,5 @@
 import type { Chat, TabularReview } from "@/app/components/shared/types";
-import type { PlaybookRunHistoryItem } from "./mikeApi";
+import type { PlaybookRunHistoryItem } from "./linkmaiApi";
 import { chatActivityAt } from "./chatActivity";
 import { parsedTime, sortByNewest } from "./sortByNewest";
 

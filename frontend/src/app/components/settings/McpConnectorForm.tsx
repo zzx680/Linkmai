@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import {

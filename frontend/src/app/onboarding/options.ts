@@ -1,8 +1,8 @@
 import type {
     PracticeSetting,
     ProfessionalTitle,
-} from "@/app/lib/mikeApi";
-import { uiText } from "@mike/client";
+} from "@/app/lib/linkmaiApi";
+import { uiText } from "@linkmai/client";
 
 export const COUNTRY_OPTIONS = [
     "Afghanistan",
@@ -311,11 +311,11 @@ export const PRACTICE_SETTING_OPTIONS = [
     { value: "not_practising", label: uiText("Not a practising attorney") },
 ] as const satisfies readonly { value: PracticeSetting; label: string }[];
 
-export type { PracticeSetting } from "@/app/lib/mikeApi";
+export type { PracticeSetting } from "@/app/lib/linkmaiApi";
 
 export const PROFESSIONAL_TITLE_OPTIONS = [
     "Partner", "Senior Associate", "Associate", "Law Clerk", "Counsel",
     "General Counsel", "Legal Counsel", "Other",
 ] as const satisfies readonly ProfessionalTitle[];
 
-export type { ProfessionalTitle } from "@/app/lib/mikeApi";
+export type { ProfessionalTitle } from "@/app/lib/linkmaiApi";

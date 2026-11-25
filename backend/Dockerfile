@@ -28,9 +28,9 @@ RUN npm run build && npm prune --omit=dev && npm cache clean --force
 # --enable-source-maps: every entrypoint in this image (API, worker,
 # sync:workflows) reports stack frames as src/*.ts lines, not dist/*.js.
 # Release identity: the product version and the commit this image was built
-# from (docs/observability.md); Sentry tags events mike@<version>+<sha12>
-# unless SENTRY_RELEASE is set. A build without them is mike@0.0.0.
-ARG MIKE_VERSION=
+# from (docs/observability.md); Sentry tags events linkmai@<version>+<sha12>
+# unless SENTRY_RELEASE is set. A build without them is linkmai@0.0.0.
+ARG LINKMAI_VERSION=
 ARG GIT_SHA=
 # Reporting defaults a fork's published image can bake in (both stay
 # overridable at runtime): SENTRY_DISABLED=true for a fork without its own
@@ -39,8 +39,8 @@ ARG GIT_SHA=
 ARG SENTRY_DISABLED=
 ARG SENTRY_DSN=
 ENV NODE_ENV=production NODE_OPTIONS=--enable-source-maps \
-    MIKE_VERSION=$MIKE_VERSION GIT_SHA=$GIT_SHA \
-    MIKE_BUILD_SENTRY_DISABLED=$SENTRY_DISABLED MIKE_BUILD_SENTRY_DSN=$SENTRY_DSN
+    LINKMAI_VERSION=$LINKMAI_VERSION GIT_SHA=$GIT_SHA \
+    LINKMAI_BUILD_SENTRY_DISABLED=$SENTRY_DISABLED LINKMAI_BUILD_SENTRY_DSN=$SENTRY_DSN
 EXPOSE 3001
 CMD ["npm", "start"]
 

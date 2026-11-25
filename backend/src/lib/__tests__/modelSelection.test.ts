@@ -99,7 +99,7 @@ describe("hasApiKeyForModel for Vertex, Foundry, xAI and custom endpoints", () =
         type: "service_account",
         project_id: "legal-prod",
         private_key: "-----BEGIN PRIVATE KEY-----",
-        client_email: "mike@legal-prod.iam.gserviceaccount.com",
+        client_email: "linkmai@legal-prod.iam.gserviceaccount.com",
     });
 
     it("requires the setting saved with each key", () => {
@@ -245,10 +245,10 @@ describe("resolveEffectiveChatModel", () => {
 });
 
 describe("configured model selection", () => {
-    const originalConfig = process.env.MIKE_MODEL_CONFIG_JSON;
+    const originalConfig = process.env.LINKMAI_MODEL_CONFIG_JSON;
 
     beforeEach(() => {
-        process.env.MIKE_MODEL_CONFIG_JSON = JSON.stringify({
+        process.env.LINKMAI_MODEL_CONFIG_JSON = JSON.stringify({
             models: [
                 {
                     id: "keyless-compatible",
@@ -270,9 +270,9 @@ describe("configured model selection", () => {
 
     afterEach(() => {
         if (originalConfig === undefined) {
-            delete process.env.MIKE_MODEL_CONFIG_JSON;
+            delete process.env.LINKMAI_MODEL_CONFIG_JSON;
         } else {
-            process.env.MIKE_MODEL_CONFIG_JSON = originalConfig;
+            process.env.LINKMAI_MODEL_CONFIG_JSON = originalConfig;
         }
         resetModelRegistryCache();
     });
@@ -297,14 +297,14 @@ describe("configured model selection", () => {
 
 
 it("preserves a configured endpoint whose name is also a removed hosted model", () => {
-    const previous = process.env.MIKE_MODEL_CONFIG_JSON;
-    process.env.MIKE_MODEL_CONFIG_JSON = JSON.stringify({ models: [{ id: "gpt-5.4", provider: "openai-compatible", location: "local", baseUrl: "http://localhost:8000/v1" }] });
+    const previous = process.env.LINKMAI_MODEL_CONFIG_JSON;
+    process.env.LINKMAI_MODEL_CONFIG_JSON = JSON.stringify({ models: [{ id: "gpt-5.4", provider: "openai-compatible", location: "local", baseUrl: "http://localhost:8000/v1" }] });
     resetModelRegistryCache();
     try {
         expect(normalizeOptionalModelPreference("gpt-5.4", routerModels)).toBe("gpt-5.4");
     } finally {
-        if (previous === undefined) delete process.env.MIKE_MODEL_CONFIG_JSON;
-        else process.env.MIKE_MODEL_CONFIG_JSON = previous;
+        if (previous === undefined) delete process.env.LINKMAI_MODEL_CONFIG_JSON;
+        else process.env.LINKMAI_MODEL_CONFIG_JSON = previous;
         resetModelRegistryCache();
     }
 });

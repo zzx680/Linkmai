@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
     getPlaybookRunStatuses,
     type PlaybookRunHistoryItem,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifyPlaybookRunsChanged } from "@/app/lib/playbookRunActivity";
 
 type Status = "loading" | "complete";

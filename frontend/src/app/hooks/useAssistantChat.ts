@@ -1,7 +1,7 @@
 "use client";
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 
 import {
   useCallback,
@@ -14,7 +14,7 @@ import {
   type SetStateAction,
 } from "react";
 import { useRouter } from "next/navigation";
-import { stopChatTurn, streamChat, streamProjectChat } from "@/app/lib/mikeApi";
+import { stopChatTurn, streamChat, streamProjectChat } from "@/app/lib/linkmaiApi";
 import {
   createTurnCursor,
   createTurnEventSink,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getOllamaModels, type OllamaModelOption } from "@/app/lib/mikeApi";
+import { getOllamaModels, type OllamaModelOption } from "@/app/lib/linkmaiApi";
 
 // Module-level store so every picker shares one fetch. Empty list if Ollama
 // is unreachable — the app works without it.

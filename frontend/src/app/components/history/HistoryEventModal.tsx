@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { UserAvatar } from "@/app/components/ui/user-avatar";
 import { HistorySubjectIcon } from "./HistorySubjectIcon";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
 import { workflowDetailPath } from "@/app/components/workflows/workflowRoutes";
-import { PillButtonUI, pillButtonUIClassName } from "@mike/ui";
+import { PillButtonUI, pillButtonUIClassName } from "@linkmai/ui";
 import { ChevronDown } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
 import { SkeletonLine } from "@/app/components/shared/TablePrimitive";
@@ -20,9 +20,9 @@ import {
   getWorkflow,
   openOrgPrivateContent,
   closeOrgPrivateContent,
-  MikeApiError,
+  LinkMaiApiError,
   type AuditEvent,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { knownErrorCodeMessage } from "@/app/lib/userFacingError";
 import {
   auditAction,
@@ -105,9 +105,9 @@ export function HistoryEventModal({
       .catch((cause: unknown) => {
         if (!current) return;
         setError(
-          cause instanceof MikeApiError && cause.status === 403
+          cause instanceof LinkMaiApiError && cause.status === 403
             ? uiText("You do not have access to this document.")
-            : cause instanceof MikeApiError && cause.status === 404
+            : cause instanceof LinkMaiApiError && cause.status === 404
               ? uiText("This document is no longer available.")
               : knownErrorCodeMessage(
                   cause,
@@ -450,7 +450,7 @@ function HistoryDocumentPreview({
 }
 
 function privateAccessError(cause: unknown, fallback: string): string {
-  if (cause instanceof MikeApiError) {
+  if (cause instanceof LinkMaiApiError) {
     if (cause.status === 403)
       return "You no longer have permission to access this item.";
     if (cause.status === 404) return "This item is no longer available.";

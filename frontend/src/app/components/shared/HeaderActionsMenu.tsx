@@ -6,7 +6,7 @@ import {
     DropdownContent,
     DropdownItem,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 import { LIQUID_GLASS_HOVER_CLASS } from "@/app/components/ui/liquid-surface";
 

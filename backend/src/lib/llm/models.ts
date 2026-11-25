@@ -112,7 +112,7 @@ export function normalizeReasoningLevelForModel(
 // OpenAI Responses, Anthropic Messages, and OpenAI Chat Completions. The live
 // /models payload does not identify a model's protocol, so keep these lists
 // fail-closed and in sync with https://opencode.ai/docs/go/#endpoints. A new
-// catalog entry is not offered until Mike can actually speak its protocol.
+// catalog entry is not offered until LinkMai can actually speak its protocol.
 export const OPENCODE_GO_CHAT_COMPLETIONS_MODEL_IDS: ReadonlySet<string> =
     new Set([
         "glm-5",
@@ -232,7 +232,7 @@ export const LEGACY_MODEL_IDS: Record<string, string> = {
 // ---------------------------------------------------------------------------
 /**
  * Providers whose model ids are account-specific (no published catalog), so
- * Mike accepts whatever id the user typed — subject to the grammar below.
+ * LinkMai accepts whatever id the user typed — subject to the grammar below.
  */
 export const ACCOUNT_MODEL_PREFIXES = [
     "bedrock",
@@ -376,7 +376,7 @@ export function azureDeploymentName(model: string): string {
 }
 
 // Vertex AI and Azure AI Foundry serve several wire protocols, and neither
-// tells an API key which one a model speaks. Mike infers it from the name,
+// tells an API key which one a model speaks. LinkMai infers it from the name,
 // and a saved id can state it outright for names the inference gets wrong:
 // "anthropic:prod-sonnet", "openai:mistral-large-2411", "gemini:my-tuned-model".
 const EXPLICIT_PROTOCOL_RE = /^(anthropic|openai|gemini):/;

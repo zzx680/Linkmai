@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Dropdown, DropdownContent, DropdownTrigger, ToastViewportUI, clearToasts } from "@mike/ui";
+import { Dropdown, DropdownContent, DropdownTrigger, ToastViewportUI, clearToasts } from "@linkmai/ui";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RowActionMenuItems, RowActions } from "./RowActions";
 

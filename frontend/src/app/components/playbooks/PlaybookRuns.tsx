@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   useEffect,
@@ -29,15 +29,15 @@ import {
   listPlaybookRuns,
   type PlaybookFinding,
   type PlaybookRun,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { reportFault } from "@/app/lib/userFacingError";
 import {
   notifyPlaybookRunsChanged,
   setViewedPlaybookRun,
 } from "@/app/lib/playbookRunActivity";
 import { diffWords } from "@/app/lib/wordDiff";
-import { modelDisplayName } from "@mike/client";
-import { PillButtonUI, TextButtonUI, TextSlabUI } from "@mike/ui";
+import { modelDisplayName } from "@linkmai/client";
+import { PillButtonUI, TextButtonUI, TextSlabUI } from "@linkmai/ui";
 import { ModalSegmentedToggle } from "@/app/components/modals/ModalSegmentedToggle";
 import { PlaybookPanels } from "./PlaybookPanels";
 import {
@@ -659,7 +659,7 @@ function RunResults({
       {run.documentName && !isWordSource && (
         <p className="text-xs text-gray-500">
           {uiText("This review used extracted text from")}{" "}
-          <span className="font-medium">{run.documentName}</span>{uiText(". For a formatting-preserving Word redline, provide the original DOCX in Assistant; if it is unavailable, Mike can create a text-reconstructed DOCX and will warn that formatting may differ.")}
+          <span className="font-medium">{run.documentName}</span>{uiText(". For a formatting-preserving Word redline, provide the original DOCX in Assistant; if it is unavailable, LinkMai can create a text-reconstructed DOCX and will warn that formatting may differ.")}
         </p>
       )}
       <section aria-labelledby={findingsId} className="space-y-3">

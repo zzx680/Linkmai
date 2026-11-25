@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, {
   forwardRef,
   useEffect,
@@ -15,14 +15,14 @@ import {
   slashCommandQueryFromValue,
   withoutSlashCommand,
   workflowSlashCommandFromTitle,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import {
   serializeExcerpts,
   type MessageExcerpt,
   NO_MODELS_MESSAGES,
   routerSelections as routerSelectionsFromProfile,
   type RouterSelections,
-} from "@mike/client";
+} from "@linkmai/client";
 import { WorkflowModal } from "../workflows/WorkflowModal";
 import { PlaybookModal, playbookTitle } from "../playbooks/PlaybookModal";
 import { ChatInput as ChatInputShell } from "../../../shared/chat/ChatInput";
@@ -36,7 +36,7 @@ import {
   type ApiKeyStatus,
   type UploadOutcome,
   type UploadProgress,
-} from "../../api/mikeApi";
+} from "../../api/linkmaiApi";
 import { useSelectedModel } from "../../hooks/useSelectedModel";
 import type { Document, Workflow } from "../../types";
 import {

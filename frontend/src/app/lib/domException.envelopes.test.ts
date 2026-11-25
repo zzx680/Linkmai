@@ -1,6 +1,6 @@
 import { afterEach, expect, it } from "vitest";
 import * as Sentry from "@sentry/react";
-import { createEventScrubber, privacyBoundaryIntegration } from "@mike/client";
+import { createEventScrubber, privacyBoundaryIntegration } from "@linkmai/client";
 
 afterEach(async () => { await Sentry.close(); });
 it.each([

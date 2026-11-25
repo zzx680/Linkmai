@@ -7,7 +7,7 @@ import {
     type SetStateAction,
 } from "react";
 import type { TabularReview } from "@/app/components/shared/types";
-import { listTabularReviewIds, listTabularReviews } from "@/app/lib/mikeApi";
+import { listTabularReviewIds, listTabularReviews } from "@/app/lib/linkmaiApi";
 import { appendUniqueRows, paginationError, splitOverfetchedPage } from "@/app/lib/paginatedRows";
 import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
 

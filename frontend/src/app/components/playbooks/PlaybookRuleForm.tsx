@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useId, useState } from "react";
 import { Plus, X } from "lucide-react";
@@ -8,7 +8,7 @@ import { ModalSelect } from "@/app/components/modals/ModalSelect";
 import { HeaderActionsMenu } from "@/app/components/shared/HeaderActionsMenu";
 import { LIQUID_GLASS_FLAT_CLASS } from "@/app/components/ui/liquid-surface";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import { PillButtonUI, TextButtonUI } from "@mike/ui";
+import { PillButtonUI, TextButtonUI } from "@linkmai/ui";
 import {
   PlaybookField as Field,
   PLAYBOOK_HELP_CLASS,
@@ -20,7 +20,7 @@ import type {
   PlaybookClauseUsage,
   PlaybookPosition,
   PlaybookRule,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { cn } from "@/app/lib/utils";
 
 type PositionKind = "standard" | "fallbacks" | "unacceptable";

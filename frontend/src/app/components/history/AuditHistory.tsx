@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   useCallback,
@@ -23,7 +23,7 @@ import {
   MoreHorizontal,
   X,
 } from "lucide-react";
-import { getAuditHistory, type AuditActor, type AuditEvent } from "@/app/lib/mikeApi";
+import { getAuditHistory, type AuditActor, type AuditEvent } from "@/app/lib/linkmaiApi";
 import { HistoryActorFilter } from "./HistoryActorFilter";
 import { runUserExport } from "@/app/lib/asyncExport";
 import { appendUniqueRows } from "@/app/lib/paginatedRows";
@@ -94,7 +94,7 @@ import {
   DropdownItem,
   DropdownSurface,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 const STATUS_DOT_STYLES: Record<string, string> = {
   completed: "bg-green-400/80",

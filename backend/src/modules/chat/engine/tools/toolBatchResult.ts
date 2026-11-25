@@ -4,7 +4,7 @@
 import type {
   DocumentSearchEvent,
   TextCardEvent,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import type { McpToolEvent } from "../../../../lib/mcpConnectors";
 import type { AskInputsEvent } from "../types";
 import type { CaseCitationEvent, CourtlistenerToolEvent } from "./courtlistenerTools";

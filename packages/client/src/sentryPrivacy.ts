@@ -44,7 +44,7 @@ export function identifyApplicationError(error: object, kind: ErrorKind): void {
 
 /** Fixed external protocol vocabulary; application labels use the source contract above. */
 export const DIAGNOSTIC_VOCABULARY: Record<string, ReadonlySet<string>> = Object.fromEntries(Object.entries({
-  service: 'mike-backend mike-frontend mike-word-addin',
+  service: 'linkmai-backend linkmai-frontend linkmai-word-addin',
   role: 'api worker worker-thread job',
   runtime: 'browser server edge',
   surface: 'taskpane commands dialog',
@@ -412,8 +412,8 @@ export function diagnosticEvent(value: unknown): RecordValue {
   const crumbs = Array.isArray(event.breadcrumbs) ? event.breadcrumbs : [];
   const trail = crumbs.flatMap(raw => {
     const crumb = record(raw);
-    if (crumb.category !== 'mike.stage' || !isDiagnosticLabel(crumb.message)) return [];
-    const out: RecordValue = { category: 'mike.stage', message: crumb.message };
+    if (crumb.category !== 'linkmai.stage' || !isDiagnosticLabel(crumb.message)) return [];
+    const out: RecordValue = { category: 'linkmai.stage', message: crumb.message };
     if (typeof crumb.timestamp === 'number' && Number.isFinite(crumb.timestamp)) out.timestamp = crumb.timestamp;
     return [out];
   }).slice(-20);
@@ -539,7 +539,7 @@ export function diagnosticEnvelope(envelope: Envelope, destination?: string, tel
 /** Applies to browser, server, workers and add-in, in both install modes. */
 export function privacyBoundaryIntegration(options: { acceptEvent?: (event: RecordValue) => boolean; telemetry?: TelemetryBudget } = {}) {
   return {
-    name: 'MikePrivacyBoundary',
+    name: 'LinkMaiPrivacyBoundary',
     setup(client: {
       getTransport(): Transport | undefined;
       getDsn?(): { protocol: string; publicKey?: string; host: string; port?: string; path?: string; projectId: string } | undefined;

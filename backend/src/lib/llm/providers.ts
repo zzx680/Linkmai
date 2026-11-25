@@ -94,7 +94,7 @@ const ROUTER_KEY_ENV_HINTS: Record<RouterProvider, string> = {
 };
 
 /**
- * Per-request settings asking a provider not to keep, or train on, what Mike
+ * Per-request settings asking a provider not to keep, or train on, what LinkMai
  * sends it: lawyers' prompts and document text. Only providers whose API has
  * such a request field are listed; for the others (Anthropic, Gemini,
  * Vertex, Bedrock, Mistral) retention is set by the account's terms, not by
@@ -264,7 +264,7 @@ async function createRouterAdapter(
       apiKey: key,
       baseURL: OPENROUTER_BASE_URL,
       compatibility: "strict",
-      appName: "Mike",
+      appName: "LinkMai",
       appUrl: process.env.FRONTEND_URL,
       fetch: aiSdkFetch,
     });
@@ -564,7 +564,7 @@ function configuredModelOrThrow(id: string): ConfiguredModel {
   const configured = getConfiguredModel(id);
   if (!configured) {
     throw new Error(
-      `Model ${id} is not declared in MIKE_MODEL_CONFIG_JSON.`,
+      `Model ${id} is not declared in LINKMAI_MODEL_CONFIG_JSON.`,
     );
   }
   if (!configured.baseUrl?.trim()) {
@@ -633,7 +633,7 @@ function configuredModelKeySource(
 
 function unsupportedOpenCodeGoModel(model: string): Error {
   return new Error(
-    `OpenCode Go model ${openCodeGoModelId(model)} requires a protocol Mike does not support yet. Select a model listed under Model Selections for OpenCode Go in Settings → Bring Your Own Keys.`,
+    `OpenCode Go model ${openCodeGoModelId(model)} requires a protocol LinkMai does not support yet. Select a model listed under Model Selections for OpenCode Go in Settings → Bring Your Own Keys.`,
   );
 }
 

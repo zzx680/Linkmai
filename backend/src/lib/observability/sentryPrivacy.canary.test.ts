@@ -36,7 +36,7 @@ it.each(['community', 'official'] as const)('lets no planted client data reach t
   setOperation('documents.upload.complete');
   const scope = Sentry.getIsolationScope();
   for (const [key, value] of Object.entries({ request_id: 'Jane_Doe_NDA.pdf', error_kind: 'Jane_Doe_NDA.pdf', error_code: 'Jane_Doe_NDA.pdf', warning_code: 'DEP1234 Jane_Doe_NDA.pdf', http_route: '/documents/Jane_Doe_NDA.pdf', what: 'Jane_Doe_NDA.pdf', filename: 'Jane_Doe_NDA.pdf' })) scope.setTag(key, value);
-  Sentry.addBreadcrumb({ category: 'mike.stage', message: 'Jane_Doe_NDA.pdf', data: { filename: 'Jane_Doe_NDA.pdf' } });
+  Sentry.addBreadcrumb({ category: 'linkmai.stage', message: 'Jane_Doe_NDA.pdf', data: { filename: 'Jane_Doe_NDA.pdf' } });
   Sentry.addBreadcrumb({ category: 'http', message: 'GET /documents/Jane_Doe_NDA.pdf' });
   markStage('process-file');
 
@@ -75,8 +75,8 @@ it.each(['community', 'official'] as const)('lets no planted client data reach t
 // free-text action, the API client's raw path, the add-in's edit identifiers.
 it('lets no planted client data through a browser or add-in shaped event', () => {
   const wire = JSON.stringify([
-    diagnosticEvent({ tags: { component: 'notify', action: 'rename Jane_Doe_NDA.pdf', operation: 'documents.edit', error_code: 'internal_error', request_id: '11111111-2222-4333-8444-555555555555' }, exception: { values: [{ type: 'MikeApiError', value: 'Jane_Doe_NDA.pdf could not be renamed' }] } }),
-    diagnosticEvent({ message: 'API 500 on PUT /documents/Jane_Doe_NDA.pdf', tags: { component: 'mike-api', http_route: '/documents/Jane_Doe_NDA.pdf?name=Jane%20Doe', http_status: 500, operation: 'documents.edit' }, extra: { path: '/documents/Jane_Doe_NDA.pdf?name=Jane%20Doe' }, fingerprint: ['api-5xx', 'PUT', '/documents/Jane_Doe_NDA.pdf', '500'] }),
+    diagnosticEvent({ tags: { component: 'notify', action: 'rename Jane_Doe_NDA.pdf', operation: 'documents.edit', error_code: 'internal_error', request_id: '11111111-2222-4333-8444-555555555555' }, exception: { values: [{ type: 'LinkMaiApiError', value: 'Jane_Doe_NDA.pdf could not be renamed' }] } }),
+    diagnosticEvent({ message: 'API 500 on PUT /documents/Jane_Doe_NDA.pdf', tags: { component: 'linkmai-api', http_route: '/documents/Jane_Doe_NDA.pdf?name=Jane%20Doe', http_status: 500, operation: 'documents.edit' }, extra: { path: '/documents/Jane_Doe_NDA.pdf?name=Jane%20Doe' }, fingerprint: ['api-5xx', 'PUT', '/documents/Jane_Doe_NDA.pdf', '500'] }),
     diagnosticEvent({ tags: { component: 'word-office', operation: 'word.edit_apply', stage: 'apply', office_code: 'ItemNotFound' }, extra: { stableEditId: 'Jane_Doe_NDA.pdf', bookmarkName: 'Jane Doe' } }),
   ]);
   for (const canary of CANARIES) expect(wire, `${canary} in a client-shaped event`).not.toContain(canary);

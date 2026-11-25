@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { setUiLocale } from "@mike/client";
+import { setUiLocale } from "@linkmai/client";
 import { LoginPage } from "../../../word-addin/src/taskpane/auth/LoginPage";
 
 const { options } = vi.hoisted(() => ({ options: vi.fn() }));

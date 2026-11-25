@@ -440,7 +440,7 @@ test("a device-only save failure after a finished answer is reported as a save f
   // re-send the whole turn.
   await expect(page.getByText(/get a response/i)).toHaveCount(0);
   await expect(
-    page.getByText("Mike couldn't finish that answer. Try again."),
+    page.getByText("LinkMai couldn't finish that answer. Try again."),
   ).toHaveCount(0);
 });
 
@@ -475,7 +475,7 @@ const idbReads = (page: import("@playwright/test").Page, store: string) =>
 /** Put rows straight into the pane's database, as months of use would. */
 async function seedLocalRows(page: import("@playwright/test").Page, rows: Record<string, unknown[]>) {
   await page.evaluate((stores) => new Promise<void>((resolve, reject) => {
-    const open = indexedDB.open("mike-word-addin");
+    const open = indexedDB.open("linkmai-word-addin");
     open.onerror = () => reject(open.error);
     open.onsuccess = () => {
       const database = open.result;
@@ -489,7 +489,7 @@ async function seedLocalRows(page: import("@playwright/test").Page, rows: Record
 
 async function firstLocalChat(page: import("@playwright/test").Page) {
   return page.evaluate(() => new Promise<{ id: string; owner_id: string; document_id: string }>((resolve, reject) => {
-    const open = indexedDB.open("mike-word-addin");
+    const open = indexedDB.open("linkmai-word-addin");
     open.onerror = () => reject(open.error);
     open.onsuccess = () => {
       const request = open.result.transaction("word-chats").objectStore("word-chats").getAll();
@@ -500,7 +500,7 @@ async function firstLocalChat(page: import("@playwright/test").Page) {
 
 async function expectSavedAnswer(page: import("@playwright/test").Page, chatId: string, content: string) {
   await expect.poll(() => page.evaluate(({ chatId, content }) => new Promise<boolean>((resolve, reject) => {
-    const open = indexedDB.open("mike-word-addin");
+    const open = indexedDB.open("linkmai-word-addin");
     open.onerror = () => reject(open.error);
     open.onsuccess = () => {
       const database = open.result;
@@ -565,7 +565,7 @@ test("opening a device-only chat reads only that chat's edits", async ({ addin, 
   await page.getByRole("button", { name: "Delete chats" }).click();
   await expect(page.getByRole("button", { name: "Delete chats" })).toHaveCount(0);
   expect(await page.evaluate(() => new Promise<number[]>((resolve) => {
-    const open = indexedDB.open("mike-word-addin");
+    const open = indexedDB.open("linkmai-word-addin");
     open.onsuccess = () => {
       const stores = ["word-chats", "word-chat-messages", "word-document-edits"];
       const transaction = open.result.transaction(stores);
@@ -597,7 +597,7 @@ test("saving into a long device-only chat does not re-read its messages", async 
     })),
   });
   const countMessages = () => page.evaluate(() => new Promise<number>((resolve) => {
-    const open = indexedDB.open("mike-word-addin");
+    const open = indexedDB.open("linkmai-word-addin");
     open.onsuccess = () => {
       const request = open.result.transaction("word-chat-messages").objectStore("word-chat-messages").count();
       request.onsuccess = () => { open.result.close(); resolve(request.result); };
@@ -637,10 +637,10 @@ for (const version of [4, 5]) test(`device-only history preserves a version ${ve
   // Version 4 is the released schema; version 5 was used by PR previews.
   // Opening either must preserve its version, rows and ordering.
   await page.evaluate(({ current, olderCount, version }) => new Promise<void>((resolve, reject) => {
-    const deletion = indexedDB.deleteDatabase("mike-word-addin");
+    const deletion = indexedDB.deleteDatabase("linkmai-word-addin");
     deletion.onerror = () => reject(deletion.error);
     deletion.onsuccess = () => {
-      const open = indexedDB.open("mike-word-addin", version);
+      const open = indexedDB.open("linkmai-word-addin", version);
       open.onupgradeneeded = () => {
         const database = open.result;
         const chats = database.createObjectStore("word-chats", { keyPath: "id" });
@@ -689,7 +689,7 @@ for (const version of [4, 5]) test(`device-only history preserves a version ${ve
   // the released version explicitly and rewrites chat rows without the new
   // counter, exactly as the old storage code does.
   await page.evaluate(({ current, version }) => new Promise<void>((resolve, reject) => {
-    const open = indexedDB.open("mike-word-addin", version);
+    const open = indexedDB.open("linkmai-word-addin", version);
     open.onerror = () => reject(open.error);
     open.onsuccess = () => {
       const db = open.result;
@@ -725,9 +725,9 @@ test("an add-in older than the device-only database says to reopen it", async ({
   await addin.expectAuthedShell();
   // A newer build already upgraded this device's database past this bundle.
   await page.evaluate(() => new Promise<void>((resolve, reject) => {
-    const deletion = indexedDB.deleteDatabase("mike-word-addin");
+    const deletion = indexedDB.deleteDatabase("linkmai-word-addin");
     deletion.onsuccess = () => {
-      const open = indexedDB.open("mike-word-addin", 99);
+      const open = indexedDB.open("linkmai-word-addin", 99);
       open.onupgradeneeded = () => open.result.createObjectStore("word-chats", { keyPath: "id" });
       open.onsuccess = () => { open.result.close(); resolve(); };
       open.onerror = () => reject(open.error);

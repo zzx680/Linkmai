@@ -1,7 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { ModalUI, type ModalUISize, PillButtonUI } from "@mike/ui";
+import { ModalUI, type ModalUISize, PillButtonUI } from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 
 type ModalAction = Omit<

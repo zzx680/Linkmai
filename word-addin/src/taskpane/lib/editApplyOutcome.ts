@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * Decisions that keep a user-driven "Retry" from quietly changing the
  * document twice, and that keep the pane from claiming an outcome it cannot
@@ -31,7 +31,7 @@ export const ALREADY_APPLIED_MESSAGE =
 
 /** Shown when Word faulted and the verification read proved nothing. */
 export const UNVERIFIED_APPLY_MESSAGE =
-  uiText("Mike couldn't confirm whether this change was applied — check the document before retrying.");
+  uiText("LinkMai couldn't confirm whether this change was applied — check the document before retrying.");
 
 /**
  * How many applied stable edit IDs a document remembers. Office document
@@ -76,7 +76,7 @@ export type ApplyFailureOutcome =
 /**
  * What to report when the Word batch for one edit threw.
  *
- * - The verification read found the expected revisions: it landed, Mike just
+ * - The verification read found the expected revisions: it landed, LinkMai just
  *   lost its review controls.
  * - A mutation was queued but nothing could prove it landed: unknown. No
  *   automatic retry, because retrying an edit that DID land duplicates it.

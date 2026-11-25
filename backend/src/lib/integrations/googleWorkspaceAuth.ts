@@ -1,7 +1,7 @@
 import type {
   GoogleWorkspaceProvider,
   GoogleWorkspaceStatus,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import crypto from "node:crypto";
 import type { Db } from "../supabase";
 import { type ConnectorOwner, workspaceFilter } from "../connectorOwner";
@@ -79,7 +79,7 @@ export function googleWorkspaceSetupInstructions(
     `${api}, then set GOOGLE_WORKSPACE_OAUTH_CLIENT_ID and ` +
     "GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET (or the Google Drive client variables) " +
     "in backend/.env and restart. The redirect URI is derived from " +
-    "API_PUBLIC_URL, so fix that first if it is not the address browsers use to reach Mike."
+    "API_PUBLIC_URL, so fix that first if it is not the address browsers use to reach LinkMai."
   );
 }
 export function googleWorkspaceEnv() {
@@ -94,7 +94,7 @@ export function googleWorkspaceEnv() {
   return googleDriveOAuthEnv();
 }
 /**
- * Mike asks for write access on every connect. Google lets the user untick
+ * LinkMai asks for write access on every connect. Google lets the user untick
  * individual permissions and lets Workspace admins block them, so write access
  * is whatever Google actually granted — see `grantedWriteAccess`.
  */
@@ -103,8 +103,8 @@ export function requestedScopes(provider: GoogleProvider): string[] {
   return ["openid", "email", ...config.read, ...config.write];
 }
 /**
- * Broader scopes that cover narrower ones Mike checks for. gmail.modify was
- * Mike's Gmail write scope before gmail.compose; listing it keeps those grants
+ * Broader scopes that cover narrower ones LinkMai checks for. gmail.modify was
+ * LinkMai's Gmail write scope before gmail.compose; listing it keeps those grants
  * readable and writable without a reconnect.
  */
 const IMPLIED_SCOPES: Record<string, readonly string[]> = {

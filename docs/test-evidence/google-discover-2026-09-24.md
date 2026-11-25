@@ -3,7 +3,7 @@
 Drive, Gmail, and Calendar now appear alongside the other services in Discover.
 The separate Google accounts section has been removed. For a configured service,
 **Add opens Google OAuth directly**, with read access by default. Users choose
-the account on Google's screen; Mike has no preliminary account-selection dialog.
+the account on Google's screen; LinkMai has no preliminary account-selection dialog.
 The OAuth request explicitly asks Google to show account selection and consent.
 Google sign-in alone still does not connect any service.
 
@@ -31,11 +31,11 @@ against the production server. CI results for the pushed head are recorded in
 
 ## Evidence boundaries
 
-These are actual browser screenshots of the rebuilt Mike application using
+These are actual browser screenshots of the rebuilt LinkMai application using
 **synthetic API fixtures**, including `alex.morgan@example.com`. The provider
 popup destination is intercepted for deterministic testing; no Google chooser
 or consent screen is imitated in this gallery. OAuth-start screenshots show
-Mike's pending state after Add and the absence of a preliminary Mike dialog.
+LinkMai's pending state after Add and the absence of a preliminary LinkMai dialog.
 No email was sent, no event changed, and no real Google grant was made by these
 tests. Earlier live proofs and outstanding live acceptance remain in the
 [combined testing report](google-integrations-2026-09-23.md).

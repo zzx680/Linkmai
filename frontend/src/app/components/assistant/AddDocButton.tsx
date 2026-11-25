@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useRef } from "react";
 import {
@@ -16,7 +16,7 @@ import {
     DropdownItem,
     DropdownSeparator,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 interface Props {
     onBrowseAll: () => void;

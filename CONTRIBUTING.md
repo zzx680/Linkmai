@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Mike. Please keep contributions small, focused, and easy to review.
+Thanks for helping improve LinkMai. Please keep contributions small, focused, and easy to review.
 
 ## Guidelines
 
@@ -16,7 +16,7 @@ Thanks for helping improve Mike. Please keep contributions small, focused, and e
 ## Frontend UI Work
 
 Before writing a new component, check whether one already exists. Look first in
-`frontend/src/app/components/ui/` (and `packages/ui/`, imported as `@mike/ui`,
+`frontend/src/app/components/ui/` (and `packages/ui/`, imported as `@linkmai/ui`,
 for anything the Word add-in also renders), then in the
 [shadcn/ui](https://ui.shadcn.com)
 registry — the project is configured for it in `frontend/components.json`, so
@@ -40,7 +40,7 @@ tokens, the primitive inventory, and the full baseline.
     - why
     - testing
 
-## Mike Workflows
+## LinkMai Workflows
 
 System workflows live in the sibling
 [`Open-Legal-Products/mike-workflows`](https://github.com/Open-Legal-Products/mike-workflows)

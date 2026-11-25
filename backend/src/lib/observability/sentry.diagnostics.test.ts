@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/node';
 import { reportProcessWarning, resetSentryForTests, scrubEvent, reportError, markErrorHandled } from './sentry';
 import { toProviderStreamError } from '../llm/providerErrors';
 import { eventBudget, eventBudgetLimits } from './sentryVolume';
-import { MIKE_SENTRY_DSN } from './sentry';
+import { LINKMAI_SENTRY_DSN } from './sentry';
 import { privacyBoundaryIntegration } from './sentryPrivacy';
 
 // The final transport also emits Sentry's legacy top-level message stack.
@@ -130,8 +130,8 @@ it('enforces the shared project ceiling through final SDK envelopes even with an
   const events: Sentry.Event[] = [];
   resetSentryForTests('community');
   Sentry.init({
-    dsn: MIKE_SENTRY_DSN.backend, defaultIntegrations: false,
-    integrations: [privacyBoundaryIntegration({ acceptEvent: eventBudget(eventBudgetLimits(undefined, MIKE_SENTRY_DSN.backend, Object.values(MIKE_SENTRY_DSN))) })],
+    dsn: LINKMAI_SENTRY_DSN.backend, defaultIntegrations: false,
+    integrations: [privacyBoundaryIntegration({ acceptEvent: eventBudget(eventBudgetLimits(undefined, LINKMAI_SENTRY_DSN.backend, Object.values(LINKMAI_SENTRY_DSN))) })],
     beforeSend: scrubEvent,
     transport: () => ({ send: async envelope => {
       for (const [header, payload] of envelope[1]) if (header.type === 'event') events.push(payload as Sentry.Event);

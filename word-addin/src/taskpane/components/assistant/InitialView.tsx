@@ -1,9 +1,9 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useState } from "react";
 import quickActionsIcon from "@icons/features/quick-actions.svg";
-import { getUserProfile } from "../../api/mikeApi";
-import { MikeIcon } from "../../../shared/chat/mike-icon";
+import { getUserProfile } from "../../api/linkmaiApi";
+import { LinkMaiIcon } from "../../../shared/chat/linkmai-icon";
 import type { QuickAction } from "../../types";
 import { useQuickActions } from "../../lib/quickActionStore";
 import { quickActionDisplayName } from "../../lib/quickActions";
@@ -45,8 +45,8 @@ export function InitialView({
           </div>
         ) : (
           <>
-            <span data-testid="initial-mike-icon" className="shrink-0" aria-hidden="true">
-              <MikeIcon size={ICON_SIZE} />
+            <span data-testid="initial-linkmai-icon" className="shrink-0" aria-hidden="true">
+              <LinkMaiIcon size={ICON_SIZE} />
             </span>
             <h1 className="min-w-0 font-serif text-2xl font-light leading-relaxed text-gray-900 [overflow-wrap:anywhere]">
               你好{name ? `，${name}` : ""}

@@ -1,4 +1,4 @@
-import type { TabularReviewHistoryStatus } from "@mike/contracts";
+import type { TabularReviewHistoryStatus } from "@linkmai/contracts";
 
 type Activity = Pick<TabularReviewHistoryStatus, "id" | "updated_at" | "is_running" | "title" | "project_id" | "org_id"> &
     Partial<Pick<TabularReviewHistoryStatus, "is_complete">>;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import {
     TURN_FAILED_MESSAGE,
     errorFrameFailure,
@@ -9,8 +9,8 @@ import {
 describe("isUncertainDelivery", () => {
     it("treats only an explicit 4xx as proof nothing was stored", () => {
         expect(isUncertainDelivery(new TypeError("Failed to fetch"), false)).toBe(true);
-        expect(isUncertainDelivery(new MikeApiError({ message: "down", status: 502 }), false)).toBe(true);
-        expect(isUncertainDelivery(new MikeApiError({ message: "busy", status: 429 }), false)).toBe(false);
+        expect(isUncertainDelivery(new LinkMaiApiError({ message: "down", status: 502 }), false)).toBe(true);
+        expect(isUncertainDelivery(new LinkMaiApiError({ message: "busy", status: 429 }), false)).toBe(false);
     });
 
     it("is never uncertain once the server has named the turn", () => {

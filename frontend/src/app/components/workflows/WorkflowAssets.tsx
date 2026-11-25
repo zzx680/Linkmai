@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   forwardRef,
@@ -26,7 +26,7 @@ import {
   uploadDocumentVersion,
   uploadWorkflowAssets,
   type DocumentVersion,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
   SUPPORTED_DOCUMENT_ACCEPT,
   formatUnsupportedDocumentWarning,

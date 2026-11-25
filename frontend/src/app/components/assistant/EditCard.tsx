@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
-import { EditCardUI } from "@mike/ui";
-import { resolveDocumentEdit } from "@/app/lib/mikeApi";
+import { EditCardUI } from "@linkmai/ui";
+import { resolveDocumentEdit } from "@/app/lib/linkmaiApi";
 import type { EditAnnotation } from "../shared/types";
 import { RESPONSE_GLASS_SURFACE } from "./message/messageStyles";
 import { docxRevisionElements } from "../shared/views/docxRevisionElements";

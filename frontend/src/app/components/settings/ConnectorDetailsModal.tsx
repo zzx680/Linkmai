@@ -1,12 +1,12 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState, type ReactNode } from "react";
 import { ChevronDown, Loader2, RefreshCw } from "lucide-react";
 import { FieldLabel } from "@/app/components/ui/form-field";
 import { Modal } from "@/app/components/modals/Modal";
-import { LIQUID_GLASS_FLAT_CLASS, TabPillButtonUI, ToggleSwitchUI } from "@mike/ui";
+import { LIQUID_GLASS_FLAT_CLASS, TabPillButtonUI, ToggleSwitchUI } from "@linkmai/ui";
 
 export type ConnectorToolView = {
     id: string;
@@ -173,7 +173,7 @@ export function ConnectorDetailsModal({
                                             </p>
                                             <p className="mt-0.5 text-xs text-gray-500">
                                                 {hasWriteTools || toolsLoading
-                                                    ? uiText("Mike asks you in the chat before running an action that changes data.")
+                                                    ? uiText("LinkMai asks you in the chat before running an action that changes data.")
                                                     : uiText("This connector has no write actions right now.")}
                                             </p>
                                         </div>

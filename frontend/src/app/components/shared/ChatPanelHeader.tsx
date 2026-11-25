@@ -1,7 +1,7 @@
 "use client";
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, Loader2, Plus, X } from "lucide-react";
@@ -11,7 +11,7 @@ import { FormTextInput } from "@/app/components/ui/form-field";
 import {
     ChatHistoryDropdownUI,
     type ChatHistoryDropdownItemUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import {
     LIQUID_GLASS_HOVER_CLASS,
     LIQUID_GLASS_SUBTLE_CLASS,

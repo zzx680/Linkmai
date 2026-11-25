@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
 import { useEffect, useId, useRef, useState } from "react";
 import type { Editor } from "@docx-editor.dev/core/contracts/editor";
 import { useEditorSnapshot } from "@docx-editor.dev/react";
-import { TextButtonUI, PillButtonUI } from "@mike/ui";
+import { TextButtonUI, PillButtonUI } from "@linkmai/ui";
 import { FORM_CONTROL_GLASS_CLASS } from "@/app/components/ui/form-field";
 import { cn } from "@/app/lib/utils";
 

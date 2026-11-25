@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { clearToasts, getSnapshot } from "@mike/client";
+import { clearToasts, getSnapshot } from "@linkmai/client";
 import {
-    MikeApiError,
+    LinkMaiApiError,
     SCHEMA_OUT_OF_DATE_MESSAGE,
     UPSTREAM_UNAVAILABLE_MESSAGE,
-} from "./mikeApi";
+} from "./linkmaiApi";
 import { describeError, notifyError } from "./userFacingError";
 
 const reporting = vi.hoisted(() => ({ reportError: vi.fn(), isReported: vi.fn(() => false) }));
@@ -22,8 +22,8 @@ describe("notifyError for server-reported 5xx codes", () => {
     it.each([
         ["schema_out_of_date", SCHEMA_OUT_OF_DATE_MESSAGE],
         ["upstream_unavailable", UPSTREAM_UNAVAILABLE_MESSAGE],
-    ])("shows mikeApi's sentence for %s and does not report it again", (code, message) => {
-        notifyError(new MikeApiError({ status: 503, code, message }));
+    ])("shows linkmaiApi's sentence for %s and does not report it again", (code, message) => {
+        notifyError(new LinkMaiApiError({ status: 503, code, message }));
 
         expect(getSnapshot().at(-1)?.message).toBe(message);
         expect(reporting.reportError).not.toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe("notifyError for server-reported 5xx codes", () => {
 
     it("lets a call site's own code message win", () => {
         notifyError(
-            new MikeApiError({ status: 503, code: "schema_out_of_date", message: "x" }),
+            new LinkMaiApiError({ status: 503, code: "schema_out_of_date", message: "x" }),
             { codeMessages: { schema_out_of_date: "Ask your admin to run the migration." } },
         );
 
@@ -45,7 +45,7 @@ describe("notifyError for server-reported 5xx codes", () => {
     });
 
     it("leaves other 5xx codes on the generic classification", () => {
-        notifyError(new MikeApiError({ status: 503, code: "internal_error", message: "secret" }));
+        notifyError(new LinkMaiApiError({ status: 503, code: "internal_error", message: "secret" }));
 
         expect(getSnapshot().at(-1)?.message).not.toContain("secret");
         expect(getSnapshot().at(-1)?.message).not.toBe(UPSTREAM_UNAVAILABLE_MESSAGE);
@@ -59,9 +59,9 @@ describe("describeError for server-reported 5xx codes", () => {
     it.each([
         ["schema_out_of_date", SCHEMA_OUT_OF_DATE_MESSAGE],
         ["upstream_unavailable", UPSTREAM_UNAVAILABLE_MESSAGE],
-    ])("gives mikeApi's sentence for %s inline too", (code, message) => {
+    ])("gives linkmaiApi's sentence for %s inline too", (code, message) => {
         const described = describeError(
-            new MikeApiError({ status: 503, code, message: "x" }),
+            new LinkMaiApiError({ status: 503, code, message: "x" }),
             { action: "load your connectors", fallback: "Fallback." },
         );
 

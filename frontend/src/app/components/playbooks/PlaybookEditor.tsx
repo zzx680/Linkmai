@@ -1,8 +1,8 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   useEffect,
@@ -54,11 +54,11 @@ import {
   TabPillButtonUI,
   DropdownAtPoint,
   DropdownItem,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { setRowDragPreview } from "@/app/lib/rowDragPreview";
 import { movePlaybookRule, type RuleDropTarget } from "./playbookRuleMoves";
 import { createPlaybookRule } from "./playbookRules";
-import type { PlaybookContent, PlaybookRule } from "@/app/lib/mikeApi";
+import type { PlaybookContent, PlaybookRule } from "@/app/lib/linkmaiApi";
 
 const RULE_BUTTON_CLASS =
   "grid w-full min-w-0 cursor-pointer grid-cols-[12px_minmax(0,1fr)] items-center gap-2 rounded-lg py-1.5 text-left text-xs transition-colors";

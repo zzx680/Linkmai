@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -20,7 +20,7 @@ import {
   getWorkflowAddon,
   importWorkflowAddon,
   listWorkflowAddons,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { useDebouncedValue } from "@/app/hooks/useDebouncedValue";
 import { useQueryParamTab } from "@/app/hooks/useQueryParamTab";
 import { usePaginatedWorkflows } from "@/app/hooks/usePaginatedWorkflows";
@@ -36,7 +36,7 @@ import { PAGE_HEADER_TITLE_CLASS } from "@/app/components/shared/pageHeaderStyle
 import { SubfolderSvgIcon } from "@/app/components/shared/FolderSvgIcon";
 import { EmptyState } from "@/app/components/ui/empty-state";
 import { LIQUID_GLASS_HOVER_CLASS } from "@/app/components/ui/liquid-surface";
-import { PillButtonUI, TabPillButtonUI } from "@mike/ui";
+import { PillButtonUI, TabPillButtonUI } from "@linkmai/ui";
 import {
   ChatSkeuoIcon,
   TabularReviewSkeuoIcon,

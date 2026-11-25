@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useState } from "react";
 import type { WordChatOpenHandler } from "../../lib/wordChatTypes";
 import {
@@ -25,7 +25,7 @@ import {
   DropdownItem,
   DropdownSeparator,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import chatIcon from "@icons/features/chat.svg";
 import quickActionsIcon from "@icons/features/quick-actions.svg";
 import workflowIcon from "@icons/features/workflow.svg";

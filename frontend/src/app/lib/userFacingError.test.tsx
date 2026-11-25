@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
-import { MikeApiError, SCHEMA_OUT_OF_DATE_MESSAGE, UPSTREAM_UNAVAILABLE_MESSAGE } from "./mikeApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
+import { LinkMaiApiError, SCHEMA_OUT_OF_DATE_MESSAGE, UPSTREAM_UNAVAILABLE_MESSAGE } from "./linkmaiApi";
 
 // The Sentry SDK is not loaded in tests; what matters is which failures
 // reach `reportError` and which do not.
@@ -30,7 +30,7 @@ import {
 
 describe("userFacingApiError", () => {
     it("allows intentional client-error details", () => {
-        const error = new MikeApiError({
+        const error = new LinkMaiApiError({
             status: 400,
             message: "The filename is required.",
         });
@@ -41,7 +41,7 @@ describe("userFacingApiError", () => {
     });
 
     it("shows the intentional schema_out_of_date and upstream_unavailable messages despite the 5xx status", () => {
-        const error = new MikeApiError({
+        const error = new LinkMaiApiError({
             status: 503,
             code: "schema_out_of_date",
             message: SCHEMA_OUT_OF_DATE_MESSAGE,
@@ -49,14 +49,14 @@ describe("userFacingApiError", () => {
         expect(userFacingApiError(error, "Fallback")).toBe(SCHEMA_OUT_OF_DATE_MESSAGE);
         expect(
             userFacingApiError(
-                new MikeApiError({ status: 503, code: "upstream_unavailable", message: "raw" }),
+                new LinkMaiApiError({ status: 503, code: "upstream_unavailable", message: "raw" }),
                 "Fallback",
             ),
         ).toBe(UPSTREAM_UNAVAILABLE_MESSAGE);
         // Any other 5xx code keeps the generic fallback.
         expect(
             userFacingApiError(
-                new MikeApiError({ status: 503, code: "internal_error", message: "x" }),
+                new LinkMaiApiError({ status: 503, code: "internal_error", message: "x" }),
                 "Fallback",
             ),
         ).toBe("Fallback");
@@ -65,7 +65,7 @@ describe("userFacingApiError", () => {
     it("does not expose server or plain exception messages", () => {
         expect(
             userFacingApiError(
-                new MikeApiError({
+                new LinkMaiApiError({
                     status: 500,
                     message: "relation user_profiles does not exist",
                 }),
@@ -83,13 +83,13 @@ describe("userFacingApiError", () => {
     it("rejects non-client statuses and empty client-error messages", () => {
         expect(
             userFacingApiError(
-                new MikeApiError({ status: 399, message: "Unexpected" }),
+                new LinkMaiApiError({ status: 399, message: "Unexpected" }),
                 "Fallback",
             ),
         ).toBe("Fallback");
         expect(
             userFacingApiError(
-                new MikeApiError({ status: 400, message: "" }),
+                new LinkMaiApiError({ status: 400, message: "" }),
                 "Fallback",
             ),
         ).toBe("Fallback");
@@ -153,7 +153,7 @@ describe("notifyError", () => {
         };
         act(() => {
             result.described = notifyError(
-                new MikeApiError({
+                new LinkMaiApiError({
                     status: 500,
                     message: "internal",
                     requestId: "req-9",
@@ -196,7 +196,7 @@ describe("notifyError", () => {
                 const { unmount } = render(<ToastViewportUI />);
                 act(() => {
                     notifyError(
-                        new MikeApiError({
+                        new LinkMaiApiError({
                             status: 500,
                             message: "internal",
                             code: "internal_error",
@@ -250,7 +250,7 @@ describe("notifyError", () => {
         });
         try {
             act(() => {
-                notifyError(new MikeApiError({ status: 401, message: "no" }));
+                notifyError(new LinkMaiApiError({ status: 401, message: "no" }));
             });
             act(() => {
                 screen.getByRole("button", { name: "Sign in" }).click();
@@ -271,7 +271,7 @@ describe("notifyError", () => {
         render(<ToastViewportUI />);
         act(() => {
             notifyError(
-                new MikeApiError({
+                new LinkMaiApiError({
                     status: 400,
                     message: "Password must be at most 72 UTF-8 bytes. Accented characters and emoji can use more than one byte.",
                 }),
@@ -333,12 +333,12 @@ describe("notifyError options", () => {
         render(<ToastViewportUI />);
         const onOpen = vi.fn();
         act(() => {
-            notifyError(new MikeApiError({ status: 500, message: "x" }), {
+            notifyError(new LinkMaiApiError({ status: 500, message: "x" }), {
                 support: false,
                 actions: [{ label: "Open settings", onClick: onOpen }],
             });
             notifyError(
-                new MikeApiError({ status: 400, message: "Bad input." }),
+                new LinkMaiApiError({ status: 400, message: "Bad input." }),
                 { support: true, supportNote: "While renaming Contract.docx" },
             );
         });
@@ -390,7 +390,7 @@ describe("notifyError options", () => {
         delete globalThis.window;
         try {
             const described = notifyError(
-                new MikeApiError({ status: 401, message: "no" }),
+                new LinkMaiApiError({ status: 401, message: "no" }),
                 { onRetry: () => undefined },
             );
             expect(described?.kind).toBe("unauthenticated");
@@ -407,7 +407,7 @@ describe("notifyError options", () => {
         const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
         vi.stubEnv("NODE_ENV", "production");
         try {
-            notifyError(new MikeApiError({ status: 500, message: "boom" }));
+            notifyError(new LinkMaiApiError({ status: 500, message: "boom" }));
             expect(warn).not.toHaveBeenCalled();
         } finally {
             vi.unstubAllEnvs();
@@ -441,7 +441,7 @@ describe("what notifyError reports to Sentry", () => {
 
     it("reports a 5xx the API client did not already report, once", () => {
         act(() => {
-            notifyError(new MikeApiError({ status: 500, message: "x" }));
+            notifyError(new LinkMaiApiError({ status: 500, message: "x" }));
         });
         expect(reported.reportError).toHaveBeenCalledTimes(1);
     });
@@ -455,7 +455,7 @@ describe("what notifyError reports to Sentry", () => {
     it("does not report a 5xx twice", () => {
         reported.isReported.mockReturnValue(true);
         act(() => {
-            notifyError(new MikeApiError({ status: 500, message: "x" }));
+            notifyError(new LinkMaiApiError({ status: 500, message: "x" }));
         });
         expect(reported.reportError).not.toHaveBeenCalled();
     });
@@ -463,8 +463,8 @@ describe("what notifyError reports to Sentry", () => {
     it("stays quiet for failures that are not faults", () => {
         act(() => {
             // An intentional 4xx answer.
-            notifyError(new MikeApiError({ status: 400, message: "Bad." }));
-            // The transport, already reported under component: mike-api.
+            notifyError(new LinkMaiApiError({ status: 400, message: "Bad." }));
+            // The transport, already reported under component: linkmai-api.
             notifyError(new TypeError("Failed to fetch"));
             // A cancellation the user caused.
             notifyError(new DOMException("x", "AbortError"));

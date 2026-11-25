@@ -28,8 +28,8 @@ vi.mock("@/app/contexts/UserProfileContext", () => ({
         updateApiKeyEnabled: mocks.updateApiKeyEnabled,
     }),
 }));
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-    ...await original<typeof import("@/app/lib/mikeApi")>(),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+    ...await original<typeof import("@/app/lib/linkmaiApi")>(),
     listOrgs: mocks.listOrgs,
     getOrgApiKeys: mocks.getOrgApiKeys,
 }));
@@ -40,7 +40,7 @@ vi.mock("@/app/components/popups/MfaVerificationPopup", () => ({
 vi.mock("@/app/components/settings/RouterSettingsSection", () => ({
     RouterSettingsSection: () => null,
 }));
-vi.mock("@/app/components/site-logo", () => ({ SiteLogo: () => <div>Mike</div> }));
+vi.mock("@/app/components/site-logo", () => ({ SiteLogo: () => <div>LinkMai</div> }));
 
 function noKeys() {
     return Object.fromEntries(

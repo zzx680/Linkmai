@@ -1,6 +1,6 @@
-// Mike for Mac — a native desktop shell around the Mike web app.
+// LinkMai for Mac — a native desktop shell around the LinkMai web app.
 //
-// Design decision (mirrors the Word add-in): Mike clients don't re-implement
+// Design decision (mirrors the Word add-in): LinkMai clients don't re-implement
 // the product UI — the web app IS the product, and this shell gives it a
 // first-class macOS home: real menu bar with shortcuts, window-state
 // persistence, external links opening in the default browser, a connection
@@ -25,11 +25,11 @@ const { pathToFileURL } = require("url");
 
 // Out of the box the shell points at the hosted service, so a downloaded app
 // works with no local stack. Self-hosters retarget via the connect screen
-// (⌘⇧,), --server-url=, or MIKE_SERVER_URL — see serverUrl() below. A third
+// (⌘⇧,), --server-url=, or LINKMAI_SERVER_URL — see serverUrl() below. A third
 // mode runs the ENTIRE stack on this Mac (src/local/supervisor.js): the
 // connect screen offers it, and once chosen the shell boots the local
 // services and loads the local frontend.
-const DEFAULT_SERVER_URL = "https://app.mikeoss.com";
+const DEFAULT_SERVER_URL = "https://app.linkmai.com";
 const LOCAL_FRONTEND_URL = require("./local/config").FRONTEND_URL;
 const CONNECT_PAGE = path.join(__dirname, "pages", "connect.html");
 const LOCAL_BOOT_PAGE = path.join(__dirname, "pages", "local-boot.html");
@@ -50,7 +50,7 @@ const PROBE_TIMEOUT_MS = 5_000;
 // ---------------------------------------------------------------------------
 // Settings — a plain JSON file in userData. Deliberately no dependency: the
 // shell stores two things (server URL, window bounds) and a schema-less file
-// keeps the prototype inspectable (~/Library/Application Support/Mike/).
+// keeps the prototype inspectable (~/Library/Application Support/LinkMai/).
 // ---------------------------------------------------------------------------
 
 const settingsPath = () => path.join(app.getPath("userData"), "settings.json");
@@ -69,26 +69,26 @@ function saveSettings(patch) {
     fs.mkdirSync(path.dirname(settingsPath()), { recursive: true });
     fs.writeFileSync(settingsPath(), JSON.stringify(next, null, 2));
   } catch (err) {
-    console.error("[mike-desktop] failed to save settings", err);
+    console.error("[linkmai-desktop] failed to save settings", err);
   }
   return next;
 }
 
-// Precedence: --server-url= argv, then MIKE_SERVER_URL, then settings.json,
+// Precedence: --server-url= argv, then LINKMAI_SERVER_URL, then settings.json,
 // then default. The two overrides exist so automation (e2e against a shifted
 // compose stack) can retarget the packaged app without touching the user's
 // real settings file.
 const serverUrlOverride = () => {
   const argv = process.argv.find((a) => a.startsWith("--server-url="));
   const override =
-    argv?.slice("--server-url=".length) ?? process.env.MIKE_SERVER_URL;
+    argv?.slice("--server-url=".length) ?? process.env.LINKMAI_SERVER_URL;
   return typeof override === "string" && override.trim()
     ? override.trim().replace(/\/+$/, "")
     : null;
 };
 
 // Local mode: the saved choice (or --local, for automation) — but an explicit
-// --server-url=/MIKE_SERVER_URL override always wins, so e2e can retarget a
+// --server-url=/LINKMAI_SERVER_URL override always wins, so e2e can retarget a
 // machine whose saved mode is local without touching its settings.
 const localMode = () => {
   if (serverUrlOverride()) return false;
@@ -112,18 +112,18 @@ const serverUrl = () => {
 
 // ---------------------------------------------------------------------------
 // External links — one funnel for every hand-off to the default browser.
-// MIKE_E2E_CAPTURE_EXTERNAL (a file path) diverts the URL to that file
+// LINKMAI_E2E_CAPTURE_EXTERNAL (a file path) diverts the URL to that file
 // instead, so e2e can assert "the shell WOULD have opened the browser here"
 // without actually spraying tabs across the test machine.
 // ---------------------------------------------------------------------------
 
 function openExternalOrCapture(url) {
-  const captureFile = process.env.MIKE_E2E_CAPTURE_EXTERNAL;
+  const captureFile = process.env.LINKMAI_E2E_CAPTURE_EXTERNAL;
   if (captureFile) {
     try {
       fs.appendFileSync(captureFile, url + "\n");
     } catch (err) {
-      console.error("[mike-desktop] failed to capture external url", err);
+      console.error("[linkmai-desktop] failed to capture external url", err);
     }
     return;
   }
@@ -133,7 +133,7 @@ function openExternalOrCapture(url) {
 // ---------------------------------------------------------------------------
 // Navigation policy — who may show what, where.
 //
-// The main window hosts exactly one origin: the configured Mike server (plus
+// The main window hosts exactly one origin: the configured LinkMai server (plus
 // the shell's own bundled pages). Popups exist for one reason: the MCP
 // connector OAuth flow opens `about:blank` first to keep a synchronous window
 // handle, then steers it through third-party consent pages and back to an
@@ -156,9 +156,9 @@ const isAppOrigin = (url) => {
 };
 
 // Child windows must NOT inherit the shell preload: a third-party consent
-// page could otherwise call mikeDesktop.setServerUrl and repoint the shell at
+// page could otherwise call linkmaiDesktop.setServerUrl and repoint the shell at
 // a hostile origin. `preload: undefined` here does defeat Electron's default
-// preload inheritance (verified live: the popup has no window.mikeDesktop
+// preload inheritance (verified live: the popup has no window.linkmaiDesktop
 // while window.opener/postMessage back to the app keep working — stripping
 // the preload does not touch the opener wiring, which lives in Chromium's
 // window-proxy plumbing, not in any script we inject).
@@ -326,8 +326,8 @@ function setupDownloads() {
   session.defaultSession.on("will-download", (_event, item) => {
     // No save dialog on purpose: the flow starts from an in-app "download"
     // affordance, and a native prompt would be a worse experience than the
-    // browser it replaces. MIKE_DOWNLOAD_DIR exists for e2e artifact capture.
-    const dir = process.env.MIKE_DOWNLOAD_DIR || app.getPath("downloads");
+    // browser it replaces. LINKMAI_DOWNLOAD_DIR exists for e2e artifact capture.
+    const dir = process.env.LINKMAI_DOWNLOAD_DIR || app.getPath("downloads");
     try {
       fs.mkdirSync(dir, { recursive: true });
     } catch {
@@ -336,12 +336,12 @@ function setupDownloads() {
     const savePath = collisionFreeSavePath(dir, item.getFilename());
     item.setSavePath(savePath);
     item.once("done", (_e, state) => {
-      // Seam twin of MIKE_E2E_CAPTURE_EXTERNAL: an attached automation client
+      // Seam twin of LINKMAI_E2E_CAPTURE_EXTERNAL: an attached automation client
       // (Playwright over CDP) installs its own browser-level download
       // behavior, diverting the bytes away from setSavePath — so e2e can't
       // watch the directory. This log records that the handler ran and where
       // it saved (or would have, under automation).
-      const logFile = process.env.MIKE_E2E_DOWNLOAD_LOG;
+      const logFile = process.env.LINKMAI_E2E_DOWNLOAD_LOG;
       if (logFile) {
         try {
           fs.appendFileSync(
@@ -349,14 +349,14 @@ function setupDownloads() {
             JSON.stringify({ state, savePath, url: item.getURL() }) + "\n",
           );
         } catch (err) {
-          console.error("[mike-desktop] failed to log download", err);
+          console.error("[linkmai-desktop] failed to log download", err);
         }
       }
       reservedSavePaths.delete(savePath);
       if (state === "completed") {
         app.dock?.downloadFinished(savePath);
       } else {
-        console.error("[mike-desktop] download", state, item.getURL());
+        console.error("[linkmai-desktop] download", state, item.getURL());
       }
     });
   });
@@ -523,7 +523,7 @@ async function serverReachable(url) {
 }
 
 // True first launch, in a build that can actually run locally: the user has
-// never chosen where Mike runs, so ask — "cloud or this Mac" is a decision a
+// never chosen where LinkMai runs, so ask — "cloud or this Mac" is a decision a
 // user shouldn't need to know a keyboard shortcut to make. Any explicit
 // signal (an override, --local, or a saved choice) skips the chooser, so
 // automation and returning users never see it. Builds without the local
@@ -577,11 +577,11 @@ async function startLocalAndLoad() {
   localBootInFlight = (async () => {
     try {
       await startLocalStack(app, (msg) => {
-        win?.webContents.send("mike:local-status", msg);
+        win?.webContents.send("linkmai:local-status", msg);
       });
       await win.loadURL(LOCAL_FRONTEND_URL);
     } catch (err) {
-      console.error("[mike-desktop] local stack failed", err);
+      console.error("[linkmai-desktop] local stack failed", err);
       await showConnectPage(
         `Local mode failed to start: ${String(err?.message ?? err).slice(0, 300)}`,
       );
@@ -605,8 +605,8 @@ const fromMainFrame = (event) => Boolean(win && event.sender === win.webContents
 const fromShellPage = (event) =>
   fromMainFrame(event) && isShellPage(event.senderFrame?.url ?? "");
 
-ipcMain.handle("mike:get-server-url", () => serverUrl());
-ipcMain.handle("mike:set-server-url", (event, url) => {
+ipcMain.handle("linkmai:get-server-url", () => serverUrl());
+ipcMain.handle("linkmai:set-server-url", (event, url) => {
   if (fromShellPage(event) && typeof url === "string" && url.trim()) {
     // Choosing a URL is choosing remote mode — the two are one decision on
     // the connect screen, so flipping them together can't strand the app
@@ -615,29 +615,29 @@ ipcMain.handle("mike:set-server-url", (event, url) => {
   }
   return serverUrl();
 });
-ipcMain.handle("mike:retry", (event) => {
+ipcMain.handle("linkmai:retry", (event) => {
   if (fromShellPage(event)) return connectOrExplain();
 });
-ipcMain.handle("mike:start-local", (event) => {
+ipcMain.handle("linkmai:start-local", (event) => {
   if (!fromShellPage(event)) return;
   saveSettings({ mode: "local" });
   return startLocalAndLoad();
 });
-ipcMain.handle("mike:local-available", () => {
+ipcMain.handle("linkmai:local-available", () => {
   // The connect screen only offers "Run locally" when this build actually
   // carries the stack (binaries fetched / resources staged).
   return localStackAvailable();
 });
-ipcMain.handle("mike:choose-cloud", (event) => {
+ipcMain.handle("linkmai:choose-cloud", (event) => {
   if (!fromShellPage(event)) return;
   // Recording the choice is what retires the first-run chooser.
   saveSettings({ mode: "remote" });
   return connectOrExplain();
 });
-ipcMain.handle("mike:open-connect", (event) => {
+ipcMain.handle("linkmai:open-connect", (event) => {
   if (fromShellPage(event)) return showConnectPage();
 });
-ipcMain.handle("mike:guest-credentials", (event) => {
+ipcMain.handle("linkmai:guest-credentials", (event) => {
   // The one bridge call the PRODUCT may make (everything above is
   // shell-pages-only): the login page asks for the local guest account and
   // shows "Continue as guest" when it gets one. Answer only in local mode
@@ -768,7 +768,7 @@ function buildMenu() {
       role: "help",
       submenu: [
         {
-          label: "Mike on GitHub",
+          label: "LinkMai on GitHub",
           click: () =>
             openExternalOrCapture("https://github.com/Open-Legal-Products/mike"),
         },
@@ -784,11 +784,11 @@ function buildMenu() {
 
 // Test seam: relocate userData BEFORE the single-instance lock and any window
 // bounds are read/written. Without it an e2e run would fight the developer's
-// own running Mike.app for the instance lock (and lose, quitting instantly)
+// own running LinkMai.app for the instance lock (and lose, quitting instantly)
 // and would read/write their real window bounds. Must precede requestSingle-
 // InstanceLock — the lock lives in userData.
-if (process.env.MIKE_USER_DATA_DIR) {
-  app.setPath("userData", process.env.MIKE_USER_DATA_DIR);
+if (process.env.LINKMAI_USER_DATA_DIR) {
+  app.setPath("userData", process.env.LINKMAI_USER_DATA_DIR);
 }
 
 // One dock icon, one window; a second launch focuses the first instance.
@@ -837,8 +837,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 process.on("uncaughtException", (err) => {
-  console.error("[mike-desktop] uncaught", err);
+  console.error("[linkmai-desktop] uncaught", err);
   if (app.isReady() && win === null) {
-    dialog.showErrorBox("Mike", String(err?.message ?? err));
+    dialog.showErrorBox("LinkMai", String(err?.message ?? err));
   }
 });

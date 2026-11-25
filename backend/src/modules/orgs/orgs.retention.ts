@@ -1,6 +1,6 @@
 import type {
     OrgDeparture, OrgDepartureArchive, OrgDepartureArchivePage, OrgDepartureList, OrgDepartureResolution,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import { AppError } from "../../lib/appError";
 import { getOrgRole } from "../../lib/access";
 import { failure, internalFailure, ok, type ServiceResult } from "../../lib/serviceResult";

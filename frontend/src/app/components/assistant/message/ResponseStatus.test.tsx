@@ -2,22 +2,22 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ResponseStatus, type StatusState } from "./ResponseStatus";
 
-vi.mock("@mike/ui", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@mike/ui")>()),
-    MikeIcon: ({
+vi.mock("@linkmai/ui", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@linkmai/ui")>()),
+    LinkMaiIcon: ({
         spin,
         done,
-        mike,
+        linkmai,
     }: {
         spin?: boolean;
         done?: boolean;
-        mike?: boolean;
+        linkmai?: boolean;
     }) => (
         <span
             data-testid="icon"
             data-spin={String(!!spin)}
             data-done={String(!!done)}
-            data-mike={String(!!mike)}
+            data-linkmai={String(!!linkmai)}
         />
     ),
 }));
@@ -54,7 +54,7 @@ describe("ResponseStatus", () => {
 
         expect(icon()).toHaveAttribute("data-spin", "false");
         expect(icon()).toHaveAttribute("data-done", "false");
-        expect(icon()).toHaveAttribute("data-mike", "true");
+        expect(icon()).toHaveAttribute("data-linkmai", "true");
     });
 
     it("does not show done on the paused message once the user answers", async () => {

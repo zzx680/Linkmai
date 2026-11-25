@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -13,7 +13,7 @@ import type {
     Editor,
     ReviewCommentPlacement,
 } from "@docx-editor.dev/core/contracts/editor";
-import { TextButtonUI, Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from "@mike/ui";
+import { TextButtonUI, Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from "@linkmai/ui";
 import { LIQUID_FLOAT_PANEL_SURFACE_CLASS } from "@/app/components/ui/liquid-surface";
 import { DocxCommentEdit } from "./DocxCommentEdit";
 import { DocxCommentReply } from "./DocxCommentReply";
@@ -75,7 +75,7 @@ export function DocxCommentCard({
             data-active={thread.isActive || undefined}
             tabIndex={0}
             aria-label={`Comment by ${thread.author || uiText("Unknown author")}`}
-            className={`w-[var(--mike-docx-comment-width)] p-3 focus-visible:outline-2 focus-visible:outline-blue-500/40 ${thread.activatable ? "cursor-pointer" : ""} ${LIQUID_FLOAT_PANEL_SURFACE_CLASS} ${thread.isActive ? "ring-1 ring-ring/30" : ""}`}
+            className={`w-[var(--linkmai-docx-comment-width)] p-3 focus-visible:outline-2 focus-visible:outline-blue-500/40 ${thread.activatable ? "cursor-pointer" : ""} ${LIQUID_FLOAT_PANEL_SURFACE_CLASS} ${thread.isActive ? "ring-1 ring-ring/30" : ""}`}
             onClick={(event) => {
                 // Controls and forms inside the card keep their own behavior,
                 // and selecting card text to copy it must not jump the page.

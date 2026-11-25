@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getPanelDocument } from "@/app/lib/mikeApi";
+import { getPanelDocument } from "@/app/lib/linkmaiApi";
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import type { PanelDocument } from "../shared/types";
 import { documentCapabilities } from "../shared/documentCapabilities";

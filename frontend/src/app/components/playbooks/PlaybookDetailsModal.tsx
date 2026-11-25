@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
 import { AccessVisibilityField } from "@/app/components/modals/AccessVisibilityField";
 import type { ContentVisibility } from "@/app/components/shared/types";
-import type { Playbook, PlaybookContent } from "@/app/lib/mikeApi";
+import type { Playbook, PlaybookContent } from "@/app/lib/linkmaiApi";
 import {
   PlaybookDetailsFields,
   playbookDetailsOf,

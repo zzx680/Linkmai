@@ -427,7 +427,7 @@ test("surfaces an error when the workflow list fails to load", async ({
   await page.getByRole("button", { name: "Open menu" }).click();
   await page.getByRole("menuitem", { name: "Workflows" }).click();
 
-  // listWorkflows() throws a MikeApiError. The toast is the one report: it
+  // listWorkflows() throws a LinkMaiApiError. The toast is the one report: it
   // carries the classified sentence and Retry, never the 500 body ("boom").
   const toast = page.getByTestId("toast");
   await expect(toast).toContainText("Couldn't load your workflows");

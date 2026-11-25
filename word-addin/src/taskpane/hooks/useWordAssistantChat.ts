@@ -1,6 +1,6 @@
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 import { createRedlineStreamProjector } from "../lib/redline";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
@@ -12,7 +12,7 @@ import {
   type WordTurnHandlers,
 } from "../api/stream";
 import { isReported, reportError } from "../lib/errorReporting";
-import { postWordChatToolResult, stopWordChatTurn } from "../api/mikeApi";
+import { postWordChatToolResult, stopWordChatTurn } from "../api/linkmaiApi";
 import { useWordDoc } from "./useWordDoc";
 import type {
   DocumentReadActivity,
@@ -330,7 +330,7 @@ export function useWordAssistantChat({
             console.error("Failed to read the current Word document", error);
             if (requestIsCurrent()) {
               setRequestError(
-                uiText("Mike couldn't read this Word document. Try again."),
+                uiText("LinkMai couldn't read this Word document. Try again."),
               );
             }
             return;
@@ -1020,7 +1020,7 @@ export function useWordAssistantChat({
           // carries what the bubble cannot: the actions on the failure.
           const failureCopy = {
             action: uiText("get a response"),
-            fallback: uiText("Mike couldn't finish that answer. Try again."),
+            fallback: uiText("LinkMai couldn't finish that answer. Try again."),
           };
           const recovery = failedTurnRecovery({
             wasSend: input.kind === "send",

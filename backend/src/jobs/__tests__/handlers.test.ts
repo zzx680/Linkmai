@@ -516,10 +516,10 @@ describe("handleExportBuild", () => {
         );
         const [path, , contentType] = uploadFile.mock.calls[0];
         expect(path).toBe(
-            "exports/u1/job-1-mike-memory-export.zip",
+            "exports/u1/job-1-linkmai-memory-export.zip",
         );
         expect(contentType).toBe("application/zip");
-        expect(out.filename).toBe("mike-memory-export.zip");
+        expect(out.filename).toBe("linkmai-memory-export.zip");
         expect(recordAudit).toHaveBeenCalledWith(
             db,
             expect.objectContaining({ action: "export.memory" }),
@@ -541,7 +541,7 @@ describe("handleExportBuild", () => {
 
         expect(memberDataActionAllowed).toHaveBeenCalledWith(db, "u1", "org-1", "export");
         expect(buildMemoryArchive).toHaveBeenCalledWith(db, "u1", "u@x.test", "org-1");
-        expect(out.filename).toBe("mike-memory-export-org-1.zip");
+        expect(out.filename).toBe("linkmai-memory-export-org-1.zip");
     });
 
     it("fails an organization's export, without retrying, once its owners turn exports off", async () => {

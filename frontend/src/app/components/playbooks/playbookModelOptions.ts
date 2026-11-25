@@ -1,9 +1,9 @@
-import type { ModelOption } from "@mike/client";
+import type { ModelOption } from "@linkmai/client";
 import { isModelAvailable } from "@/app/lib/modelAvailability";
 import type {
     ApiKeyState,
     PlaybookConfiguration,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 
 export function buildPlaybookModelOptions(
     catalog: ModelOption[],

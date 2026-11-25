@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
 import {
@@ -31,7 +31,7 @@ import {
   shareWorkflow,
   updateWorkflow,
   type ProjectPeople,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { can, roleFromLoaded } from "@/app/lib/permissions";
 import { reportFault,
   userFacingApiError,
@@ -62,7 +62,7 @@ import { AddDocumentsModal } from "@/app/components/modals/AddDocumentsModal";
 import { OpenSourceWorkflowModal } from "@/app/components/workflows/OpenSourceWorkflowModal";
 import { PageHeader } from "@/app/components/shared/PageHeader";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import { PillButtonUI, TabPillButtonUI } from "@mike/ui";
+import { PillButtonUI, TabPillButtonUI } from "@linkmai/ui";
 import {
   EDITOR_SURFACE_CLASS,
 } from "@/app/components/ui/liquid-surface";

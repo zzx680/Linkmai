@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { Download, Trash2 } from "lucide-react";
-import { PillButtonUI, GlassCardUI } from "@mike/ui";
+import { PillButtonUI, GlassCardUI } from "@linkmai/ui";
 import {
   SettingsDescription,
   SettingsLabel,
@@ -35,7 +35,7 @@ import {
   isMfaRequiredError,
   startUserExport,
   type UserExportType,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { UserVisibleError, notifyError } from "@/app/lib/userFacingError";
 
 type DeleteDataAction = "chats" | "tabular-reviews" | "projects" | "memory";
@@ -189,7 +189,7 @@ function PrivacyData({
       const status = await getUserExportStatus(export_id);
       if (status.status === "failed") {
         throw new UserVisibleError(
-          "Mike couldn't build the export. Try again, and contact support if it keeps happening.",
+          "LinkMai couldn't build the export. Try again, and contact support if it keeps happening.",
           { retryable: true },
         );
       }
@@ -297,7 +297,7 @@ function PrivacyData({
         setPendingMfaAction("export-memory");
         return;
       }
-      await runAsyncExport("memory-zip", "mike-memory-export.zip");
+      await runAsyncExport("memory-zip", "linkmai-memory-export.zip");
     } catch (error) {
       devLog("[privacy-data/mfa] export memory failed", {
         isMfaRequired: isMfaRequiredError(error),

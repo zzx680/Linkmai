@@ -1,8 +1,8 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { deleteProject, getProjectFilterOptions } from "@/app/lib/mikeApi";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { deleteProject, getProjectFilterOptions } from "@/app/lib/linkmaiApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import type { Project } from "@/app/components/shared/types";
 import { ProjectsOverview } from "./ProjectsOverview";
 
@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
     usePathname: () => "/projects",
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     deleteProject: vi.fn(async () => {}),
     setProjectMemoryEnabled: vi.fn(),
     updateProject: vi.fn(),

@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 export const MIN_PASSWORD_LENGTH = 10;
 
 /**

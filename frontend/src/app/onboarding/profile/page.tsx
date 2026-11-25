@@ -1,15 +1,15 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/app/components/auth/OnboardingShell";
-import { authInputUIClassName, InputUI, PillButtonUI } from "@mike/ui";
+import { authInputUIClassName, InputUI, PillButtonUI } from "@linkmai/ui";
 import { FullScreenLoader } from "@/app/components/shared/FullScreenLoader";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
-import { updateUserProfile } from "@/app/lib/mikeApi";
+import { updateUserProfile } from "@/app/lib/linkmaiApi";
 import { FieldLabel } from "@/app/components/ui/form-field";
 import { describeError } from "@/app/lib/userFacingError";
 
@@ -79,7 +79,7 @@ function ProfileDetailsForm({
         <OnboardingShell
             step={uiText("Step 1 of 4")}
             title={uiText("Tell us about you")}
-            description={uiText("Add the details we should use across Mike.")}
+            description={uiText("Add the details we should use across LinkMai.")}
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

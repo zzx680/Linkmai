@@ -1,19 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import {
   ModelToggleUI,
   nearestReasoningLevelForModel,
   reasoningLevelsForModel,
   type ReasoningLevel,
-} from "@mike/ui";
-import { getOllamaModels, type ApiKeyStatus } from "../../api/mikeApi";
+} from "@linkmai/ui";
+import { getOllamaModels, type ApiKeyStatus } from "../../api/linkmaiApi";
 import {
   MODELS,
   allRouterModelOptions,
   modelDisplayName,
   type ModelOption,
   type RouterSelections,
-} from "@mike/client";
+} from "@linkmai/client";
 import { isModelAvailable } from "../../lib/modelCatalog";
 
 export function ModelToggle({

@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
-  MikeApiError,
+  LinkMaiApiError,
   type OrgDepartureItem,
   type OrgDepartureList,
   type OrgMember,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { OrganizationDepartedMembers } from "./OrganizationDepartedMembers";
 
 // The Departed view of the Members page: who left, what they left and when
@@ -20,8 +20,8 @@ const mocks = vi.hoisted(() => ({
   notifySuccess: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   listOrgDepartures: mocks.listOrgDepartures,
   reassignOrgDepartureArchives: mocks.reassignOrgDepartureArchives,
   deleteOrgDepartureArchives: mocks.deleteOrgDepartureArchives,
@@ -288,7 +288,7 @@ describe("what it lists", () => {
     view.unmount();
 
     mocks.listOrgDepartures.mockRejectedValueOnce(
-      new MikeApiError({ message: "relation boom", status: 500 }),
+      new LinkMaiApiError({ message: "relation boom", status: 500 }),
     );
     const user = userEvent.setup();
     renderView();
@@ -470,7 +470,7 @@ describe("deleting", () => {
 
   it("asks for a second factor when the server requires one, then deletes", async () => {
     mocks.deleteOrgDepartureArchives.mockRejectedValueOnce(
-      new MikeApiError({
+      new LinkMaiApiError({
         message: "MFA verification required",
         status: 403,
         code: "mfa_verification_required",
@@ -499,7 +499,7 @@ describe("deleting", () => {
 
   it("reports a failed delete without the server's wording", async () => {
     mocks.deleteOrgDepartureArchives.mockRejectedValueOnce(
-      new MikeApiError({ message: "relation boom", status: 500 }),
+      new LinkMaiApiError({ message: "relation boom", status: 500 }),
     );
     const user = userEvent.setup();
     renderView();

@@ -1,7 +1,7 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { useEffect, useSyncExternalStore } from "react";
-import { listQuickActions } from "../api/mikeApi";
+import { listQuickActions } from "../api/linkmaiApi";
 import type { QuickAction } from "../types";
 import { notifyError } from "./notify";
 

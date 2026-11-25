@@ -1,12 +1,12 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "../modals/Modal";
 import { ModalSelect } from "../modals/ModalSelect";
 import { FieldLabel, FormTextInput } from "../ui/form-field";
-import { ToggleSwitchUI } from "@mike/ui";
+import { ToggleSwitchUI } from "@linkmai/ui";
 import type { Project, TabularReview } from "../shared/types";
 
 interface TabularReviewDetailsModalProps {

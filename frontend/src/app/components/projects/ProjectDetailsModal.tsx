@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Users } from "lucide-react";
@@ -15,7 +15,7 @@ import type {
     ContentVisibility,
     Project,
 } from "@/app/components/shared/types";
-import { listOrgs, type Org } from "@/app/lib/mikeApi";
+import { listOrgs, type Org } from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import { ProjectPracticeField } from "./ProjectPracticeField";
 

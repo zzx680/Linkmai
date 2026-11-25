@@ -1,5 +1,5 @@
 import { afterEach, expect, it } from "vitest";
-import { setUiLocale } from "@mike/client";
+import { setUiLocale } from "@linkmai/client";
 import { professionalLabel } from "./professionalLabels";
 
 afterEach(() => setUiLocale("en"));

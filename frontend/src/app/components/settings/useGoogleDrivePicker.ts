@@ -1,12 +1,12 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useState } from "react";
 import {
   createGoogleDrivePickerSession,
   isMfaRequiredError,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { openGoogleDrivePicker } from "@/app/lib/googlePicker";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 
@@ -32,7 +32,7 @@ export function useGoogleDrivePicker(workspace?: string) {
       );
       setMessage(
         picked.length
-          ? `Added ${picked.length} ${picked.length === 1 ? "file" : "files"}. Mike can now search and read them.`
+          ? `Added ${picked.length} ${picked.length === 1 ? "file" : "files"}. LinkMai can now search and read them.`
           : "No files added.",
       );
     } catch (error) {

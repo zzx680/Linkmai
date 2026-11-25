@@ -6,21 +6,21 @@ import {
     getWorkflow,
     getWorkflowPeople,
     listWorkflowShares,
-    MikeApiError,
+    LinkMaiApiError,
     shareWorkflow,
     updateWorkflow,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { Workflow } from "../shared/types";
 import { WorkflowDetailPage } from "./WorkflowDetailPage";
 
 const useItemWorkspace = vi.hoisted(() => vi.fn());
 vi.mock("@/app/hooks/useItemWorkspace", () => ({ useItemWorkspace }));
 
-// `importOriginal` keeps the real `MikeApiError`: `userFacingApiError`
+// `importOriginal` keeps the real `LinkMaiApiError`: `userFacingApiError`
 // decides with `instanceof`, so a stand-in class would make every 4xx look
 // like an unexpected failure.
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     deleteWorkflow: vi.fn(),
     deleteWorkflowShare: vi.fn(),
     getWorkflow: vi.fn(),
@@ -149,7 +149,7 @@ describe("WorkflowDetailPage access mutations", () => {
     it("does not report a role change as failed when only the re-read fails", async () => {
         const user = userEvent.setup();
         vi.mocked(listWorkflowShares).mockRejectedValue(
-            new MikeApiError({ message: "Shares unavailable.", status: 500 }),
+            new LinkMaiApiError({ message: "Shares unavailable.", status: 500 }),
         );
 
         const rolePill = await openAccess(user);
@@ -173,7 +173,7 @@ describe("WorkflowDetailPage access mutations", () => {
         // had stopped tracking the server.
         const user = userEvent.setup();
         vi.mocked(listWorkflowShares).mockRejectedValue(
-            new MikeApiError({ message: "Shares unavailable.", status: 500 }),
+            new LinkMaiApiError({ message: "Shares unavailable.", status: 500 }),
         );
 
         const rolePill = await openAccess(user);
@@ -194,7 +194,7 @@ describe("WorkflowDetailPage access mutations", () => {
     it("does not report a revoke as failed when only the re-read fails", async () => {
         const user = userEvent.setup();
         vi.mocked(listWorkflowShares).mockRejectedValue(
-            new MikeApiError({ message: "Shares unavailable.", status: 500 }),
+            new LinkMaiApiError({ message: "Shares unavailable.", status: 500 }),
         );
 
         await openAccess(user);
@@ -216,7 +216,7 @@ describe("WorkflowDetailPage access mutations", () => {
     it("still reports a role change the grant itself refused", async () => {
         const user = userEvent.setup();
         vi.mocked(shareWorkflow).mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 message: "Only owners can share this workflow.",
                 status: 403,
             }),

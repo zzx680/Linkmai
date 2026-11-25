@@ -12,7 +12,7 @@ def activity: [.State.FinishedAt, .State.StartedAt, .Created] | map(epoch) | max
 ($classes | with_entries(
     .key as $p | .value += {
         members: [$cs[] | select(project == $p)],
-        owned: (["mike", "orphan", "supabase"] | index($classes[$p].kind) != null)
+        owned: (["linkmai", "orphan", "supabase"] | index($classes[$p].kind) != null)
     } |
     .value.removable = (.value.scope and .value.owned and (.value.members | length > 0) and
         (.value.members | all(stopped)))
@@ -34,7 +34,7 @@ reduce $vs[] as $v (
         then . else null end) as $old |
     (if $p != "" then $pr.scope else ($anon and $only == "") end) as $scope |
     # A known foreign project always vetoes a saved ownership record or name.
-    # Unknown named volumes need a previous verified record; a mike* prefix
+    # Unknown named volumes need a previous verified record; a linkmai* prefix
     # alone is insufficient when no containers establish provenance.
     (if $pr.kind == "other" then false
      elif $supa != "" then ($allowed_supa | index($supa) != null)

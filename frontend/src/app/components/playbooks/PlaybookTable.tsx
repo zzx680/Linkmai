@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -15,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { RowActions } from "@/app/components/shared/RowActions";
-import { DropdownItem, PillButtonUI } from "@mike/ui";
+import { DropdownItem, PillButtonUI } from "@linkmai/ui";
 import { AccessScopeLabel } from "@/app/components/shared/AccessScopeLabel";
 import {
   CreatorLabel,
@@ -36,7 +36,7 @@ import {
 } from "@/app/components/shared/TablePrimitive";
 import { EmptyState } from "@/app/components/ui/empty-state";
 import type { ResourceAccessScope } from "@/app/components/shared/types";
-import type { Playbook, PlaybookImport } from "@/app/lib/mikeApi";
+import type { Playbook, PlaybookImport } from "@/app/lib/linkmaiApi";
 
 const NAME_COLUMN = "flex min-w-64 flex-1 items-center pl-3 pr-4";
 const CREATOR_COLUMN = "w-36 shrink-0 pr-4";

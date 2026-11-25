@@ -1,6 +1,6 @@
 # Design system
 
-Mike uses Tailwind v4 with shadcn-derived `new-york` primitives for selected
+LinkMai uses Tailwind v4 with shadcn-derived `new-york` primitives for selected
 controls, alongside its own liquid-glass component system. Lucide supplies the
 icon set. This page documents what already exists so contributors can reuse it
 instead of re-deriving it. It is a description of the current system, not a
@@ -13,7 +13,7 @@ Everything below lives in `frontend/src/app/globals.css` unless stated otherwise
 | Location | What belongs there |
 | --- | --- |
 | `frontend/src/app/components/ui/` | Shared web primitives. Small, unopinionated, no data fetching, no feature knowledge. |
-| `packages/ui/` (`@mike/ui`) | Primitives shared by the web app **and** the Word add-in. Framework-light: React, `lucide-react`, `clsx`, `tailwind-merge`, the Radix dropdown, and `@mike/client` only. |
+| `packages/ui/` (`@linkmai/ui`) | Primitives shared by the web app **and** the Word add-in. Framework-light: React, `lucide-react`, `clsx`, `tailwind-merge`, the Radix dropdown, and `@linkmai/client` only. |
 | `frontend/src/app/components/shared/` | App-level building blocks that assume the app shell — the table layer (`TablePrimitive.tsx`, `TableToolbar.tsx`), page headers, sidebars. |
 | `frontend/src/app/components/<feature>/` | Feature components. Compose the above; do not restate their markup. |
 
@@ -28,12 +28,12 @@ a new file needs no per-file registration. What it does need is an export from
 re-exported there is internal.
 
 Cross-target primitives use the `XxxUI.tsx` convention and are imported from
-`@mike/ui` by both targets, for example `import { PillButtonUI } from
-"@mike/ui"`. Do not add a web-only re-export whose only job is to rename
+`@linkmai/ui` by both targets, for example `import { PillButtonUI } from
+"@linkmai/ui"`. Do not add a web-only re-export whose only job is to rename
 `XxxUI`: it adds another file, test, and catalog entry without adding behavior.
 `GlassCardUI`, `PillButtonUI`, `GlassIconButtonUI`, `TabPillButtonUI`, and
 `ToggleSwitchUI` are the canonical implementations used by both targets. To
-style a link as a pill, apply `pillButtonUIClassName` (also from `@mike/ui`)
+style a link as a pill, apply `pillButtonUIClassName` (also from `@linkmai/ui`)
 directly to the link; this keeps the correct link semantics and is safe in
 server components.
 
@@ -65,7 +65,7 @@ Word add-in's `word-addin/src/taskpane/styles.css` both import that file, so a
 token change reaches both targets. Do not redeclare one of these tokens in either
 entry stylesheet; `DesignTokensUI.test.ts` fails if you do.
 
-### App surfaces (Mike's own)
+### App surfaces (LinkMai's own)
 
 These back the "liquid glass" chrome and are the ones most feature code needs.
 
@@ -111,7 +111,7 @@ the meaning ("this is the destructive action") rather than a specific color.
 
 ### Blue is overridden
 
-`@theme inline` redefines part of Tailwind's blue scale to Mike's azure:
+`@theme inline` redefines part of Tailwind's blue scale to LinkMai's azure:
 
 ```css
 --color-blue:     rgb(0, 136, 255);
@@ -122,7 +122,7 @@ the meaning ("this is the destructive action") rather than a specific color.
 --color-blue-700: rgb(0, 120, 230);
 ```
 
-`bg-blue-600` is therefore Mike azure, not Tailwind blue. `blue-300`, `-400`,
+`bg-blue-600` is therefore LinkMai azure, not Tailwind blue. `blue-300`, `-400`,
 `-500`, `-800` and `-900` are *not* overridden, so the scale is discontinuous —
 stay on the overridden steps for brand blue.
 
@@ -135,7 +135,7 @@ liquid-glass material tokens all have `.dark` values. The user preference adds
 without component-level `dark:` shadow recipes. The preference lives in
 Settings > Appearance.
 
-`MikeIcon` is the exception: the mark is inline SVG, so no class-based
+`LinkMaiIcon` is the exception: the mark is inline SVG, so no class-based
 remapping reaches its gradient stops. It subscribes to the document theme class
 itself and swaps its dark-glass blades for the white ones. Anything else drawing
 brand-colored SVG should follow the same pattern rather than hard-coding a
@@ -320,7 +320,7 @@ chrome fully obscure content beneath them; subtle and overlay tiers retain
 their translucency where depth or underlying content matters.
 Elevation is centralized in
 `packages/ui/styles/LiquidGlassUI.css`, with class-name constants exported
-from `@mike/ui` (`packages/ui/src/LiquidGlassUI.ts`). Do not write a new
+from `@linkmai/ui` (`packages/ui/src/LiquidGlassUI.ts`). Do not write a new
 `shadow-[...]` recipe for a general glass
 surface.
 
@@ -368,7 +368,7 @@ Compose the material classes through the established primitives and constants:
 ### Dropdowns
 
 Every menu a button or a right-click opens is built from
-`packages/ui/src/dropdown.tsx`, exported from `@mike/ui` for both the web app
+`packages/ui/src/dropdown.tsx`, exported from `@linkmai/ui` for both the web app
 and the Word add-in. There is no separate web wrapper. Do not hand-build a menu
 from a positioned
 `div` and buttons: that loses keyboard navigation, menu roles, focus return,

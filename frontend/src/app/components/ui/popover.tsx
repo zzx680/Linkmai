@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { cn } from "@/app/lib/utils";
-import { LIQUID_GLASS_FLOAT_CLASS } from "@mike/ui";
+import { LIQUID_GLASS_FLOAT_CLASS } from "@linkmai/ui";
 
 export const Popover = PopoverPrimitive.Root;
 export const PopoverTrigger = PopoverPrimitive.Trigger;

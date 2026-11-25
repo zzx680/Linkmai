@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useRef, useState } from "react";
 import type { Document } from "../../types";
 import {
@@ -8,7 +8,7 @@ import {
   listWorkflowAssets,
   uploadWorkflowAssets,
   uploadWorkflowAssetVersion,
-} from "../../api/mikeApi";
+} from "../../api/linkmaiApi";
 import { reportFault } from "../../lib/notify";
 import { openExternalUrl } from "../../lib/openExternalUrl";
 
@@ -46,7 +46,7 @@ export function WorkflowAssets({
           setFiles([]);
           setError(
             reportFault(reason, {
-              fallback: uiText("Mike couldn't load this workflow's files. Try again."),
+              fallback: uiText("LinkMai couldn't load this workflow's files. Try again."),
               operation: "workflows.run",
             }).message,
           );
@@ -70,7 +70,7 @@ export function WorkflowAssets({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: uiText("Mike couldn't upload that file. Try again."),
+          fallback: uiText("LinkMai couldn't upload that file. Try again."),
           operation: "workflows.run",
         }).message,
       );
@@ -89,7 +89,7 @@ export function WorkflowAssets({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: uiText("Mike couldn't upload the new version. Try again."),
+          fallback: uiText("LinkMai couldn't upload the new version. Try again."),
           operation: "workflows.run",
         }).message,
       );
@@ -160,7 +160,7 @@ export function WorkflowAssets({
                     .catch((reason: unknown) =>
                       setError(
                         reportFault(reason, {
-                          fallback: uiText("Mike couldn't open that file. Try again."),
+                          fallback: uiText("LinkMai couldn't open that file. Try again."),
                           operation: "workflows.run",
                         }).message,
                       ),
@@ -191,7 +191,7 @@ export function WorkflowAssets({
                           setError(
                             reportFault(reason, {
                               fallback:
-                                uiText("Mike couldn't delete that file. Try again."),
+                                uiText("LinkMai couldn't delete that file. Try again."),
                               operation: "workflows.run",
                             }).message,
                           ),

@@ -9,9 +9,9 @@ import {
   presetDirectory,
   presetTemplateUrl,
 } from "./presetTemplates";
-import { uploadLibraryDocument } from "@/app/lib/mikeApi";
+import { uploadLibraryDocument } from "@/app/lib/linkmaiApi";
 
-vi.mock("@/app/lib/mikeApi", () => ({ uploadLibraryDocument: vi.fn() }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ uploadLibraryDocument: vi.fn() }));
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.clearAllMocks();

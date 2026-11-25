@@ -13,7 +13,7 @@ import { AppError } from "./appError";
 import { requestRoutePattern } from "./observability/sentry";
 import { log } from "./log";
 
-const AUTH_COOKIE_BASE_NAME = "mike-session";
+const AUTH_COOKIE_BASE_NAME = "linkmai-session";
 const refreshFetch = singleFlightRefreshFetch();
 
 function authConfiguration() {

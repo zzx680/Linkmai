@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedValue } from "@/app/hooks/useDebouncedValue";
@@ -14,7 +14,7 @@ import {
     grantTabularReviewAccess,
     listProjects,
     updateTabularReview,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { TabularReview, Project } from "@/app/components/shared/types";
 import { TableToolbar } from "@/app/components/shared/TableToolbar";
 import { NewTRModal } from "@/app/components/tabular/NewTRModal";
@@ -200,7 +200,7 @@ function TabularReviewsWorkspacePage({ workspace }: { workspace?: string }) {
         model: string,
         accessAssignments: {
             email: string;
-            role: import("@/app/lib/mikeApi").AccessAssignmentRole;
+            role: import("@/app/lib/linkmaiApi").AccessAssignmentRole;
         }[],
     ): Promise<string | void> => {
         setCreating(true);

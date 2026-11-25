@@ -30,8 +30,8 @@ import {
     uploadStandaloneDocument,
     uploadStandaloneDocuments,
     uploadWorkflowAssets,
-} from "./mikeApi";
-import { uploadProcessingPollDelayMs } from "@mike/client";
+} from "./linkmaiApi";
+import { uploadProcessingPollDelayMs } from "@linkmai/client";
 
 const fetchMock = vi.fn();
 const API_URL = "/api";
@@ -949,7 +949,7 @@ describe("direct upload sessions", () => {
         for (const [, context] of reporting.reportError.mock.calls) {
             expect(context).toEqual({
                 tags: {
-                    component: "mike-api",
+                    component: "linkmai-api",
                     operation: "upload_session.storage",
                     http_method: "PUT",
                     http_status: 503,

@@ -1,13 +1,13 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
-import { releaseName } from "@mike/client";
+import { releaseName } from "@linkmai/client";
 import { securityHeaders } from "./src/app/lib/securityHeaders";
 
 // The repository root: the parent of this directory, here and in the Docker
 // image (frontend/Dockerfile mirrors the layout at /app/frontend and
-// /app/packages). The shared packages the app imports, @mike/ui and
-// @mike/client (packages/ui, packages/client), live there.
+// /app/packages). The shared packages the app imports, @linkmai/ui and
+// @linkmai/client (packages/ui, packages/client), live there.
 const REPO_ROOT = path.resolve(__dirname, "..");
 
 const nextConfig: NextConfig = {
@@ -108,10 +108,10 @@ const sourceMapUploadConfigured = Boolean(
 // The release the maps are uploaded under must be the string the SDKs tag
 // events with (packages/client/src/sentryEvent.ts reads the same
 // variables at runtime), or Sentry files the maps under a release no event
-// carries. MIKE_VERSION and GIT_SHA are the image build arguments.
+// carries. LINKMAI_VERSION and GIT_SHA are the image build arguments.
 const release = releaseName(
     process.env.SENTRY_RELEASE ?? process.env.NEXT_PUBLIC_SENTRY_RELEASE,
-    process.env.MIKE_VERSION,
+    process.env.LINKMAI_VERSION,
     process.env.GIT_SHA,
 );
 

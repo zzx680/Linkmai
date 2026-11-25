@@ -26,12 +26,12 @@ describe("ToastUI", () => {
             showToast({
                 tone: "error",
                 title: "Couldn't save the document",
-                message: "Mike couldn't reach the server.",
+                message: "LinkMai couldn't reach the server.",
             });
         });
         const alert = screen.getByRole("alert");
         expect(alert).toHaveTextContent("Couldn't save the document");
-        expect(alert).toHaveTextContent("Mike couldn't reach the server.");
+        expect(alert).toHaveTextContent("LinkMai couldn't reach the server.");
         expect(alert).toHaveClass("liquid-glass-float");
 
         fireEvent.click(
@@ -61,11 +61,11 @@ describe("ToastUI", () => {
             showToast({
                 tone: "error",
                 message: "Failed",
-                supportHref: "mailto:support@mikeoss.com?subject=x",
+                supportHref: "mailto:support@linkmai.com?subject=x",
             });
         });
         const link = screen.getByRole("link", { name: "Contact support" });
-        expect(link).toHaveAttribute("href", "mailto:support@mikeoss.com?subject=x");
+        expect(link).toHaveAttribute("href", "mailto:support@linkmai.com?subject=x");
     });
 
     it("keeps an error with actions until dismissed but auto-dismisses success", () => {

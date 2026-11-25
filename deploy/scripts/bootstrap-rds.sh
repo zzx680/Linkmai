@@ -9,7 +9,7 @@
 # command from the backend image instead:
 #   docker run --rm -it --network host \
 #     -v "$PWD/deploy:/deploy" --env-file deploy/.env.prod \
-#     linkmai/mike-backend:prod bash /deploy/scripts/bootstrap-rds.sh
+#     linkmai/linkmai-backend:prod bash /deploy/scripts/bootstrap-rds.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

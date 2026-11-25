@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 export function ConnectorSetupGuideLink({ href }: { href: string }) {
   return (
     <div className="mt-2">

@@ -8,7 +8,7 @@
 # database. scripts/stack.test.sh boots throwaway fixture stacks that mimic
 # the real leftovers and asserts the sweep's decisions, so run it whenever the
 # script changes. The runner has Docker; the test confines itself to its own
-# fixtures with MIKE_GC_ONLY.
+# fixtures with LINKMAI_GC_ONLY.
 name: Stack script
 
 on:

@@ -1,5 +1,5 @@
 -- Migration date: 2026-08-23
--- Store every Mike-authored workflow in one versioned runtime catalog.
+-- Store every LinkMai-authored workflow in one versioned runtime catalog.
 
 create table if not exists public.mike_workflows (
   id uuid primary key default gen_random_uuid(),

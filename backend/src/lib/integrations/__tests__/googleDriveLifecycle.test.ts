@@ -42,7 +42,7 @@ const json = (value: unknown, status = 200) =>
 async function begin(store: ReturnType<typeof driveDb>, user = "u1") {
     const result = await startGoogleDriveOAuth(
         personalConnectorOwner(user),
-        "https://mike.test/api/callback",
+        "https://linkmai.test/api/callback",
         store.db,
     );
     return new URL(result.authorizationUrl).searchParams.get("state")!;
@@ -89,7 +89,7 @@ describe("Google Drive OAuth lifecycle", () => {
             const body = init?.body as URLSearchParams;
             expect(body.get("code_verifier")).toBe(config.codeVerifier);
             expect(body.get("redirect_uri")).toBe(
-                "https://mike.test/api/callback",
+                "https://linkmai.test/api/callback",
             );
             expect(body.get("client_secret")).toBe("test-secret");
             return json(tokens);
@@ -127,7 +127,7 @@ describe("Google Drive OAuth lifecycle", () => {
         const firm = { userId: "u1", orgId: "org-1" };
         const { authorizationUrl } = await startGoogleDriveOAuth(
             firm,
-            "https://mike.test/api/callback",
+            "https://linkmai.test/api/callback",
             store.db,
         );
         expect(store.states[0]).toMatchObject({ user_id: "u1", org_id: "org-1" });
@@ -173,7 +173,7 @@ describe("Google Drive OAuth lifecycle", () => {
         expect(status.connected).toBe(true);
         expect(status.accountEmail).toBeUndefined();
     });
-    it("rejects another Mike user's authorization URL before token exchange", async () => {
+    it("rejects another LinkMai user's authorization URL before token exchange", async () => {
         const store = driveDb();
         const state = await begin(store, "attacker");
         const fetchMock = vi.fn();
@@ -567,7 +567,7 @@ describe("Google Drive OAuth lifecycle", () => {
         expect(await buildGoogleDriveTools(personalConnectorOwner("u1"), store.db)).toEqual([]);
         await expect(begin(store)).rejects.toMatchObject({
             code: "connector_unavailable",
-            message: "Google Drive is not offered on this Mike server.",
+            message: "Google Drive is not offered on this LinkMai server.",
         });
         await expect(
             createGoogleDrivePickerSession(personalConnectorOwner("u1"), store.db),
@@ -578,7 +578,7 @@ describe("Google Drive OAuth lifecycle", () => {
         ] as const) {
             const refused = await executeGoogleDriveToolCall(personalConnectorOwner("u1"), name, args, store.db);
             expect(refused.event.status).toBe("error");
-            expect(refused.content).toContain("not offered on this Mike server");
+            expect(refused.content).toContain("not offered on this LinkMai server");
         }
         expect(
             (await planGoogleDriveCall(personalConnectorOwner("u1"), "google_drive_create_folder", { name: "x" }, store.db)).type,

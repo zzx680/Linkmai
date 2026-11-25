@@ -205,7 +205,7 @@ describe("one failed chat turn in Sentry", () => {
         // (C), the classified InvalidApiKeyError (E) and the route's
         // AssistantStreamError wrapper (B) — then one warning (MIKE-BACKEND-
         // 5B, -76, -85, -16). The user is told to fix the key; nothing in
-        // Mike can, so nothing is sent, and no later log of the turn's
+        // LinkMai can, so nothing is sent, and no later log of the turn's
         // failure (the route's console.error above) files it either.
         expect(sent).toEqual([]);
     });
@@ -255,7 +255,7 @@ describe("one failed chat turn in Sentry", () => {
         }
     });
 
-    // MIK-89: a provider that is busy or down is not Mike's bug. One event
+    // MIK-89: a provider that is busy or down is not LinkMai's bug. One event
     // per turn, as a warning, named by what the provider did.
     it.each([
         [429, "Resource has been exhausted (e.g. check quota).", "chat.provider_rate_limited"],

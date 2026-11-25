@@ -21,7 +21,7 @@ function repository(files: Record<string, string>) {
     }
     return root;
 }
-const APP_CONFIG = JSON.stringify({ compilerOptions: { paths: { "@/*": ["./src/*"], "@mike/shared": ["../packages/shared/src/index.ts"], "@mike/contracts": ["../packages/contracts/index.d.ts"] } } });
+const APP_CONFIG = JSON.stringify({ compilerOptions: { paths: { "@/*": ["./src/*"], "@linkmai/shared": ["../packages/shared/src/index.ts"], "@linkmai/contracts": ["../packages/contracts/index.d.ts"] } } });
 describe("source dependency contracts", () => {
     it("parses imports, re-exports, erased types, require and dynamic import without matching comments", () => {
         expect(dependencies(`
@@ -82,7 +82,7 @@ describe("source dependency contracts", () => {
             // The package files are never enumerated as an application's src/;
             // only the traversal from app/src/entry.ts reaches them.
             const graph = graphOf({
-                "app/src/entry.ts": `import { run } from "@mike/shared"; run();`,
+                "app/src/entry.ts": `import { run } from "@linkmai/shared"; run();`,
                 "packages/shared/src/index.ts": `export { run } from "./run";`,
                 "packages/shared/src/run.ts": `import type { Options } from "./options"; export function run(o?: Options) { return o; }`,
                 "packages/shared/src/options.ts": `import type { run } from "./run"; export type Options = Parameters<typeof run>;`,
@@ -92,14 +92,14 @@ describe("source dependency contracts", () => {
         });
         it("finds a cycle that crosses the application/package boundary", () => {
             const graph = graphOf({
-                "app/src/entry.ts": `export const feature = "x"; import "@mike/shared";`,
+                "app/src/entry.ts": `export const feature = "x"; import "@linkmai/shared";`,
                 "packages/shared/src/index.ts": `import type { feature } from "../../../app/src/entry"; export type Feature = typeof feature;`,
             });
             expect(cycles(graph)).toEqual([["app/src/entry.ts", "packages/shared/src/index.ts"]]);
         });
         it("treats a declaration-only package like any other source, including type-only cycles", () => {
             const graph = graphOf({
-                "app/src/types.ts": `import type { Event } from "@mike/contracts"; export type Wire = Event;`,
+                "app/src/types.ts": `import type { Event } from "@linkmai/contracts"; export type Wire = Event;`,
                 "packages/contracts/index.d.ts": `import type { Wire } from "../../app/src/types"; export type Event = { wire: Wire };`,
             });
             expect(cycles(graph)).toEqual([["app/src/types.ts", "packages/contracts/index.d.ts"]]);
@@ -121,7 +121,7 @@ describe("source dependency contracts", () => {
         });
         it("leaves acyclic shared code alone and skips tests, stories and node_modules", () => {
             const graph = graphOf({
-                "app/src/entry.ts": `import { run } from "@mike/shared"; import "@/util"; run();`,
+                "app/src/entry.ts": `import { run } from "@linkmai/shared"; import "@/util"; run();`,
                 "app/src/util.ts": `export {};`,
                 "app/src/util.test.ts": `import "./entry";`,
                 "packages/shared/src/index.ts": `export { run } from "./run";`,

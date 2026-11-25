@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
-import { listDocumentVersions } from "@/app/lib/mikeApi";
+import { listDocumentVersions } from "@/app/lib/linkmaiApi";
 import { DocumentVersionPicker } from "./DocumentVersionPicker";
 
-vi.mock("@/app/lib/mikeApi", () => ({ listDocumentVersions: vi.fn() }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ listDocumentVersions: vi.fn() }));
 const versions = [
     {
         id: "v1",

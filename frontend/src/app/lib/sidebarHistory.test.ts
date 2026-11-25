@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Chat, TabularReview } from "@/app/components/shared/types";
-import type { PlaybookRunHistoryItem } from "./mikeApi";
+import type { PlaybookRunHistoryItem } from "./linkmaiApi";
 import { mergeSidebarHistory } from "./sidebarHistory";
 
 const chat = (id: string, day: number) => ({

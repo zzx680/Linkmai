@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * What a failed session refresh actually means.
  *
@@ -11,7 +11,7 @@ import { uiText } from "@mike/client";
  *
  * Pure, so each rule can be asserted without a network.
  */
-import { isNetworkError, isOffline, isTimeoutError } from "@mike/client";
+import { isNetworkError, isOffline, isTimeoutError } from "@linkmai/client";
 
 export type SessionRefreshOutcome =
   /** The session came back. Re-run the request that got the 401. */

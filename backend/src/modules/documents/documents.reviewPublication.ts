@@ -98,7 +98,7 @@ export async function prepareDocumentReviewEdits(db: Db, args: {
     .select("display_name, email").eq("user_id", args.userId).maybeSingle();
   if (profileError) throw profileError;
   const edited = await applyTrackedEdits(Buffer.from(raw), args.edits.map(({ edit }) => edit), {
-    author: profileAttributionName(profile, "Mike"),
+    author: profileAttributionName(profile, "LinkMai"),
   });
   if (!edited.changes.length) return null;
   const failed = new Set(edited.errors.map(({ index }) => index));

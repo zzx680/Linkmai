@@ -10,7 +10,7 @@ const state = vi.hoisted(() => ({
 
 // Exercise the real byte-fetch hook, including its retained-byte behavior.
 vi.mock("@/app/lib/authEvents", () => ({ authenticatedFetch: state.fetch }));
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     getDocumentFileUrl: (id: string, version?: string | null) => `/synthetic/${id}/${version ?? "active"}`,
 }));
 vi.mock("luckyexcel", () => ({

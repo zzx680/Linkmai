@@ -6,7 +6,7 @@
     "moduleResolution": "bundler",
     "types": ["node", "office-js", "office-runtime", "react", "react-dom"],
     "paths": {
-      "@mike/contracts": ["../packages/contracts/index.d.ts"],
+      "@linkmai/contracts": ["../packages/contracts/index.d.ts"],
       // The shared packages have no node_modules of their own; their
       // dependencies resolve to this application's (see also the webpack
       // resolve.modules fallback). Keep in step with packages/*/package.json.
@@ -31,8 +31,8 @@
       "@radix-ui/react-dropdown-menu": [
         "./node_modules/@radix-ui/react-dropdown-menu"
       ],
-      "@mike/ui": ["../packages/ui/src/index.ts"],
-      "@mike/client": ["../packages/client/src/index.ts"]
+      "@linkmai/ui": ["../packages/ui/src/index.ts"],
+      "@linkmai/client": ["../packages/client/src/index.ts"]
     },
     "jsx": "react-jsx",
     "strict": true,

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { EditAnnotation } from "@mike/contracts";
+import type { EditAnnotation } from "@linkmai/contracts";
 import type { Db } from "../../lib/supabase";
 import type { PlaybookRole } from "./playbooks.access";
 import type { playbookContentSchema, findingSchema } from "./playbooks.schemas";

@@ -1,6 +1,6 @@
-# @mike/client
+# @linkmai/client
 
-Client behavior shared by the Mike web app (`frontend/`) and the Word add-in
+Client behavior shared by the LinkMai web app (`frontend/`) and the Word add-in
 (`word-addin/`) that has nothing to do with rendering:
 
 - `userError.ts`, `toastStore.ts`, `errorNotifier.ts`: one classification of a
@@ -21,7 +21,7 @@ Client behavior shared by the Mike web app (`frontend/`) and the Word add-in
 Application code imports the package's `src/index.ts` entry point:
 
 ```ts
-import { describeError, MODELS, serializeExcerpts } from "@mike/client";
+import { describeError, MODELS, serializeExcerpts } from "@linkmai/client";
 ```
 
 The Word webpack config also loads `src/releaseName.cjs`, the CommonJS twin
@@ -34,8 +34,8 @@ webpack aliases are not active while loading that config. Other files under
 - Framework-free. No React (type-only imports excepted), no DOM access at
   module scope, nothing from `frontend/src/app/` or `word-addin/src/`. The
   add-in's Playwright suite loads this package directly in Node.
-- `@mike/ui` may depend on this package; this package never depends on
-  `@mike/ui`.
+- `@linkmai/ui` may depend on this package; this package never depends on
+  `@linkmai/ui`.
 
 ## How it is wired
 

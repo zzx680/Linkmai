@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     type PointerEvent as ReactPointerEvent,
@@ -42,7 +42,7 @@ import {
     LIQUID_GLASS_PRESSED_CLASS,
     LIQUID_FLOAT_PANEL_SURFACE_CLASS,
 } from "@/app/components/ui/liquid-surface";
-import { CloseButton, CitationPillUI } from "@mike/ui";
+import { CloseButton, CitationPillUI } from "@linkmai/ui";
 import { resolveDocumentViewType } from "@/app/lib/documentViewType";
 
 interface Props {

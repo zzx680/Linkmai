@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { clearToasts, firstUploadResult, getSnapshot } from "@mike/client";
-import { MikeApiError, UploadBatchError, uploadOutcomeNeedsRetry } from "./mikeApi";
+import { clearToasts, firstUploadResult, getSnapshot } from "@linkmai/client";
+import { LinkMaiApiError, UploadBatchError, uploadOutcomeNeedsRetry } from "./linkmaiApi";
 import { errorFrameFailure } from "./chatTurnFailure";
 import {
     UserVisibleError,
@@ -54,14 +54,14 @@ describe("operation identity on reports", () => {
 
     it("does not report a 4xx answer, a cancellation or a failure already reported", () => {
         reportFault(
-            new MikeApiError({ status: 404, message: "gone" }),
+            new LinkMaiApiError({ status: 404, message: "gone" }),
             { operation: "documents.open" },
         );
         reportFault(new DOMException("Aborted", "AbortError"), {
             operation: "documents.open",
         });
         reporting.isReported.mockReturnValue(true);
-        reportFault(new MikeApiError({ status: 500, message: "x" }), {
+        reportFault(new LinkMaiApiError({ status: 500, message: "x" }), {
             operation: "documents.open",
         });
 
@@ -69,7 +69,7 @@ describe("operation identity on reports", () => {
     });
 
     it("carries the server's code and request id next to the operation", () => {
-        const error = new MikeApiError({
+        const error = new LinkMaiApiError({
             status: 500,
             code: "internal_error",
             message: "x",
@@ -115,7 +115,7 @@ describe("reportFlowFailure", () => {
         });
 
         expect(tagsOfLastReport()).toMatchObject({
-            component: "mike-api",
+            component: "linkmai-api",
             operation: "tabular.run",
             http_method: "POST",
             http_route: "/api/tabular-reviews/abc/run",
@@ -179,7 +179,7 @@ describe("notifyPartialFailure with an underlying cause", () => {
         });
         notifyPartialFailure("Changed elsewhere.", {
             operation: "documents.upload",
-            cause: new MikeApiError({ status: 409, code: "upload_target_busy", message: "x" }),
+            cause: new LinkMaiApiError({ status: 409, code: "upload_target_busy", message: "x" }),
         });
 
         expect(reporting.reportError).not.toHaveBeenCalled();
@@ -306,7 +306,7 @@ describe("which faults a notice reports", () => {
         notifyError(errorFrameFailure("x", false, { code: "internal_error", requestId: "11111111-2222-4333-8444-555555555555", reportingOwner: "backend" }), { action: "get a response" });
         expect(reporting.reportError).not.toHaveBeenCalled();
         // An HTTP 5xx keeps both halves, joined by the request id.
-        notifyError(new MikeApiError({ status: 500, code: "internal_error", message: "x", requestId: "11111111-2222-4333-8444-555555555555" }), { action: "load documents" });
+        notifyError(new LinkMaiApiError({ status: 500, code: "internal_error", message: "x", requestId: "11111111-2222-4333-8444-555555555555" }), { action: "load documents" });
         expect(tagsOfLastReport()).toMatchObject({ component: "notify", error_code: "internal_error", request_id: "11111111-2222-4333-8444-555555555555" });
     });
 

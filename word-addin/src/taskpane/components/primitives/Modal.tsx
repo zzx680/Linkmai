@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import { ModalUI, PillButtonUI as PillButton, type PillButtonUITone } from "@mike/ui";
+import { ModalUI, PillButtonUI as PillButton, type PillButtonUITone } from "@linkmai/ui";
 import { cn } from "../../../shared/lib/utils";
 
 interface ModalProps {

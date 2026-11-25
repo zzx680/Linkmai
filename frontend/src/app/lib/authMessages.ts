@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * One table of auth failure sentences.
  *
@@ -60,11 +60,11 @@ export const AUTH_ERROR_MESSAGES = {
     signup_disabled: uiText("New accounts aren't open right now."),
     email_address_invalid: uiText("Enter a valid email address."),
     email_address_not_authorized:
-        uiText("Mike can't send email to this address. Use a different one."),
+        uiText("LinkMai can't send email to this address. Use a different one."),
 
     // Passwords
     weak_password: WEAK_PASSWORD_MESSAGE,
-    same_password: uiText("Choose a password you haven't used on Mike before."),
+    same_password: uiText("Choose a password you haven't used on LinkMai before."),
     password_too_short: uiText`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
     password_too_long: uiText`Password must be at most ${MAX_PASSWORD_LENGTH} UTF-8 bytes. Accented characters and emoji can use more than one byte.`,
 

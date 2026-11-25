@@ -1,5 +1,5 @@
 /**
- * Bulk accept/reject of Mike's tracked edits, through the add-in's public
+ * Bulk accept/reject of LinkMai's tracked edits, through the add-in's public
  * restore + resolve API against a small in-memory Word host (the add-in
  * package has no unit-test runner of its own).
  *
@@ -122,8 +122,8 @@ function wordHost({ desktopRevisions = false } = {}) {
         refuseOnce(id: string) {
             refusals.add(id);
         },
-        /** One of Mike's replacements, inside its persistent bookmark. */
-        mikeEdit(stableEditId: string, original: string, replacement: string) {
+        /** One of LinkMai's replacements, inside its persistent bookmark. */
+        linkmaiEdit(stableEditId: string, original: string, replacement: string) {
             const bookmark = bookmarkNameForEdit(stableEditId);
             records.push(
                 { id: `${stableEditId}:added`, type: "Added", text: replacement, bookmark, state: "pending" },
@@ -131,7 +131,7 @@ function wordHost({ desktopRevisions = false } = {}) {
             );
             return { stableEditId, edit: { original, replacement } };
         },
-        /** A pending revision someone else made, outside Mike's passages. */
+        /** A pending revision someone else made, outside LinkMai's passages. */
         foreignInsertion(id: string, text: string) {
             records.push({ id, type: "Added", text, bookmark: null, state: "pending" });
         },
@@ -159,11 +159,11 @@ describe("bulk tracked-edit resolution", () => {
         ["reject", true],
     ] as const)("%ss only each edit's own revisions after the user amended one (desktop surface: %s)", async (decision, desktopRevisions) => {
         const host = wordHost({ desktopRevisions });
-        const first = host.mikeEdit("m:edit-0", "original clause", "replacement clause");
-        const second = host.mikeEdit("m:edit-1", "second original", "second replacement");
+        const first = host.linkmaiEdit("m:edit-0", "original clause", "replacement clause");
+        const second = host.linkmaiEdit("m:edit-1", "second original", "second replacement");
         const handles = await restore([first, second]);
-        // The user rewrote Mike's insertion; elsewhere, an unrelated pending
-        // insertion now carries Mike's replacement text.
+        // The user rewrote LinkMai's insertion; elsewhere, an unrelated pending
+        // insertion now carries LinkMai's replacement text.
         host.records.find((r) => r.id === "m:edit-0:added")!.text = "user amended replacement";
         host.foreignInsertion("foreign", "replacement clause");
 
@@ -178,8 +178,8 @@ describe("bulk tracked-edit resolution", () => {
 
     it("resolves two edits with identical text through their own revisions", async () => {
         const host = wordHost();
-        const first = host.mikeEdit("m:edit-0", "the Seller", "the Vendor");
-        const second = host.mikeEdit("m:edit-1", "the Seller", "the Vendor");
+        const first = host.linkmaiEdit("m:edit-0", "the Seller", "the Vendor");
+        const second = host.linkmaiEdit("m:edit-1", "the Seller", "the Vendor");
         const handles = await restore([first, second]);
 
         const results = await resolveTrackedEdits(handles, "accept");
@@ -190,8 +190,8 @@ describe("bulk tracked-edit resolution", () => {
 
     it("falls back to each edit's own anchor when its retained proxies went stale", async () => {
         const host = wordHost();
-        const first = host.mikeEdit("m:edit-0", "original clause", "replacement clause");
-        const second = host.mikeEdit("m:edit-1", "second original", "second replacement");
+        const first = host.linkmaiEdit("m:edit-0", "original clause", "replacement clause");
+        const second = host.linkmaiEdit("m:edit-1", "second original", "second replacement");
         const handles = await restore([first, second]);
         host.invalidateProxies();
         host.foreignInsertion("foreign", "replacement clause");
@@ -208,7 +208,7 @@ describe("bulk tracked-edit resolution", () => {
 
     it("keeps the edits decided before a failed sync decided, with their cleanup", async () => {
         const host = wordHost();
-        const edits = [0, 1, 2].map((i) => host.mikeEdit(`m:edit-${i}`, `original ${i}`, `replacement ${i}`));
+        const edits = [0, 1, 2].map((i) => host.linkmaiEdit(`m:edit-${i}`, `original ${i}`, `replacement ${i}`));
         const handles = await restore(edits);
         // An Office batch is not a transaction: edit 0's accepts run, then
         // Word refuses edit 1's first revision.

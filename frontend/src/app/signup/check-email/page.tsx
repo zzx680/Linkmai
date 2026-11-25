@@ -1,12 +1,12 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { authGlassCardUIClassName, pillButtonUIClassName } from "@mike/ui";
+import { authGlassCardUIClassName, pillButtonUIClassName } from "@linkmai/ui";
 import { SiteLogo } from "@/app/components/site-logo";
 import { useAuth } from "@/app/contexts/AuthContext";
 

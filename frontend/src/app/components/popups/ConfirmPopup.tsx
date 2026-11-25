@@ -1,11 +1,11 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { createPortal } from "react-dom";
 import { useEffect, useId, type ReactNode } from "react";
 import { Trash2 } from "lucide-react";
-import { PillButtonUI, CloseButton, LIQUID_GLASS_FLOAT_CLASS } from "@mike/ui";
+import { PillButtonUI, CloseButton, LIQUID_GLASS_FLOAT_CLASS } from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 
 type ConfirmStatus = "idle" | "loading" | "complete";

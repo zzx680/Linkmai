@@ -1,6 +1,6 @@
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 /**
  * How the task pane tells the user something failed.
  *
@@ -12,7 +12,7 @@ import { BACKEND_REPORTING_OWNER } from "@mike/client";
  * Word, which is why it is an action and not an anchor.
  *
  * The toast, the Retry and the cancellation rule are the web app's own
- * (`createErrorNotifier` in `@mike/client`), so a failure reads the same in Word as it does in
+ * (`createErrorNotifier` in `@linkmai/client`), so a failure reads the same in Word as it does in
  * the browser; this file adds only what differs in the pane. Screens must
  * never render a raw `error.message` from the API, a stream, or Office.js.
  */
@@ -27,7 +27,7 @@ import {
   notifyInfo,
   notifySuccess,
   type NotifyErrorOptions as SharedNotifyErrorOptions,
-} from "@mike/client";
+} from "@linkmai/client";
 import {
   isSessionHandledError,
   retryWhenSessionRecovers,
@@ -56,8 +56,8 @@ export {
   isNetworkError,
   type UserErrorKind,
   type UserFacingError,
-} from "@mike/client";
-export { notifyInfo, notifySuccess } from "@mike/client";
+} from "@linkmai/client";
+export { notifyInfo, notifySuccess } from "@linkmai/client";
 
 /** Which client the support email came from. */
 export const SUPPORT_PRODUCT = "word-addin";
@@ -78,7 +78,7 @@ export type UserMessageOptions = DescribeErrorOptions;
  * A server or unclassifiable failure shown to the user is a fault worth an
  * event, under the same rules as the web app's notice layer: a 4xx, a
  * cancellation and a transport failure are not (the transport was already
- * reported under component mike-api), and an error the API client or
+ * reported under component linkmai-api), and an error the API client or
  * `reportWordFailure` already sent — or a wrapper around one, such as the
  * "outcome unknown" sentence a failed turn is rephrased into — is not sent
  * again. The server's own code and request id let the event be matched to

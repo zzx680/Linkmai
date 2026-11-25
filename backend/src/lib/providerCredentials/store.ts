@@ -157,7 +157,7 @@ function envApiKey(provider: ApiKeyProvider): string | null {
         case "xai":
             return process.env.XAI_API_KEY?.trim() || null;
         // A custom endpoint is always the user's own; deployments declare
-        // shared endpoints in MIKE_MODEL_CONFIG_JSON.
+        // shared endpoints in LINKMAI_MODEL_CONFIG_JSON.
         case "custom":
             return null;
         // CourtListener is a connector: each user (or their organization)

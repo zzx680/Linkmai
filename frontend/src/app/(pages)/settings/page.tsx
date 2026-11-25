@@ -1,12 +1,12 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { ProfilePhotoSettings } from "@/app/components/settings/ProfilePhotoSettings";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import { PillButtonUI, GlassCardUI } from "@mike/ui";
+import { PillButtonUI, GlassCardUI } from "@linkmai/ui";
 import { Modal } from "@/app/components/modals/Modal";
 import { FieldLabel } from "@/app/components/ui/form-field";
 import { SettingsTextInput } from "@/app/components/settings/SettingsTextInput";
@@ -18,7 +18,7 @@ import {
   needsMfaVerification,
 } from "@/app/components/popups/MfaVerificationPopup";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
-import { deleteAccount, isMfaRequiredError } from "@/app/lib/mikeApi";
+import { deleteAccount, isMfaRequiredError } from "@/app/lib/linkmaiApi";
 import { authMessages } from "@/app/lib/authMessages";
 import {
   describeError,

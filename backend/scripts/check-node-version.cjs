@@ -58,7 +58,7 @@ function backendNodeRange(backendDir = path.resolve(__dirname, "..")) {
 function nodeVersionProblem(version, range) {
   if (satisfiesFloor(version, range)) return null;
   return (
-    `Mike's backend needs Node ${range} (package.json "engines"), but this is Node ${version}. ` +
+    `LinkMai's backend needs Node ${range} (package.json "engines"), but this is Node ${version}. ` +
     "Older 22.x releases crash at boot inside undici. Install a newer Node 22 " +
     "(for example `nvm install 22`) and run the command again."
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MikeIcon } from "@mike/ui";
+import { LinkMaiIcon } from "@linkmai/ui";
 import { PRODUCT_NAME, PRODUCT_SITE_URL } from "@/app/lib/productConfig";
 
 interface SiteLogoProps {
@@ -41,7 +41,7 @@ export function SiteLogo({
             <span
                 className={`inline-flex shrink-0 items-center leading-none ${iconClassName}`}
             >
-                <MikeIcon size={iconSizes[size]} />
+                <LinkMaiIcon size={iconSizes[size]} />
             </span>
             <span>{PRODUCT_NAME}</span>
         </h1>

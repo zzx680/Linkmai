@@ -121,7 +121,7 @@ export class NonRetryableJobError extends AppError {
     /**
      * How the terminal failure is reported: "error" by default (a refused
      * job is worth knowing about), "warning", or null for a condition the
-     * user has already been told about and nothing in Mike can fix (a
+     * user has already been told about and nothing in LinkMai can fix (a
      * provider rejecting the user's own key) — logged, never sent.
      */
     readonly reportLevel: "error" | "warning" | null;

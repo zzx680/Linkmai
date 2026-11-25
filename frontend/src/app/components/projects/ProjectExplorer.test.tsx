@@ -7,7 +7,7 @@ import {
     waitFor,
     within,
 } from "@testing-library/react";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
     Document,
@@ -100,7 +100,7 @@ describe("ProjectExplorer actions", () => {
         });
 
         expect(dataTransfer.setData).toHaveBeenCalledWith(
-            "application/mike-doc",
+            "application/linkmai-doc",
             "doc-1",
         );
         expect(dataTransfer.effectAllowed).toBe("copyMove");
@@ -293,9 +293,9 @@ describe("ProjectExplorer moves", () => {
         );
 
         const dataTransfer = {
-            types: ["application/mike-doc"],
+            types: ["application/linkmai-doc"],
             getData: (type: string) =>
-                type === "application/mike-doc" ? "doc-1" : "",
+                type === "application/linkmai-doc" ? "doc-1" : "",
         };
         fireEvent.drop(screen.getByText("Drafts").closest("div[draggable]")!, {
             dataTransfer,

@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * Server-Sent Events framing, shared by every streaming call site.
  *

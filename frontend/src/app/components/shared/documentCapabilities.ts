@@ -2,7 +2,7 @@ import type { PanelDocument, PanelDocumentType } from "./types";
 
 /**
  * A document read from a provider (CourtListener case law; Legal Data Hunter
- * case law, legislation and legal research) rather than uploaded to Mike
+ * case law, legislation and legal research) rather than uploaded to LinkMai
  * says so on the wire (`SourceDocument.provider`). The web app treats every
  * such document the same way: no permissions, versions, editing, renaming or
  * file download; a text view instead of a file viewer; and a body that may

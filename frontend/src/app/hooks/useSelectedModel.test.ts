@@ -4,8 +4,8 @@ import { useSelectedModel, useSelectedReasoning } from "./useSelectedModel";
 import {
     canonicalModelId,
     routerSelections as selectionsFromProfile,
-} from "@mike/client";
-import type { ApiKeyState } from "../lib/mikeApi";
+} from "@linkmai/client";
+import type { ApiKeyState } from "../lib/linkmaiApi";
 
 const keys: ApiKeyState = {
     claude: { configured: true, source: "user" },

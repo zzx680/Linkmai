@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/app/lib/authApi", () => ({ getAuthSession, updateAuthPassword }));
 
 vi.mock("@/app/components/site-logo", () => ({
-    SiteLogo: () => <div>Mike</div>,
+    SiteLogo: () => <div>LinkMai</div>,
 }));
 
 // The real popup lists factors and verifies a code against the auth API;
@@ -139,7 +139,7 @@ describe("ResetPasswordPage", () => {
 
         expect(
             await screen.findByText(
-                "Mike couldn't reach the server. Check your connection and try again.",
+                "LinkMai couldn't reach the server. Check your connection and try again.",
             ),
         ).toBeInTheDocument();
     });

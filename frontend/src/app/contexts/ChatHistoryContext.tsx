@@ -22,7 +22,7 @@ import {
     leaveChat,
     listChats,
     renameChat,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
 import type { Chat, Message } from "@/app/components/shared/types";
 import type { ProjectRole } from "@/app/lib/permissions";

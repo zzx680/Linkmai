@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
-import type { MemoryCurrent } from "@/app/lib/mikeApi";
+import type { MemoryCurrent } from "@/app/lib/linkmaiApi";
 
-const DISMISSAL_PREFIX = "mike:memory-update-failure-dismissed:";
-const DISMISSAL_EVENT = "mike:memory-update-failure-dismissed";
+const DISMISSAL_PREFIX = "linkmai:memory-update-failure-dismissed:";
+const DISMISSAL_EVENT = "linkmai:memory-update-failure-dismissed";
 
 function failureId(memory: MemoryCurrent | null): string | null {
   if (memory?.status !== "failed") return null;

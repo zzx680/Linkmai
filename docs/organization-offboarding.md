@@ -78,7 +78,7 @@ cannot recover private content deleted under the previous removal policy.
 The PostgreSQL regression suite creates and drops its own disposable database:
 
 ```bash
-MIKE_TEST_POSTGRES_CONTAINER=supabase_db_backend npm test --prefix backend -- \
+LINKMAI_TEST_POSTGRES_CONTAINER=supabase_db_backend npm test --prefix backend -- \
   src/__tests__/integration/orgDepartureRetention.postgres.test.ts
 ```
 
@@ -164,7 +164,7 @@ The fresh schema includes the same changes. Verify the database rules in a
 disposable local database:
 
 ```bash
-MIKE_TEST_POSTGRES_CONTAINER=supabase_db_backend npm test --prefix backend -- \
+LINKMAI_TEST_POSTGRES_CONTAINER=supabase_db_backend npm test --prefix backend -- \
   src/modules/orgs/__tests__/orgs.privateContent.postgres.test.ts
 ```
 

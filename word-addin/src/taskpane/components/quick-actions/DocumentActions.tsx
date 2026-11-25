@@ -1,13 +1,13 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { ToggleSwitchUI } from "@mike/ui";
+import { ToggleSwitchUI } from "@linkmai/ui";
 import {
   createQuickAction,
   listWorkflows,
   updateQuickAction,
-} from "../../api/mikeApi";
+} from "../../api/linkmaiApi";
 import type { QuickAction, Workflow } from "../../types";
 import {
   addQuickAction,
@@ -67,7 +67,7 @@ export function DocumentActions({
         if (cancelled) return;
         setWorkflowsError(
           reportFault(reason, {
-            fallback: uiText("Mike couldn't load your quick actions. Try again."),
+            fallback: uiText("LinkMai couldn't load your quick actions. Try again."),
             operation: "quick_actions.run",
           }).message,
         );

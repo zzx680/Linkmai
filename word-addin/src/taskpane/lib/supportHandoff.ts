@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * Getting a failure from the task pane to a human.
  *
@@ -15,7 +15,7 @@ import { uiText } from "@mike/client";
  * user is told what actually happened; when both fail the block is put on
  * screen to copy by hand.
  */
-import { supportDetailLines, type UserFacingError } from "@mike/client";
+import { supportDetailLines, type UserFacingError } from "@linkmai/client";
 import { PRODUCT_SUPPORT_EMAIL as SUPPORT_EMAIL } from "./openExternalUrl";
 
 export type SupportErrorFields = Pick<
@@ -51,7 +51,7 @@ export function buildSupportDiagnostics(
   context: SupportContext = {},
 ): string {
   const lines: string[] = [
-    "Mike support details",
+    "LinkMai support details",
     `What happened: ${error.title}`,
     `Message shown: ${error.message}`,
   ];

@@ -9,8 +9,8 @@ const { getDocument, getPanelDocument, listDocumentVersions } = vi.hoisted(() =>
     getPanelDocument: vi.fn(),
     listDocumentVersions: vi.fn(),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     getDocument,
     getPanelDocument,
     listDocumentVersions,
@@ -52,7 +52,7 @@ function sourceCitation(type: string, url = "https://example.org/official/source
             actions: [{ type: "link", url }],
             quotes: [{ quote, target: { subdocument_id: `${id}:text` } }],
             subdocuments: [{ document_id: `${id}:text`, title: "Fair hearing", type: "html", text: body }],
-        } as PanelDocument, // legal_research is added to @mike/contracts by the backend port.
+        } as PanelDocument, // legal_research is added to @linkmai/contracts by the backend port.
     };
 }
 function renderView(citation: DocumentCitation) {

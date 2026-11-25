@@ -1,17 +1,17 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  MikeApiError,
+  LinkMaiApiError,
   getCustomInstructions,
   updateCustomInstructions,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
   CUSTOM_INSTRUCTIONS_MAX_LENGTH,
   CustomInstructionsSection,
 } from "./CustomInstructionsSection";
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getCustomInstructions: vi.fn(),
   updateCustomInstructions: vi.fn(),
 }));
@@ -121,7 +121,7 @@ describe("CustomInstructionsSection", () => {
 
   it("keeps the draft and offers a retry when a save fails", async () => {
     vi.mocked(updateCustomInstructions).mockRejectedValueOnce(
-      new MikeApiError({ message: "boom", status: 500 }),
+      new LinkMaiApiError({ message: "boom", status: 500 }),
     );
     render(<CustomInstructionsSection />);
     const textbox = await editor();

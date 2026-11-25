@@ -9,24 +9,24 @@ import {
     uploadProjectDocuments,
     uploadStandaloneDocuments,
     type OrgMember,
-} from "@/app/lib/mikeApi";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
-import { UPLOAD_LIMIT_MESSAGES } from "@mike/client";
+} from "@/app/lib/linkmaiApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
+import { UPLOAD_LIMIT_MESSAGES } from "@linkmai/client";
 import { UNSUPPORTED_DOCUMENT_WARNING_MESSAGE } from "@/app/lib/documentUploadValidation";
 import type { Document } from "../shared/types";
 import { NewTRModal } from "./NewTRModal";
 
-vi.mock("@/app/lib/mikeApi", async () => {
+vi.mock("@/app/lib/linkmaiApi", async () => {
     // The upload error copy is real shared code; only the network calls are
     // stubbed, so the modal's failure messages are the ones users would see.
     const uploads = await vi.importActual<
-        typeof import("@mike/client")
-    >("@mike/client");
-    class MikeApiError extends Error {
+        typeof import("@linkmai/client")
+    >("@linkmai/client");
+    class LinkMaiApiError extends Error {
         status = 500;
     }
     return {
-        MikeApiError,
+        LinkMaiApiError,
         UploadBatchError: uploads.UploadBatchError,
         failedUploadMessage: uploads.failedUploadMessage,
         getProject: vi.fn(),
@@ -547,7 +547,7 @@ describe("NewTRModal", () => {
     });
 
     it("reports a thrown upload batch failure", async () => {
-        const { UploadBatchError } = await import("@/app/lib/mikeApi");
+        const { UploadBatchError } = await import("@/app/lib/linkmaiApi");
         vi.mocked(uploadProjectDocuments).mockRejectedValue(
             new UploadBatchError("batch failed", [
                 {

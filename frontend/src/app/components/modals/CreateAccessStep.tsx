@@ -7,7 +7,7 @@ import {
     type AccessAssignmentRole,
     type OrgMember,
     type UserLookupResult,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { ContentVisibility } from "@/app/components/shared/types";
 import { isOrgOwner, type ProjectRole } from "@/app/lib/permissions";
 import {

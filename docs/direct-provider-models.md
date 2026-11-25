@@ -131,7 +131,7 @@ Self-hosted deployments can instead set `GOOGLE_VERTEX_CREDENTIALS_JSON` with
 `GOOGLE_VERTEX_LOCATION`, `AZURE_FOUNDRY_API_KEY` with
 `AZURE_FOUNDRY_ENDPOINT`, and `XAI_API_KEY`. A custom endpoint has no
 environment form: deployments declare shared endpoints in
-`MIKE_MODEL_CONFIG_JSON`. As elsewhere, a personal key runs only with its own
+`LINKMAI_MODEL_CONFIG_JSON`. As elsewhere, a personal key runs only with its own
 saved setting.
 
 Models are added per provider once the key is saved. The app-level IDs are
@@ -146,7 +146,7 @@ request resolves it, and again before a provider is called: `/`-separated
 segments of letters, digits and `. _ : @ + -`, with no empty, `.` or `..`
 segments and no `?`, `#`, `%`, backslash, whitespace or control characters.
 Vertex Claude and Gemini IDs are a single segment and partner IDs are exactly
-`publisher/model`. A model declared in `MIKE_MODEL_CONFIG_JSON` keeps its
+`publisher/model`. A model declared in `LINKMAI_MODEL_CONFIG_JSON` keeps its
 declared provider even if its ID starts with one of these prefixes.
 
 Moving a saved Azure AI Foundry key or custom-endpoint key to a different
@@ -179,7 +179,7 @@ because the location only selects one of Google's own regional endpoints.
   same guarded fetch as custom MCP connectors: loopback, private, link-local
   and cloud-metadata addresses are refused, including when a public name
   resolves to one. Endpoints on a private network belong in
-  `MIKE_MODEL_CONFIG_JSON`.
+  `LINKMAI_MODEL_CONFIG_JSON`.
 
 Vertex AI and Foundry infer the protocol from the model or deployment name.
 When a name does not reveal it, save the ID with an explicit protocol:

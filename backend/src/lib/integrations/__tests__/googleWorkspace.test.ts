@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, describe, it, expect, vi } from "vitest";
-import type { ConnectorApprovalItem } from "@mike/contracts";
+import type { ConnectorApprovalItem } from "@linkmai/contracts";
 import { workspaceDb } from "./googleWorkspaceDb";
 import { ConnectorSetupError } from "../../mcp/errors";
 import {
@@ -127,7 +127,7 @@ describe("Google Workspace opt-in and OAuth", () => {
         store.db,
         personalConnectorOwner("u1"),
         provider,
-        "https://mike.test/callback",
+        "https://linkmai.test/callback",
       );
       const url = new URL(authorizationUrl);
       expect(url.searchParams.get("scope")?.split(" ")).toEqual(
@@ -153,7 +153,7 @@ describe("Google Workspace opt-in and OAuth", () => {
       "https://www.googleapis.com/auth/gmail.compose",
     ]);
   });
-  it("stores selected account identity separately from the Mike identity and encrypts secrets", async () => {
+  it("stores selected account identity separately from the LinkMai identity and encrypts secrets", async () => {
     const s = await connected();
     const status = await workspaceStatus(s.db, personalConnectorOwner("u1"), "gmail");
     expect(status.accountEmail).toBe("different-google-account@example.com");
@@ -173,7 +173,7 @@ describe("Google Workspace opt-in and OAuth", () => {
       workspaceDb().db,
       personalConnectorOwner("u"),
       "gmail",
-      "https://mike.test/callback",
+      "https://linkmai.test/callback",
     );
     await expect(started).rejects.toBeInstanceOf(ConnectorSetupError);
     await expect(started).rejects.toThrow(
@@ -186,7 +186,7 @@ describe("Google Workspace opt-in and OAuth", () => {
       s.db,
       personalConnectorOwner("u1"),
       "gmail",
-      "https://mike.test",
+      "https://linkmai.test",
     );
     const state = new URL(start.authorizationUrl).searchParams.get("state")!;
     await expect(
@@ -201,14 +201,14 @@ describe("Google Workspace opt-in and OAuth", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
   it.each(["gmail", "google-calendar"] as const)(
-    "rejects %s consent from a different Mike user before token exchange",
+    "rejects %s consent from a different LinkMai user before token exchange",
     async (provider) => {
       const s = workspaceDb();
       const { authorizationUrl } = await startWorkspaceOAuth(
         s.db,
         personalConnectorOwner("attacker"),
         provider,
-        "https://mike.test/api/callback",
+        "https://linkmai.test/api/callback",
       );
       const state = new URL(authorizationUrl).searchParams.get("state")!;
       await expect(
@@ -235,7 +235,7 @@ describe("Google Workspace opt-in and OAuth", () => {
       s.db,
       personalConnectorOwner("u1"),
       "google-calendar",
-      "https://mike.test",
+      "https://linkmai.test",
     );
     fetchMock.mockResolvedValueOnce(
       json({
@@ -262,7 +262,7 @@ describe("Google Workspace opt-in and OAuth", () => {
       s.db,
       personalConnectorOwner("u1"),
       "gmail",
-      "https://mike.test",
+      "https://linkmai.test",
     );
     fetchMock
       .mockImplementationOnce(async () => {
@@ -329,7 +329,7 @@ describe("Google Workspace opt-in and OAuth", () => {
 describe.each(["gmail", "google-calendar"] as const)("%s OAuth error classification", (provider) => {
   it.each([401, 503])("classifies token-exchange HTTP %i without losing the status", async (status) => {
     const store = workspaceDb();
-    const start = await startWorkspaceOAuth(store.db, personalConnectorOwner("u1"), provider, "https://mike.test/callback");
+    const start = await startWorkspaceOAuth(store.db, personalConnectorOwner("u1"), provider, "https://linkmai.test/callback");
     fetchMock.mockResolvedValueOnce(json({ error: "provider failure" }, status));
     await expect(completeWorkspaceOAuth(store.db, "u1", provider, new URL(start.authorizationUrl).searchParams.get("state")!, "code"))
       .rejects.toMatchObject({ kind: status >= 500 ? "google.api_failed" : "google.auth_failed", cause: { status } });
@@ -338,7 +338,7 @@ describe.each(["gmail", "google-calendar"] as const)("%s OAuth error classificat
 
   it.each([401, 503])("classifies userinfo HTTP %i without losing the status", async (status) => {
     const store = workspaceDb();
-    const start = await startWorkspaceOAuth(store.db, personalConnectorOwner("u1"), provider, "https://mike.test/callback");
+    const start = await startWorkspaceOAuth(store.db, personalConnectorOwner("u1"), provider, "https://linkmai.test/callback");
     fetchMock.mockResolvedValueOnce(json({ access_token: "access", refresh_token: "refresh", expires_in: 3600, scope: grantedScope(provider, false) }))
       .mockResolvedValueOnce(json({ error: "provider failure" }, status));
     await expect(completeWorkspaceOAuth(store.db, "u1", provider, new URL(start.authorizationUrl).searchParams.get("state")!, "code"))
@@ -424,7 +424,7 @@ describe("Google connector settings", () => {
       s.db,
     );
     expect(refused.event.status).toBe("error");
-    expect(refused.content).toContain("Gmail is not offered on this Mike server.");
+    expect(refused.content).toContain("Gmail is not offered on this LinkMai server.");
     expect(
       (await planGoogleWorkspaceCall(personalConnectorOwner("u1"), "gmail_send", email, s.db)).type,
     ).toBe("result");
@@ -881,7 +881,7 @@ describe("additional Google service regression coverage", () => {
       s.db,
       personalConnectorOwner("u1"),
       "gmail",
-      "https://mike.test",
+      "https://linkmai.test",
     );
     fetchMock
       .mockResolvedValueOnce(
@@ -916,7 +916,7 @@ describe("additional Google service regression coverage", () => {
       s.db,
       personalConnectorOwner("u1"),
       "gmail",
-      "https://mike.test/api/callback",
+      "https://linkmai.test/api/callback",
     );
     const config = JSON.parse(
       decryptFields(s.tables.google_workspace_oauth_states[0], "state_config"),

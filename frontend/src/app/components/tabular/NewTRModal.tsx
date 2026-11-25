@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 
@@ -14,8 +14,8 @@ import {
     listWorkflows,
     uploadProjectDocuments,
     uploadStandaloneDocuments,
-} from "@/app/lib/mikeApi";
-import type { AccessAssignmentRole } from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
+import type { AccessAssignmentRole } from "@/app/lib/linkmaiApi";
 import {
     useDocumentWorkspace,
     useWorkspace,
@@ -32,12 +32,12 @@ import { FileDirectory } from "../shared/FileDirectory";
 import { Modal } from "../modals/Modal";
 import { ModalSelect } from "../modals/ModalSelect";
 import { FieldLabel, FormTextInput } from "../ui/form-field";
-import { ToggleSwitchUI } from "@mike/ui";
+import { ToggleSwitchUI } from "@linkmai/ui";
 import { ModelToggle } from "../assistant/ModelToggle";
 import {
     isRouterModelSelected,
     type NoModelsReason,
-} from "@mike/client";
+} from "@linkmai/client";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
 import { useModelApiKeys } from "@/app/hooks/useModelApiKeys";
 import { useModelRouterSelections } from "@/app/hooks/useModelRouterSelections";

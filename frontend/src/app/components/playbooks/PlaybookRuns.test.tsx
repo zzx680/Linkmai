@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PlaybookRun } from "@/app/lib/mikeApi";
+import type { PlaybookRun } from "@/app/lib/linkmaiApi";
 import { PlaybookRuns } from "./PlaybookRuns";
 import {
   subscribePlaybookRunChanges,
@@ -32,8 +32,8 @@ vi.mock("@/app/components/shared/views/DocxView", () => ({
     );
   },
 }));
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-  ...(await original<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+  ...(await original<typeof import("@/app/lib/linkmaiApi")>()),
   ...api,
 }));
 

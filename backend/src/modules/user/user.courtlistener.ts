@@ -2,7 +2,7 @@
 // own token live in user_courtlistener_connections (see lib/providerCredentials/store.ts);
 // an organization's token comes from org_api_keys and is laid over theirs.
 
-import type { CourtListenerConnectorStatus } from "@mike/contracts";
+import type { CourtListenerConnectorStatus } from "@linkmai/contracts";
 import type { ConnectorOwner } from "../../lib/connectorOwner";
 import { courtlistenerBulkDataEnabled } from "../../lib/courtlistener";
 import {

@@ -75,11 +75,11 @@ const app = express();
 app.use("/models", modelsRouter);
 
 describe("GET /models/configured", () => {
-    const originalConfig = process.env.MIKE_MODEL_CONFIG_JSON;
+    const originalConfig = process.env.LINKMAI_MODEL_CONFIG_JSON;
 
     beforeEach(() => {
         getUserApiKeys.mockResolvedValue({ openai: "user-openai-key" });
-        process.env.MIKE_MODEL_CONFIG_JSON = JSON.stringify({
+        process.env.LINKMAI_MODEL_CONFIG_JSON = JSON.stringify({
             models: [
                 {
                     id: "local-qwen",
@@ -110,9 +110,9 @@ describe("GET /models/configured", () => {
 
     afterEach(() => {
         if (originalConfig === undefined) {
-            delete process.env.MIKE_MODEL_CONFIG_JSON;
+            delete process.env.LINKMAI_MODEL_CONFIG_JSON;
         } else {
-            process.env.MIKE_MODEL_CONFIG_JSON = originalConfig;
+            process.env.LINKMAI_MODEL_CONFIG_JSON = originalConfig;
         }
         resetModelRegistryCache();
         vi.clearAllMocks();
@@ -777,7 +777,7 @@ describe("GET /models/custom", () => {
         expect(JSON.stringify(blocked.body)).not.toContain("blocked network");
     });
 
-    // The user's endpoint or key is at fault and nothing in Mike can fix it,
+    // The user's endpoint or key is at fault and nothing in LinkMai can fix it,
     // so the 502 is logged but not filed (MIKE-BACKEND-DE).
     it.each([
         ["answers 401", () => guardedFetch.mockResolvedValueOnce(new Response("denied", { status: 401 }))],
@@ -815,7 +815,7 @@ describe("GET /models/custom", () => {
     });
 });
 
-describe("catalog loaders separate Mike's own failures from the provider's", () => {
+describe("catalog loaders separate LinkMai's own failures from the provider's", () => {
     const fetchMock = vi.fn();
     beforeEach(() => {
         vi.stubGlobal("fetch", fetchMock);

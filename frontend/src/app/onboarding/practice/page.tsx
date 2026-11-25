@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import {
     personalisationInitialValues,
     usePersonalisationFields,
 } from "@/app/components/settings/PersonalisationFields";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import { FullScreenLoader } from "@/app/components/shared/FullScreenLoader";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";

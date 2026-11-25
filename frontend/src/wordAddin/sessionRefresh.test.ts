@@ -19,7 +19,7 @@ import {
 } from "../../../word-addin/src/taskpane/lib/sessionRefresh";
 import { responseError } from "../../../word-addin/src/taskpane/api/client";
 import { notifyError, userMessage } from "../../../word-addin/src/taskpane/lib/notify";
-import { clearToasts, getSnapshot } from "@mike/client";
+import { clearToasts, getSnapshot } from "@linkmai/client";
 
 class StatusError extends Error {
     constructor(readonly status: number) {

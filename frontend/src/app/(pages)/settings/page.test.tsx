@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import SettingsPage from "./page";
-import { deleteAccount } from "@/app/lib/mikeApi";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { deleteAccount } from "@/app/lib/linkmaiApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 const state = vi.hoisted(() => ({
     push: vi.fn(),
@@ -51,10 +51,10 @@ vi.mock("@/app/contexts/UserProfileContext", () => ({
 }));
 
 // The real module is spread back in because userFacingApiError resolves
-// MikeApiError from it; a bare object mock leaves that `instanceof` check
+// LinkMaiApiError from it; a bare object mock leaves that `instanceof` check
 // comparing against undefined.
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     deleteAccount: state.deleteAccount,
     isMfaRequiredError: vi.fn(() => false),
 }));
@@ -180,7 +180,7 @@ describe("SettingsPage Google email changes", () => {
         const detail =
             "You are the only owner of Elite Law LLP. Make another member an owner, or delete the organization, before deleting your account.";
         state.deleteAccount.mockRejectedValue(
-            new MikeApiError({
+            new LinkMaiApiError({
                 status: 409,
                 code: "org_successor_required",
                 message: detail,
@@ -252,7 +252,7 @@ describe("SettingsPage Google email changes", () => {
 
         expect(
             await screen.findByText(
-                "Mike couldn't reach the server. Check your connection and try again.",
+                "LinkMai couldn't reach the server. Check your connection and try again.",
             ),
         ).toBeInTheDocument();
     });

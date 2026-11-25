@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AssistantEvent, Message } from "@/app/components/shared/types";
-import type { ConnectorApprovalItem } from "@mike/contracts";
-import { streamChatTurn } from "./mikeApi";
+import type { ConnectorApprovalItem } from "@linkmai/contracts";
+import { streamChatTurn } from "./linkmaiApi";
 import { reportGatewayLimit } from "@/app/lib/errorReporting";
 import { beginAssistantTurn } from "./assistantTurns";
 import {
@@ -11,7 +11,7 @@ import {
   readAssistantTurn,
 } from "./assistantTurnStream";
 
-vi.mock("./mikeApi", () => ({ streamChatTurn: vi.fn(), stopChatTurn: vi.fn() }));
+vi.mock("./linkmaiApi", () => ({ streamChatTurn: vi.fn(), stopChatTurn: vi.fn() }));
 vi.mock("@/app/lib/errorReporting", () => ({ reportGatewayLimit: vi.fn() }));
 const streamChatTurnMock = vi.mocked(streamChatTurn);
 const reportGatewayLimitMock = vi.mocked(reportGatewayLimit);

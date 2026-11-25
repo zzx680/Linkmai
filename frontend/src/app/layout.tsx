@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import type { Metadata } from "next";
 // Self-hosted Inter and EB Garamond; sets --font-inter and --font-eb-garamond.
 import "./fonts/fonts.css";

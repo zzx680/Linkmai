@@ -200,18 +200,18 @@ function githubHeaders(token?: string): Record<string, string> {
 function sourceConfiguration(options: WorkflowCatalogSourceOptions) {
   const repository =
     options.repository ??
-    process.env.MIKE_WORKFLOWS_REPOSITORY ??
+    process.env.LINKMAI_WORKFLOWS_REPOSITORY ??
     DEFAULT_REPOSITORY;
-  const ref = options.ref ?? process.env.MIKE_WORKFLOWS_REF ?? DEFAULT_REF;
+  const ref = options.ref ?? process.env.LINKMAI_WORKFLOWS_REF ?? DEFAULT_REF;
   const githubToken =
-    options.githubToken ?? process.env.MIKE_WORKFLOWS_GITHUB_TOKEN;
+    options.githubToken ?? process.env.LINKMAI_WORKFLOWS_GITHUB_TOKEN;
   if (!REPOSITORY_PATTERN.test(repository)) {
     throw new Error(
-      "MIKE_WORKFLOWS_REPOSITORY must use the owner/repository form",
+      "LINKMAI_WORKFLOWS_REPOSITORY must use the owner/repository form",
     );
   }
   if (!ref.trim() || ref.length > 200) {
-    throw new Error("MIKE_WORKFLOWS_REF must be between 1 and 200 characters");
+    throw new Error("LINKMAI_WORKFLOWS_REF must be between 1 and 200 characters");
   }
   return { repository, ref, githubToken };
 }
@@ -271,11 +271,11 @@ async function downloadArchive(
   const declaredLength = Number(response.headers.get("content-length") ?? 0);
   if (declaredLength > MAX_ARCHIVE_BYTES) {
     throw new Error(
-      "Mike workflows archive exceeds the 10 MB compressed limit",
+      "LinkMai workflows archive exceeds the 10 MB compressed limit",
     );
   }
   if (!response.body) {
-    throw new Error("GitHub returned an empty Mike workflows archive");
+    throw new Error("GitHub returned an empty LinkMai workflows archive");
   }
   const archive = await open(archivePath, "wx", 0o600);
   const reader = response.body.getReader();
@@ -288,7 +288,7 @@ async function downloadArchive(
       if (receivedBytes > MAX_ARCHIVE_BYTES) {
         await reader.cancel();
         throw new Error(
-          "Mike workflows archive exceeds the 10 MB compressed limit",
+          "LinkMai workflows archive exceeds the 10 MB compressed limit",
         );
       }
       let offset = 0;
@@ -299,7 +299,7 @@ async function downloadArchive(
           value.byteLength - offset,
         );
         if (bytesWritten === 0) {
-          throw new Error("Could not write the Mike workflows archive");
+          throw new Error("Could not write the LinkMai workflows archive");
         }
         offset += bytesWritten;
       }

@@ -1,11 +1,11 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { TabularReview } from "@/app/components/shared/types";
-import { getTabularReviewHistoryStatuses } from "@/app/lib/mikeApi";
+import { getTabularReviewHistoryStatuses } from "@/app/lib/linkmaiApi";
 import { notifyTabularReviewsChanged } from "@/app/lib/tabularReviewChanges";
 import { useTabularHistoryStatuses } from "./useTabularHistoryStatuses";
 
-vi.mock("@/app/lib/mikeApi", () => ({ getTabularReviewHistoryStatuses: vi.fn() }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ getTabularReviewHistoryStatuses: vi.fn() }));
 vi.mock("@/app/lib/tabularReviewChanges", () => ({ notifyTabularReviewsChanged: vi.fn() }));
 const running = [{ id: "r1", is_running: true }] as TabularReview[];
 beforeEach(() => { vi.clearAllMocks(); vi.useFakeTimers(); });

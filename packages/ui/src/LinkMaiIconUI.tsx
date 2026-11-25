@@ -75,10 +75,10 @@ const TINT_PALETTES = {
     indigo: tintPalette(["#e0e7ff", "#c7d2fe", "#a5b4fc", "#818cf8", "#6366f1", "#4f46e5"]),
 } satisfies Record<string, IconPalette>;
 
-export type MikeIconTint = keyof typeof TINT_PALETTES;
+export type LinkMaiIconTint = keyof typeof TINT_PALETTES;
 
 /** The tints in the order a list of marks should take them. */
-export const MIKE_ICON_TINTS = Object.keys(TINT_PALETTES) as MikeIconTint[];
+export const LINKMAI_ICON_TINTS = Object.keys(TINT_PALETTES) as LinkMaiIconTint[];
 
 // The dark mark, inverted for dark surfaces: white glass blades, with the
 // depth cues (inner shading, hairline border) darkened instead of lightened
@@ -197,11 +197,11 @@ function Blades({ ids }: { ids: Record<string, string> }) {
     );
 }
 
-export function MikeIcon({
+export function LinkMaiIcon({
     spin = false,
     done = false,
     error = false,
-    mike = false,
+    linkmai = false,
     tint,
     size = 24,
     style,
@@ -209,13 +209,13 @@ export function MikeIcon({
     spin?: boolean;
     done?: boolean;
     error?: boolean;
-    mike?: boolean;
+    linkmai?: boolean;
     /** A colour for the mark; the status palettes take precedence. */
-    tint?: MikeIconTint;
+    tint?: LinkMaiIconTint;
     size?: number;
     style?: React.CSSProperties;
 }) {
-    void mike;
+    void linkmai;
     const id = useId().replace(/:/g, "");
     const darkTheme = useDarkTheme();
     const palette = error

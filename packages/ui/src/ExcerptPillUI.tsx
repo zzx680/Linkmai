@@ -1,11 +1,11 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import type { ReactElement } from "react";
 import { TextQuote, X } from "lucide-react";
 import { LIQUID_GLASS_FLAT_CLASS } from "./LiquidGlassUI";
-import type { MessageExcerpt } from "@mike/client";
+import type { MessageExcerpt } from "@linkmai/client";
 
 /** What a pill calls an excerpt: it names the kind, not the passage. */
 export function excerptLabel(excerpt: MessageExcerpt): string {

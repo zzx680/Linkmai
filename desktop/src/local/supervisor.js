@@ -1,5 +1,5 @@
 // The local stack supervisor — docker-compose reimplemented as a process
-// tree, so `Mike.app` can run the entire product on one Mac with nothing
+// tree, so `LinkMai.app` can run the entire product on one Mac with nothing
 // installed.
 //
 // It boots, in dependency order (mirroring compose's depends_on/healthcheck
@@ -288,8 +288,8 @@ async function startLocalStack(app, status = () => {}) {
         // mode (the connect screen says so) — GoTrue only touches SMTP when
         // asked to actually send.
         GOTRUE_MAILER_AUTOCONFIRM: "true",
-        GOTRUE_SMTP_ADMIN_EMAIL: "admin@mike.local",
-        GOTRUE_SMTP_SENDER_NAME: "Mike",
+        GOTRUE_SMTP_ADMIN_EMAIL: "admin@linkmai.local",
+        GOTRUE_SMTP_SENDER_NAME: "LinkMai",
         GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify",
         GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify",
         GOTRUE_MAILER_URLPATHS_INVITE: "/auth/v1/verify",
@@ -333,7 +333,7 @@ async function startLocalStack(app, status = () => {}) {
 
     // 6. Backend — Electron's own binary in Node mode, so no separate
     // runtime ships with the app.
-    status("Starting Mike services…");
+    status("Starting LinkMai services…");
     assertBackendNodeSupported(paths.backendDir);
     const soffice = findSoffice();
     spawnService("backend", process.execPath,

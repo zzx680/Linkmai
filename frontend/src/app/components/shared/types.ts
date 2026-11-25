@@ -1,19 +1,19 @@
 
-import { uiText } from "@mike/client";
-import type { AssistantEvent as WireAssistantEvent } from "@mike/contracts";
-// Shared TypeScript types for Mike AI legal assistant
+import { uiText } from "@linkmai/client";
+import type { AssistantEvent as WireAssistantEvent } from "@linkmai/contracts";
+// Shared TypeScript types for LinkMai AI legal assistant
 
 import type {
   SourceDocument,
   SourceDocumentQuote,
   SourceDocumentType,
   SourceSubdocument,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 import type {
   AskInputItem as SharedAskInputItem,
   AskInputResponseItem as SharedAskInputResponseItem,
   AskInputsEvent as SharedAskInputsEvent,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 
 export interface Folder {
   id: string;

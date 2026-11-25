@@ -42,8 +42,8 @@ export type McpToolSummary = {
     lastSeenAt: string;
 };
 
-export type { McpToolEvent } from "@mike/contracts";
-import type { ConnectorApprovalItem, McpToolEvent } from "@mike/contracts";
+export type { McpToolEvent } from "@linkmai/contracts";
+import type { ConnectorApprovalItem, McpToolEvent } from "@linkmai/contracts";
 
 /**
  * What to do with a connector tool call: run it now, pause for the user's

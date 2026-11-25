@@ -7,9 +7,9 @@ import {
     isAllowedModelId,
     isRouterModelSelected,
     type RouterSelections,
-} from "@mike/client";
+} from "@linkmai/client";
 import { isModelAvailable } from "../lib/modelAvailability";
-import type { ApiKeyState } from "../lib/mikeApi";
+import type { ApiKeyState } from "../lib/linkmaiApi";
 
 export interface SelectedModelSources {
     selectionKey?: string | null;

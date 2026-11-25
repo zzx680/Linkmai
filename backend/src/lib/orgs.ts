@@ -28,7 +28,7 @@
 // someone to a firm workspace exposes confidential content, so it takes the
 // recipient's consent, not just the inviter's intent.
 
-import type { OrgMemberHandover } from "@mike/contracts";
+import type { OrgMemberHandover } from "@linkmai/contracts";
 import { listOrgPrivateContentAccess } from "./orgPrivateContent";
 import type { Db } from "./supabase";
 import { selectAllByKey, selectInBatches } from "./batchedQuery";

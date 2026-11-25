@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 const AUTH_REDIRECT_PATHS = new Set([
     "/assistant",
     "/login",
@@ -26,7 +26,7 @@ export function safeAuthNext(
         return fallback;
     }
 
-    const base = new URL("https://auth.mike.local");
+    const base = new URL("https://auth.linkmai.local");
     const resolved = new URL(candidate, base);
     if (
         resolved.origin !== base.origin ||

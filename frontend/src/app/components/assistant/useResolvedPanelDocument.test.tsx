@@ -1,11 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getPanelDocument } from "@/app/lib/mikeApi";
+import { getPanelDocument } from "@/app/lib/linkmaiApi";
 import type { ReactNode } from "react";
 import { DocumentWorkspaceScope } from "@/app/contexts/WorkspaceContext";
 import { useResolvedPanelDocument } from "./useResolvedPanelDocument";
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     getPanelDocument: vi.fn(),
 }));
 
@@ -109,7 +109,7 @@ describe("useResolvedPanelDocument", () => {
         expect(result.current.error).toBeNull();
     });
     it("shows the endpoint's fixed 400 sentence, not a generic failure", async () => {
-        // MikeApiError carries the body's `detail` as its message and the status.
+        // LinkMaiApiError carries the body's `detail` as its message and the status.
         const refused = Object.assign(
             new Error("Connect the provider in Settings → Connectors."),
             { status: 400 },

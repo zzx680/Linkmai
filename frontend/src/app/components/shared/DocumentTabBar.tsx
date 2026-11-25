@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     useEffect,
@@ -18,7 +18,7 @@ import { FileTypeIcon } from "@/app/components/shared/FileTypeIcon";
 import { VersionChip } from "@/app/components/shared/VersionChip";
 import type { TabDropPosition } from "@/app/lib/reorderTabs";
 import { cn } from "@/app/lib/utils";
-import { CloseButton } from "@mike/ui";
+import { CloseButton } from "@linkmai/ui";
 import { LIQUID_GLASS_HOVER_CLASS } from "@/app/components/ui/liquid-surface";
 
 export interface DocumentTabItem {

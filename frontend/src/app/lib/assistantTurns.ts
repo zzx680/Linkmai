@@ -4,13 +4,13 @@ import type {
   ActiveAssistantTurn,
   Message,
 } from "@/app/components/shared/types";
-import { getChat, stopChatTurn, streamChatTurn } from "./mikeApi";
+import { getChat, stopChatTurn, streamChatTurn } from "./linkmaiApi";
 import {
   createTurnCursor,
   createTurnEventSink,
   readAssistantTurn,
 } from "./assistantTurnStream";
-import { isAbortError } from "@mike/client";
+import { isAbortError } from "@linkmai/client";
 
 type TurnRecord = {
   chatId: string | undefined;

@@ -1,8 +1,8 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { indexFolderDirectory } from "../shared/folderDirectoryIndex";
 import { isProjectItemDrag } from "@/app/lib/projectDragTypes";
@@ -37,7 +37,7 @@ import {
 import {
     DropdownAtPoint,
     DropdownItem,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import {
     notifyMoveFailure,
     type ProjectTreeItemKind,
@@ -223,8 +223,8 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
     }
 
     async function handleDropOnTarget(targetFolderId: string | null, e: React.DragEvent) {
-        const docId = e.dataTransfer.getData("application/mike-doc");
-        const movingFolderId = e.dataTransfer.getData("application/mike-folder");
+        const docId = e.dataTransfer.getData("application/linkmai-doc");
+        const movingFolderId = e.dataTransfer.getData("application/linkmai-folder");
 
         if (docId && onMoveDoc) {
             const doc = documents.find((d) => d.id === docId);
@@ -309,7 +309,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                             <div
                                 draggable
                                 onDragStart={(e) => {
-                                    e.dataTransfer.setData("application/mike-folder", folder.id);
+                                    e.dataTransfer.setData("application/linkmai-folder", folder.id);
                                     e.dataTransfer.effectAllowed = "move";
                                     setRowDragPreview({
                                         dataTransfer: e.dataTransfer,
@@ -393,7 +393,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                             key={`d-${doc.id}`}
                             draggable
                             onDragStart={(e) => {
-                                e.dataTransfer.setData("application/mike-doc", doc.id);
+                                e.dataTransfer.setData("application/linkmai-doc", doc.id);
                                 e.dataTransfer.effectAllowed = "copyMove";
                                 setRowDragPreview({
                                     dataTransfer: e.dataTransfer,

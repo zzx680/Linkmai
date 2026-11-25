@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
@@ -16,12 +16,12 @@ import {
   REASONING_LEVEL_LABELS,
   orderedModelGroups,
   GlassCardUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import {
   useUserProfile,
   type PreferenceField,
 } from "@/app/contexts/UserProfileContext";
-import { type ApiKeyState } from "@/app/lib/mikeApi";
+import { type ApiKeyState } from "@/app/lib/linkmaiApi";
 import { mergeConfiguredModelOptions } from "@/app/components/assistant/ModelToggle";
 import {
   MODELS,
@@ -30,7 +30,7 @@ import {
   canonicalModelId,
   routerSelections,
   type ModelOption,
-} from "@mike/client";
+} from "@linkmai/client";
 import { isModelAvailable } from "@/app/lib/modelAvailability";
 import {
   SettingsDescription,
@@ -176,14 +176,14 @@ export default function ModelPreferencesPage() {
       <section className="space-y-3" aria-labelledby="subagents-heading">
         <SettingsHeading id="subagents-heading">{uiText("Subagents")}</SettingsHeading>
         <SettingsDescription>
-          {uiText("Mike can hand parts of a task to subagents that work on them separately and report back. These are the defaults it follows unless you ask for something else in the chat.")}
+          {uiText("LinkMai can hand parts of a task to subagents that work on them separately and report back. These are the defaults it follows unless you ask for something else in the chat.")}
         </SettingsDescription>
         <GlassCardUI>
           <SettingsRow layout="stacked">
             <div className="space-y-1">
               <SettingsLabel>{uiText("Model")}</SettingsLabel>
               <SettingsDescription>
-                {uiText("The model each subagent runs on. Chosen per task lets Mike match the model to the work.")}
+                {uiText("The model each subagent runs on. Chosen per task lets LinkMai match the model to the work.")}
               </SettingsDescription>
             </div>
             <ModelPreferenceDropdown

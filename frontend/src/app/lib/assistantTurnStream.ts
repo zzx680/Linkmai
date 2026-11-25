@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 
-import { streamChatTurn } from "@/app/lib/mikeApi";
+import { streamChatTurn } from "@/app/lib/linkmaiApi";
 import { readSseFrames } from "@/app/lib/sse";
 import { reportGatewayLimit } from "@/app/lib/errorReporting";
 import { isPanelDocument } from "@/app/components/shared/types";
@@ -12,7 +12,7 @@ import type { AssistantTurnHandle } from "@/app/lib/assistantTurnTypes";
 import type {
   ConnectorApprovalItem,
   WebSource,
-} from "@mike/contracts";
+} from "@linkmai/contracts";
 
 /**
  * Reading an assistant turn's SSE stream into its turn record.

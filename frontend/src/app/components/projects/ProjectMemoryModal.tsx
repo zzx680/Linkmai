@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useState } from "react";
 import { Brain } from "lucide-react";
@@ -15,13 +15,13 @@ import { Modal } from "@/app/components/modals/Modal";
 import { ConfirmPopup } from "@/app/components/popups/ConfirmPopup";
 import { EmptyState } from "@/app/components/ui/empty-state";
 import { FieldLabel } from "@/app/components/ui/form-field";
-import { GlassCardUI, PillButtonUI, ToggleSwitchUI } from "@mike/ui";
+import { GlassCardUI, PillButtonUI, ToggleSwitchUI } from "@linkmai/ui";
 import { MarkdownEditor } from "@/app/components/ui/markdown-editor";
 import {
     getProjectMemory,
     setProjectMemoryEnabled,
     updateProjectMemory,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 
 export function ProjectMemoryModal({

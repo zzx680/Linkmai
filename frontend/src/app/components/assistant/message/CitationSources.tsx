@@ -1,12 +1,12 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { Loader2 } from "lucide-react";
 import { FileTypeIcon } from "../../shared/FileTypeIcon";
 import { LegalSourceIcon } from "../../shared/LegalSourceIcon";
 import { legalSourceIconKind } from "../../shared/documentCapabilities";
 import { displayCitationQuote, formatCitationPage } from "../../shared/types";
 import type { Citation } from "../../shared/types";
-import { CitationPillUI } from "@mike/ui";
+import { CitationPillUI } from "@linkmai/ui";
 import { RESPONSE_GLASS_SURFACE } from "./messageStyles";
 import {
     citationVerificationAriaLabel,

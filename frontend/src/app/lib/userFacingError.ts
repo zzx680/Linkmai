@@ -1,14 +1,14 @@
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 import { PRODUCT_SUPPORT_EMAIL } from "./productConfig";
 import {
-    MikeApiError,
+    LinkMaiApiError,
     UploadBatchError,
     reportedUpstreamMessage,
     type UploadOutcome,
-} from "./mikeApi";
-import type { Operation } from "@mike/client";
+} from "./linkmaiApi";
+import type { Operation } from "@linkmai/client";
 
 export type { Operation };
 
@@ -29,13 +29,13 @@ export function userFacingApiError(
     fallback: string,
 ): string {
     // The 5xx codes with something to say (a migration to apply, a server
-    // to wait for) get their fixed frontend message (mikeApi.ts).
-    if (error instanceof MikeApiError && error.code) {
+    // to wait for) get their fixed frontend message (linkmaiApi.ts).
+    if (error instanceof LinkMaiApiError && error.code) {
         const upstream = reportedUpstreamMessage(error.code);
         if (upstream) return upstream;
     }
     if (
-        error instanceof MikeApiError &&
+        error instanceof LinkMaiApiError &&
         error.status >= 400 &&
         error.status < 500 &&
         error.message
@@ -77,7 +77,7 @@ import {
     type UserFacingError,
     createErrorNotifier,
     type NotifyErrorOptions as SharedNotifyErrorOptions,
-} from "@mike/client";
+} from "@linkmai/client";
 import { isReported, reportError } from "@/app/lib/errorReporting";
 
 export {
@@ -87,9 +87,9 @@ export {
     isNetworkError,
     type UserErrorKind,
     type UserFacingError,
-} from "@mike/client";
+} from "@linkmai/client";
 
-export { notifyInfo, notifySuccess } from "@mike/client";
+export { notifyInfo, notifySuccess } from "@linkmai/client";
 
 /** The shared toast options plus the web app's Sentry identity. */
 export interface NotifyErrorOptions
@@ -148,7 +148,7 @@ function signInActionHref(): string | null {
  * Send real faults to Sentry, and only real faults.
  *
  * A 4xx is an intentional answer, a transport failure is already reported by
- * the API client under `component: mike-api`, and a cancellation is not a
+ * the API client under `component: linkmai-api`, and a cancellation is not a
  * failure at all. What is left is an unclassifiable throw (a bug in this
  * code) and a 5xx that reached a screen without going through the API
  * client. It runs BEFORE the shared notifier's console.warn so the console
@@ -205,7 +205,7 @@ export function reportFault(
 export function reportFlowFailure(args: {
     operation: Operation;
     /** Which client layer saw it; the API client unless the caller says. */
-    component?: "mike-api" | "assistant-chat";
+    component?: "linkmai-api" | "assistant-chat";
     status?: number | null;
     code?: string | null;
     requestId?: string | null;
@@ -225,7 +225,7 @@ export function reportFlowFailure(args: {
         {
             level: args.level,
             tags: {
-                component: args.component ?? "mike-api",
+                component: args.component ?? "linkmai-api",
                 operation: args.operation,
                 http_status: status,
                 http_method: args.method,
@@ -238,14 +238,14 @@ export function reportFlowFailure(args: {
 }
 
 /**
- * Codes the server side already reported and phrased for users (mikeApi.ts:
+ * Codes the server side already reported and phrased for users (linkmaiApi.ts:
  * schema_out_of_date, upstream_unavailable) keep that one sentence in a toast
  * too, so the error copy for them has a single source. A call site's own
  * `codeMessages` entry still wins.
  */
 function withReportedUpstreamMessage<T extends DescribeErrorOptions>(error: unknown, options: T): T {
     // Duck-typed like describeError: the code is read off any error shape,
-    // and mikeApi's table is consulted only when there is a code to look up.
+    // and linkmaiApi's table is consulted only when there is a code to look up.
     const raw = error && typeof error === "object" ? (error as { code?: unknown }).code : null;
     const code = typeof raw === "string" ? raw : null;
     const upstream = code ? reportedUpstreamMessage(code) : null;
@@ -254,7 +254,7 @@ function withReportedUpstreamMessage<T extends DescribeErrorOptions>(error: unkn
 }
 
 /**
- * The web app's `describeError`: the shared classifier plus mikeApi's fixed
+ * The web app's `describeError`: the shared classifier plus linkmaiApi's fixed
  * sentences for server-reported 5xx codes. Web code imports it from here so
  * an inline message and a notice for the same failure read the same words;
  * calling the shared one directly drops those sentences.
@@ -274,7 +274,7 @@ export function describeError(
  * also render it inline, or `null` when the failure is a cancellation the
  * user caused and does not need to hear about.
  *
- * The shared notifier (`createErrorNotifier` in `@mike/client`) owns the toast, the
+ * The shared notifier (`createErrorNotifier` in `@linkmai/client`) owns the toast, the
  * Retry and the cancellation rule; the web app adds its upstream copy, its
  * Sentry reporting, "Sign in", and a `mailto:` support link.
  */

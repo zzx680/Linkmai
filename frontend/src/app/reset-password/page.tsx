@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import {
     pillButtonUIClassName,
     authGlassCardUIClassName,
     authInputUIClassName,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { SiteLogo } from "@/app/components/site-logo";
 import {
     MIN_PASSWORD_LENGTH,

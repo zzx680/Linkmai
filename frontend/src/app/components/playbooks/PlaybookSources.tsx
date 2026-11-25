@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   useCallback,
@@ -29,7 +29,7 @@ import {
   listPlaybookSources,
   uploadPlaybookSource,
   type PlaybookSupplementarySource,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
 import {
   Dropdown,
@@ -38,7 +38,7 @@ import {
   DropdownTrigger,
   PillButtonUI,
   TextButtonUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { PlaybookPanels } from "./PlaybookPanels";
 import {
   PLAYBOOK_PANE_EMPTY_CLASS,

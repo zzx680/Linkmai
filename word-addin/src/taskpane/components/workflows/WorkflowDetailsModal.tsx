@@ -1,9 +1,9 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useRef, useState } from "react";
-import { WorkflowSlashCommandUI } from "@mike/ui";
+import { WorkflowSlashCommandUI } from "@linkmai/ui";
 import type { Workflow } from "../../types";
-import { deleteWorkflow, updateWorkflow } from "../../api/mikeApi";
+import { deleteWorkflow, updateWorkflow } from "../../api/linkmaiApi";
 import { Modal } from "../primitives/Modal";
 import {
   ModalFieldLabel,
@@ -150,7 +150,7 @@ export function WorkflowDetailsModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: uiText("Mike couldn't save this workflow. Try again."),
+          fallback: uiText("LinkMai couldn't save this workflow. Try again."),
           operation: "workflows.run",
         }).message,
       );
@@ -171,7 +171,7 @@ export function WorkflowDetailsModal({
     } catch (reason) {
       setDeleteError(
         reportFault(reason, {
-          fallback: uiText("Mike couldn't delete this workflow. Try again."),
+          fallback: uiText("LinkMai couldn't delete this workflow. Try again."),
           operation: "workflows.run",
         }).message,
       );

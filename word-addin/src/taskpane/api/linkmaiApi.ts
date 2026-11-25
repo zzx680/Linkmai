@@ -1,9 +1,9 @@
 /// <reference types="office-js" />
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * Configured API barrel for the Word add-in — the single place the typed client
  * is wired to the add-in's backend-managed cookie session. Mirrors
- * frontend/src/app/lib/mikeApi.ts, with auth state synchronized by
+ * frontend/src/app/lib/linkmaiApi.ts, with auth state synchronized by
  * ../auth/session.
  *
  * Components import API functions FROM THIS MODULE (not from the base client

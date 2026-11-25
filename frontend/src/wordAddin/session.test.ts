@@ -6,7 +6,7 @@
  * plain browser tab, or a Word host without that storage API) the
  * ReferenceError was thrown before the `.catch(() => {})` existed, rejected
  * the whole sign-in chain, and was filed to Sentry as "Failure in
- * word.session / notify" (MIKE-WORD-ADDIN-7) while the pane said "Mike
+ * word.session / notify" (MIKE-WORD-ADDIN-7) while the pane said "LinkMai
  * couldn't sign you in".
  */
 import { afterEach, describe, expect, it, vi } from "vitest";

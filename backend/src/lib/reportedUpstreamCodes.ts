@@ -1,4 +1,4 @@
-import type { ReportingOwner } from "@mike/contracts";
+import type { ReportingOwner } from "@linkmai/contracts";
 
 /** Ownership is explicit; a status or display code never establishes it. */
 export const BACKEND_REPORTING_OWNER = "backend" satisfies ReportingOwner;

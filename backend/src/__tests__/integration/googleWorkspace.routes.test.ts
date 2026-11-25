@@ -110,7 +110,7 @@ describe("Google Workspace routes", () => {
     expect(mocks.driveSettings).toHaveBeenCalledWith(PERSONAL, { enabled: undefined, requireWriteApproval: true, readOnly: true }, {});
   });
   it.each(["gmail", "google-calendar"])(
-    "starts %s for the authenticated Mike user; the body cannot change the requested permissions",
+    "starts %s for the authenticated LinkMai user; the body cannot change the requested permissions",
     async (provider) => {
       mocks.start.mockResolvedValue({
         authorizationUrl: "https://accounts.google.com/auth",
@@ -141,7 +141,7 @@ describe("Google Workspace routes", () => {
         .set("Host", "attacker.test");
       expect(relay.status).toBe(303);
       expect(relay.headers.location).toBe(
-        `https://app.mike.test/api/user/integrations/${provider}/oauth/finish?state=s&code=c`,
+        `https://app.linkmai.test/api/user/integrations/${provider}/oauth/finish?state=s&code=c`,
       );
       expect(relay.headers["cache-control"]).toBe("no-store");
       expect(relay.headers["referrer-policy"]).toBe("no-referrer");
@@ -248,7 +248,7 @@ describe("Google Workspace routes", () => {
     expect(res.status).toBe(404);
     expect(res.body).toEqual({
       code: "connector_unavailable",
-      detail: "Gmail is not offered on this Mike server.",
+      detail: "Gmail is not offered on this LinkMai server.",
     });
     expect(mocks.start).not.toHaveBeenCalled();
     mocks.start.mockResolvedValue({ authorizationUrl: "https://accounts.google.com/x" });
@@ -341,7 +341,7 @@ describe("Google Drive picker session", () => {
     expect(res.status).toBe(404);
     expect(res.body).toEqual({
       code: "connector_unavailable",
-      detail: "Google Drive is not offered on this Mike server.",
+      detail: "Google Drive is not offered on this LinkMai server.",
     });
   });
 

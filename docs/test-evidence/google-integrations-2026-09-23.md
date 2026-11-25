@@ -13,7 +13,7 @@ is incomplete. This report is not a merge-readiness sign-off.**
 ## September 24 live Assistant review
 
 A fresh Chrome conversation, **Google Integrations Acceptance Review**, was run
-against the real local deployment and the requested MikeOSS client. No provider
+against the real local deployment and the requested LinkMaiOSS client. No provider
 responses were mocked. Drive search/read returned the four expected fixture
 values (18 months, California, 45 days, violet otter 7391), independently checked
 against the source Google Doc. Calendar list/search/read returned the synthetic
@@ -26,7 +26,7 @@ thread, and draft-content reads remain untested. All three connections were
 read-only; no write or proposal tools were exposed. No email was sent and no
 provider data was changed during this review.
 
-The live run exposed incorrect Assistant instructions claiming a Mike
+The live run exposed incorrect Assistant instructions claiming a LinkMai
 administrator must provision write tools. Tool descriptions now explain the
 actual permission state and the user-facing Manage → Enable writes with approval
 path. A live follow-up in the same conversation correctly explained both Gmail
@@ -77,7 +77,7 @@ affected workflows completed successfully after the fix.
 ## Latest live flow: Drive search and read
 
 The Drive read was repeated successfully on `8af69de4` (application code
-`c26a2d72`) using the requested MikeOSS client. A fresh Assistant conversation
+`c26a2d72`) using the requested LinkMaiOSS client. A fresh Assistant conversation
 searched only for `MIKE-GOOGLE-20260923-native-doc`, invoked the live Drive read
 tool, and returned **18 months**, **California**, **45 days**, and **violet otter
 7391**, matching the private synthetic source. The complete answer was visually
@@ -92,7 +92,7 @@ not implemented in this PR; Drive remains read-only.
 
 ### Calendar positive read and read-only boundary
 
-After browser input recovered, Mike's live Gmail search and Calendar list-events
+After browser input recovered, LinkMai's live Gmail search and Calendar list-events
 tools both returned zero matches for the isolated synthetic marker. A subsequent
 request to prepare a draft and event while read-only exposed no write tools.
 Follow-up live Gmail message/draft and Calendar searches returned zero matching
@@ -102,7 +102,7 @@ items, confirming no synthetic write occurred.
 
 A private source event was then created directly in Google Calendar, with no
 guests, notifications, or busy-time effect. This fixture setup is **not** counted
-as a Mike write. Mike found the exact title `MIKE-GOOGLE-20260923-calendar-read`
+as a LinkMai write. LinkMai found the exact title `MIKE-GOOGLE-20260923-calendar-read`
 and invoked `google_calendar_read_event`. It returned September 25, 2026 in `America/Los_Angeles`, the source phrase
 **amber heron 4826**, and no guests. The GIF records the returned event details.
 
@@ -116,16 +116,16 @@ test fixture for later approved update/delete checks.
 
 Gmail positive message/thread reads and all approved writes remain unproven.
 The exact Gmail/Calendar write-access and self-addressed test-email confirmation
-is pending. Gmail Compose still triggers a browser-control failure; Mike and
+is pending. Gmail Compose still triggers a browser-control failure; LinkMai and
 Calendar UI control recovered. No successful write GIF is claimed.
 
 ## Environment and evidence boundaries
 
 - Production Next.js web server on localhost:3000, Express on localhost:3001.
 - Local Supabase and disposable S3-compatible storage; synthetic documents only.
-- Live model tests used the model key saved in the disposable Mike test user's
+- Live model tests used the model key saved in the disposable LinkMai test user's
   profile. No credential is included in this report or the screenshots.
-- Requested Google project: `soy-oarlock-503613-m7`, OAuth client MikeOSS.
+- Requested Google project: `soy-oarlock-503613-m7`, OAuth client LinkMaiOSS.
   Organization-owned project; OAuth audience is **External / Testing**.
   This is not evidence of an Internal Workspace audience or administrator policy.
 - The old `mikeamal` connections were removed before this run. All eight old-client
@@ -186,7 +186,7 @@ the suite; this is not a claim that the whole app is accessibility-clean.
 
 ## Review and responsive-layout fixes
 
-- Bind OAuth completion to the initiating Mike user. Provider callbacks relay to
+- Bind OAuth completion to the initiating LinkMai user. Provider callbacks relay to
   a fixed frontend gateway so its session cookies are available even when the
   public API has a separate origin. Anonymous, wrong-owner, and MFA failures are
   rejected before token exchange. The registered Google callback URLs stay the same.
@@ -295,14 +295,14 @@ screenshots finish CSS transitions before capture; no visual content is fabricat
 | Three localhost callbacks | Saved for Drive, Gmail, and Calendar via localhost:3000/api |
 | Test-user eligibility | Configured; fresh Drive OAuth passed the prior access-denied screen |
 | Optional scopes | gmail.modify and calendar.events saved alongside the existing read scopes |
-| Final Drive consent | Approved by the user and completed; Mike displayed Connected · Read-only |
+| Final Drive consent | Approved by the user and completed; LinkMai displayed Connected · Read-only |
 | Gmail/Calendar consent and live provider operations | Pending |
 | Actual Assistant Google tool selection | Drive search and native Google Doc export/read passed with a real Claude Sonnet 4.6 response |
 | Inline mutation approval and provider writes | Pending Gmail/Calendar grants |
 
 On the resumed September 23 session, Chrome reconnected and the local Docker,
 Supabase, storage, frontend, and backend services were restored. The user
-explicitly approved Drive read access. Google accepted the callback and Mike
+explicitly approved Drive read access. Google accepted the callback and LinkMai
 persisted the connection. Gmail reached its consent flow, but Gmail/Calendar
 read consent is still awaiting approval. Write upgrades have not been granted.
 
@@ -311,7 +311,7 @@ created in the selected Google account through Google's UI. A real Assistant
 request searched for that exact title and read only that document. Its answer
 matched all four source assertions: **18 months**, **California**, **45 days**,
 and **violet otter 7391**. This ran on `ecf95dae` before the subsequent rebase,
-using the requested MikeOSS client. The screenshot below shows the actual
+using the requested LinkMaiOSS client. The screenshot below shows the actual
 `Google Drive: read_file` activity. The completed answer was verified in the
 accessibility tree; the screenshot viewport does not show the full answer table.
 
@@ -379,7 +379,7 @@ On `b3450213` (application code `c26a2d72`), the rebuilt local production app
 confirmed all three Google services connected. Gmail and Calendar each displayed
 the explicitly selected test account with **Read-only** access; Drive retained
 its existing read-only connection through the server restart. The selected Google
-account differs from the local Mike test user's login, exercising independent
+account differs from the local LinkMai test user's login, exercising independent
 account selection. No Gmail or Calendar write upgrade was granted in this step.
 
 This confirms OAuth completion and persisted connection status, not successful
@@ -415,7 +415,7 @@ the authoritative operator guide.
 
 ## UI flow recording
 
-The following GIF predates the compact-card alignment and shows actual Mike-side
+The following GIF predates the compact-card alignment and shows actual LinkMai-side
 OAuth **cancellation** flows for Drive,
 Gmail, and Calendar using the newly configured client. Each starts authorization,
 shows the pending state, cancels, and returns to a disconnected state with a

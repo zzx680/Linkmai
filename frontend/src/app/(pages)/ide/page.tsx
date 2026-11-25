@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import { SvgAssetIcon } from "@/app/components/ui/svg-asset-icon";
 import ide from "../../../../public/icons/features/ide-new.svg";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import { ProjectPickerModal } from "@/app/components/modals/ProjectPickerModal";
 import { NewProjectModal } from "@/app/components/projects/NewProjectModal";
 import type { Project } from "@/app/components/shared/types";

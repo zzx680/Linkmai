@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "mike-backend",
+      "name": "linkmai-backend",
       "dependencies": {
         "@ai-sdk/amazon-bedrock": "^5.0.113",
         "@ai-sdk/anthropic": "^4.0.65",

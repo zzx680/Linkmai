@@ -1,4 +1,4 @@
-import type { ConnectorApprovalItem, DocumentSearchEvent } from "@mike/contracts";
+import type { ConnectorApprovalItem, DocumentSearchEvent } from "@linkmai/contracts";
 import { textCardEvent } from "./textCard";
 import { internalFailure } from "../../../../lib/serviceResult";
 import { canUseWorkflowInWorkspace } from "../../../../lib/workflowWorkspace";

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     useCallback,
@@ -18,7 +18,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Brain, MessageSquare, Pencil, Trash2, X } from "lucide-react";
 import { findPendingAskInput } from "@/app/lib/pendingAskInput";
-import { deleteChat } from "@/app/lib/mikeApi";
+import { deleteChat } from "@/app/lib/linkmaiApi";
 import { loadAssistantChat } from "@/app/lib/assistantTurns";
 import {
     sortChatsByActivity,
@@ -41,7 +41,7 @@ import {
     type ChatInputHandle,
 } from "@/app/components/assistant/ChatInput";
 import { ChatInputPrompt } from "@/app/components/assistant/ChatInputPrompt";
-import { ResponseSelectionMenuUI, MikeIcon } from "@mike/ui";
+import { ResponseSelectionMenuUI, LinkMaiIcon } from "@linkmai/ui";
 import { ChatPanelHeader } from "@/app/components/shared/ChatPanelHeader";
 import { HeaderActionsMenu } from "@/app/components/shared/HeaderActionsMenu";
 import { ApiKeyMissingPopup } from "@/app/components/popups/ApiKeyMissingPopup";
@@ -60,7 +60,7 @@ import { can, roleFromLoaded } from "@/app/lib/permissions";
 import { LIQUID_GLASS_FLAT_CLASS } from "@/app/components/ui/liquid-surface";
 import { cn } from "@/app/lib/utils";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import type { MessageExcerpt } from "@mike/client";
+import type { MessageExcerpt } from "@linkmai/client";
 
 const ICON_SIZE = 28;
 const GAP = 14;
@@ -101,7 +101,7 @@ function AssistantGreeting({ username }: { username: string }) {
                             "transform 900ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                     }}
                 >
-                    <MikeIcon size={ICON_SIZE} />
+                    <LinkMaiIcon size={ICON_SIZE} />
                 </div>
                 <h1
                     ref={textRef}
@@ -515,7 +515,7 @@ export function ProjectChatPanel({
         event.preventDefault();
         event.stopPropagation();
         setChatDragOver(false);
-        const docId = event.dataTransfer.getData("application/mike-doc");
+        const docId = event.dataTransfer.getData("application/linkmai-doc");
         if (!docId) {
             const files = Array.from(event.dataTransfer.files);
             if (files.length > 0) chatInputRef.current?.addFiles(files);

@@ -20,7 +20,7 @@ import {
     getDocumentFile,
     getPlaybook,
     type Playbook,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { PageChromeContext } from "@/app/contexts/PageChromeContext";
 
 const { push, renameChat, deleteChat, leaveChat, setCurrentChatId, setNewChatMessages } =
@@ -100,8 +100,8 @@ vi.mock("@/app/contexts/AuthContext", () => ({
 vi.mock("@/app/contexts/UserProfileContext", () => ({
     useUserProfile: () => ({ profile: null }),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     listDocumentVersions: vi.fn(),
     getDocument: vi.fn(),
     renameProjectDocument: vi.fn(),

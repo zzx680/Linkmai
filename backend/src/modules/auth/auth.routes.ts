@@ -213,7 +213,7 @@ authRouter.post("/setup", asyncRoute(async (req, res) => {
     if (result.reason === "auth_error") return authError(res, result.error);
     return res.status(409).json({
       code: "setup_complete",
-      detail: "This Mike instance is already set up. Log in instead.",
+      detail: "This LinkMai instance is already set up. Log in instead.",
     });
   }
 

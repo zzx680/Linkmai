@@ -39,7 +39,7 @@ export type RouterModelSelections = Record<RouterSlug, string[]>;
 /** The router a namespaced app-level model id routes through, if any. */
 export function routerForModelId(model: string): RouterSlug | null {
     // Deployment-declared models win over the prefix rules, exactly as in
-    // providerForModel: an operator's MIKE_MODEL_CONFIG_JSON model named
+    // providerForModel: an operator's LINKMAI_MODEL_CONFIG_JSON model named
     // "azure/gpt-internal" is an openai-compatible endpoint, not an Azure
     // OpenAI deployment, and is not gated by the user's router selection.
     if (getConfiguredModel(model)) return null;

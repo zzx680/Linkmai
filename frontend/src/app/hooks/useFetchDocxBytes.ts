@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
-import { getDocumentFileUrl } from "@/app/lib/mikeApi";
+import { getDocumentFileUrl } from "@/app/lib/linkmaiApi";
 import { authenticatedFetch } from "@/app/lib/authEvents";
 
 export interface FetchDocxResult {

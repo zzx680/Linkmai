@@ -11,10 +11,10 @@ import {
     listSystemWorkflows,
     listWorkflowIds,
     listWorkflowsPage,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { usePaginatedWorkflows } from "./usePaginatedWorkflows";
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listSystemWorkflows: vi.fn(),
     listWorkflowsPage: vi.fn(),
     listWorkflowIds: vi.fn(),

@@ -99,7 +99,7 @@ describe("startGoogleDriveOAuth", () => {
         expect(url.searchParams.get("scope")).toBe(
             `openid email ${GOOGLE_DRIVE_SCOPE}`,
         );
-        // Mike asks only for per-file access, never the restricted full scope.
+        // LinkMai asks only for per-file access, never the restricted full scope.
         const requested = url.searchParams.get("scope")!.split(" ");
         expect(requested).toContain(
             "https://www.googleapis.com/auth/drive.file",

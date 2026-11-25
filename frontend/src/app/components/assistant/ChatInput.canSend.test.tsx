@@ -6,14 +6,14 @@ import { useUserProfile } from "@/app/contexts/UserProfileContext";
 import {
     uploadProjectDocuments,
     uploadStandaloneDocuments,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { Document } from "@/app/components/shared/types";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
 import { AssistantWorkflowModal } from "./AssistantWorkflowModal";
 import { AddDocumentsModal } from "../modals/AddDocumentsModal";
 import { PlaybookPickerModal } from "../playbooks/PlaybookPickerModal";
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listWorkflows: vi.fn(async () => []),
     uploadStandaloneDocument: vi.fn(),
     uploadProjectDocuments: vi.fn(),

@@ -12,7 +12,7 @@ import {
     DropdownTrigger,
     LIQUID_GLASS_HOVER_CLASS,
     LIQUID_GLASS_SELECTED_CLASS,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 export type ModalSelectOption =
     | string

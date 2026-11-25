@@ -2,7 +2,7 @@ import { act, createRef } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import type { Document } from "../shared/types";
 import { WorkflowAssets, type WorkflowAssetsHandle } from "./WorkflowAssets";
 
@@ -16,8 +16,8 @@ const {
     uploadWorkflowAssets: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("@/app/lib/mikeApi")>();
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@/app/lib/linkmaiApi")>();
     return {
         ...actual,
         copyDocumentsToWorkflowAssets,

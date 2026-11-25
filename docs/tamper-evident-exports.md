@@ -1,6 +1,6 @@
 # Tamper-evident exports
 
-Mike hashes a document version's bytes with SHA-256 whenever it writes them.
+LinkMai hashes a document version's bytes with SHA-256 whenever it writes them.
 `GET /projects/:projectId/export` returns a manifest containing those hashes and
 the accept/reject trail.
 
@@ -41,7 +41,7 @@ hashes can still be checked.
 
 The signature is calculated over:
 
-1. The bytes `mike-project-manifest-v1`.
+1. The bytes `linkmai-project-manifest-v1`.
 2. A NUL byte.
 3. The manifest digest bytes.
 
@@ -51,7 +51,7 @@ It can be checked with any Ed25519 implementation:
 crypto.verify(
   null,
   Buffer.concat([
-    Buffer.from("mike-project-manifest-v1\0"),
+    Buffer.from("linkmai-project-manifest-v1\0"),
     Buffer.from(manifest.digest.value, "hex"),
   ]),
   publicKey,

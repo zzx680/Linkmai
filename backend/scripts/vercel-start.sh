@@ -9,7 +9,7 @@
 #
 #   1. Reads the Supabase Marketplace integration's variable names
 #      (SUPABASE_SERVICE_ROLE_KEY, POSTGRES_URL_NON_POOLING, ...) into the
-#      ones Mike uses. A variable already set on the project always wins.
+#      ones LinkMai uses. A variable already set on the project always wins.
 #   2. Derives FRONTEND_URL and API_PUBLIC_URL from the production domain
 #      Vercel assigns, and selects Supabase Storage when no S3 bucket is
 #      configured.
@@ -20,7 +20,7 @@
 #      signing/encryption secrets once, keeping them in a schema PostgREST
 #      does not expose, so they survive redeploys and are never in the repo.
 #   5. Turns on first-run setup, so the first visitor creates the first
-#      account in the app; MIKE_ADMIN_EMAIL/MIKE_ADMIN_PASSWORD, when set,
+#      account in the app; LINKMAI_ADMIN_EMAIL/LINKMAI_ADMIN_PASSWORD, when set,
 #      create it here instead (scripts/vercel-admin-user.mjs).
 #
 # Every step is idempotent; a start with nothing to do costs a few queries.
@@ -44,7 +44,7 @@ first_set() {
   done
 }
 
-# --- 1. Supabase integration names -> Mike names ----------------------------
+# --- 1. Supabase integration names -> LinkMai names ----------------------------
 export SUPABASE_URL="${SUPABASE_URL:-$(first_set NEXT_PUBLIC_SUPABASE_URL)}"
 export SUPABASE_SECRET_KEY="${SUPABASE_SECRET_KEY:-$(first_set SUPABASE_SERVICE_ROLE_KEY)}"
 export SUPABASE_PUBLISHABLE_KEY="${SUPABASE_PUBLISHABLE_KEY:-$(first_set \
@@ -70,7 +70,7 @@ fi
 bucket="${SUPABASE_STORAGE_BUCKET:-mike}"
 # A new deployment has no accounts: the first visitor creates one on the
 # setup screen (backend/src/modules/auth, docs/vercel.md).
-export MIKE_FIRST_RUN_SETUP="${MIKE_FIRST_RUN_SETUP:-true}"
+export LINKMAI_FIRST_RUN_SETUP="${LINKMAI_FIRST_RUN_SETUP:-true}"
 
 # --- 3. Database ------------------------------------------------------------
 psql_db() {
@@ -170,7 +170,7 @@ case "$role" in
     # The catalog lives in the database, so a failed sync only delays new
     # workflows. GitHub's anonymous API limit is shared by Vercel's outbound
     # addresses and often answers 403, so retry in the background for two
-    # hours instead of holding up the workers (set MIKE_WORKFLOWS_GITHUB_TOKEN
+    # hours instead of holding up the workers (set LINKMAI_WORKFLOWS_GITHUB_TOKEN
     # to avoid the limit).
     (
       for attempt in 1 2 3 4 5 6; do

@@ -15,7 +15,7 @@ const SYNTHETIC_SPECS = [
 export default defineConfig({
     testDir: "./e2e",
     /* Every parallel worker signs in as its OWN user (worker 0 is the
-       historical e2e@mike.local; see workerAccount() in e2e/users.ts and the
+       historical e2e@linkmai.local; see workerAccount() in e2e/users.ts and the
        worker fixture in e2e/fixtures.ts), so workers never share project,
        chat or workflow lists or a session. Files still run one test at a time
        within a worker: several specs build on state created earlier in the

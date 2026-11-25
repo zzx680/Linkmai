@@ -11,7 +11,7 @@ import {
     listSystemWorkflows,
     listWorkflowIds,
     listWorkflowsPage,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { appendUniqueRows, paginationError, splitOverfetchedPage } from "@/app/lib/paginatedRows";
 import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
 

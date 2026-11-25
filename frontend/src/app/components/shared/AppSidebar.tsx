@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { UserAvatar } from "@/app/components/ui/user-avatar";
 
@@ -39,7 +39,7 @@ import {
     DropdownRadioItem,
     DropdownSeparator,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { SidebarHeading } from "@/app/components/shared/SidebarHeading";
 import { SidebarLogo } from "@/app/components/shared/SidebarLogo";
 import { SidebarProjectItem } from "@/app/components/shared/SidebarProjectItem";
@@ -56,7 +56,7 @@ import {
     SettingsSkeuoIcon,
     SignOutSkeuoIcon,
 } from "@/app/components/shared/AppSidebarSkeuoIcons";
-import { listProjectsPage } from "@/app/lib/mikeApi";
+import { listProjectsPage } from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
 import { useAssignLatest } from "@/app/hooks/useLatestRef";
 import type { Project } from "@/app/components/shared/types";
@@ -266,8 +266,8 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
               ]
             : null;
     // The sidebar is headed by whose work it is showing: the organization's
-    // name in its workspace, and plain "Mike" for personal work. `null` while
-    // a remembered organization's name is still loading — saying "Mike" for
+    // name in its workspace, and plain "LinkMai" for personal work. `null` while
+    // a remembered organization's name is still loading — saying "LinkMai" for
     // that moment would be naming the wrong workspace.
     const sidebarHeading = activeOrganization
         ? activeOrganization.name
@@ -275,7 +275,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
             workspaceId !== PERSONAL_WORKSPACE &&
             organizations === null
           ? null
-          : uiText("Mike");
+          : uiText("LinkMai");
     const [recentProjects, setRecentProjects] = useState<Project[] | null>(
         null,
     );

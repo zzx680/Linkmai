@@ -172,8 +172,8 @@ async function buildMemoryZipExport(
     return {
         body: await buildMemoryArchive(db, userId, userEmail, orgId),
         filename: orgId
-            ? `mike-memory-export-${orgId.slice(0, 8)}.zip`
-            : "mike-memory-export.zip",
+            ? `linkmai-memory-export-${orgId.slice(0, 8)}.zip`
+            : "linkmai-memory-export.zip",
         contentType: "application/zip",
     };
 }

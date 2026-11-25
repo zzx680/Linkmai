@@ -13,7 +13,7 @@ import {
     listTabularReviews,
     listWorkflowIds,
     listWorkflowsPage,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { usePaginatedProjects } from "./usePaginatedProjects";
 import { usePaginatedTabularReviews } from "./usePaginatedTabularReviews";
 import { usePaginatedWorkflows } from "./usePaginatedWorkflows";
@@ -23,7 +23,7 @@ const workspace = vi.hoisted(() => ({ current: "personal" as string | undefined 
 vi.mock("@/app/contexts/WorkspaceContext", () => ({
     useWorkspaceParam: () => workspace.current,
 }));
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listProjectsPage: vi.fn(),
     listProjectIds: vi.fn(),
     listSystemWorkflows: vi.fn(),

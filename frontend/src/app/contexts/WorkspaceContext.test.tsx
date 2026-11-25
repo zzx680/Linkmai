@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/app/contexts/AuthContext", () => ({
     useAuth: () => ({ user: mocks.userId ? { id: mocks.userId } : null }),
 }));
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listOrgs: mocks.listOrgs,
     getOrgApiKeys: mocks.getOrgApiKeys,
 }));

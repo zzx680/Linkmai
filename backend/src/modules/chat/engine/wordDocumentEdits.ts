@@ -1,7 +1,7 @@
 import type { Db } from "../../../lib/supabase";
 
-export type { WordEditApplyMode } from "@mike/contracts";
-import type { WordEditApplyMode } from "@mike/contracts";
+export type { WordEditApplyMode } from "@linkmai/contracts";
+import type { WordEditApplyMode } from "@linkmai/contracts";
 
 interface ParsedWordDocumentEdit {
   blockIndex: number;

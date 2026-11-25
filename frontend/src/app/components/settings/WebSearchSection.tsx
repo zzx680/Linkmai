@@ -1,10 +1,10 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import { ApiKeyField } from "@/app/components/settings/ApiKeyField";
-import { GlassCardUI, PillButtonUI, ToggleSwitchUI } from "@mike/ui";
+import { GlassCardUI, PillButtonUI, ToggleSwitchUI } from "@linkmai/ui";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
 import { SettingsRow } from "@/app/components/settings/SettingsRow";
 import {
@@ -24,7 +24,7 @@ import {
   WEB_SEARCH_BACKENDS,
   type WebSearchBackend,
   type WebSearchSettings,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
 
 const SEARCH_SERVICES: Record<
@@ -33,7 +33,7 @@ const SEARCH_SERVICES: Record<
 > = {
   brave: {
     label: "Brave Search",
-    description: uiText("Mike searches with Brave Search. Works with any model."),
+    description: uiText("LinkMai searches with Brave Search. Works with any model."),
     keyLabel: uiText("Brave Search API Key"),
   },
   tavily: {
@@ -212,7 +212,7 @@ export function WebSearchSection() {
               <div className="min-w-0 space-y-1">
                 <SettingsLabel>{uiText("Enable web search")}</SettingsLabel>
                 <SettingsDescription>
-                  {uiText("Let Mike search the web and read pages when an answer needs current or public information.")}
+                  {uiText("Let LinkMai search the web and read pages when an answer needs current or public information.")}
                 </SettingsDescription>
               </div>
               {settings ? (

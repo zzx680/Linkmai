@@ -41,8 +41,8 @@ matrix:
 
 Each Playwright worker signs in as its **own** user, following Playwright's
 [one account per parallel worker](https://playwright.dev/docs/auth#moderate-one-account-per-parallel-worker)
-pattern. Worker 0 is the historical `e2e@mike.local` (or `E2E_EMAIL` /
-`E2E_PASSWORD`); worker *n* is `e2e-wn@mike.local` with the same password
+pattern. Worker 0 is the historical `e2e@linkmai.local` (or `E2E_EMAIL` /
+`E2E_PASSWORD`); worker *n* is `e2e-wn@linkmai.local` with the same password
 (`workerAccount()` in `e2e/users.ts`). The worker-scoped fixture in
 `e2e/fixtures.ts` creates the account through the local Supabase admin API,
 signs in once, finishes onboarding and reuses the session for every test in

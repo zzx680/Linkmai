@@ -28,9 +28,9 @@
       // Shared packages (packages/*), reached by name. frontend/Dockerfile
       // copies each target into the image at the path the alias resolves to;
       // src/__tests__/architecture.test.ts checks the two agree.
-      "@mike/contracts": ["../packages/contracts/index.d.ts"],
-      "@mike/ui": ["../packages/ui/src/index.ts"],
-      "@mike/client": ["../packages/client/src/index.ts"],
+      "@linkmai/contracts": ["../packages/contracts/index.d.ts"],
+      "@linkmai/ui": ["../packages/ui/src/index.ts"],
+      "@linkmai/client": ["../packages/client/src/index.ts"],
       // The packages have no node_modules of their own: their dependencies
       // are this application's. Node-style lookup from packages/ walks up to
       // the repository root and never reaches frontend/node_modules, so name

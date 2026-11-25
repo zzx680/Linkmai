@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState, type ReactNode } from "react";
 
@@ -11,14 +11,14 @@ import {
     ModelProviderIcon,
     type ModelApiKeyField,
 } from "@/app/components/settings/modelProviders";
-import { PillButtonUI } from "@mike/ui";
-import { ToggleSwitchUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
+import { ToggleSwitchUI } from "@linkmai/ui";
 import { MfaVerificationPopup } from "@/app/components/popups/MfaVerificationPopup";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
 import { SettingsDescription } from "@/app/components/settings/SettingsText";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
-import { isMfaRequiredError, type ApiKeyProvider } from "@/app/lib/mikeApi";
+import { isMfaRequiredError, type ApiKeyProvider } from "@/app/lib/linkmaiApi";
 import { reportFault } from "@/app/lib/userFacingError";
 
 /**

@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { indexFolderDirectory } from "./folderDirectoryIndex";
 import {
@@ -19,7 +19,7 @@ import { FileTypeIcon } from "./FileTypeIcon";
 import { ProjectSvgIcon, SubfolderSvgIcon } from "./FolderSvgIcon";
 import { SearchBar } from "@/app/components/ui/search-bar";
 import { SelectionCheckbox as DirectorySelectionCheckbox } from "@/app/components/ui/selection-checkbox";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import { SkeletonLine } from "./TablePrimitive";
 import { TableLoadMoreRow } from "./TableLoadMoreRow";
 import { useDirectoryData, type DirectoryTab } from "./useDirectoryData";
@@ -27,7 +27,7 @@ import { useDebouncedValue } from "@/app/hooks/useDebouncedValue";
 import {
   searchLibraryDocuments,
   searchProjectDirectory,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { missingById } from "@/app/lib/idCollections";
 import {

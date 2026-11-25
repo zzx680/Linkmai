@@ -1,10 +1,10 @@
 # Deploy on Vercel
 
-Mike can run entirely on Vercel, with a Supabase project from the Vercel
+LinkMai can run entirely on Vercel, with a Supabase project from the Vercel
 Marketplace for the database, sign-in and file storage. There is nothing else
 to host, no Docker to install and no keys to copy by hand.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fopen-legal-products%2Fmike&project-name=mike&repository-name=mike&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22supabase%22%2C%22productSlug%22%3A%22supabase%22%2C%22protocol%22%3A%22storage%22%7D%5D&demo-title=Mike&demo-description=Your%20own%20Mike%3A%20the%20open-source%20legal%20AI%20workspace%2C%20on%20your%20Vercel%20account%20with%20a%20Supabase%20database.&demo-url=https%3A%2F%2Fgithub.com%2Fopen-legal-products%2Fmike)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fopen-legal-products%2Fmike&project-name=linkmai&repository-name=linkmai&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22supabase%22%2C%22productSlug%22%3A%22supabase%22%2C%22protocol%22%3A%22storage%22%7D%5D&demo-title=LinkMai&demo-description=Your%20own%20Mike%3A%20the%20open-source%20legal%20AI%20workspace%2C%20on%20your%20Vercel%20account%20with%20a%20Supabase%20database.&demo-url=https%3A%2F%2Fgithub.com%2Fopen-legal-products%2Fmike)
 
 > Vercel's Services, Container runtime and Daemons, which this deployment
 > uses, are in beta.
@@ -24,7 +24,7 @@ to host, no Docker to install and no keys to copy by hand.
 | Database, Auth, files | Supabase | Marketplace integration |
 
 There is nothing to fill in. Open the production URL when the deployment is
-ready: a new deployment has no accounts, so Mike shows **Set up Mike**, where
+ready: a new deployment has no accounts, so LinkMai shows **Set up LinkMai**, where
 you create the first account and are signed straight in. That account is
 confirmed without an email, because a new Supabase project cannot send one
 yet.
@@ -32,16 +32,16 @@ yet.
 > [!IMPORTANT]
 > Create your account as soon as the deployment is ready. Until the first
 > account exists, anyone who opens your deployment's address sees **Set up
-> Mike** and can create it. The address can be guessed: every deployment
-> from the button is named `mike`, and Vercel adds a suffix that can include
+> LinkMai** and can create it. The address can be guessed: every deployment
+> from the button is named `linkmai`, and Vercel adds a suffix that can include
 > your team or account name. Vercel takes you to the site when the build
 > finishes, so you are normally first. To skip the screen entirely, set
-> `MIKE_ADMIN_EMAIL` and `MIKE_ADMIN_PASSWORD` before the first deployment
+> `LINKMAI_ADMIN_EMAIL` and `LINKMAI_ADMIN_PASSWORD` before the first deployment
 > (see below).
 
 Each deployment is independent: its own Vercel project, Supabase database and
 address. Setup closes for good once that deployment has an account, and the
-first account has no special rights. Setup needs no database table: Mike asks
+first account has no special rights. Setup needs no database table: LinkMai asks
 Supabase Auth whether any account exists.
 
 Then add a model-provider key under **Settings > Bring Your Own Keys**, or set
@@ -61,9 +61,9 @@ step is idempotent:
   `POSTGRES_URL_NON_POOLING`) and derives `FRONTEND_URL` and `API_PUBLIC_URL`
   from the project's production domain (`VERCEL_PROJECT_PRODUCTION_URL`).
 - On a new database it loads `backend/schema.sql`; then it applies any pending
-  migration with `backend/scripts/migrate.sh`. A redeploy of a newer Mike
+  migration with `backend/scripts/migrate.sh`. A redeploy of a newer LinkMai
   migrates the database the same way.
-- It creates the private `mike` Storage bucket and selects the Supabase
+- It creates the private `linkmai` Storage bucket and selects the Supabase
   Storage driver (`STORAGE_DRIVER=supabase`), unless `R2_ENDPOINT_URL` is set.
 - It generates `DOWNLOAD_SIGNING_SECRET` and `USER_API_KEYS_ENCRYPTION_SECRET`
   once and keeps them in the table `mike_deploy.secrets`, in a schema that the
@@ -72,9 +72,9 @@ step is idempotent:
   does not list it. A value you set on the Vercel project takes precedence.
   Do not change `USER_API_KEYS_ENCRYPTION_SECRET` afterwards, and do not drop
   that table: keys users saved under the old value can no longer be read.
-- It turns on first-run setup (`MIKE_FIRST_RUN_SETUP=true`). To create the
-  first account without the setup screen instead, set `MIKE_ADMIN_EMAIL` and
-  `MIKE_ADMIN_PASSWORD` (at least 10 characters) on the project before the
+- It turns on first-run setup (`LINKMAI_FIRST_RUN_SETUP=true`). To create the
+  first account without the setup screen instead, set `LINKMAI_ADMIN_EMAIL` and
+  `LINKMAI_ADMIN_PASSWORD` (at least 10 characters) on the project before the
   first deployment; `backend/scripts/vercel-admin-user.mjs` creates it,
   confirmed, and never changes an existing account.
 
@@ -94,7 +94,7 @@ can never be confirmed. To open it:
    your production URL and add `https://<your-domain>/auth/callback` to the
    redirect URLs.
 2. **Authentication > Emails > SMTP Settings**: add your own SMTP provider.
-3. On the Vercel project, set `MIKE_SIGNUP_EMAIL_CONFIGURED=true` and
+3. On the Vercel project, set `LINKMAI_SIGNUP_EMAIL_CONFIGURED=true` and
    redeploy.
 
 See [Authentication email](deployment.md#authentication-email) for the
@@ -107,7 +107,7 @@ the button appears on the login page within a minute, with no redeploy.
 - **Request and response size.** A request body through `/api` is capped at
   4.5 MB. Files never take that path: browsers upload straight to Supabase
   Storage.
-- **File size.** The Supabase Free plan stores files up to 50 MB; Mike
+- **File size.** The Supabase Free plan stores files up to 50 MB; LinkMai
   accepts uploads up to 100 MB. Raise the limit on a paid Supabase plan under
   **Storage > Settings**.
 - **Long assistant turns.** A streamed response ends when the API reaches its
@@ -124,7 +124,7 @@ the button appears on the login page within a minute, with no redeploy.
   Dependabot branch. Dependabot still opens pull requests in your copy;
   disable it under the repository's **Settings > Code security** if you do
   not want them.
-- **No CI in your copy.** The copy includes Mike's GitHub Actions workflows,
+- **No CI in your copy.** The copy includes LinkMai's GitHub Actions workflows,
   but every job is skipped unless the repository is
   `open-legal-products/mike` or a fork of it, so your copy uses no Actions
   minutes. To run them, remove the `if:` line from the jobs you want.
@@ -134,7 +134,7 @@ the button appears on the login page within a minute, with no redeploy.
 - **Built-in workflows.** The worker loads the workflow catalog from GitHub
   when it starts. GitHub's anonymous API limit is shared by Vercel's outbound
   addresses, so the download can be refused; the worker retries for two
-  hours. Set `MIKE_WORKFLOWS_GITHUB_TOKEN` (a token with no scopes is enough)
+  hours. Set `LINKMAI_WORKFLOWS_GITHUB_TOKEN` (a token with no scopes is enough)
   to avoid the limit.
 
 ## Setting it up by hand

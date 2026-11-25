@@ -156,7 +156,7 @@ describe("version text extraction", () => {
     expect(fake.calls[2].payload).toMatchObject({ status: "failed", last_error: "document_text_unreadable" });
     expect(fake.calls[3].payload).toMatchObject({ status: "failed", error_code: "extraction_failed" });
     fake.done();
-    // The user's own file, and nothing in Mike can read it: logged on the
+    // The user's own file, and nothing in LinkMai can read it: logged on the
     // server, not sent to Sentry.
     expect(sentry.setOperation).toHaveBeenCalledWith("documents.extract");
     expect(sentry.reportError).not.toHaveBeenCalled();

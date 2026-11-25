@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     createContext,
@@ -30,7 +30,7 @@ import { PageHeader } from "@/app/components/shared/PageHeader";
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
 import { TableToolbar } from "@/app/components/shared/TableToolbar";
 import { DocumentUploadMenu } from "@/app/components/shared/DocumentUploadMenu";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import {
   bulkDeleteLibraryDocuments,
     createLibraryFolder,
@@ -51,7 +51,7 @@ import {
     uploadLibraryDocuments,
     type LibraryKind,
     type LibraryScope,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
 import type { Document } from "@/app/components/shared/types";
 import { useDebouncedValue } from "@/app/hooks/useDebouncedValue";

@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Mike</title>
+    <title>LinkMai</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -139,9 +139,9 @@
   </head>
   <body>
     <main>
-      <h1>Connect to Mike</h1>
+      <h1>Connect to LinkMai</h1>
       <p>
-        The Mike server isn't reachable. Check your internet connection, or
+        The LinkMai server isn't reachable. Check your internet connection, or
         point the app at a self-hosted deployment.
       </p>
       <label for="url">Server URL</label>
@@ -166,22 +166,22 @@
     <script>
       const input = document.getElementById("url");
       const status = document.getElementById("status");
-      window.mikeDesktop.getServerUrl().then((url) => (input.value = url));
+      window.linkmaiDesktop.getServerUrl().then((url) => (input.value = url));
       const bootError = new URLSearchParams(location.search).get("error");
       if (bootError) status.textContent = bootError;
-      if (window.mikeDesktop.localAvailable) {
-        window.mikeDesktop.localAvailable().then((ok) => {
+      if (window.linkmaiDesktop.localAvailable) {
+        window.linkmaiDesktop.localAvailable().then((ok) => {
           if (ok) document.getElementById("local").style.display = "block";
         });
         document.getElementById("run-local").addEventListener("click", () => {
           status.textContent = "Starting local mode…";
-          window.mikeDesktop.startLocal();
+          window.linkmaiDesktop.startLocal();
         });
       }
       const connect = async (save) => {
         status.textContent = "Connecting…";
-        if (save) await window.mikeDesktop.setServerUrl(input.value);
-        await window.mikeDesktop.retry();
+        if (save) await window.linkmaiDesktop.setServerUrl(input.value);
+        await window.linkmaiDesktop.retry();
         // Still here after a beat → the server is still unreachable.
         setTimeout(() => (status.textContent = "Still unreachable."), 3500);
       };

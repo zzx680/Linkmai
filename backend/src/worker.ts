@@ -38,7 +38,7 @@ async function main(): Promise<void> {
   }
   await enforceDocumentLifecycleMigration();
   startAllWorkers();
-  console.log("Mike worker process running");
+  console.log("LinkMai worker process running");
 }
 
 void main();

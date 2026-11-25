@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ import { OnboardingShell } from "@/app/components/auth/OnboardingShell";
 import { FullScreenLoader } from "@/app/components/shared/FullScreenLoader";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 
 export default function OnboardingInvitationsPage() {
     const router = useRouter();

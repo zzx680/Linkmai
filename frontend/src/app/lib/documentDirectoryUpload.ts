@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 export type DocumentUploadEntry = {
     file: File;
     relativePath: string;

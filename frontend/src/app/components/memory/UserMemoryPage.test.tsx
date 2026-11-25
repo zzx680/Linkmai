@@ -2,16 +2,16 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  MikeApiError,
+  LinkMaiApiError,
   getUserMemory,
   setUserMemoryEnabled,
   updateUserMemory,
   type MemoryCurrent,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { UserMemoryPage } from "./UserMemoryPage";
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getUserMemory: vi.fn(),
   setUserMemoryEnabled: vi.fn(),
   updateUserMemory: vi.fn(),
@@ -108,7 +108,7 @@ describe("UserMemoryPage", () => {
 
     expect(
       await screen.findByText(
-        "Let Mike curate useful details after your saved conversations and use them in future answers.",
+        "Let LinkMai curate useful details after your saved conversations and use them in future answers.",
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText(/separate memory for each workspace/)).toBeNull();
@@ -223,7 +223,7 @@ describe("UserMemoryPage", () => {
 
   it("explains a save refused because memory was turned off meanwhile", async () => {
     vi.mocked(updateUserMemory).mockRejectedValueOnce(
-      new MikeApiError({
+      new LinkMaiApiError({
         status: 409,
         code: "memory_disabled",
         message: "Enable memory before editing it.",
@@ -260,7 +260,7 @@ describe("UserMemoryPage", () => {
     // changes were not saved" line survived the re-enable and sat next to a
     // fresh, empty file, reading as if the new file were already failing.
     vi.mocked(updateUserMemory).mockRejectedValueOnce(
-      new MikeApiError({
+      new LinkMaiApiError({
         status: 409,
         code: "memory_disabled",
         message: "Enable memory before editing it.",
@@ -302,7 +302,7 @@ describe("UserMemoryPage", () => {
     // same stale draft with the old revision and failed where nobody could
     // see it. Only an ordinary pending edit may flush.
     vi.mocked(updateUserMemory).mockRejectedValueOnce(
-      new MikeApiError({
+      new LinkMaiApiError({
         status: 409,
         code: "memory_disabled",
         message: "Enable memory before editing it.",
@@ -418,7 +418,7 @@ describe("UserMemoryPage", () => {
       .mockResolvedValueOnce(latest);
     vi.mocked(updateUserMemory)
       .mockRejectedValueOnce(
-        new MikeApiError({
+        new LinkMaiApiError({
           status: 409,
           code: "memory_revision_conflict",
           message: "Memory changed",

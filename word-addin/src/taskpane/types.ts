@@ -1,4 +1,4 @@
-import type { AssistantEvent as WireAssistantEvent } from "@mike/contracts";
+import type { AssistantEvent as WireAssistantEvent } from "@linkmai/contracts";
 /** API contracts used by the Word task pane. */
 
 export interface LibraryFolder {
@@ -118,8 +118,8 @@ export type WordEditBlockEvent = {
   key?: string;
 };
 
-export type { WordDocumentEdit } from "@mike/contracts";
-import type { WordDocumentEdit } from "@mike/contracts";
+export type { WordDocumentEdit } from "@linkmai/contracts";
+import type { WordDocumentEdit } from "@linkmai/contracts";
 
 /**
  * A backend-persisted assistant activity the Word surface does not render yet.
@@ -159,7 +159,7 @@ export interface WordCitation {
   quotes?: { quote?: string | null; text?: string | null }[] | null;
 }
 
-export type { WordEditResolutionStatus } from "@mike/contracts";
+export type { WordEditResolutionStatus } from "@linkmai/contracts";
 
 export interface Message {
   id?: string;
@@ -195,7 +195,7 @@ export interface Workflow {
 
 /**
  * The fields of GET /playbooks the composer's picker reads. The full shape
- * is frontend/src/app/lib/mikeApi.ts `Playbook`.
+ * is frontend/src/app/lib/linkmaiApi.ts `Playbook`.
  */
 export interface Playbook {
   id: string;

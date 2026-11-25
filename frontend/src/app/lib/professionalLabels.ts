@@ -1,4 +1,4 @@
-import { getUiLocale, uiText } from "@mike/client";
+import { getUiLocale, uiText } from "@linkmai/client";
 
 const countryNames = new Intl.DisplayNames(["zh-CN"], { type: "region" });
 const englishCountries = new Intl.DisplayNames(["en"], { type: "region" });

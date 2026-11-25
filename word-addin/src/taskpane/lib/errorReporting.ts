@@ -1,4 +1,4 @@
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 /**
  * Error reporting for the Word add-in. Same policy as the web app (see
  * frontend/src/app/lib/errorReporting.ts and the shared scrubber it uses):
@@ -15,7 +15,7 @@ import {
   privacyBoundaryIntegration,
   eventBudget,
   eventBudgetLimits,
-  MIKE_SENTRY_DSN,
+  LINKMAI_SENTRY_DSN,
   createEventScrubber,
   installKind,
   normalizeApiPath,
@@ -23,7 +23,7 @@ import {
   releaseName,
   resolveDsn,
   sentryEnvironment,
-} from "@mike/client";
+} from "@linkmai/client";
 
 export type ReportLevel = "fatal" | "error" | "warning";
 
@@ -67,7 +67,7 @@ export function addinSentryOptions(
     maxRepeatEventsPerDay?: string;
   },
 ): Sentry.BrowserOptions {
-  // ON BY DEFAULT: the Mike project's own DSN unless REACT_APP_SENTRY_DISABLED
+  // ON BY DEFAULT: the LinkMai project's own DSN unless REACT_APP_SENTRY_DISABLED
   // or a DSN of your own is baked in at build time (README, "Telemetry").
   // webpack sets NODE_ENV from --mode: the dev server is "development",
   // `npm run build` (every image) is "production".
@@ -75,7 +75,7 @@ export function addinSentryOptions(
   const { dsn } = resolveDsn({
     disabled: env.disabled,
     dsn: env.dsn,
-    fallback: MIKE_SENTRY_DSN.wordAddin,
+    fallback: LINKMAI_SENTRY_DSN.wordAddin,
     development,
   });
   const dataCollection = {
@@ -100,10 +100,10 @@ export function addinSentryOptions(
     // No session replay: the pane sits next to a privileged document.
     dataCollection,
     attachStacktrace: true,
-    integrations: [privacyBoundaryIntegration({ acceptEvent: eventBudget(eventBudgetLimits(env.maxRepeatEventsPerDay, dsn, Object.values(MIKE_SENTRY_DSN))) }), Sentry.captureConsoleIntegration({ levels: ["error"] })],
+    integrations: [privacyBoundaryIntegration({ acceptEvent: eventBudget(eventBudgetLimits(env.maxRepeatEventsPerDay, dsn, Object.values(LINKMAI_SENTRY_DSN))) }), Sentry.captureConsoleIntegration({ levels: ["error"] })],
     initialScope: {
       tags: {
-        service: "mike-word-addin",
+        service: "linkmai-word-addin",
         surface,
         build_mode: env.nodeEnv,
         diagnostics_version: "2",
@@ -122,7 +122,7 @@ export function initAddinErrorReporting(surface: AddinSurface): boolean {
     install: process.env.REACT_APP_SENTRY_INSTALL,
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     release: process.env.REACT_APP_SENTRY_RELEASE,
-    version: process.env.REACT_APP_MIKE_VERSION,
+    version: process.env.REACT_APP_LINKMAI_VERSION,
     gitSha: process.env.REACT_APP_GIT_SHA,
     tracesSampleRate: process.env.REACT_APP_SENTRY_TRACES_SAMPLE_RATE,
     nodeEnv: process.env.NODE_ENV,
@@ -168,7 +168,7 @@ function officeDiagnostics():
 }
 
 /**
- * Office.onReady resolved with no host, so the pane shows the "open Mike in
+ * Office.onReady resolved with no host, so the pane shows the "open LinkMai in
  * Word" notice instead of the app. A plain browser tab (a crawler, a link
  * preview, a pasted URL) has no Office diagnostics either, and stays silent.
  * Diagnostics WITH a null host is a contradiction only a real Office client
@@ -280,7 +280,7 @@ export function reportApiFailure(failure: {
         applyContext(scope, {
             level: "error",
             tags: {
-                component: "mike-api",
+                component: "linkmai-api",
                 operation: failure.operation,
                 http_status: failure.status,
                 http_method: method,
@@ -313,7 +313,7 @@ export function reportNetworkFailure(
     applyContext(scope, {
       level: "warning",
       tags: {
-        component: "mike-api",
+        component: "linkmai-api",
         operation: request.operation,
         network: true,
         http_method: request.method,

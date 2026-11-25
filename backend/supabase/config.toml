@@ -4,9 +4,9 @@
 # working directory name when running `supabase init`.
 project_id = "backend"
 
-# This stack runs only what Mike uses: Postgres, Auth, the data API (PostgREST),
+# This stack runs only what LinkMai uses: Postgres, Auth, the data API (PostgREST),
 # the Kong gateway, and the local mail catcher. Realtime, Studio, Storage, Edge
-# Functions, and Analytics are switched off below because no Mike code calls
+# Functions, and Analytics are switched off below because no LinkMai code calls
 # them, and together they are most of the stack's memory (over 2 GB with
 # them, about 0.4 GB without).
 
@@ -90,7 +90,7 @@ allowed_cidrs_v6 = ["::/0"]
 # [db.ssl_enforcement]
 # enabled = true
 
-# Off by default: Mike streams over its own server-sent events and opens no Realtime channel.
+# Off by default: LinkMai streams over its own server-sent events and opens no Realtime channel.
 # See "Supabase CLI stack" in docs/local-development.md.
 [realtime]
 enabled = false
@@ -123,7 +123,7 @@ port = 54324
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Off by default: Mike keeps files in S3-compatible object storage (RustFS locally), not Supabase Storage.
+# Off by default: LinkMai keeps files in S3-compatible object storage (RustFS locally), not Supabase Storage.
 # See "Supabase CLI stack" in docs/local-development.md.
 [storage]
 enabled = false
@@ -258,8 +258,8 @@ host = "smtp.resend.com"
 port = 465
 user = "resend"
 pass = "env(RESEND_API_KEY)"
-admin_email = "noreply@mikeoss.com"
-sender_name = "MikeOSS (No Reply)"
+admin_email = "noreply@linkmai.com"
+sender_name = "LinkMaiOSS (No Reply)"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -401,7 +401,7 @@ authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
 
-# Off by default: Mike has no Edge Functions; server logic lives in the Express backend.
+# Off by default: LinkMai has no Edge Functions; server logic lives in the Express backend.
 # See "Supabase CLI stack" in docs/local-development.md.
 [edge_runtime]
 enabled = false

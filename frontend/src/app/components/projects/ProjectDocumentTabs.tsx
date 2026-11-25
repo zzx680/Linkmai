@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { DocumentTabBar } from "@/app/components/shared/DocumentTabBar";
 import { LegalSourceIcon } from "@/app/components/shared/LegalSourceIcon";

@@ -5,16 +5,16 @@ import {
     deleteProject,
     getProject,
     getProjectAccess,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { ProjectWorkspaceProvider } from "./ProjectWorkspace";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn() }),
     useSelectedLayoutSegments: () => [],
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     createTabularReview: vi.fn(),
     deleteProject: vi.fn(),
     getProject: vi.fn(),

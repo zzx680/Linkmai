@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { downloadBlob, downloadDocumentFile } from "./downloadDocument";
-import { getDocumentFile } from "./mikeApi";
-vi.mock("./mikeApi", () => ({ getDocumentFile: vi.fn() }));
+import { getDocumentFile } from "./linkmaiApi";
+vi.mock("./linkmaiApi", () => ({ getDocumentFile: vi.fn() }));
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
 it("uses the server filename, downloads bytes and releases the URL", async () => {
     vi.useFakeTimers();

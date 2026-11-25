@@ -1,8 +1,8 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useDocumentConversionPolling } from "@/app/hooks/useDocumentConversionPolling";
 import { indexFolderDirectory } from "../shared/folderDirectoryIndex";
@@ -36,8 +36,8 @@ import {
     type UploadOutcome,
     type UploadProgress,
     type UploadProgressStatus,
-    MikeApiError,
-} from "@/app/lib/mikeApi";
+    LinkMaiApiError,
+} from "@/app/lib/linkmaiApi";
 import { runUserExport } from "@/app/lib/asyncExport";
 import type {
     Document,
@@ -52,7 +52,7 @@ import {
     type RowAddStatus,
 } from "@/app/components/shared/RowActions";
 import { SubfolderSvgIcon } from "@/app/components/shared/FolderSvgIcon";
-import { DropdownAtPoint, PillButtonUI } from "@mike/ui";
+import { DropdownAtPoint, PillButtonUI } from "@linkmai/ui";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useOptionalUserProfile } from "@/app/contexts/UserProfileContext";
 import {
@@ -101,7 +101,7 @@ import {
     type DocumentUploadFolderPathResolution,
     type DocumentUploadProgressEntry,
 } from "@/app/lib/documentDirectoryUpload";
-import { settleWithConcurrency } from "@mike/client";
+import { settleWithConcurrency } from "@linkmai/client";
 import { appendMissingById, indexById } from "@/app/lib/idCollections";
 import { createFrameBatcher } from "@/app/lib/frameBatcher";
 import {
@@ -1462,7 +1462,7 @@ export function DocTable({
             // (nothing to carry the name); say so instead of snapping back
             // silently. Anything else gets the generic fallback.
             notifyError(
-                e instanceof MikeApiError && e.status === 404
+                e instanceof LinkMaiApiError && e.status === 404
                     ? new UserVisibleError(
                           uiText("This document has no file yet, so it can't be renamed."),
                           { kind: "not_found", cause: e },
@@ -1575,7 +1575,7 @@ export function DocTable({
             (type) =>
                 type === SINGLE_DOCUMENT_DRAG_TYPE ||
                 type === MULTI_DOCUMENT_DRAG_TYPE ||
-                type === "application/mike-folder",
+                type === "application/linkmai-folder",
         );
     }
 
@@ -2184,7 +2184,7 @@ export function DocTable({
     async function handleDropOnFolder(targetFolderId: string | null, dt: DataTransfer) {
         if (!hasMovePayload(dt)) return;
         const docIds = readDocumentDragPayload(dt);
-        const subFolderId = dt.getData("application/mike-folder");
+        const subFolderId = dt.getData("application/linkmai-folder");
         if (docIds.length > 0) {
             const movingIds = docIds.filter((id) => {
                 const doc = documentById.get(id);
@@ -3053,7 +3053,7 @@ export function DocTable({
                                         e.preventDefault();
                                         return;
                                     }
-                                    e.dataTransfer.setData("application/mike-folder", folder.id);
+                                    e.dataTransfer.setData("application/linkmai-folder", folder.id);
                                     e.dataTransfer.effectAllowed = "move";
                                     e.stopPropagation();
                                 }}

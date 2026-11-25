@@ -1,6 +1,6 @@
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 import {
     markErrorHandled,
     reportApiFailure,
@@ -9,7 +9,7 @@ import {
 import {
     reportedUpstreamMessage,
     type Operation,
-} from "@mike/client";
+} from "@linkmai/client";
 
 export interface AuthUser {
     id: string;
@@ -31,7 +31,7 @@ export class AuthApiError extends Error {
     /**
      * The id the API stamped on this request. Support cannot find an auth
      * failure in the logs without it, and `describeError` reads it straight
-     * off the error, so it has to be carried here the way `MikeApiError`
+     * off the error, so it has to be carried here the way `LinkMaiApiError`
      * carries it.
      */
     requestId: string | null;
@@ -78,7 +78,7 @@ async function authRequest<T>(
             },
         });
     } catch (error) {
-        // Same rule as mikeApi: a request that never got a response is one
+        // Same rule as linkmaiApi: a request that never got a response is one
         // "API unreachable" event per outage, never one per auth screen. An
         // abort is the caller's doing, not an outage.
         if (!report) markErrorHandled(error);
@@ -95,7 +95,7 @@ async function authRequest<T>(
             reporting_owner?: unknown;
         };
         const code = typeof body.code === "string" ? body.code : null;
-        // Mirrors mikeApi.toApiError: the body wins, the header is the
+        // Mirrors linkmaiApi.toApiError: the body wins, the header is the
         // fallback for a response that carried no JSON id.
         const requestId =
             typeof body.request_id === "string" && body.request_id

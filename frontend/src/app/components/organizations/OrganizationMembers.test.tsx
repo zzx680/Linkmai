@@ -7,7 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import { OrganizationMembers } from "./OrganizationMembers";
 
 const mocks = vi.hoisted(() => ({
@@ -37,8 +37,8 @@ vi.mock("@/app/contexts/WorkspaceContext", () => ({
 vi.mock("@/app/contexts/AuthContext", () => ({
   useAuth: () => ({ user: { id: "me", email: "me@firm.example" } }),
 }));
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getOrg: mocks.getOrg,
   listOrgMembers: mocks.listOrgMembers,
   listOrgInvitations: mocks.listOrgInvitations,
@@ -519,7 +519,7 @@ describe("OrganizationMembers", () => {
   it("shows last-owner failures with the warning primitive", async () => {
     const user = userEvent.setup();
     mocks.updateOrgMember.mockRejectedValue(
-      new MikeApiError({
+      new LinkMaiApiError({
         status: 409,
         message: "An organization must keep at least one owner.",
       }),

@@ -7,10 +7,10 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getAuditActors, type AuditActor } from "@/app/lib/mikeApi";
+import { getAuditActors, type AuditActor } from "@/app/lib/linkmaiApi";
 import { HistoryActorFilter } from "./HistoryActorFilter";
 
-vi.mock("@/app/lib/mikeApi", () => ({ getAuditActors: vi.fn() }));
+vi.mock("@/app/lib/linkmaiApi", () => ({ getAuditActors: vi.fn() }));
 const getActors = vi.mocked(getAuditActors);
 const person = (id: string, name = `Person ${id}`): AuditActor => ({
   user_id: id,

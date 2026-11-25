@@ -28,14 +28,14 @@ function corsPolicy(env: Record<string, string>, nodeArgs = ["--experimental-str
 describe("docker/storage-cors.mjs", () => {
   it("allows the configured public origins, not only localhost", () => {
     const { status, stdout } = corsPolicy({
-      FRONTEND_URL: "https://mike.firm.example/",
+      FRONTEND_URL: "https://linkmai.firm.example/",
       WORD_ADDIN_URL: "https://word.firm.example:8443/taskpane.html",
     });
     expect(status).toBe(0);
     expect(JSON.parse(stdout)).toEqual({
       CORSRules: [
         {
-          AllowedOrigins: ["https://mike.firm.example", "https://word.firm.example:8443"],
+          AllowedOrigins: ["https://linkmai.firm.example", "https://word.firm.example:8443"],
           AllowedMethods: ["PUT", "HEAD"],
           AllowedHeaders: ["Content-Type", "x-amz-*"],
           ExposeHeaders: ["ETag"],
@@ -47,29 +47,29 @@ describe("docker/storage-cors.mjs", () => {
 
   it("also allows every extra client origin the backend trusts (ALLOWED_ORIGINS)", () => {
     const { status, stdout } = corsPolicy({
-      FRONTEND_URL: "https://mike.example.com",
+      FRONTEND_URL: "https://linkmai.example.com",
       ALLOWED_ORIGINS: "http://localhost:3000,https://word.example.com",
     });
     expect(status).toBe(0);
     expect(JSON.parse(stdout).CORSRules[0].AllowedOrigins).toEqual(
       expect.arrayContaining([
-        "https://mike.example.com",
+        "https://linkmai.example.com",
         "http://localhost:3000",
         "https://word.example.com",
       ]),
     );
-    expect(JSON.parse(stdout).CORSRules[0].AllowedOrigins[0]).toBe("https://mike.example.com");
+    expect(JSON.parse(stdout).CORSRules[0].AllowedOrigins[0]).toBe("https://linkmai.example.com");
   });
 
   it("skips an ALLOWED_ORIGINS entry the backend's exact-match CORS could never match", () => {
     const { status, stdout, stderr } = corsPolicy({
-      FRONTEND_URL: "https://mike.example.com",
+      FRONTEND_URL: "https://linkmai.example.com",
       NODE_ENV: "production",
       ALLOWED_ORIGINS: "https://ok.example.com, https://app.example.com/path ,not a url",
     });
     expect(status).toBe(0);
     expect(JSON.parse(stdout).CORSRules[0].AllowedOrigins).toEqual([
-      "https://mike.example.com",
+      "https://linkmai.example.com",
       "https://ok.example.com",
     ]);
     expect(stderr).toMatch(/skipping ALLOWED_ORIGINS entry .*app\.example\.com\/path/);
@@ -104,13 +104,13 @@ describe("docker/storage-cors.mjs", () => {
 
   it("keeps the valid origin when only the other URL is bad", () => {
     const { status, stdout } = corsPolicy({
-      FRONTEND_URL: "https://mike.example.com",
+      FRONTEND_URL: "https://linkmai.example.com",
       WORD_ADDIN_URL: "word.example.com",
       NODE_ENV: "production",
     });
     expect(status).toBe(0);
     expect(JSON.parse(stdout).CORSRules[0].AllowedOrigins).toEqual([
-      "https://mike.example.com",
+      "https://linkmai.example.com",
       "http://localhost:3000",
       "https://localhost:3200",
     ]);
@@ -118,8 +118,8 @@ describe("docker/storage-cors.mjs", () => {
 
   it("falls back, not fails, on an image built before origins.ts existed", () => {
     const { status, stdout, stderr } = corsPolicy({
-      FRONTEND_URL: "https://mike.example.com",
-      MIKE_ORIGINS_MODULE: path.join(os.tmpdir(), "no-such-dir", "dist", "lib", "origins.js"),
+      FRONTEND_URL: "https://linkmai.example.com",
+      LINKMAI_ORIGINS_MODULE: path.join(os.tmpdir(), "no-such-dir", "dist", "lib", "origins.js"),
     });
     expect(status).toBe(0);
     expect(JSON.parse(stdout).CORSRules[0].AllowedOrigins).toEqual([
@@ -169,17 +169,17 @@ describe("docker/storage-cors.mjs", () => {
       expect(readFileSync(compiled, "utf8")).toMatch(/exports\.configuredAllowedOrigins/);
       const { status, stdout, stderr } = corsPolicy(
         {
-          FRONTEND_URL: "https://mike.firm.example",
+          FRONTEND_URL: "https://linkmai.firm.example",
           ALLOWED_ORIGINS: "https://word.firm.example",
           NODE_ENV: "production",
-          MIKE_ORIGINS_MODULE: compiled,
+          LINKMAI_ORIGINS_MODULE: compiled,
         },
         [],
       );
       expect(stderr).toBe("");
       expect(status).toBe(0);
       expect(JSON.parse(stdout).CORSRules[0].AllowedOrigins).toEqual([
-        "https://mike.firm.example",
+        "https://linkmai.firm.example",
         "https://word.firm.example",
       ]);
     });
@@ -197,7 +197,7 @@ describe("docker/storage-cors.mjs", () => {
       const line = backend.environment.find((e: string) => e.startsWith(`${name}=`));
       expect(generator.environment).toContain(line);
     }
-    expect(generator.environment).toContain("MIKE_ORIGINS_MODULE=/app/dist/lib/origins.js");
+    expect(generator.environment).toContain("LINKMAI_ORIGINS_MODULE=/app/dist/lib/origins.js");
     // It receives the backend's whole env_file (secrets included) but only
     // prints JSON, so it gets no network at all.
     expect(generator.network_mode).toBe("none");

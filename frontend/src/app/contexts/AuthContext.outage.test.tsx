@@ -6,7 +6,7 @@
 // real AuthProvider and the real auth client against a mocked fetch.
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import { AuthProvider, useAuth } from "./AuthContext";
 
 const reporting = vi.hoisted(() => ({

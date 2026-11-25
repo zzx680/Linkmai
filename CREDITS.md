@@ -1,14 +1,14 @@
 # Open-source credits
 
-Mike is built with the work of open-source maintainers and contributors. Thank
+LinkMai is built with the work of open-source maintainers and contributors. Thank
 you for making these projects available and for the care that goes into them.
 
-This page highlights the projects behind Mike's document tools, applications,
+This page highlights the projects behind LinkMai's document tools, applications,
 infrastructure, and development workflow, including optional local integrations.
 
 ## Documents and spreadsheets
 
-| Project | How Mike uses it |
+| Project | How LinkMai uses it |
 | --- | --- |
 | [LibreOffice](https://www.libreoffice.org/) | Server-side office-document conversion, including PDF renditions. |
 | [libreoffice-convert](https://github.com/elwerene/libreoffice-convert) | Node.js integration with LibreOffice's conversion tools. |
@@ -27,7 +27,7 @@ infrastructure, and development workflow, including optional local integrations.
 
 ## Application and interface
 
-| Project | How Mike uses it |
+| Project | How LinkMai uses it |
 | --- | --- |
 | [Node.js](https://nodejs.org/) | JavaScript runtime for the backend and application tooling. |
 | [TypeScript](https://www.typescriptlang.org/) | Typed application code across the web app, backend, and Word add-in. |
@@ -47,7 +47,7 @@ infrastructure, and development workflow, including optional local integrations.
 
 ## AI, data, and infrastructure
 
-| Project | How Mike uses it |
+| Project | How LinkMai uses it |
 | --- | --- |
 | [AI SDK](https://github.com/vercel/ai) | Language-model integrations, streaming, and tool calls. |
 | [Pi](https://github.com/earendil-works/pi) (`pi-schema`, `pi-codemode`) and [quickjs-wasi](https://github.com/vercel-labs/quickjs-wasi) | Checking tool-call arguments against their schemas, and the sandbox that runs `run_script`. |
@@ -67,7 +67,7 @@ infrastructure, and development workflow, including optional local integrations.
 
 ## Development and testing
 
-| Project | How Mike uses it |
+| Project | How LinkMai uses it |
 | --- | --- |
 | [Vitest](https://vitest.dev/) | Unit and integration tests. |
 | [Testing Library](https://testing-library.com/) and [jsdom](https://github.com/jsdom/jsdom) | Component and browser-DOM tests. |

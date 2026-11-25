@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import type { ReactNode } from "react";
 import { Modal } from "@/app/components/modals/Modal";
@@ -18,8 +18,8 @@ import {
   normalizeCustomBaseUrl,
   normalizeVertexLocation,
 } from "@/app/lib/cloudProviderSettings";
-import type { ApiKeyProvider, ApiKeySettings } from "@/app/lib/mikeApi";
-import { isRouterSlug } from "@mike/client";
+import type { ApiKeyProvider, ApiKeySettings } from "@/app/lib/linkmaiApi";
+import { isRouterSlug } from "@linkmai/client";
 
 export type ByokProvider = {
   provider: ApiKeyProvider;

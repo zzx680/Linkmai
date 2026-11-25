@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -8,11 +8,11 @@ import { ClipboardCheck, Waypoints } from "lucide-react";
 import { playbookPath } from "../playbooks/PlaybookTable";
 import { FileTypeIcon } from "../shared/FileTypeIcon";
 import type { MessageFile } from "../shared/types";
-import { LIQUID_GLASS_FLAT_CLASS, ExcerptModalUI, ExcerptPillUI } from "@mike/ui";
+import { LIQUID_GLASS_FLAT_CLASS, ExcerptModalUI, ExcerptPillUI } from "@linkmai/ui";
 import {
     parseExcerpts,
     type MessageExcerpt,
-} from "@mike/client";
+} from "@linkmai/client";
 
 interface Props {
     content: string;

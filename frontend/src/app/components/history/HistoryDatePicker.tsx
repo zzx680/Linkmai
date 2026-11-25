@@ -31,7 +31,7 @@ import {
   DropdownSurface,
   DropdownTrigger,
   TextButtonUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 
 export function localDateValue(date: Date): string {

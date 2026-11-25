@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
@@ -10,7 +10,7 @@ import {
     NO_MODELS_MESSAGES,
     isOrganizationNoModelsReason,
     type NoModelsReason,
-} from "@mike/client";
+} from "@linkmai/client";
 import { WarningPopup } from "./WarningPopup";
 
 export function NoModelsWarningPopup({

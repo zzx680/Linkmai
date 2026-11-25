@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import type { Chat, Message, WordDocumentEdit } from "../types";
 import type { PersistedWordEditPatch } from "./wordChatTypes";
 import { notifyWordChatHistoryChanged } from "./wordChatHistoryEvents";
@@ -7,9 +7,9 @@ import { UserVisibleError } from "./notify";
 
 /** Shown when this pane's code is older than the device-only chat database. */
 export const OUTDATED_ADDIN_MESSAGE =
-  uiText("A newer version of Mike updated this device's chats. Close and reopen the add-in to load them.");
+  uiText("A newer version of LinkMai updated this device's chats. Close and reopen the add-in to load them.");
 
-const DATABASE_NAME = "mike-word-addin";
+const DATABASE_NAME = "linkmai-word-addin";
 // Keep the released version: an existing pane opens version 4 explicitly,
 // so upgrading it would prevent that pane from saving an in-flight answer.
 // Fresh databases can have the optional recency index without a version bump.

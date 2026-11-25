@@ -1,4 +1,4 @@
-import type { OrgPrivateContentKind } from "@mike/contracts";
+import type { OrgPrivateContentKind } from "@linkmai/contracts";
 import type { Db } from "./supabase";
 
 /** Permission alone never opens content: the member must explicitly open it. */

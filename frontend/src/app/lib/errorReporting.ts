@@ -1,10 +1,10 @@
 
-import { uiText } from "@mike/client";
-import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { uiText } from "@linkmai/client";
+import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 /**
  * Error reporting for the web app: a thin, testable layer over the Sentry
  * SDK. Application code calls these helpers instead of `@sentry/nextjs`
- * directly so the PII policy (see `@mike/client`'s sentryEvent) and the
+ * directly so the PII policy (see `@linkmai/client`'s sentryEvent) and the
  * explicit opt-out rule live in one place.
  */
 
@@ -14,7 +14,7 @@ import {
     eventBudget,
     eventBudgetLimits,
     type Operation,
-    MIKE_SENTRY_DSN,
+    LINKMAI_SENTRY_DSN,
     createEventScrubber,
     sentryEnvironment,
     installKind,
@@ -22,7 +22,7 @@ import {
     parseSampleRate,
     releaseName,
     resolveDsn,
-} from "@mike/client";
+} from "@linkmai/client";
 
 export type ReportLevel = "fatal" | "error" | "warning";
 
@@ -119,7 +119,7 @@ export function reportApiFailure(failure: {
         applyContext(scope, {
             level: "error",
             tags: {
-                component: "mike-api",
+                component: "linkmai-api",
                 operation: failure.operation,
                 http_status: failure.status,
                 http_method: method,
@@ -331,7 +331,7 @@ export function reportNetworkFailure(
             applyContext(scope, {
                 level: "warning",
                 tags: {
-                    component: "mike-api",
+                    component: "linkmai-api",
                     operation: request.operation,
                     stage: "api-unreachable",
                     network: true,
@@ -355,7 +355,7 @@ export function reportNetworkFailure(
         applyContext(scope, {
             level: "warning",
             tags: {
-                component: "mike-api",
+                component: "linkmai-api",
                 network: true,
                 network_state: networkState,
                 request_origin: requestOrigin,
@@ -393,7 +393,7 @@ export function browserSentryOptions(env: {
         // The SDK requires a valid DSN even with a tunnel. This placeholder
         // never chooses the destination: /monitoring rewrites it. Always
         // initialize so a runtime override can enable a baked-off image.
-        dsn: MIKE_SENTRY_DSN.frontend,
+        dsn: LINKMAI_SENTRY_DSN.frontend,
         enabled: true,
         environment: sentryEnvironment(env.environment, env.nodeEnv === "development"),
         release: releaseName(env.release, env.version, env.gitSha),
@@ -422,7 +422,7 @@ export function browserSentryOptions(env: {
         integrations: [privacyBoundaryIntegration(), Sentry.captureConsoleIntegration({ levels: ["error"] })],
         initialScope: {
             tags: {
-                service: "mike-frontend",
+                service: "linkmai-frontend",
                 runtime: "browser",
                 build_mode: env.nodeEnv,
                 diagnostics_version: "2",
@@ -455,7 +455,7 @@ export type ReportingDestination = {
  *   SENTRY_DSN                    the deployment's project (FRONTEND_SENTRY_DSN in compose)
  *   NEXT_PUBLIC_SENTRY_DSN        the project baked in at image build, for images
  *                                 built with a DSN and run without the runtime one
- *   otherwise                     the built-in Mike project (community default)
+ *   otherwise                     the built-in LinkMai project (community default)
  *
  * The result is printed at boot (sentry.server.config.ts) and answered by
  * GET /monitoring, so an operator can see which rule applied.
@@ -475,7 +475,7 @@ export function reportingDestination(env: NodeJS.ProcessEnv): ReportingDestinati
     const resolved = resolveDsn({
         disabled: runtimeDisabled || env.NEXT_PUBLIC_SENTRY_DISABLED?.trim(),
         dsn: runtimeDsn || buildDsn,
-        fallback: MIKE_SENTRY_DSN.frontend,
+        fallback: LINKMAI_SENTRY_DSN.frontend,
         // `next dev` runs with NODE_ENV=development; `next build`/`next
         // start` (every image) with production.
         development: env.NODE_ENV === "development",
@@ -518,7 +518,7 @@ export function describeReportingDestination(destination: ReportingDestination):
         case "build":
             return `[sentry] web app reports → NEXT_PUBLIC_SENTRY_DSN project ${project} (baked at build; set SENTRY_DSN to change it at runtime), browser included`;
         default:
-            return "[sentry] web app reports → Mike project Sentry (community default), browser included. Opt out with SENTRY_DISABLED=true or point SENTRY_DSN at your own project.";
+            return "[sentry] web app reports → LinkMai project Sentry (community default), browser included. Opt out with SENTRY_DISABLED=true or point SENTRY_DSN at your own project.";
     }
 }
 
@@ -532,8 +532,8 @@ export function serverSentryOptions(
         dsn: dsn || undefined,
         enabled: dsn.length > 0,
         environment: sentryEnvironment(env.SENTRY_ENVIRONMENT, env.NODE_ENV === "development"),
-        integrations: [privacyBoundaryIntegration({ acceptEvent: eventBudget(eventBudgetLimits(env.SENTRY_MAX_REPEAT_EVENTS_PER_DAY, dsn, Object.values(MIKE_SENTRY_DSN))) })],
-        release: releaseName(env.SENTRY_RELEASE, env.MIKE_VERSION, env.GIT_SHA),
+        integrations: [privacyBoundaryIntegration({ acceptEvent: eventBudget(eventBudgetLimits(env.SENTRY_MAX_REPEAT_EVENTS_PER_DAY, dsn, Object.values(LINKMAI_SENTRY_DSN))) })],
+        release: releaseName(env.SENTRY_RELEASE, env.LINKMAI_VERSION, env.GIT_SHA),
         tracesSampleRate: parseSampleRate(env.SENTRY_TRACES_SAMPLE_RATE, 0),
         dataCollection: {
             userInfo: false,
@@ -551,7 +551,7 @@ export function serverSentryOptions(
         attachStacktrace: true,
         initialScope: {
             tags: {
-                service: "mike-frontend",
+                service: "linkmai-frontend",
                 runtime,
                 build_mode: env.NODE_ENV,
                 diagnostics_version: "2",

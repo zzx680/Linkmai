@@ -1,16 +1,16 @@
 {
-  "name": "mike-desktop",
-  "productName": "Mike",
+  "name": "linkmai-desktop",
+  "productName": "LinkMai",
   "version": "0.1.0",
   "private": true,
-  "description": "Mike for Mac — desktop shell around the Mike web app",
+  "description": "LinkMai for Mac — desktop shell around the LinkMai web app",
   "main": "src/main.js",
   "engines": {
     "node": ">=22.19.0"
   },
   "scripts": {
     "start": "electron .",
-    "dev": "MIKE_DESKTOP_DEV=1 electron .",
+    "dev": "LINKMAI_DESKTOP_DEV=1 electron .",
     "start:local": "electron . --local",
     "local:fetch": "bash scripts/fetch-local-stack.sh",
     "local:build": "bash scripts/build-local-stack.sh",

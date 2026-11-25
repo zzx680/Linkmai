@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 /**
  * Shared toast (snackbar) system for the web app and the Word add-in.
@@ -40,7 +40,7 @@ import {
     getServerSnapshot,
     type ToastAction,
     type ToastRecord,
-} from "@mike/client";
+} from "@linkmai/client";
 export {
     showToast,
     dismissToast,
@@ -51,7 +51,7 @@ export {
     type ToastInput,
     type ToastRecord,
     type ToastTone,
-} from "@mike/client";
+} from "@linkmai/client";
 
 const toastNodes = new Map<string, HTMLElement>();
 

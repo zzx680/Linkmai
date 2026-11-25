@@ -14,7 +14,7 @@
 #              migration or schema.sql change re-runs it.
 #
 #   packaged   the whole pipeline a release would run — fetch binaries,
-#              build backend + standalone frontend, stage, package Mike.app
+#              build backend + standalone frontend, stage, package LinkMai.app
 #              (unsigned) — then e2e/local.e2e.mjs drives the PACKAGED app:
 #              cold first run (initdb → signup → project → upload →
 #              blob-token download → guest ×2), quit, and the returning-user
@@ -89,13 +89,13 @@ jobs:
           key: local-stack-pg-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('desktop/scripts/fetch-local-stack.sh') }}
 
       - name: Fetch bundled Postgres
-        run: MIKE_LOCAL_FETCH_ONLY=postgres npm run local:fetch
+        run: LINKMAI_LOCAL_FETCH_ONLY=postgres npm run local:fetch
 
-      # MIKE_REQUIRE_LOCAL_STACK turns upgrade.test.js's "binaries missing →
+      # LINKMAI_REQUIRE_LOCAL_STACK turns upgrade.test.js's "binaries missing →
       # skip" (a developer convenience) into a hard failure here, so a broken
       # fetch can never pass as a green run.
       - name: Unit, catalog, gateway and schema-upgrade tests
-        run: MIKE_REQUIRE_LOCAL_STACK=1 npm test
+        run: LINKMAI_REQUIRE_LOCAL_STACK=1 npm test
 
   packaged:
     # Runs here and in forks; skipped in copies such as the Vercel Deploy button makes (docs/vercel.md).
@@ -142,7 +142,7 @@ jobs:
         run: npm run local:fetch --prefix desktop
 
       - name: Audit fetched PostgREST and test relocation
-        run: MIKE_NATIVE_BIN="$PWD/desktop/local-stack/bin" node --test desktop/src/local/postgrest-linkage.test.js
+        run: LINKMAI_NATIVE_BIN="$PWD/desktop/local-stack/bin" node --test desktop/src/local/postgrest-linkage.test.js
 
       # backend tsc + offline workflow bundle + Next standalone build, with the
       # same isolated environment the release build uses (env -i inside the
@@ -152,13 +152,13 @@ jobs:
       # through the GitHub API. Unauthenticated calls share a 60/hour budget
       # per source IP, which hosted runners exhaust — the API answers 403 —
       # so the importer gets the job's own read-only token
-      # (MIKE_WORKFLOWS_GITHUB_TOKEN, see backend/src/lib/workflowCatalogSource.ts).
+      # (LINKMAI_WORKFLOWS_GITHUB_TOKEN, see backend/src/lib/workflowCatalogSource.ts).
       - name: Build backend and standalone frontend
         run: npm run local:build --prefix desktop
         env:
-          MIKE_WORKFLOWS_GITHUB_TOKEN: ${{ github.token }}
+          LINKMAI_WORKFLOWS_GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Stage the stack and package Mike.app (unsigned)
+      - name: Stage the stack and package LinkMai.app (unsigned)
         run: |
           npm run local:stage --prefix desktop
           npm run dist:local --prefix desktop
@@ -167,7 +167,7 @@ jobs:
       - name: Audit packaged PostgREST linkage
         run: |
           MAC_DIST_DIR=$(node -p 'process.arch === "arm64" ? "mac-arm64" : "mac"')
-          MIKE_NATIVE_BIN="$PWD/desktop/dist/$MAC_DIST_DIR/Mike.app/Contents/Resources/local-stack/bin" node --test --test-name-pattern='actual PostgREST input' desktop/src/local/postgrest-linkage.test.js
+          LINKMAI_NATIVE_BIN="$PWD/desktop/dist/$MAC_DIST_DIR/LinkMai.app/Contents/Resources/local-stack/bin" node --test --test-name-pattern='actual PostgREST input' desktop/src/local/postgrest-linkage.test.js
 
       - name: Packaged first-run + returning-user e2e
         run: npm run e2e:local --prefix desktop

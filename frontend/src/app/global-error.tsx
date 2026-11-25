@@ -1,13 +1,13 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 // global-error replaces the root layout, so it imports the layout's CSS
 // itself; without these the design-system classes below would not apply.
 import "./fonts/fonts.css";
 import "./globals.css";
 import { CrashScreen } from "@/app/components/shared/CrashScreen";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 
 export default function GlobalError({
     error,
@@ -19,7 +19,7 @@ export default function GlobalError({
     return (
         <html lang="zh-CN">
             <head>
-                <title>{uiText("Something went wrong – Mike")}</title>
+                <title>{uiText("Something went wrong – LinkMai")}</title>
             </head>
             <body className="font-sans antialiased">
                 <CrashScreen

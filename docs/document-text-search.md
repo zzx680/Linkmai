@@ -72,7 +72,7 @@ five queued jobs per maintenance sweep; normal deployments should keep workers o
 Unit tests cover extractors, stale jobs, failure handling, input bounds, and agent
 handles. `documents.textSearch.sql` exercises actual PostgreSQL triggers, scoped
 search, version publication, backfill and permissions in rolled-back transactions.
-Run the opt-in PostgreSQL Vitest wrapper with `MIKE_TEST_POSTGRES_CONTAINER` pointing
+Run the opt-in PostgreSQL Vitest wrapper with `LINKMAI_TEST_POSTGRES_CONTAINER` pointing
 to a disposable local Supabase container; it creates and drops its own database.
 
 ## Search activity

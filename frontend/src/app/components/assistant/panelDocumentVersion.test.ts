@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PanelDocument } from "../shared/types";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import { resolvePanelDocumentVersionResult } from "./panelDocumentVersion";
 
 const document: PanelDocument = {
@@ -80,7 +80,7 @@ describe("resolvePanelDocumentVersionResult", () => {
         const loadVersions = vi
             .fn()
             .mockRejectedValue(
-                new MikeApiError({ message: "Not found", status: 404 }),
+                new LinkMaiApiError({ message: "Not found", status: 404 }),
             );
 
         await expect(
@@ -92,7 +92,7 @@ describe("resolvePanelDocumentVersionResult", () => {
         const loadVersions = vi
             .fn()
             .mockRejectedValue(
-                new MikeApiError({ message: "Forbidden", status: 403 }),
+                new LinkMaiApiError({ message: "Forbidden", status: 403 }),
             );
 
         await expect(
@@ -114,7 +114,7 @@ describe("resolvePanelDocumentVersionResult", () => {
         const loadVersions = vi
             .fn()
             .mockRejectedValue(
-                new MikeApiError({ message: "Server error", status: 500 }),
+                new LinkMaiApiError({ message: "Server error", status: 500 }),
             );
 
         await expect(

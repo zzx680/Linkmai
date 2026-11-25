@@ -1,8 +1,8 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     useEffect,
@@ -23,7 +23,7 @@ import {
     DropdownItem,
     DropdownSeparator,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import {
     LIQUID_GLASS_SELECTED_CLASS,
     LIQUID_GLASS_GROUP_HOVER_CLASS,
@@ -31,7 +31,7 @@ import {
     TABLE_SURFACE_CLASS,
 } from "@/app/components/ui/liquid-surface";
 
-export const CLOSE_ROW_ACTIONS_EVENT = "mike:close-row-actions";
+export const CLOSE_ROW_ACTIONS_EVENT = "linkmai:close-row-actions";
 
 export function closeRowActionMenus() {
     document.dispatchEvent(new Event(CLOSE_ROW_ACTIONS_EVENT));

@@ -1,8 +1,8 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import Image from "next/image";
 import { Plug, type LucideIcon } from "lucide-react";
-import type { ApiKeyProvider } from "@/app/lib/mikeApi";
+import type { ApiKeyProvider } from "@/app/lib/linkmaiApi";
 
 // The model providers a key can be saved for, in the order they are listed.
 // Shared by a person's Bring Your Own Keys page and an organization's Model

@@ -49,9 +49,9 @@ describe("shared-redaction block", () => {
  */
 function dsnTable(file: string): string {
     const match = readFileSync(file, "utf8").match(
-        /export const MIKE_SENTRY_DSN = \{[\s\S]*?\}(?: as const)?;/,
+        /export const LINKMAI_SENTRY_DSN = \{[\s\S]*?\}(?: as const)?;/,
     );
-    if (!match) throw new Error(`no MIKE_SENTRY_DSN table in ${file}`);
+    if (!match) throw new Error(`no LINKMAI_SENTRY_DSN table in ${file}`);
     return match[0]
         .split("\n")
         .map((line) => line.trim())

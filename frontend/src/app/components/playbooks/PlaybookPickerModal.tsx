@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
@@ -13,8 +13,8 @@ import {
 } from "@/app/components/ui/liquid-surface";
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
-import { listPlaybooks, type Playbook } from "@/app/lib/mikeApi";
-import { LIQUID_GLASS_SUBTLE_CLASS } from "@mike/ui";
+import { listPlaybooks, type Playbook } from "@/app/lib/linkmaiApi";
+import { LIQUID_GLASS_SUBTLE_CLASS } from "@linkmai/ui";
 
 type Props = {
   open: boolean;

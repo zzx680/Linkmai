@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { listProjectsPage, listTabularReviews } from "@/app/lib/mikeApi";
+import { listProjectsPage, listTabularReviews } from "@/app/lib/linkmaiApi";
 import type { Chat, TabularReview } from "@/app/components/shared/types";
 import { AppSidebar } from "./AppSidebar";
 import { notifyTabularReviewsChanged } from "@/app/lib/tabularReviewChanges";
@@ -21,8 +21,8 @@ const state = vi.hoisted(() => ({
   chats: [] as Chat[],
 }));
 
-vi.mock("@mike/client", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@mike/client")>()),
+vi.mock("@linkmai/client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@linkmai/client")>()),
   showToast: state.showToast,
 }));
 
@@ -37,7 +37,7 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
   listProjectsPage: vi.fn(),
   listProjectChats: vi.fn(async () => []),
   listTabularReviews: vi.fn(async () => []),
@@ -80,9 +80,9 @@ vi.mock("@/app/contexts/WorkspaceContext", async (importOriginal) => ({
   }),
 }));
 
-vi.mock("@mike/ui", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@mike/ui")>()),
-  MikeIcon: () => <span aria-hidden="true" />,
+vi.mock("@linkmai/ui", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@linkmai/ui")>()),
+  LinkMaiIcon: () => <span aria-hidden="true" />,
 }));
 
 const project = (id: string, name: string) => ({
@@ -162,7 +162,7 @@ describe("AppSidebar workspace switcher", () => {
     const user = userEvent.setup();
     render(<AppSidebar isOpen onToggle={vi.fn()} />);
 
-    expect(heading()).toHaveTextContent("Mike");
+    expect(heading()).toHaveTextContent("LinkMai");
     await openAccountMenu(user);
     expect(screen.getByRole("menuitem", { name: "Settings" })).toBeVisible();
     expect(screen.queryByRole("menuitemradio")).not.toBeInTheDocument();
@@ -175,7 +175,7 @@ describe("AppSidebar workspace switcher", () => {
     render(<AppSidebar isOpen onToggle={vi.fn()} />);
 
     expect(heading()).toHaveTextContent("Acme LLP");
-    expect(heading()).not.toHaveTextContent("Mike");
+    expect(heading()).not.toHaveTextContent("LinkMai");
     // Still the way home, whatever it is called.
     expect(screen.getByRole("link", { name: "Acme LLP" })).toHaveAttribute(
       "href",
@@ -183,17 +183,17 @@ describe("AppSidebar workspace switcher", () => {
     );
   });
 
-  it("heads the sidebar with plain Mike for personal work, even with organizations to switch to", () => {
+  it("heads the sidebar with plain LinkMai for personal work, even with organizations to switch to", () => {
     state.organizations = [ACME, BETA];
     state.workspaceId = "personal";
     render(<AppSidebar isOpen onToggle={vi.fn()} />);
 
-    expect(heading()).toHaveTextContent("Mike");
+    expect(heading()).toHaveTextContent("LinkMai");
     expect(screen.queryByText("Personal")).not.toBeInTheDocument();
   });
 
-  it("shows a placeholder, not Mike, while a remembered organization's name loads", () => {
-    // "Mike" means personal work. Saying it for the moment before the
+  it("shows a placeholder, not LinkMai, while a remembered organization's name loads", () => {
+    // "LinkMai" means personal work. Saying it for the moment before the
     // organization's name arrives would name the wrong workspace.
     state.organizations = null;
     state.workspaceId = ACME.id;
@@ -202,10 +202,10 @@ describe("AppSidebar workspace switcher", () => {
     expect(
       screen.getByRole("status", { name: "Loading workspace" }),
     ).toBeInTheDocument();
-    expect(screen.queryByText("Mike")).not.toBeInTheDocument();
+    expect(screen.queryByText("LinkMai")).not.toBeInTheDocument();
   });
 
-  it("sets an organization's name at the size Mike is, in the same fixed header row", () => {
+  it("sets an organization's name at the size LinkMai is, in the same fixed header row", () => {
     state.organizations = [ACME];
     state.workspaceId = ACME.id;
     const { unmount } = render(<AppSidebar isOpen onToggle={vi.fn()} />);
@@ -561,6 +561,6 @@ describe("AppSidebar workspace switcher", () => {
     expect(
       vi.mocked(listProjectsPage).mock.calls[0][0]?.workspace,
     ).toBeUndefined();
-    expect(heading()).toHaveTextContent("Mike");
+    expect(heading()).toHaveTextContent("LinkMai");
   });
 });

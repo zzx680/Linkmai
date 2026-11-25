@@ -7,7 +7,7 @@ import {
     LIQUID_GLASS_HOVER_CLASS,
     LIQUID_GLASS_SELECTED_CLASS,
     LIQUID_GLASS_SUBTLE_CLASS,
-} from "@mike/ui";
+} from "@linkmai/ui";
 
 export interface SegmentedToggleOption<T extends string> {
     value: T;

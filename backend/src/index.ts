@@ -148,7 +148,7 @@ async function main(): Promise<void> {
     PORT,
     () => {
       console.log(
-        `Mike backend running on port ${PORT} (workers: ${WORKERS_MODE})`,
+        `LinkMai backend running on port ${PORT} (workers: ${WORKERS_MODE})`,
       );
       if (WORKERS_MODE === "thread") {
         for (const role of WORKER_ROLES) spawnWorkerThread(role);

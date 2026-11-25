@@ -1,15 +1,15 @@
 {
-  "name": "@mike/ui",
+  "name": "@linkmai/ui",
   "version": "0.0.0",
   "private": true,
-  "description": "React primitives shared by the Mike web app and the Word add-in.",
+  "description": "React primitives shared by the LinkMai web app and the Word add-in.",
   "exports": {
     ".": "./src/index.ts",
     "./styles/*": "./styles/*"
   },
   "sideEffects": false,
   "peerDependencies": {
-    "@mike/client": "*",
+    "@linkmai/client": "*",
     "@radix-ui/react-dropdown-menu": "^2.2.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.58.0",

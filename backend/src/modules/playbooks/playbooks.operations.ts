@@ -45,7 +45,7 @@ import {
 } from "../../lib/access";
 import { PERSONAL_WORKSPACE, resolveWorkspaceFilter, workspaceMatches, type WorkspaceFilter } from "../../lib/workspace";
 import { selectAllByKey, selectInBatches } from "../../lib/batchedQuery";
-import type { EditAnnotation } from "@mike/contracts";
+import type { EditAnnotation } from "@linkmai/contracts";
 import { extractDocxBodyText, type EditInput } from "../../lib/docxTrackedChanges";
 import { loadActiveVersion } from "../../lib/documentVersions";
 import { buildDownloadUrl } from "../../lib/downloadTokens";
@@ -411,7 +411,7 @@ function validateModel(model: string): void {
     // providerForModel throws a plain Error for an unrecognised id. A stale
     // stored selection is an input problem, so answer 4xx rather than 500.
     throw new PlaybookRequestError(
-      `“${model.trim()}” is not a model MikeOSS can use. Choose another model.`,
+      `“${model.trim()}” is not a model LinkMaiOSS can use. Choose another model.`,
     );
   }
 }

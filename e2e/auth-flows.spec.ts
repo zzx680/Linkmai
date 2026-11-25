@@ -28,7 +28,7 @@ test.describe("unauthenticated", () => {
         await page.goto("/login");
         await expect(page).toHaveURL(/\/login/);
 
-        await page.fill("#email", "e2e@mike.local");
+        await page.fill("#email", "e2e@linkmai.local");
         await page.fill("#password", "definitely-wrong-password");
         await page.click('button[type="submit"]');
 
@@ -57,7 +57,7 @@ test.describe("unauthenticated", () => {
         e2eAccount,
         workerStorageState,
     }) => {
-        /* Sign in as THIS worker's account (e2eAccount; e2e@mike.local on
+        /* Sign in as THIS worker's account (e2eAccount; e2e@linkmai.local on
            worker 0). Depending on `workerStorageState` makes Playwright run the
            worker fixture first, which creates the account and finishes its
            onboarding; this test's own page stays signed out because the
@@ -114,7 +114,7 @@ test.describe("unauthenticated", () => {
 
 /* The logout flow calls supabase.auth.signOut(), which defaults to GLOBAL
    scope and revokes the user's session server-side. If this ran against the
-   shared `e2e@mike.local` user it would 401 every other parallel worker
+   shared `e2e@linkmai.local` user it would 401 every other parallel worker
    ("Invalid or expired token"). So this test starts from a clean session and
    logs in as a DEDICATED user (created in auth.setup.ts) whose session can be
    safely destroyed without affecting any other test. */
@@ -122,7 +122,7 @@ test.describe("logout (isolated user)", () => {
     test.use({ storageState: { cookies: [], origins: [] } });
 
     const logoutEmail =
-        process.env.E2E_LOGOUT_EMAIL ?? "e2e-logout@mike.local";
+        process.env.E2E_LOGOUT_EMAIL ?? "e2e-logout@linkmai.local";
     const logoutPassword =
         process.env.E2E_LOGOUT_PASSWORD ?? "E2eLogoutPass1!";
 

@@ -13,14 +13,14 @@
  * reattached pane handles everything a fresh one does, client tool calls
  * included.
  */
-import { streamWordChat, streamWordChatTurn, readSSE } from "./mikeApi";
+import { streamWordChat, streamWordChatTurn, readSSE } from "./linkmaiApi";
 import { responseError } from "./client";
 import {
   WordChatTerminalError,
   terminalErrorFromFrame,
 } from "../lib/wordChatTerminalError";
 import type { ReasoningLevel } from "../lib/wordChatTypes";
-import type { TextCardEvent } from "@mike/contracts";
+import type { TextCardEvent } from "@linkmai/contracts";
 
 export interface WordChatDocumentReadEvent {
   type: "doc_read_start" | "doc_read";

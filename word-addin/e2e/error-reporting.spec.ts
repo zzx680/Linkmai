@@ -87,14 +87,14 @@ test("an unowned backend 5xx preserves its exception, operation, route, status, 
 
   const event = await nextEvent;
   const exception = (event.exception as { values: { value: string; stacktrace: { frames: unknown[] } }[] }).values[0]!;
-  expect(exception.value).toContain("Failure in workflows.run / mike-api");
+  expect(exception.value).toContain("Failure in workflows.run / linkmai-api");
   expect(exception.stacktrace.frames.length).toBeGreaterThan(0);
   expect(JSON.stringify(event)).not.toContain("PRIVATE_SERVER_DETAIL");
   expect(event.level).toBe("error");
   expect(tagsOf(event)).toMatchObject({
-    service: "mike-word-addin",
+    service: "linkmai-word-addin",
     surface: "taskpane",
-    component: "mike-api",
+    component: "linkmai-api",
     operation: "workflows.run",
     // Tag values keep their JS type in the envelope; Sentry stringifies on
     // ingest.
@@ -107,7 +107,7 @@ test("an unowned backend 5xx preserves its exception, operation, route, status, 
   // no user id leaves the machine at all; the request id is the correlation
   // key and it survives.
   expect(event.user).toBeUndefined();
-  expect(JSON.stringify(event)).not.toContain("e2e@mike.local");
+  expect(JSON.stringify(event)).not.toContain("e2e@linkmai.local");
   expect(event).not.toHaveProperty("request.data");
   expect(event).not.toHaveProperty("request.cookies");
 });
@@ -138,7 +138,7 @@ test.describe("5xx ownership is explicit, never inferred from a recognized code"
 
         if (nextEvent) {
           const event = await nextEvent;
-          expect(tagsOf(event)).toMatchObject({ error_code: code, http_status: 503, component: "mike-api" });
+          expect(tagsOf(event)).toMatchObject({ error_code: code, http_status: 503, component: "linkmai-api" });
           expect(JSON.stringify(event)).not.toContain("PRIVATE_SERVER_DETAIL");
         }
         // Also catch a duplicate from the screen or console bridge.
@@ -167,7 +167,7 @@ test("a transport failure is reported as a warning grouped by endpoint", async (
   const event = await nextEvent;
   expect(event.level).toBe("warning");
   expect(tagsOf(event)).toMatchObject({
-    component: "mike-api",
+    component: "linkmai-api",
     network: true,
     http_method: "GET",
   });

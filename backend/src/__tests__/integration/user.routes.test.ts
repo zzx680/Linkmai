@@ -306,7 +306,7 @@ vi.mock("../../application/exports/buildJsonExport", () => ({
     buildUserTabularReviewsExport: (...args: unknown[]) =>
         buildUserTabularReviewsExport(...args),
     userExportFilename: (kind: string, userId: string) =>
-        `mike-${kind}-export-${userId.slice(0, 8)}.json`,
+        `linkmai-${kind}-export-${userId.slice(0, 8)}.json`,
 }));
 
 import { app } from "../../app";
@@ -1235,7 +1235,7 @@ describe("user.routes", () => {
                 type: "service_account",
                 project_id: "legal-prod",
                 private_key: "-----BEGIN PRIVATE KEY-----",
-                client_email: "mike@legal-prod.iam.gserviceaccount.com",
+                client_email: "linkmai@legal-prod.iam.gserviceaccount.com",
             });
             const res = await request(app)
                 .put("/user/api-keys/vertex")

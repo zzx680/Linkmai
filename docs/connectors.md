@@ -1,6 +1,6 @@
 # MCP connectors
 
-Mike connects to remote [Model Context Protocol](https://modelcontextprotocol.io)
+LinkMai connects to remote [Model Context Protocol](https://modelcontextprotocol.io)
 servers from **Settings > Connectors**. Installed connectors appear under
 **Installed**. Hosted providers appear under **Discover**, and an arbitrary
 remote server can be added with **+ Custom**. Google Drive, Gmail, Google
@@ -50,7 +50,7 @@ organization can supply a CourtListener token for its members; see
 
 Most hosted MCP servers support OAuth Dynamic Client Registration (DCR). A
 user clicks **Add** in Discover and completes the provider's consent screen;
-the Mike deployment does not need provider-specific credentials. Airtable,
+the LinkMai deployment does not need provider-specific credentials. Airtable,
 Lawve, Legal Data Hunter, Linear, and Notion use this pathway.
 
 Servers that use a bearer token or custom headers can be added through
@@ -59,14 +59,14 @@ leave an incomplete connector installed.
 
 ### Pre-configured OAuth clients
 
-Some providers do not support DCR. The person operating Mike must create one
+Some providers do not support DCR. The person operating LinkMai must create one
 OAuth client with the provider and configure its credentials in
-`backend/.env`. Each Mike user can then authorize their own provider account.
+`backend/.env`. Each LinkMai user can then authorize their own provider account.
 
 - [Slack](#slack)
 - [Google-hosted MCP servers](#google-hosted-mcp-servers)
 
-If the deployment is not configured, Mike rejects the connector before saving
+If the deployment is not configured, LinkMai rejects the connector before saving
 it. The warning links to this guide rather than assuming a callback URI for the
 deployment.
 
@@ -80,7 +80,7 @@ must not appear in a provider configuration.
 | Deployment | `API_PUBLIC_URL` | Provider redirect URI |
 | --- | --- | --- |
 | Local development | `http://localhost:3000/api` | `http://localhost:3000/api/user/mcp-connectors/oauth/callback` |
-| Production | `https://<your-mike-host>/api` | `https://<your-mike-host>/api/user/mcp-connectors/oauth/callback` |
+| Production | `https://<your-linkmai-host>/api` | `https://<your-linkmai-host>/api/user/mcp-connectors/oauth/callback` |
 
 The provider redirect URI must match byte-for-byte. Some providers impose
 additional requirements; Slack requires HTTPS.
@@ -100,7 +100,7 @@ rights in the workspace.
    **OAuth & Permissions**, enable PKCE. These settings are not represented in
    the app manifest and must be enabled manually.
 3. Register
-   `https://<your-mike-host>/api/user/mcp-connectors/oauth/callback` as a
+   `https://<your-linkmai-host>/api/user/mcp-connectors/oauth/callback` as a
    redirect URI. Slack requires HTTPS. For local development, run an HTTPS
    tunnel against the frontend on port 3000, set
    `API_PUBLIC_URL=https://<tunnel-host>/api`, and register the matching tunnel
@@ -108,7 +108,7 @@ rights in the workspace.
    values together.
 4. Set `SLACK_MCP_OAUTH_CLIENT_ID` and
    `SLACK_MCP_OAUTH_CLIENT_SECRET` in `backend/.env`, then restart the backend.
-5. In Mike, go to **Settings > Connectors > Discover**, click **Add** on Slack,
+5. In LinkMai, go to **Settings > Connectors > Discover**, click **Add** on Slack,
    and approve the consent screen. A workspace owner or administrator may
    need to approve the app first.
 
@@ -148,12 +148,12 @@ returned by LDH search. The default response may be truncated and is not eligibl
 for an inline source. A complete, matching response from the canonical LDH
 endpoint becomes a request-scoped source with its title, text, and a link to the
 provider's page.
-Mike passes at most 60,000 characters of an MCP tool result to the model; for the
+LinkMai passes at most 60,000 characters of an MCP tool result to the model; for the
 LDH connector alone the limit is 200,000, so a full judgment usually fits. When
 a long LDH document exceeds that, the complete text still becomes the source, and
 the model is told to read it in full with `read_document` before relying on the
 rest. Source text is limited to 1,000,000 characters: a document longer than that
-is not registered as a source and cannot be cited. Case law, legislation, and doctrine use Mike's existing citation and source panel;
+is not registered as a source and cannot be cited. Case law, legislation, and doctrine use LinkMai's existing citation and source panel;
 there is no uploaded-document version to fetch. Exact-quote verification still
 runs against the retrieved text. Treat source content as untrusted, not as
 instructions to execute connector actions.
@@ -166,7 +166,7 @@ source panel know only the provider registry, so another document provider is
 one implementation file and one registry entry; the frontend changes only if
 the provider introduces a new document type.
 
-Mike does not store LDH text. A saved citation keeps the source's reference,
+LinkMai does not store LDH text. A saved citation keeps the source's reference,
 title, link and quotes; when the source is opened later, the panel reads the
 text again through `GET /documents/:id`, which calls `get_document` with the
 viewer's own LDH connection in the chat's workspace. A viewer without a usable
@@ -177,7 +177,7 @@ same rule covers the other two places a tool result is persisted: an approved
 including for later `read_document`, `find_in_document` and `fetch_documents`
 calls on that source. The live request still has the full text in memory.
 
-For a live smoke test on a non-production Mike instance: authorize your own LDH
+For a live smoke test on a non-production LinkMai instance: authorize your own LDH
 account, retrieve one public document in full, cite an exact excerpt, and open
 both the citation and its source title. Confirm the panel shows the retrieved
 text and the link, then reload the chat and confirm the source opens again
@@ -188,7 +188,7 @@ cannot establish live provider authorization, retrieval, or model accuracy.
 
 - Connector bearer tokens, custom headers, and OAuth tokens are encrypted at
   rest using `MCP_CONNECTORS_ENCRYPTION_SECRET`.
-- Remote URLs are subject to Mike's outbound SSRF protections.
+- Remote URLs are subject to LinkMai's outbound SSRF protections.
 - Connector tools are cached after successful registration and can be enabled
   or disabled from the connector's Manage dialog.
 
@@ -224,7 +224,7 @@ turned off, deleted, or replaced in the meantime. Changing the server URL,
 credentials, or authorized account invalidates a pending approval. Routine
 OAuth token refresh does not.
 
-Approvals are available in the Mike assistant and project chats. The Word
+Approvals are available in the LinkMai assistant and project chats. The Word
 add-in and tabular review cannot show them, so a write that needs approval is
 refused there with an explanation.
 

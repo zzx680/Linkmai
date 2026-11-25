@@ -25,7 +25,7 @@ export function userExportFilename(
     orgId: string | null = null,
 ) {
     const workspace = orgId ? `-org-${orgId.slice(0, 8)}` : "";
-    return `mike-${kind}-export-${userId.slice(0, 8)}${workspace}-${nowStamp()}.json`;
+    return `linkmai-${kind}-export-${userId.slice(0, 8)}${workspace}-${nowStamp()}.json`;
 }
 
 type Row = Record<string, unknown>;

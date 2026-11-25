@@ -49,11 +49,11 @@ export default defineConfig({
             },
             // The shared packages, by the same names tsconfig.json maps.
             {
-                find: /^@mike\/ui$/,
+                find: /^@linkmai\/ui$/,
                 replacement: resolvePath("../packages/ui/src/index.ts"),
             },
             {
-                find: /^@mike\/client$/,
+                find: /^@linkmai\/client$/,
                 replacement: resolvePath("../packages/client/src/index.ts"),
             },
             {
@@ -126,13 +126,13 @@ export default defineConfig({
             // Ratchet the lib layer only, mirroring the backend's decision to
             // gate src/lib/**: components/hooks are exercised by their own
             // suites but not floor-gated (their coverage is UI-shaped and
-            // noisy). src/app/lib/** is the client library: mikeApi (the
+            // noisy). src/app/lib/** is the client library: linkmaiApi (the
             // frontend half of the SSE contract), upload validation, model
             // availability, utils, and the cookie-session auth wrapper.
             include: ["src/app/lib/**"],
             exclude: ["src/app/lib/**/*.test.*"],
             // No-regression RATCHET floor, not a target. The lib layer is
-            // effectively fully tested: every mikeApi endpoint wrapper has a
+            // effectively fully tested: every linkmaiApi endpoint wrapper has a
             // route/method/body assertion, and the remaining gap is only the
             // dev-logging branch and a couple of `?? null` default arms.
             // Measured on this tree: 100% statements, 99.07% branches,

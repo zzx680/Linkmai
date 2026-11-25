@@ -1,4 +1,4 @@
-// Mirrored across backend and @mike/client; sentryEvent.sync.test.ts enforces parity.
+// Mirrored across backend and @linkmai/client; sentryEvent.sync.test.ts enforces parity.
 type RecordValue = Record<string, unknown>;
 const record = (value: unknown): RecordValue => value && typeof value === 'object' && !Array.isArray(value) ? value as RecordValue : {};
 
@@ -63,7 +63,7 @@ export function eventBudget(options: { repeatEventsPerDay?: number; eventsPerDay
       if (!ceilingNoticeLogged) {
         ceilingNoticeLogged = true;
         // Fixed local text only: no event data, and warn is not captured by
-        // Mike's error-only console bridge. Set the guard before logging.
+        // LinkMai's error-only console bridge. Set the guard before logging.
         console.warn("[sentry] Daily event limit reached; further reports are suppressed until the next reporting day.");
       }
       return false;

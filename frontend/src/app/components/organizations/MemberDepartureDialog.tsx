@@ -1,20 +1,20 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
 import { ModalSelect } from "@/app/components/modals/ModalSelect";
 import { SkeletonLine } from "@/app/components/shared/TablePrimitive";
-import { textButtonUIClassName } from "@mike/ui";
+import { textButtonUIClassName } from "@linkmai/ui";
 import {
   getOrgMemberHandover,
   listOrgMembers,
   removeOrgMember,
   type OrgMember,
   type OrgMemberHandover,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 
 // Shared work is handed to one successor; unshared work is archived for
 // 30 days. Existing co-owned items stay with their remaining owners.

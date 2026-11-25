@@ -6,7 +6,7 @@
  *   4. Add a document — upload via AddDocumentsModal, row appears in table
  *
  * Auth: runs signed in as this worker's account (the storageState fixture in
- * e2e/fixtures.ts; e2e@mike.local on worker 0).
+ * e2e/fixtures.ts; e2e@linkmai.local on worker 0).
  */
 import { test, expect } from "./fixtures";
 import { PDF_FIXTURE } from "./helpers";

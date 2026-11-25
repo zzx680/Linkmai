@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -11,7 +11,7 @@ import { preprocessCitations, type ParsedCitation } from "./citation-utils";
 import { getPillClass } from "./pillUtils";
 import { SkeletonLine } from "../shared/TablePrimitive";
 import { TRExpandedCellSurface } from "./TRExpandedCellSurface";
-import { CitationPillUI } from "@mike/ui";
+import { CitationPillUI } from "@linkmai/ui";
 
 interface Props {
     cell: TCell;

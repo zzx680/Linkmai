@@ -1,6 +1,6 @@
 "use client";
 
-import { getAuditActors, type AuditActor } from "@/app/lib/mikeApi";
+import { getAuditActors, type AuditActor } from "@/app/lib/linkmaiApi";
 import { PersonFilter } from "@/app/components/shared/PersonFilter";
 
 /** Search and select an exact audit actor, loading additional people on scroll. */

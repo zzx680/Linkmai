@@ -1,8 +1,8 @@
 "use client";
 
-import { uiDateLocale } from "@mike/client";
+import { uiDateLocale } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   useCallback,
@@ -64,10 +64,10 @@ import {
   type OrgDepartureItem,
   type OrgDepartureList,
   type OrgMember,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { notifySuccess, userFacingApiError } from "@/app/lib/userFacingError";
 import { cn } from "@/app/lib/utils";
-import { DropdownItem } from "@mike/ui";
+import { DropdownItem } from "@linkmai/ui";
 import { useIdSet } from "@/app/hooks/useIdSet";
 
 type Kind = OrgDepartureItem["kind"];

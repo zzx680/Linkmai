@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 // Client-side mirror of backend/src/lib/permissions.ts — the project role
 // ladder and capability matrix. The server is the enforcement point; this
 // exists so the UI can hide or disable affordances the server would reject,

@@ -1,9 +1,9 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useState } from "react";
-import { LIQUID_GLASS_FLAT_CLASS, PillButtonUI } from "@mike/ui";
+import { LIQUID_GLASS_FLAT_CLASS, PillButtonUI } from "@linkmai/ui";
 import { MemorySaveStatus } from "@/app/components/memory/MemoryEditorState";
 import { useMemoryAutosave } from "@/app/components/memory/useMemoryAutosave";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
@@ -11,7 +11,7 @@ import { SettingsDescription } from "@/app/components/settings/SettingsText";
 import {
   getCustomInstructions,
   updateCustomInstructions,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 
 /** Mirrors CUSTOM_INSTRUCTIONS_MAX_LENGTH in the backend user module. */
@@ -99,7 +99,7 @@ export function CustomInstructionsSection() {
         ) : null}
       </div>
       <SettingsDescription>
-        {uiText("Tell Mike how you would like it to respond in chats.")}
+        {uiText("Tell LinkMai how you would like it to respond in chats.")}
       </SettingsDescription>
 
       {loading ? (

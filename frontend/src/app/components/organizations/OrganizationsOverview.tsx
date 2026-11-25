@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,10 +19,10 @@ import {
   listOrgs,
   type Org,
   type OrgInvitation,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { ORG_ROLE_LABELS } from "@/app/lib/permissions";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { GlassCardUI, LIQUID_GLASS_SUBTLE_CLASS, PillButtonUI } from "@mike/ui";
+import { GlassCardUI, LIQUID_GLASS_SUBTLE_CLASS, PillButtonUI } from "@linkmai/ui";
 import { DeletedOrganizations } from "./DeletedOrganizations";
 import { CreateOrganizationModal } from "./OrganizationModals";
 import { organizationSettingsHref } from "./OrganizationSettingsShell";

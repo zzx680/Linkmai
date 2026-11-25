@@ -12,13 +12,13 @@
 // page_count / textless_page_count are measured in-process at upload and stay
 // correct even when every background extraction fails. That is how the bug
 // #799 fixed went unnoticed: the parser child's env allowlist dropped
-// ELECTRON_RUN_AS_NODE, so in the packaged app the child relaunched Mike
+// ELECTRON_RUN_AS_NODE, so in the packaged app the child relaunched LinkMai
 // instead of parsing, and this suite stayed green because it only checked the
 // stored bytes.
 //
 // Two launch modes:
-//   node e2e/local.e2e.mjs                  # packaged Mike.app (dist:local)
-//   MIKE_E2E_DEV=1 node e2e/local.e2e.mjs   # electron . (repo dev mode)
+//   node e2e/local.e2e.mjs                  # packaged LinkMai.app (dist:local)
+//   LINKMAI_E2E_DEV=1 node e2e/local.e2e.mjs   # electron . (repo dev mode)
 //
 // A fresh userData per run is the point: it exercises the first-run path a
 // downloader hits (initdb → roles → gotrue migrations → schema.sql → ledger
@@ -43,7 +43,7 @@ import {
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const DESKTOP = path.join(here, "..");
-const DEV = process.env.MIKE_E2E_DEV === "1";
+const DEV = process.env.LINKMAI_E2E_DEV === "1";
 const APP_BINARY = DEV
   ? path.join(DESKTOP, "node_modules", ".bin", "electron")
   : packagedAppBinary(DESKTOP);
@@ -172,10 +172,10 @@ const launchApp = () =>
     cwd: DESKTOP,
     env: {
       ...process.env,
-      MIKE_DOWNLOAD_DIR: DOWNLOAD_DIR,
-      MIKE_E2E_CAPTURE_EXTERNAL: CAPTURE_FILE,
-      MIKE_E2E_DOWNLOAD_LOG: DOWNLOAD_LOG,
-      MIKE_USER_DATA_DIR: USER_DATA_DIR,
+      LINKMAI_DOWNLOAD_DIR: DOWNLOAD_DIR,
+      LINKMAI_E2E_CAPTURE_EXTERNAL: CAPTURE_FILE,
+      LINKMAI_E2E_DOWNLOAD_LOG: DOWNLOAD_LOG,
+      LINKMAI_USER_DATA_DIR: USER_DATA_DIR,
     },
   });
 const connectApp = async () => {
@@ -229,7 +229,7 @@ try {
   });
   await completeOnboardingIfRequired(page, {
     name: "Local E2E",
-    organisation: "Mike Local CI",
+    organisation: "LinkMai Local CI",
   });
   await page
     .getByRole("button", { name: "Assistant", exact: true })
@@ -388,7 +388,7 @@ try {
     });
     await completeOnboardingIfRequired(page, {
       name: "Local Guest",
-      organisation: "Mike Local CI",
+      organisation: "LinkMai Local CI",
     });
     await page
       .getByRole("button", { name: "Assistant", exact: true })

@@ -34,11 +34,11 @@ describe("same-origin API gateway", () => {
         });
         upstreamHeaders.append(
             "set-cookie",
-            "__Host-mike-session=one; Path=/; Secure; HttpOnly",
+            "__Host-linkmai-session=one; Path=/; Secure; HttpOnly",
         );
         upstreamHeaders.append(
             "set-cookie",
-            "__Host-mike-session.1=two; Path=/; Secure; HttpOnly",
+            "__Host-linkmai-session.1=two; Path=/; Secure; HttpOnly",
         );
         fetchMock.mockResolvedValue(
             new Response(JSON.stringify({ ok: true }), {
@@ -50,7 +50,7 @@ describe("same-origin API gateway", () => {
             "https://app.example.test/api/projects/a%2Fb?view=full",
             {
                 headers: {
-                    cookie: "__Host-mike-session=incoming",
+                    cookie: "__Host-linkmai-session=incoming",
                     origin: "https://app.example.test",
                 },
             },
@@ -67,7 +67,7 @@ describe("same-origin API gateway", () => {
         );
         const forwardedHeaders = new Headers(init.headers);
         expect(forwardedHeaders.get("cookie")).toBe(
-            "__Host-mike-session=incoming",
+            "__Host-linkmai-session=incoming",
         );
         expect(forwardedHeaders.get("origin")).toBe("https://app.example.test");
         expect(forwardedHeaders.get("host")).toBeNull();
@@ -75,10 +75,10 @@ describe("same-origin API gateway", () => {
             "app.example.test",
         );
         expect(response.headers.get("set-cookie")).toContain(
-            "__Host-mike-session=one",
+            "__Host-linkmai-session=one",
         );
         expect(response.headers.get("set-cookie")).toContain(
-            "__Host-mike-session.1=two",
+            "__Host-linkmai-session.1=two",
         );
     });
 
@@ -353,8 +353,8 @@ describe("same-origin API gateway", () => {
         // The real scrubber: once reportError marked the error, the console
         // bridge's copy of this exact log call is dropped, not re-sent.
         const { createEventScrubber } = await vi.importActual<
-            typeof import("@mike/client")
-        >("@mike/client");
+            typeof import("@linkmai/client")
+        >("@linkmai/client");
         const scrubber = createEventScrubber();
         const [reported] = reportError.mock.calls.at(-1) as [unknown];
         scrubber.markReported(reported);

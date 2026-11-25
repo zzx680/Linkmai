@@ -1,0 +1,20 @@
+LinkMai
+Copyright (C) 2026 LinkMai contributors
+
+This product is a modified version of the Mike project, developed by Open
+Legal Products and contributors:
+
+    https://github.com/open-legal-products/mike
+
+Mike is licensed under the GNU Affero General Public License, version 3. The
+original copyright notices and the license text are preserved in LICENSE.
+
+LinkMai changes relative to the upstream project include a Chinese-language
+interface and dictionary, the LinkMai product identity, package, environment
+variable, and service names, LinkMai-specific deployment templates for
+Alibaba Cloud, and an in-progress LinkMai marketing site. Upstream database
+object names that begin with `mike_` are retained in this release so existing
+databases can be upgraded without a destructive rename.
+
+The LinkMai name, logo, and marketing site content are not part of the
+upstream project and are not covered by its copyright.

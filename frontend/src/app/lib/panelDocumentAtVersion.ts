@@ -1,4 +1,4 @@
-import type { DocumentVersion } from "./mikeApi";
+import type { DocumentVersion } from "./linkmaiApi";
 import type { PanelDocument } from "@/app/components/shared/types";
 import { resolveDocumentViewType } from "./documentViewType";
 

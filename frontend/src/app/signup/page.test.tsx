@@ -31,7 +31,7 @@ vi.mock("@/app/contexts/AuthContext", () => ({
 }));
 
 vi.mock("@/app/components/site-logo", () => ({
-    SiteLogo: () => <div>Mike</div>,
+    SiteLogo: () => <div>LinkMai</div>,
 }));
 
 const signInOptions = vi.hoisted(() => ({
@@ -168,7 +168,7 @@ describe("SignupPage", () => {
         [
             "a dropped connection",
             new TypeError("Failed to fetch"),
-            "Mike couldn't reach the server. Check your connection and try again.",
+            "LinkMai couldn't reach the server. Check your connection and try again.",
         ],
         [
             "a password the server calls weak",

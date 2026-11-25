@@ -1,25 +1,25 @@
 // Regression proof for the shell's fixed flows (see desktop-fix-spec): drives
-// the packaged Mike.app over CDP and asserts, one by one, the behaviors the
+// the packaged LinkMai.app over CDP and asserts, one by one, the behaviors the
 // window-open / navigation / download rework promises:
 //
-//   a. OAuth popup mechanics — window.open("about:blank","mike_mcp_oauth")
+//   a. OAuth popup mechanics — window.open("about:blank","linkmai_mcp_oauth")
 //      yields a real in-shell popup with a live window.opener back-channel
-//      that survives a cross-origin hop, and the popup gets NO mikeDesktop
+//      that survives a cross-origin hop, and the popup gets NO linkmaiDesktop
 //      bridge (a third-party consent page must never see privileged APIs).
 //   b. External links still bounce to the system browser (captured to a file
-//      via MIKE_E2E_CAPTURE_EXTERNAL, so no real tabs open) and never spawn
+//      via LINKMAI_E2E_CAPTURE_EXTERNAL, so no real tabs open) and never spawn
 //      an in-shell window.
 //   c. A file: navigation of the main window is blocked (drop hijack fix).
 //   d. A failing iframe does NOT kick the session to the connect screen
 //      (did-fail-load must ignore subframes).
 //   e. Blob downloads (settings → export account JSON) are picked up by the
-//      shell's will-download handler, targeting MIKE_DOWNLOAD_DIR with no
+//      shell's will-download handler, targeting LINKMAI_DOWNLOAD_DIR with no
 //      save dialog.
 //   f. Presigned-URL document downloads (DocTable downloadDoc: foreign-origin
 //      anchor click) are resolved by the will-navigate → probe → downloadURL
 //      path into the shell's download handler — not bounced to the browser.
 //
-// Download assertions read MIKE_E2E_DOWNLOAD_LOG (a JSONL file the shell's
+// Download assertions read LINKMAI_E2E_DOWNLOAD_LOG (a JSONL file the shell's
 // will-download handler appends to), NOT the download directory: an attached
 // Playwright session installs its own browser-level CDP download behavior,
 // which diverts the actual bytes away from setSavePath. The unattended
@@ -29,7 +29,7 @@
 // Prereqs: the docker-compose stack is up and the app has been packaged
 // (npm run dist). Run from desktop/:
 //   node e2e/flows.e2e.mjs
-//   MIKE_E2E_URL=http://localhost:3100 MIKE_E2E_API=http://localhost:3101 \
+//   LINKMAI_E2E_URL=http://localhost:3100 LINKMAI_E2E_API=http://localhost:3101 \
 //     node e2e/flows.e2e.mjs                                # shifted stack
 //
 // Every step is attempted even after a failure (failures are collected and
@@ -52,11 +52,11 @@ import {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const APP_BINARY = packagedAppBinary(path.join(here, ".."));
 const ARTIFACTS = path.join(here, "artifacts");
-const SERVER_URL = (process.env.MIKE_E2E_URL ?? "http://localhost:3000").replace(
+const SERVER_URL = (process.env.LINKMAI_E2E_URL ?? "http://localhost:3000").replace(
   /\/$/,
   "",
 );
-const API_URL = (process.env.MIKE_E2E_API ?? "http://localhost:3001").replace(
+const API_URL = (process.env.LINKMAI_E2E_API ?? "http://localhost:3001").replace(
   /\/$/,
   "",
 );
@@ -73,8 +73,8 @@ const DOWNLOAD_DIR = path.join(ARTIFACTS, `downloads-flows-${RUN_ID}`);
 const CAPTURE_FILE = path.join(ARTIFACTS, `external-flows-${RUN_ID}.txt`);
 const DOWNLOAD_LOG = path.join(ARTIFACTS, `download-log-${RUN_ID}.jsonl`);
 // Isolated userData so the run never touches the developer's real settings /
-// window bounds and never collides with a running Mike.app on the instance
-// lock (see MIKE_USER_DATA_DIR in main.js).
+// window bounds and never collides with a running LinkMai.app on the instance
+// lock (see LINKMAI_USER_DATA_DIR in main.js).
 const USER_DATA_DIR = path.join(ARTIFACTS, `userdata-flows-${RUN_ID}`);
 const PDF_FIXTURE = path.join(here, "..", "..", "e2e", "fixtures", "test.pdf");
 const DOC_BASE = `e2e-doc-${RUN_ID}`;
@@ -187,10 +187,10 @@ const app = spawn(
     detached: false,
     env: {
       ...process.env,
-      MIKE_DOWNLOAD_DIR: DOWNLOAD_DIR,
-      MIKE_E2E_CAPTURE_EXTERNAL: CAPTURE_FILE,
-      MIKE_E2E_DOWNLOAD_LOG: DOWNLOAD_LOG,
-      MIKE_USER_DATA_DIR: USER_DATA_DIR,
+      LINKMAI_DOWNLOAD_DIR: DOWNLOAD_DIR,
+      LINKMAI_E2E_CAPTURE_EXTERNAL: CAPTURE_FILE,
+      LINKMAI_E2E_DOWNLOAD_LOG: DOWNLOAD_LOG,
+      LINKMAI_USER_DATA_DIR: USER_DATA_DIR,
     },
   },
 );
@@ -227,7 +227,7 @@ try {
     // exists on the other side of it.
     await completeOnboardingIfRequired(page, {
       name: "Desktop Flows E2E",
-      organisation: "Mike Desktop CI",
+      organisation: "LinkMai Desktop CI",
     });
     await page
       .getByRole("button", { name: "Assistant", exact: true })
@@ -247,10 +247,10 @@ try {
   await step("oauth popup: about:blank window.open allowed in-shell", page, async () => {
     // Listener must exist BEFORE the popup posts anything.
     await page.evaluate(() => {
-      window.__mikeE2e = { oauthResults: [], popup: null };
+      window.__linkmaiE2e = { oauthResults: [], popup: null };
       window.addEventListener("message", (e) => {
         if (e && e.data && e.data.type === "mcp_oauth_result") {
-          window.__mikeE2e.oauthResults.push({
+          window.__linkmaiE2e.oauthResults.push({
             origin: e.origin,
             success: e.data.success,
           });
@@ -261,15 +261,15 @@ try {
     const { proxyNonNull } = await page.evaluate(() => {
       const w = window.open(
         "about:blank",
-        "mike_mcp_oauth",
+        "linkmai_mcp_oauth",
         "popup,width=560,height=720",
       );
-      window.__mikeE2e.popup = w;
+      window.__linkmaiE2e.popup = w;
       return { proxyNonNull: w !== null };
     });
     assert(
       proxyNonNull,
-      "window.open('about:blank', 'mike_mcp_oauth') returned null — shell denied the OAuth popup",
+      "window.open('about:blank', 'linkmai_mcp_oauth') returned null — shell denied the OAuth popup",
     );
     popup = await waitForNewPage(context, before, 10_000);
     assert(popup, "no new in-shell window appeared for the OAuth popup");
@@ -284,7 +284,7 @@ try {
     // included) without needing a live OAuth provider.
     await page.evaluate(
       (url) => {
-        window.__mikeE2e.popup.location.href = url;
+        window.__linkmaiE2e.popup.location.href = url;
       },
       `${API_URL}/user/mcp-connectors/oauth/callback?state=mike-e2e-bogus&code=mike-e2e-bogus`,
     );
@@ -295,12 +295,12 @@ try {
     // right away, before it goes.
     popupInfo = await popup.evaluate(() => ({
       openerAlive: window.opener !== null,
-      hasBridge: typeof window.mikeDesktop !== "undefined",
+      hasBridge: typeof window.linkmaiDesktop !== "undefined",
     }));
     await shot(popup, "flows-02-oauth-popup");
   });
 
-  await step("oauth popup: live opener back-channel, no mikeDesktop bridge", page, async () => {
+  await step("oauth popup: live opener back-channel, no linkmaiDesktop bridge", page, async () => {
     assert(popupInfo, "no popup facts from previous step");
     assert(
       popupInfo.openerAlive,
@@ -308,7 +308,7 @@ try {
     );
     assert(
       !popupInfo.hasBridge,
-      "popup has window.mikeDesktop — privileged bridge leaked to child windows",
+      "popup has window.linkmaiDesktop — privileged bridge leaked to child windows",
     );
     // The strongest proof the back-channel works: the callback page's own
     // mcp_oauth_result message actually arrived at the opener, from the API
@@ -316,7 +316,7 @@ try {
     const results = await waitFor(
       async () => {
         const r = await page.evaluate(
-          () => window.__mikeE2e && window.__mikeE2e.oauthResults,
+          () => window.__linkmaiE2e && window.__linkmaiE2e.oauthResults,
         );
         return r && r.length > 0 ? r : null;
       },
@@ -486,7 +486,7 @@ try {
     assert(entry, "shell will-download handler never logged a completed download");
     assert(
       entry.savePath.startsWith(DOWNLOAD_DIR),
-      `download saved outside MIKE_DOWNLOAD_DIR: ${entry.savePath}`,
+      `download saved outside LINKMAI_DOWNLOAD_DIR: ${entry.savePath}`,
     );
     console.log(`  ↳ downloaded: ${path.basename(entry.savePath)}`);
     await shot(page, "flows-03-blob-export");
@@ -554,7 +554,7 @@ try {
     assert(entry, "shell will-download handler never logged a completed download");
     assert(
       entry.savePath.startsWith(DOWNLOAD_DIR),
-      `download saved outside MIKE_DOWNLOAD_DIR: ${entry.savePath}`,
+      `download saved outside LINKMAI_DOWNLOAD_DIR: ${entry.savePath}`,
     );
     assert(
       page.url().startsWith(SERVER_URL),
@@ -575,7 +575,7 @@ try {
     const before = readDownloadLog().length;
     const result = await page.evaluate(
       async ({ api, docBase, pdfB64 }) => {
-        // Auth exactly as mikeApi does since the cookie-session rework: the
+        // Auth exactly as linkmaiApi does since the cookie-session rework: the
         // session is an httpOnly cookie, and requests go through the
         // frontend's same-origin /api gateway with credentials — there is no
         // token in localStorage any more.
@@ -608,7 +608,7 @@ try {
           doc = await upRes.json();
         }
 
-        // getDocumentUrl (mikeApi.ts:1164) → presigned storage URL on a
+        // getDocumentUrl (linkmaiApi.ts:1164) → presigned storage URL on a
         // foreign origin.
         const urlRes = await fetch(`${api}/single-documents/${doc.id}/url`, {
           headers,

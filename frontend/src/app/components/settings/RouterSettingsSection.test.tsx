@@ -23,7 +23,7 @@ const {
     bedrockConfigured: { value: false },
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     getOpenRouterModels,
     getVercelModels: vi.fn().mockResolvedValue([]),
     getBedrockModels,

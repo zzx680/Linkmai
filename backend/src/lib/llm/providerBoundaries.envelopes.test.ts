@@ -88,7 +88,7 @@ it.each([
 });
 
 it("reports a disabled configured model provider at warning in the final envelope", async () => {
-  vi.stubEnv("MIKE_MODEL_CONFIG_JSON", JSON.stringify({ models: [{
+  vi.stubEnv("LINKMAI_MODEL_CONFIG_JSON", JSON.stringify({ models: [{
     id: "configured-review-model", provider: "openai-compatible", location: "cloud",
     baseUrl: "https://provider.example/v1", apiKeyProvider: "openai",
   }] }));

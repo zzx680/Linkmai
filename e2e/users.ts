@@ -9,9 +9,9 @@ export interface E2eAccount {
 
 /**
  * The account a Playwright worker signs in as. Worker 0 keeps the historical
- * shared user (e2e@mike.local, or E2E_EMAIL / E2E_PASSWORD) so a serial run and
+ * shared user (e2e@linkmai.local, or E2E_EMAIL / E2E_PASSWORD) so a serial run and
  * the docs behave exactly as before; every additional parallel worker gets its
- * own user (e2e-w1@mike.local, ...). Separate users mean separate project,
+ * own user (e2e-w1@linkmai.local, ...). Separate users mean separate project,
  * chat and workflow lists and separate sessions, so workers cannot race on
  * each other's data. This is Playwright's "one account per parallel worker"
  * pattern: https://playwright.dev/docs/auth#moderate-one-account-per-parallel-worker
@@ -19,9 +19,9 @@ export interface E2eAccount {
 export function workerAccount(parallelIndex: number): E2eAccount {
     const password = process.env.E2E_PASSWORD ?? "E2eTestPass1!";
     if (parallelIndex === 0) {
-        return { email: process.env.E2E_EMAIL ?? "e2e@mike.local", password };
+        return { email: process.env.E2E_EMAIL ?? "e2e@linkmai.local", password };
     }
-    return { email: `e2e-w${parallelIndex}@mike.local`, password };
+    return { email: `e2e-w${parallelIndex}@linkmai.local`, password };
 }
 
 /**

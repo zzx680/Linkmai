@@ -1,12 +1,12 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
-import { MikeApiError } from "@/app/lib/mikeApi";
+import { LinkMaiApiError } from "@/app/lib/linkmaiApi";
 import { OnboardingInvitations } from "./OnboardingInvitations";
 
 const mocks = vi.hoisted(() => ({ list: vi.fn(), accept: vi.fn(), changed: vi.fn() }));
-vi.mock("@/app/lib/mikeApi", async (original) => ({
-    ...await original<typeof import("@/app/lib/mikeApi")>(),
+vi.mock("@/app/lib/linkmaiApi", async (original) => ({
+    ...await original<typeof import("@/app/lib/linkmaiApi")>(),
     listMyOrgInvitations: mocks.list, acceptOrgInvitation: mocks.accept,
 }));
 vi.mock("@/app/hooks/useOrganizationInvitationCount", () => ({ notifyOrganizationInvitationsChanged: mocks.changed }));
@@ -50,7 +50,7 @@ it("allows a failed lookup to be retried and never presents it as an empty list"
 });
 
 it("keeps failed or expired invitations from selecting a workspace and supports refreshing", async () => {
-    mocks.accept.mockRejectedValueOnce(new MikeApiError({ status: 410, message: "That invitation has expired." }));
+    mocks.accept.mockRejectedValueOnce(new LinkMaiApiError({ status: 410, message: "That invitation has expired." }));
     const user = userEvent.setup(); renderInvitations();
     await user.click(await screen.findByRole("button", { name: "Accept Example LLP" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("That invitation has expired.");

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ import {
   isMfaRequiredError,
   saveOrgLogo,
   updateOrg,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
   ORG_LOGO_ACCEPT,
   OrgLogoImageError,
@@ -44,7 +44,7 @@ import {
   isOrgOwner,
 } from "@/app/lib/permissions";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { GlassCardUI, MikeIcon, PillButtonUI } from "@mike/ui";
+import { GlassCardUI, LinkMaiIcon, PillButtonUI } from "@linkmai/ui";
 import { OrganizationLogoModal } from "./OrganizationLogoModal";
 import { useOrganizationSettings } from "./OrganizationSettingsShell";
 
@@ -311,7 +311,7 @@ export function OrganizationGeneralSettings() {
                   ) : logo === undefined ? (
                     <span className="h-8 w-8 animate-pulse rounded bg-gray-200" />
                   ) : (
-                    <MikeIcon size={20} />
+                    <LinkMaiIcon size={20} />
                   )}
                 </span>
                 <div className="min-w-0 space-y-1">

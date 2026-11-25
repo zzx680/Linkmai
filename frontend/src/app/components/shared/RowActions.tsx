@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -29,7 +29,7 @@ import {
     DropdownContent,
     DropdownItem,
     DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { notifyError } from "@/app/lib/userFacingError";
 import { LIQUID_GLASS_HOVER_CLASS } from "@/app/components/ui/liquid-surface";
 

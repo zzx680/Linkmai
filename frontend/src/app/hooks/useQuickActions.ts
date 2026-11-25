@@ -5,7 +5,7 @@ import {
     createQuickAction,
     listQuickActions,
     updateQuickAction,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import type { QuickAction } from "@/app/components/shared/types";

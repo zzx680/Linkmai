@@ -24,7 +24,7 @@ function start(telemetry?: TelemetryBudget) {
     Sentry.init({
         dsn: "https://test@sentry.invalid/1",
         environment: "production",
-        release: "mike@2.0.0",
+        release: "linkmai@2.0.0",
         defaultIntegrations: false,
         integrations: [privacyBoundaryIntegration({ telemetry })],
         transport: () => ({
@@ -79,7 +79,7 @@ it("sends a log's static text and identifier attributes, and nothing a call prin
         outcome: { value: "refused", type: "string" },
         count: { value: 2, type: "integer" },
         "sentry.environment": { value: "production", type: "string" },
-        "sentry.release": { value: "mike@2.0.0", type: "string" },
+        "sentry.release": { value: "linkmai@2.0.0", type: "string" },
     });
 
     const metrics = sent.filter(s => s.type === "trace_metric").flatMap(s => s.items);

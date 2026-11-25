@@ -17,8 +17,8 @@ export type { WordChatStorageMode };
  */
 export type WordEditApplyMode = "approval" | "direct";
 
-const STORAGE_KEY = "mike_word_chat_storage_mode";
-const APPLY_MODE_KEY = "mike_word_edit_apply_mode";
+const STORAGE_KEY = "linkmai_word_chat_storage_mode";
+const APPLY_MODE_KEY = "linkmai_word_edit_apply_mode";
 
 function storageKey(ownerId: string): string {
   return `${STORAGE_KEY}:${ownerId}`;

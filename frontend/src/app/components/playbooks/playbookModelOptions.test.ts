@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { ModelOption } from "@mike/client";
+import type { ModelOption } from "@linkmai/client";
 import type {
     ApiKeyState,
     PlaybookConfiguration,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { buildPlaybookModelOptions } from "./playbookModelOptions";
 
 const catalog: ModelOption[] = [

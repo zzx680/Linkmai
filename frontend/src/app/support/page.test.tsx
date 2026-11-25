@@ -9,7 +9,7 @@ it("shows the configured deployment mailbox without submitting to a missing API"
     const { container } = render(<SupportPage />);
     expect(screen.getByRole("link", { name: "support@example.test" })).toHaveAttribute("href", "mailto:support@example.test");
     expect(container.querySelector("form")).toBeNull();
-    expect(container.textContent).not.toContain("mikeoss.com");
+    expect(container.textContent).not.toContain("linkmai.com");
 });
 
 it("directs users to the administrator when the mailbox is unconfigured", async () => {

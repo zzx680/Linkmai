@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { nextRevealLength } from "./tabularReveal";
 
@@ -31,7 +31,7 @@ import {
     mapTRMessages,
     type TRChat,
     type TRCitationAnnotation,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import {
     isPanelDocument,
     type AssistantEvent,
@@ -63,7 +63,7 @@ import { ChatPanelHeader } from "../shared/ChatPanelHeader";
 import { HeaderActionsMenu } from "../shared/HeaderActionsMenu";
 import { cn } from "@/app/lib/utils";
 import { buildTabularChatHistory } from "@/app/lib/tabularChatHistory";
-import { CitationPillUI } from "@mike/ui";
+import { CitationPillUI } from "@linkmai/ui";
 import { subscribeToTabularChatSettingsUpdates } from "@/app/lib/tabularChatSettingsEvents";
 import { sortChatsByActivity, touchChatActivity } from "@/app/lib/chatActivity";
 import { WarningPopup } from "../popups/WarningPopup";

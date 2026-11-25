@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ConfirmPopup } from "./ConfirmPopup";
-import { ModalUI } from "@mike/ui";
+import { ModalUI } from "@linkmai/ui";
 
 describe("ConfirmPopup", () => {
   it("uses the configured danger variant for non-Delete labels", () => {

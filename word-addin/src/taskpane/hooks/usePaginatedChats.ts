@@ -1,8 +1,8 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Chat } from "../types";
-import { listCloudWordChats } from "../api/mikeApi";
+import { listCloudWordChats } from "../api/linkmaiApi";
 import { listLocalWordChats } from "../lib/localWordChats";
 import type { WordChatStorageMode } from "../lib/wordChatSettings";
 import { WORD_CHAT_HISTORY_CHANGED } from "../lib/wordChatHistoryEvents";
@@ -111,7 +111,7 @@ export function usePaginatedChats(
           timedOut
             ? uiText("Chat history took too long to load.")
             : reportFault(reason, {
-                fallback: uiText("Mike couldn't load your chat history. Try again."),
+                fallback: uiText("LinkMai couldn't load your chat history. Try again."),
                 operation: "word_chat.turn",
               }).message,
         );

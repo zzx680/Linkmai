@@ -1,9 +1,9 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { listProjectChats, listProjectsPage } from "@/app/lib/mikeApi";
+import { listProjectChats, listProjectsPage } from "@/app/lib/linkmaiApi";
 import { beginAssistantTurn } from "@/app/lib/assistantTurns";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import { AppSidebar } from "./AppSidebar";
 
 const state = vi.hoisted(() => ({
@@ -29,7 +29,7 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
   listProjectsPage: vi.fn(),
   listProjectChats: vi.fn(async () => []),
   listTabularReviews: vi.fn(async () => []),
@@ -57,9 +57,9 @@ vi.mock("@/app/contexts/ChatHistoryContext", () => ({
   }),
 }));
 
-vi.mock("@mike/ui", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@mike/ui")>()),
-  MikeIcon: () => <span aria-hidden="true" />,
+vi.mock("@linkmai/ui", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@linkmai/ui")>()),
+  LinkMaiIcon: () => <span aria-hidden="true" />,
 }));
 
 describe("AppSidebar account dropdown", () => {

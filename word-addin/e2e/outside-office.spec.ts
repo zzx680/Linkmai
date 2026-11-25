@@ -29,7 +29,7 @@ test("outside Office the pane points to Word without signing in or reporting", a
   await page.addInitScript(installOfficeMock, { outsideOffice: true });
   await page.goto("/taskpane.html");
 
-  await expect(page.getByText("Open Mike in Word")).toBeVisible();
+  await expect(page.getByText("Open LinkMai in Word")).toBeVisible();
   await expect(page.getByRole("button", { name: "Log in" })).toHaveCount(0);
   // Let any deferred effect or report flush before asserting absence.
   await page.waitForTimeout(500);
@@ -54,7 +54,7 @@ test("a hostless onReady inside an Office client sends one warning", async ({
   });
   await page.goto("/taskpane.html");
 
-  await expect(page.getByText("Open Mike in Word")).toBeVisible();
+  await expect(page.getByText("Open LinkMai in Word")).toBeVisible();
   await expect.poll(() => envelopes.length).toBe(1);
   await page.waitForTimeout(500);
   expect(envelopes).toHaveLength(1);

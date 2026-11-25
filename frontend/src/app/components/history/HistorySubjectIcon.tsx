@@ -8,7 +8,7 @@ import {
   WorkflowSkeuoIcon,
 } from "@/app/components/shared/AppSidebarSkeuoIcons";
 import { ClosedProjectSvgIcon } from "@/app/components/shared/FolderSvgIcon";
-import type { AuditEvent } from "@/app/lib/mikeApi";
+import type { AuditEvent } from "@/app/lib/linkmaiApi";
 import { auditSubject, auditSubjectEmail } from "./auditPresentation";
 
 export function HistorySubjectIcon({ event, avatarSize }: { event: AuditEvent; avatarSize?: UserAvatarSize }) {

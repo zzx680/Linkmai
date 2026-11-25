@@ -30,7 +30,7 @@ import { buildGoogleDriveTools } from "../../../lib/integrations/googleDrive";
 import { COURTLISTENER_TOOLS } from "./tools/courtlistenerTools";
 import { createProviderWebSearchTracker } from "./tools/providerWebSearch";
 import {
-  MIKE_WEB_SEARCH_SYSTEM_PROMPT,
+  LINKMAI_WEB_SEARCH_SYSTEM_PROMPT,
   PROVIDER_WEB_READ_SYSTEM_PROMPT,
   WEB_SEARCH_SYSTEM_PROMPT,
   WEB_TOOL_NAMES,
@@ -106,8 +106,8 @@ import {
 import { verifyCitations } from "./verifyCitations";
 import { buildMemoryTurn } from "../../../lib/memory/prompt";
 
-export type { AssistantEvent } from "@mike/contracts";
-import type { AssistantEvent, AssistantErrorCode } from "@mike/contracts";
+export type { AssistantEvent } from "@linkmai/contracts";
+import type { AssistantEvent, AssistantErrorCode } from "@linkmai/contracts";
 import { log } from "../../../lib/log";
 
 /**
@@ -535,7 +535,7 @@ export async function runLLMStream(params: {
           WEB_SEARCH_SYSTEM_PROMPT,
           webSearch === "provider"
             ? PROVIDER_WEB_READ_SYSTEM_PROMPT
-            : MIKE_WEB_SEARCH_SYSTEM_PROMPT,
+            : LINKMAI_WEB_SEARCH_SYSTEM_PROMPT,
         ]
       : []),
     ...(subagentRuns ? [delegateSystemPrompt(subagentDefaults)] : []),
@@ -584,7 +584,7 @@ export async function runLLMStream(params: {
   // The tokens are this assistant's own, summed over its steps; each
   // subagent reports its own on its delegation event.
   let answerModel: string | null = null;
-  let answerUsage: NonNullable<import("@mike/contracts").ResponseDetailsEvent["usage"]> | null = null;
+  let answerUsage: NonNullable<import("@linkmai/contracts").ResponseDetailsEvent["usage"]> | null = null;
   let fullText = "";
   let iterText = "";
   let iterVisibleText = "";

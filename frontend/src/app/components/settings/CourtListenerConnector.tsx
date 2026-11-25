@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
@@ -11,7 +11,7 @@ import {
   getCourtListenerConnector,
   saveCourtListenerConnectorToken,
   setCourtListenerConnectorEnabled,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { ApiKeyField } from "./ApiKeyField";
 
 export const COURTLISTENER_NAME = "CourtListener（美国判例）";

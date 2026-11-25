@@ -190,7 +190,7 @@ describe.each(["project", "assistant"] as const)(
             );
             const dataTransfer = {
                 getData: (type: string) =>
-                    type === "application/mike-doc" ? "a" : "",
+                    type === "application/linkmai-doc" ? "a" : "",
             };
             fireEvent.drop(screen.getByRole("tab", { name: "Second.docx" }), {
                 dataTransfer,

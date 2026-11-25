@@ -21,7 +21,7 @@
 // The origins module defaults to the backend source next to this file (Node
 // 22.18+ strips the TypeScript types; 22.6+ with --experimental-strip-types).
 // docker-compose.yml runs this inside the backend image with
-// MIKE_ORIGINS_MODULE=/app/dist/lib/origins.js, so the policy always comes
+// LINKMAI_ORIGINS_MODULE=/app/dist/lib/origins.js, so the policy always comes
 // from the same release as the backend that serves it.
 //
 // This script must never stop the stack: compose starts createbucket, and
@@ -43,7 +43,7 @@ function warn(message) {
 }
 
 async function loadConfiguredAllowedOrigins() {
-  const modulePath = process.env.MIKE_ORIGINS_MODULE;
+  const modulePath = process.env.LINKMAI_ORIGINS_MODULE;
   try {
     const originsModule = await import(
       modulePath

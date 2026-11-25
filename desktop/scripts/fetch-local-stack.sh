@@ -12,11 +12,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# MIKE_LOCAL_FETCH_ONLY=postgres fetches just the Postgres build. That is all
+# LINKMAI_LOCAL_FETCH_ONLY=postgres fetches just the Postgres build. That is all
 # `npm test` needs (src/local/upgrade.test.js boots a throwaway cluster from
 # it), and it spares CI's unit job the Go toolchain and the GoTrue source
 # build that only the packaged app requires.
-ONLY="${MIKE_LOCAL_FETCH_ONLY:-}"
+ONLY="${LINKMAI_LOCAL_FETCH_ONLY:-}"
 
 # Pins. PG tracks supabase/postgres:17.x from docker-compose.yml (zonky has no
 # 17.6 darwin build; any 17.x is wire- and dump-compatible). The other two
@@ -60,7 +60,7 @@ else
 fi
 
 if [ "$ONLY" = "postgres" ]; then
-  echo "==> Done (MIKE_LOCAL_FETCH_ONLY=postgres):"
+  echo "==> Done (LINKMAI_LOCAL_FETCH_ONLY=postgres):"
   "$DEST/pg/bin/postgres" --version
   exit 0
 fi

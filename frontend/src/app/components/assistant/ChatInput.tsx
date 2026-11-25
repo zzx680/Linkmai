@@ -24,7 +24,7 @@ import {
     COMPOSER_SEND_BUTTON_CLASS,
     ExcerptModalUI,
     ExcerptPillUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { UploadOverlay } from "./UploadOverlay";
 import { DocumentPill } from "../shared/DocumentPill";
 import { AddDocumentsModal } from "../modals/AddDocumentsModal";
@@ -64,7 +64,7 @@ import {
     uploadProjectDocuments,
     uploadStandaloneDocuments,
     type UploadProgress,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import {
@@ -73,7 +73,7 @@ import {
     partitionSupportedDocumentFiles,
 } from "@/app/lib/documentUploadValidation";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { isImeComposing, serializeExcerpts, type MessageExcerpt, type NoModelsReason } from "@mike/client";
+import { isImeComposing, serializeExcerpts, type MessageExcerpt, type NoModelsReason } from "@linkmai/client";
 import { useConfiguredModels } from "@/app/hooks/useConfiguredModels";
 import { zhCN } from "@/app/lib/localization";
 

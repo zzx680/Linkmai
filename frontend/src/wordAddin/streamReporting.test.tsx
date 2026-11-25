@@ -2,10 +2,10 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import * as Sentry from "@sentry/react";
-import { clearToasts, privacyBoundaryIntegration } from "@mike/client";
+import { clearToasts, privacyBoundaryIntegration } from "@linkmai/client";
 
 const mocks = vi.hoisted(() => ({ stream: vi.fn(), resume: vi.fn() }));
-vi.mock("../../../word-addin/src/taskpane/api/mikeApi", async () => ({
+vi.mock("../../../word-addin/src/taskpane/api/linkmaiApi", async () => ({
     readSSE: (await import("../../../word-addin/src/taskpane/api/client")).readSSE,
     streamWordChat: mocks.stream, streamWordChatTurn: mocks.resume,
     postWordChatToolResult: vi.fn(), stopWordChatTurn: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock("../../../word-addin/src/taskpane/lib/wordDocumentIdentity", () => ({ re
 
 import { useWordAssistantChat } from "../../../word-addin/src/taskpane/hooks/useWordAssistantChat";
 import { resumeAssistant } from "../../../word-addin/src/taskpane/api/stream";
-import { MikeApiError } from "../../../word-addin/src/taskpane/api/client";
+import { LinkMaiApiError } from "../../../word-addin/src/taskpane/api/client";
 import { isReported, scrubEvent } from "../../../word-addin/src/taskpane/lib/errorReporting";
 
 const requestId = "11111111-1111-4111-8111-111111111111";
@@ -58,7 +58,7 @@ it.each([[500, "backend"], [503, "backend"], [500, undefined], [503, undefined]]
 it.each(["backend", undefined, "proxy"])("preserves resume metadata and only trusts explicit backend ownership (%s)", async owner => {
     mocks.resume.mockResolvedValueOnce(response(503, owner));
     const error = await resumeAssistant({ chatId: "chat-1", turnId: "turn-1", documentId: "doc-1" }, vi.fn()).catch(error => error);
-    expect(error).toBeInstanceOf(MikeApiError);
+    expect(error).toBeInstanceOf(LinkMaiApiError);
     expect(error).toMatchObject({ status: 503, requestId, code: "upstream_unavailable", reportingOwner: owner === "backend" ? "backend" : undefined });
     expect(isReported(error)).toBe(true);
     expect(await Sentry.flush(2000)).toBe(true);

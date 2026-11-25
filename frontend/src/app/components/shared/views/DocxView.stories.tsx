@@ -3,7 +3,7 @@ import { DocxView } from "./DocxView";
 import { DocumentAnnotationLayer } from "../DocumentAnnotationLayer";
 import { DocumentTitleRow } from "../DocumentTitleRow";
 import { CitationQuotesSection } from "../../assistant/CitationQuotesSection";
-import { EditCardUI, TabPillButtonUI, PillButtonUI } from "@mike/ui";
+import { EditCardUI, TabPillButtonUI, PillButtonUI } from "@linkmai/ui";
 import { RESPONSE_GLASS_SURFACE } from "../../assistant/message/messageStyles";
 
 const meta = { title: "Documents / DOCX editor" };

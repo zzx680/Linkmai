@@ -52,9 +52,9 @@ import {
     setReportingUser,
     trackPendingRequest,
 } from "./errorReporting";
-import { MIKE_SENTRY_DSN } from "@mike/client";
-import { diagnosticEvent } from "@mike/client";
-import { MikeApiError, downloadDocumentsZip, updateWorkflow } from "./mikeApi";
+import { LINKMAI_SENTRY_DSN } from "@linkmai/client";
+import { diagnosticEvent } from "@linkmai/client";
+import { LinkMaiApiError, downloadDocumentsZip, updateWorkflow } from "./linkmaiApi";
 import { notifyError } from "./userFacingError";
 
 afterEach(() => {
@@ -203,7 +203,7 @@ describe("API operation identity before capture", () => {
     it("reports ZIP request failures as POST with their operation", async () => {
         state.enabled = true;
         vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
-        await expect(downloadDocumentsZip(["document-id"])).rejects.toBeInstanceOf(MikeApiError);
+        await expect(downloadDocumentsZip(["document-id"])).rejects.toBeInstanceOf(LinkMaiApiError);
         expect(Sentry.captureException).toHaveBeenCalledTimes(1);
         expect(state.scopes[0].setTag).toHaveBeenCalledWith("operation", "documents.directory");
         expect(state.scopes[0].setTag).toHaveBeenCalledWith("http_method", "POST");
@@ -217,7 +217,7 @@ describe("API operation identity before capture", () => {
             status: 500, headers: { "x-request-id": "req-workflow" },
         })));
         const error = await updateWorkflow("workflow-id", { skill_md: "# Workflow" }).catch((error: unknown) => error);
-        expect(error).toBeInstanceOf(MikeApiError);
+        expect(error).toBeInstanceOf(LinkMaiApiError);
         expect(Sentry.captureException).toHaveBeenCalledTimes(1);
         expect(state.scopes[0].setTag).toHaveBeenCalledWith("operation", "workflows.run");
         await vi.advanceTimersByTimeAsync(1000);
@@ -328,12 +328,12 @@ describe("setReportingUser", () => {
 });
 
 describe("browserSentryOptions", () => {
-    it("is ON BY DEFAULT with the Mike project DSN and never turns on PII or replay", () => {
+    it("is ON BY DEFAULT with the LinkMai project DSN and never turns on PII or replay", () => {
         const options = browserSentryOptions({ nodeEnv: "test" });
         expect(options.enabled).toBe(true);
-        expect(options.dsn).toBe(MIKE_SENTRY_DSN.frontend);
+        expect(options.dsn).toBe(LINKMAI_SENTRY_DSN.frontend);
         expect(options.environment).toBe("self-hosted");
-        expect(options.release).toBe("mike@0.0.0");
+        expect(options.release).toBe("linkmai@0.0.0");
         expect(options.dataCollection).toEqual({
             userInfo: false,
             cookies: false,
@@ -358,17 +358,17 @@ describe("browserSentryOptions", () => {
     it("reads the environment, release, and sample rate while leaving the destination to the tunnel", () => {
         const options = browserSentryOptions({
             environment: "staging",
-            release: "mike@1.0.0",
+            release: "linkmai@1.0.0",
             tracesSampleRate: "0.25",
         });
         expect(options.enabled).toBe(true);
-        expect(options.dsn).toBe(MIKE_SENTRY_DSN.frontend);
+        expect(options.dsn).toBe(LINKMAI_SENTRY_DSN.frontend);
         expect(options.environment).toBe("staging");
-        expect(options.release).toBe("mike@1.0.0");
+        expect(options.release).toBe("linkmai@1.0.0");
         expect(options.tracesSampleRate).toBe(0.25);
         expect(options.initialScope).toEqual({
             tags: {
-                service: "mike-frontend",
+                service: "linkmai-frontend",
                 runtime: "browser",
                 diagnostics_version: "2",
                 install: "community",
@@ -390,13 +390,13 @@ describe("browserSentryOptions", () => {
     });
 });
 
-// MIKE-FRONTEND-2, 9, N, S: `next dev` checkouts reported to the Mike
+// MIKE-FRONTEND-2, 9, N, S: `next dev` checkouts reported to the LinkMai
 // project as environment=self-hosted, indistinguishable from installs.
 describe("development builds", () => {
     const own = "https://k@o9.ingest.sentry.io/9";
     const dev = (env: Record<string, string>) => ({ NODE_ENV: "development", ...env }) as unknown as NodeJS.ProcessEnv;
 
-    it("do not fall back to the Mike project; a DSN set on purpose still reports", () => {
+    it("do not fall back to the LinkMai project; a DSN set on purpose still reports", () => {
         expect(reportingDestination(dev({}))).toEqual({ dsn: "", source: "development" });
         // The shipped example .env.local sets these to false: not an opt-in.
         expect(reportingDestination(dev({ SENTRY_DISABLED: "false", NEXT_PUBLIC_SENTRY_DISABLED: "false" })).dsn).toBe("");
@@ -419,31 +419,31 @@ describe("development builds", () => {
 });
 
 describe("release tagging", () => {
-    it("builds mike@<version>+<sha12> for both the browser and the server options", () => {
+    it("builds linkmai@<version>+<sha12> for both the browser and the server options", () => {
         expect(
             browserSentryOptions({
                 version: "2.1.0",
                 gitSha: "abcdef1234567890",
             }).release,
-        ).toBe("mike@2.1.0+abcdef123456");
+        ).toBe("linkmai@2.1.0+abcdef123456");
         expect(
             browserSentryOptions({ gitSha: "abcdef1234567890" }).release,
-        ).toBe("mike@0.0.0+abcdef123456");
+        ).toBe("linkmai@0.0.0+abcdef123456");
         expect(
             serverSentryOptions("server", {
                 NODE_ENV: "test",
                 SENTRY_DSN: "https://k@o.ingest.sentry.io/1",
-                MIKE_VERSION: "2.1.0",
+                LINKMAI_VERSION: "2.1.0",
                 GIT_SHA: "abcdef1234567890",
             } as NodeJS.ProcessEnv).release,
-        ).toBe("mike@2.1.0+abcdef123456");
+        ).toBe("linkmai@2.1.0+abcdef123456");
         expect(
             serverSentryOptions("server", {
                 NODE_ENV: "test",
-                SENTRY_RELEASE: "mike@3.1.0",
+                SENTRY_RELEASE: "linkmai@3.1.0",
                 GIT_SHA: "abcdef1234567890",
             } as NodeJS.ProcessEnv).release,
-        ).toBe("mike@3.1.0");
+        ).toBe("linkmai@3.1.0");
     });
 });
 
@@ -479,7 +479,7 @@ describe("reportingDestination", () => {
             source: "build",
         });
         expect(reportingDestination({} as unknown as NodeJS.ProcessEnv)).toEqual({
-            dsn: MIKE_SENTRY_DSN.frontend,
+            dsn: LINKMAI_SENTRY_DSN.frontend,
             source: "default",
         });
     });
@@ -548,7 +548,7 @@ describe("serverSentryOptions", () => {
         expect(options.release).toBe("r1");
         expect(options.tracesSampleRate).toBe(0.1);
         expect(options.initialScope).toEqual({
-            tags: { service: "mike-frontend", runtime: "edge", install: "community", diagnostics_version: "2" },
+            tags: { service: "linkmai-frontend", runtime: "edge", install: "community", diagnostics_version: "2" },
         });
         expect(options.beforeSend).toBe(scrubEvent);
     });
@@ -559,8 +559,8 @@ describe("serverSentryOptions", () => {
             {} as unknown as NodeJS.ProcessEnv,
         );
         expect(options.enabled).toBe(true);
-        expect(options.dsn).toBe(MIKE_SENTRY_DSN.frontend);
-        expect(options.release).toBe("mike@0.0.0");
+        expect(options.dsn).toBe(LINKMAI_SENTRY_DSN.frontend);
+        expect(options.release).toBe("linkmai@0.0.0");
         expect(options.environment).toBe("self-hosted");
         const withNodeEnv = serverSentryOptions("server", {
             NODE_ENV: "production",
@@ -687,7 +687,7 @@ describe("reportNetworkFailure when the API is unreachable", () => {
         expect(first.exception).toBeUndefined();
         expect(first.stacktrace).toBeUndefined();
         expect(first.level).toBe("warning");
-        expect(first.tags).toMatchObject({ component: "mike-api", network: true, failure_code: "fetch_failed" });
+        expect(first.tags).toMatchObject({ component: "linkmai-api", network: true, failure_code: "fetch_failed" });
     });
 
     it("does not report while the browser is offline, and does not open a window", () => {

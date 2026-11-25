@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import {
     DROPDOWN_ROWS_CLASS,
     DropdownButton,
     DropdownSurface,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import {
     searchSettings,
     type SettingsSearchEntry,

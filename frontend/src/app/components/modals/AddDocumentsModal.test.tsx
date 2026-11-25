@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { addDocumentToProject, getProject } from "@/app/lib/mikeApi";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { addDocumentToProject, getProject } from "@/app/lib/linkmaiApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 const scope = vi.hoisted(() => ({ accountId: "u1", workspace: "personal" }));
 vi.mock("@/app/contexts/WorkspaceContext", async importOriginal => ({
@@ -15,8 +15,8 @@ const apiMocks = vi.hoisted(() => ({
     uploadProjectDocuments: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     addDocumentToProject: vi.fn(),
     getProject: vi.fn(),
     uploadProjectDocuments: apiMocks.uploadProjectDocuments,

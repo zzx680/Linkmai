@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 export function workflowSlashCommandFromTitle(title: string): string | null {
     const titleSlug = title
         .trim()

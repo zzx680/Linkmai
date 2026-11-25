@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Plus } from "lucide-react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { TabPillButtonUI } from "@mike/ui";
+import { TabPillButtonUI } from "@linkmai/ui";
 import { TableToolbar } from "./TableToolbar";
 
 describe("TableToolbar", () => {

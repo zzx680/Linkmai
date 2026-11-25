@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { SelectionCheckbox } from "@/app/components/ui/selection-checkbox";

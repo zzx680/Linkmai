@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
     getLibraryFilterOptions,
     getLibraryLevels,
-} from "@/app/lib/mikeApi";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+} from "@/app/lib/linkmaiApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 import {
     LibraryCollectionPage,
     LibraryWorkspaceLayout,
@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     bulkDeleteLibraryDocuments: vi.fn(),
     createLibraryFolder: vi.fn(),
     deleteLibraryFolder: vi.fn(),

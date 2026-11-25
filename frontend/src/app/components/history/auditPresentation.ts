@@ -1,6 +1,6 @@
 
-import { uiText } from "@mike/client";
-import type { AuditEvent, OrgPrivateContentKind } from "@/app/lib/mikeApi";
+import { uiText } from "@linkmai/client";
+import type { AuditEvent, OrgPrivateContentKind } from "@/app/lib/linkmaiApi";
 
 export interface AuditPrivateAccess {
   kind: OrgPrivateContentKind;

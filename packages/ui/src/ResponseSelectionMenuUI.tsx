@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
@@ -12,7 +12,7 @@ import {
     normalizeExcerptNote,
     normalizeExcerptText,
     type MessageExcerpt,
-} from "@mike/client";
+} from "@linkmai/client";
 
 /** Marks the response text a reader can highlight to quote or annotate. */
 export const EXCERPT_SOURCE_PROPS = { "data-excerpt-source": "" } as const;

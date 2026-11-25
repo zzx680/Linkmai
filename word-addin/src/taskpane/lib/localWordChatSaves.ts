@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * Saving a Word chat message to device-only storage.
  *
@@ -11,7 +11,7 @@ import { uiText } from "@mike/client";
  *
  * The notifier is injected so the decision can be asserted without a DOM.
  */
-import { UserVisibleError } from "@mike/client";
+import { UserVisibleError } from "@linkmai/client";
 import { notifyError } from "./notify";
 import type { WordChatStorageMode } from "./wordChatTypes";
 

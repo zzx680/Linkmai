@@ -4,7 +4,7 @@
 // Design rules, in priority order:
 //
 //   1. ON BY DEFAULT for community installs; SENTRY_DISABLED=true opts out.
-//      An explicit DSN overrides Mike's project. Test processes stay disabled
+//      An explicit DSN overrides LinkMai's project. Test processes stay disabled
 //      unless SENTRY_ALLOW_IN_TESTS=true is explicitly set.
 //   2. NEVER LEAK DOCUMENT CONTENT OR CREDENTIALS. This is a legal platform:
 //      request bodies carry privileged documents and chat transcripts, and
@@ -43,7 +43,7 @@ const CONSOLE_MECHANISM = "auto.core.capture_console";
  * The mechanism of the events Sentry's Vercel AI integration files itself.
  * It subscribes to the AI SDK's `ai:telemetry` diagnostics channel and calls
  * captureException(…, { handled: false }) for EVERY `tool-error` a tool step
- * produces (`captureToolError` in @sentry/server-utils). For Mike that is
+ * produces (`captureToolError` in @sentry/server-utils). For LinkMai that is
  * never a fresh report: a tool failure ends the turn and is reported once,
  * typed, by its owner (chat-stream's `reportError`, the job runner for the
  * memory curator), and the ask_inputs / approval pause is control flow that
@@ -314,13 +314,13 @@ export function redactShaped(value: unknown, depth = 0): unknown {
 }
 
 /**
- * The Mike project's own Sentry projects. A DSN is a write-only address:
+ * The LinkMai project's own Sentry projects. A DSN is a write-only address:
  * it lets an SDK post events and nothing else, so it is public by design
  * (it ships in every browser bundle). Community installs report here by
  * default so the project learns what forks run into; the opt-out and the
  * override are one variable each (see resolveDsn).
  */
-export const MIKE_SENTRY_DSN = {
+export const LINKMAI_SENTRY_DSN = {
   backend:
     "https://d0d66029ed783707289c965cd3d5c868@o4512288166510592.ingest.us.sentry.io/4512288204718080",
   frontend:
@@ -332,7 +332,7 @@ export const MIKE_SENTRY_DSN = {
 export type DsnResolution = {
   dsn: string;
   /**
-   * Where the DSN came from; "default" means the Mike project's Sentry and
+   * Where the DSN came from; "default" means the LinkMai project's Sentry and
    * "development" means off because this is a development build.
    */
   source: "disabled" | "env" | "default" | "development";
@@ -340,7 +340,7 @@ export type DsnResolution = {
 
 /**
  * Off if the runtime's *_SENTRY_DISABLED is "true"; the runtime's own DSN
- * when one is set (a self-hoster's own Sentry); otherwise the built-in Mike
+ * when one is set (a self-hoster's own Sentry); otherwise the built-in LinkMai
  * project DSN. Test processes are guarded separately by the caller.
  */
 export function resolveDsn(input: {
@@ -350,7 +350,7 @@ export function resolveDsn(input: {
   /**
    * A development build (`next dev`, `tsx watch`, the add-in's webpack dev
    * server): a contributor's laptop, not an install. It never falls back to
-   * the Mike project; only a DSN set on purpose (your own project, or the
+   * the LinkMai project; only a DSN set on purpose (your own project, or the
    * local sink in scripts/sentry-sink.mjs) turns it on.
    */
   development?: boolean;
@@ -478,7 +478,7 @@ function mapStringLeaves(
 }
 
 /**
- * COMMUNITY INSTALLS: a fork or self-hosted Mike reporting to the Mike
+ * COMMUNITY INSTALLS: a fork or self-hosted LinkMai reporting to the LinkMai
  * project's Sentry sends only what our own code owns and what is too broad
  * to identify anyone. Removed: the machine name, the user id, request
  * headers and host, every breadcrumb, device / app / locale contexts, local
@@ -491,10 +491,10 @@ export function minimiseForCommunity<T extends CommunityEvent>(event: T): T {
   delete event.server_name;
   delete event.user;
   // Breadcrumbs are request history; only our own stage trail stays
-  // (category mike.stage, message a stage name), the privacy boundary
+  // (category linkmai.stage, message a stage name), the privacy boundary
   // checks each one against the diagnostic label format.
   const trail = Array.isArray(event.breadcrumbs)
-    ? event.breadcrumbs.filter((crumb) => (crumb as { category?: unknown })?.category === "mike.stage")
+    ? event.breadcrumbs.filter((crumb) => (crumb as { category?: unknown })?.category === "linkmai.stage")
     : [];
   if (trail.length) event.breadcrumbs = trail;
   else delete event.breadcrumbs;
@@ -567,17 +567,17 @@ export function minimiseForCommunity<T extends CommunityEvent>(event: T): T {
 export const UNVERSIONED = "0.0.0";
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 
-/** `MIKE_VERSION` as a semver string, or 0.0.0 when unset or malformed. */
+/** `LINKMAI_VERSION` as a semver string, or 0.0.0 when unset or malformed. */
 export function normalizeVersion(raw: string | undefined): string {
   const trimmed = (raw ?? "").trim().replace(/^v/, "");
   return VERSION_PATTERN.test(trimmed) ? trimmed : UNVERSIONED;
 }
 
 /**
- * `mike@<version>+<sha12>`: the release every runtime tags events with. Same
+ * `linkmai@<version>+<sha12>`: the release every runtime tags events with. Same
  * rule as packages/client/src/sentryEvent.ts (this module cannot import
- * it). An explicit SENTRY_RELEASE wins; a build without MIKE_VERSION is
- * `mike@0.0.0...`, valid and visibly not a release.
+ * it). An explicit SENTRY_RELEASE wins; a build without LINKMAI_VERSION is
+ * `linkmai@0.0.0...`, valid and visibly not a release.
  */
 export function releaseName(
   explicit: string | undefined,
@@ -587,7 +587,7 @@ export function releaseName(
   const named = explicit?.trim();
   if (named) return named;
   const sha = gitSha?.trim().slice(0, 12);
-  const base = `mike@${normalizeVersion(version)}`;
+  const base = `linkmai@${normalizeVersion(version)}`;
   return sha ? `${base}+${sha}` : base;
 }
 
@@ -663,7 +663,7 @@ export function backendBuildMode(
 /**
  * SENTRY_SOURCE_RUN_IS_INSTALL=true: a self-hoster who runs the backend from
  * its TypeScript source in production says "this source run is an install".
- * It then reports like the compiled image (Mike project by default,
+ * It then reports like the compiled image (LinkMai project by default,
  * environment self-hosted, build_mode production). Off unless exactly "true"
  * (any case), and absent from every example value, so a contributor's
  * checkout never turns it on by copying a file.
@@ -677,14 +677,14 @@ export function sentryConfiguration(
   sourceRun: boolean = isDevelopmentBuild(),
 ) {
   // ON BY DEFAULT for installs: without SENTRY_DISABLED or a DSN of your own,
-  // errors go to the Mike project's Sentry as a community install (see the
+  // errors go to the LinkMai project's Sentry as a community install (see the
   // README's Telemetry section). A development build stays off unless a DSN
-  // is set on purpose. Only Mike's own deployment sets SENTRY_INSTALL.
+  // is set on purpose. Only LinkMai's own deployment sets SENTRY_INSTALL.
   const development = sourceRun && !sourceRunIsInstall(env);
   const resolved = resolveDsn({
-    disabled: env.SENTRY_DISABLED?.trim() || env.MIKE_BUILD_SENTRY_DISABLED,
-    dsn: env.SENTRY_DSN?.trim() || env.MIKE_BUILD_SENTRY_DSN,
-    fallback: MIKE_SENTRY_DSN.backend,
+    disabled: env.SENTRY_DISABLED?.trim() || env.LINKMAI_BUILD_SENTRY_DISABLED,
+    dsn: env.SENTRY_DSN?.trim() || env.LINKMAI_BUILD_SENTRY_DSN,
+    fallback: LINKMAI_SENTRY_DSN.backend,
     development,
   });
   const dsn = resolved.dsn;
@@ -703,17 +703,17 @@ export function sentryConfiguration(
       dsn.length > 0 &&
       (!isTestProcess || env.SENTRY_ALLOW_IN_TESTS === "true"),
     environment: sentryEnvironment(env.SENTRY_ENVIRONMENT, development),
-    // An explicit SENTRY_RELEASE wins; otherwise mike@<version>+<sha12> from
-    // the MIKE_VERSION and GIT_SHA build arguments — what lets Sentry say
+    // An explicit SENTRY_RELEASE wins; otherwise linkmai@<version>+<sha12> from
+    // the LINKMAI_VERSION and GIT_SHA build arguments — what lets Sentry say
     // "regressed in this release" and resolve an issue until the next.
-    release: releaseName(env.SENTRY_RELEASE, env.MIKE_VERSION, env.GIT_SHA),
+    release: releaseName(env.SENTRY_RELEASE, env.LINKMAI_VERSION, env.GIT_SHA),
     // Performance tracing is opt-in: error tracking is the goal of this
     // integration and traces cost quota. 0 keeps the OpenTelemetry request
     // instrumentation (needed for request context on errors) without
     // sending transactions.
     tracesSampleRate: parseRate(env.SENTRY_TRACES_SAMPLE_RATE, 0),
     debug: env.SENTRY_DEBUG === "true",
-    ...eventBudgetLimits(env.SENTRY_MAX_REPEAT_EVENTS_PER_DAY, dsn, Object.values(MIKE_SENTRY_DSN)),
+    ...eventBudgetLimits(env.SENTRY_MAX_REPEAT_EVENTS_PER_DAY, dsn, Object.values(LINKMAI_SENTRY_DSN)),
   };
 }
 
@@ -1001,7 +1001,7 @@ export function initSentry(
       Sentry.onUnhandledRejectionIntegration({ mode: "strict" }),
     ],
     initialScope: {
-      tags: { service: "mike-backend", role, install: config.install, build_mode: backendBuildMode(env, config.development), diagnostics_version: "2" },
+      tags: { service: "linkmai-backend", role, install: config.install, build_mode: backendBuildMode(env, config.development), diagnostics_version: "2" },
     },
     beforeSend: scrubEvent,
   });
@@ -1015,7 +1015,7 @@ export function initSentry(
   installProcessWarningReporter(env);
   if (config.dsnSource === "default") {
     console.log(
-      `[sentry] enabled for ${role} → Mike project Sentry (${config.install} install, ` +
+      `[sentry] enabled for ${role} → LinkMai project Sentry (${config.install} install, ` +
         `release ${config.release}). ` +
         "Opt out with SENTRY_DISABLED=true or point SENTRY_DSN at your own project.",
     );
@@ -1025,11 +1025,11 @@ export function initSentry(
         `, release ${config.release})`,
     );
   }
-  if (config.release.startsWith(`mike@${UNVERSIONED}`) && env.NODE_ENV === "production") {
+  if (config.release.startsWith(`linkmai@${UNVERSIONED}`) && env.NODE_ENV === "production") {
     // An unversioned release cannot be told apart from any other local build;
-    // the images get MIKE_VERSION and GIT_SHA as build args (docs/observability.md).
+    // the images get LINKMAI_VERSION and GIT_SHA as build args (docs/observability.md).
     console.warn(
-      "[sentry] unversioned release: build the images with MIKE_VERSION=$(cat VERSION) GIT_SHA=$(git rev-parse HEAD) or set SENTRY_RELEASE",
+      "[sentry] unversioned release: build the images with LINKMAI_VERSION=$(cat VERSION) GIT_SHA=$(git rev-parse HEAD) or set SENTRY_RELEASE",
     );
   }
   return true;
@@ -1210,7 +1210,7 @@ export function setOperation(operation: Operation): void {
  */
 export function markStage(stage: Stage): void {
   if (!initialized) return;
-  Sentry.addBreadcrumb({ category: "mike.stage", message: stage, level: "info" });
+  Sentry.addBreadcrumb({ category: "linkmai.stage", message: stage, level: "info" });
 }
 
 /** Baseline identity for all request captures, including middleware/console errors. */

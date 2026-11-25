@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   isReported,

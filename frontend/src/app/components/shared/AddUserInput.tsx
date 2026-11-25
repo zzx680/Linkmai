@@ -1,16 +1,16 @@
 "use client";
 
-import { isImeComposing } from "@mike/client";
+import { isImeComposing } from "@linkmai/client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { Loader2, UserPlus } from "lucide-react";
 import {
     lookupUserByEmail,
     type UserLookupResult,
-} from "@/app/lib/mikeApi";
-import { PillButtonUI, LIQUID_GLASS_SUBTLE_CLASS } from "@mike/ui";
+} from "@/app/lib/linkmaiApi";
+import { PillButtonUI, LIQUID_GLASS_SUBTLE_CLASS } from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 
@@ -33,7 +33,7 @@ interface AddUserInputProps {
     inputEndControl?: ReactNode;
     className?: string;
     /**
-     * Refuse addresses that don't already belong to a Mike account.
+     * Refuse addresses that don't already belong to a LinkMai account.
      *
      * True is right where the address must resolve to a user immediately.
      * Organization invitations are the exceptional flow: they are intended
@@ -84,7 +84,7 @@ export function AddUserInput({
                 ? await lookupUserByEmail(email)
                 : { exists: false, email, display_name: null };
             if (requireExistingUser && !user.exists) {
-                setError(`${email} does not belong to a Mike user.`);
+                setError(`${email} does not belong to a LinkMai user.`);
                 return;
             }
 

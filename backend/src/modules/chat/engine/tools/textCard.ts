@@ -1,4 +1,4 @@
-import type { TextCardEvent } from "@mike/contracts";
+import type { TextCardEvent } from "@linkmai/contracts";
 
 export const TEXT_CARD_TOOL = {
   type: "function",

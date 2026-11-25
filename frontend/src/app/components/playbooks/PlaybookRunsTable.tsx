@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useMemo, useState } from "react";
 import {
@@ -26,8 +26,8 @@ import {
   type TableFilterOption,
 } from "@/app/components/shared/TablePrimitive";
 import { EmptyState } from "@/app/components/ui/empty-state";
-import type { PlaybookRunListItem } from "@/app/lib/mikeApi";
-import { DropdownItem, PillButtonUI } from "@mike/ui";
+import type { PlaybookRunListItem } from "@/app/lib/linkmaiApi";
+import { DropdownItem, PillButtonUI } from "@linkmai/ui";
 import { formatDateTime, runOutcome, runTitle } from "./PlaybookRuns";
 
 // The document takes the free width; the details sit together on the right,

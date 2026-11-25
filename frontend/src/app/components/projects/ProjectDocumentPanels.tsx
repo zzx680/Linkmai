@@ -3,7 +3,7 @@
 import type { DocumentPermissions } from "@/app/hooks/useDocumentPermissions";
 
 import type { DocxCloseGuard } from "../shared/views/DocxRenderer.types";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import { memo, useMemo } from "react";
 import {
     DocumentContent,

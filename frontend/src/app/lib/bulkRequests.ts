@@ -1,4 +1,4 @@
-import { settleWithConcurrency } from "@mike/client";
+import { settleWithConcurrency } from "@linkmai/client";
 
 /**
  * How many requests a bulk action keeps in flight. Enough to overlap

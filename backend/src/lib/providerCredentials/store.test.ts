@@ -281,7 +281,7 @@ describe("cloud-platform keys", () => {
         type: "service_account",
         project_id: "legal-prod",
         private_key: "-----BEGIN PRIVATE KEY-----",
-        client_email: "mike@legal-prod.iam.gserviceaccount.com",
+        client_email: "linkmai@legal-prod.iam.gserviceaccount.com",
     });
 
     it("accepts the Vertex, Foundry, xAI and custom-endpoint providers", () => {

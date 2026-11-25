@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   createContext,
@@ -21,10 +21,10 @@ import {
 import { EmptyState } from "@/app/components/ui/empty-state";
 import { useWorkspace } from "@/app/contexts/WorkspaceContext";
 import { useItemWorkspace } from "@/app/hooks/useItemWorkspace";
-import { getOrg, type Org } from "@/app/lib/mikeApi";
+import { getOrg, type Org } from "@/app/lib/linkmaiApi";
 import { isOrgAdmin, isOrgOwner } from "@/app/lib/permissions";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 
 // An organization's settings area: the same frame as a person's settings,
 // with its sections down the side.

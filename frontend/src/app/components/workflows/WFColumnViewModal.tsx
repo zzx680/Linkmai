@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { createElement } from "react";
 import ReactMarkdown from "react-markdown";

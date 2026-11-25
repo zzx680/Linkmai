@@ -38,7 +38,7 @@ revoke all on function public.merge_user_web_search(uuid, jsonb)
 grant execute on function public.merge_user_web_search(uuid, jsonb)
   to service_role;
 
--- The Brave Search API key for Mike's own web search is saved like any other
+-- The Brave Search API key for LinkMai's own web search is saved like any other
 -- API key, per user or per organization. Existing keys, RLS and grants are
 -- unchanged.
 alter table public.user_api_keys

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { PolicyNotice } from "@/app/components/auth/PolicyNotice";
 
@@ -13,7 +13,7 @@ import {
     authGlassCardUIClassName,
     authInputUIClassName,
     noticeActionClassName,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { AuthApiError, setupFirstAccount } from "@/app/lib/authApi";
 import { SiteLogo } from "@/app/components/site-logo";
 import { FullScreenLoader } from "@/app/components/shared/FullScreenLoader";
@@ -40,7 +40,7 @@ import {
 const SETUP_ERROR_MESSAGES = authMessages({
     validation_failed: "Check your email address and password and try again.",
     invalid_request: "Check your email address and password and try again.",
-    setup_complete: "This Mike instance is already set up. Log in instead.",
+    setup_complete: "This LinkMai instance is already set up. Log in instead.",
     request_timeout: "The request timed out. Try again.",
 });
 
@@ -210,7 +210,7 @@ export default function SetupPage() {
                 actions={
                     error?.supportable ? (
                         <a
-                            href={supportMailtoFor(error, "Failed to set up Mike.")}
+                            href={supportMailtoFor(error, "Failed to set up LinkMai.")}
                             className={noticeActionClassName()}
                         >
                             {uiText("联系支持")}

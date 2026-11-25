@@ -1,10 +1,10 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React, { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
-import { WorkflowSlashCommandUI } from "@mike/ui";
+import { WorkflowSlashCommandUI } from "@linkmai/ui";
 import type { Workflow } from "../../types";
-import { createWorkflow } from "../../api/mikeApi";
+import { createWorkflow } from "../../api/linkmaiApi";
 import { Modal } from "../primitives/Modal";
 import {
   ModalFieldLabel,
@@ -179,7 +179,7 @@ export function NewWorkflowModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: uiText("Mike couldn't create that workflow. Try again."),
+          fallback: uiText("LinkMai couldn't create that workflow. Try again."),
           operation: "workflows.run",
         }).message
       );

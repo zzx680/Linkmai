@@ -39,8 +39,8 @@ vi.mock("@/app/lib/authApi", async (importOriginal) => ({
     startGoogleOAuth,
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     getUserProfile,
     completeUserOnboarding,
 }));
@@ -56,7 +56,7 @@ vi.mock("@/app/contexts/AuthContext", () => ({
 }));
 
 vi.mock("@/app/components/site-logo", () => ({
-    SiteLogo: () => <div>Mike</div>,
+    SiteLogo: () => <div>LinkMai</div>,
 }));
 
 const signInOptions = vi.hoisted(() => ({
@@ -83,7 +83,7 @@ describe("LoginPage", () => {
         login.mockReset();
         signup.mockReset();
         startGoogleOAuth.mockReset();
-        delete (window as { mikeDesktop?: unknown }).mikeDesktop;
+        delete (window as { linkmaiDesktop?: unknown }).linkmaiDesktop;
         refreshSession.mockReset();
         refreshSession.mockResolvedValue(null);
         replace.mockReset();
@@ -135,7 +135,7 @@ describe("LoginPage", () => {
         [
             "a dropped connection",
             new TypeError("Failed to fetch"),
-            "Mike couldn't reach the server. Check your connection and try again.",
+            "LinkMai couldn't reach the server. Check your connection and try again.",
         ],
     ])("explains %s instead of a generic line", async (_label, thrown, shown) => {
         login.mockRejectedValue(thrown);
@@ -235,9 +235,9 @@ describe("LoginPage", () => {
     });
 
     it("hides the guest button outside the Mac desktop shell", async () => {
-        // window.mikeDesktop only exists inside the Electron shell, and only
+        // window.linkmaiDesktop only exists inside the Electron shell, and only
         // its local ("everything on this Mac") mode answers with credentials.
-        // In a browser and against Mike Cloud this page must be unchanged.
+        // In a browser and against LinkMai Cloud this page must be unchanged.
         render(<LoginPage />);
         expect(
             screen.queryByRole("button", { name: "Continue on this Mac" }),
@@ -245,10 +245,10 @@ describe("LoginPage", () => {
     });
 
     it("signs a returning guest in with the shell's credentials", async () => {
-        (window as unknown as Record<string, unknown>).mikeDesktop = {
+        (window as unknown as Record<string, unknown>).linkmaiDesktop = {
             guestCredentials: () =>
                 Promise.resolve({
-                    email: "guest@mike.local",
+                    email: "guest@linkmai.local",
                     password: "per-install-secret",
                 }),
         };
@@ -262,7 +262,7 @@ describe("LoginPage", () => {
         await user.click(button);
 
         expect(login).toHaveBeenCalledWith(
-            "guest@mike.local",
+            "guest@linkmai.local",
             "per-install-secret",
         );
         expect(signup).not.toHaveBeenCalled();
@@ -274,10 +274,10 @@ describe("LoginPage", () => {
     });
 
     it("falls back to signup the first time a guest ever clicks", async () => {
-        (window as unknown as Record<string, unknown>).mikeDesktop = {
+        (window as unknown as Record<string, unknown>).linkmaiDesktop = {
             guestCredentials: () =>
                 Promise.resolve({
-                    email: "guest@mike.local",
+                    email: "guest@linkmai.local",
                     password: "per-install-secret",
                 }),
         };
@@ -299,7 +299,7 @@ describe("LoginPage", () => {
         );
 
         expect(signup).toHaveBeenCalledWith(
-            "guest@mike.local",
+            "guest@linkmai.local",
             "per-install-secret",
             "/onboarding/profile",
         );
@@ -308,9 +308,9 @@ describe("LoginPage", () => {
     });
 
     it("does not register an account after a network failure", async () => {
-        window.mikeDesktop = {
+        window.linkmaiDesktop = {
             guestCredentials: async () => ({
-                email: "guest@mike.local",
+                email: "guest@linkmai.local",
                 password: "secret",
             }),
         };
@@ -322,11 +322,11 @@ describe("LoginPage", () => {
         expect(signup).not.toHaveBeenCalled();
         expect(push).not.toHaveBeenCalled();
         expect(screen.getByRole("alert")).toHaveTextContent(
-            "Mike couldn't reach the server",
+            "LinkMai couldn't reach the server",
         );
         login.mockResolvedValueOnce({ user: { id: "guest-1" } });
         await userEvent.click(screen.getByRole("button", { name: "Retry" }));
-        expect(login).toHaveBeenLastCalledWith("guest@mike.local", "secret");
+        expect(login).toHaveBeenLastCalledWith("guest@linkmai.local", "secret");
         expect(signup).not.toHaveBeenCalled();
         expect(push).toHaveBeenCalledWith("/assistant");
     });
@@ -338,7 +338,7 @@ it("retries a failed session refresh without submitting the empty login form", a
     retrySession.mockRejectedValueOnce(new TypeError("Failed to fetch")).mockResolvedValueOnce(null);
     render(<LoginPage />);
     await userEvent.click(screen.getByRole("button", { name: "Retry" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Mike couldn't reach the server");
+    expect(await screen.findByRole("alert")).toHaveTextContent("LinkMai couldn't reach the server");
     await userEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(retrySession).toHaveBeenCalledTimes(2);
     expect(login).not.toHaveBeenCalled();

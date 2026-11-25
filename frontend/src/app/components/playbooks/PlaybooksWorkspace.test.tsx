@@ -27,13 +27,13 @@ import {
   reviewDocumentWithPlaybook,
   updatePlaybook,
   deletePlaybook,
-  MikeApiError,
+  LinkMaiApiError,
   type Playbook,
   type PlaybookImport,
   type PlaybookRun,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { showToast } from "@/app/components/ui/toast";
-import { clearToasts, getSnapshot as getToastSnapshot, SETTINGS_MODELS } from "@mike/client";
+import { clearToasts, getSnapshot as getToastSnapshot, SETTINGS_MODELS } from "@linkmai/client";
 import { PlaybooksWorkspaceLayout as PlaybooksPage } from "./PlaybooksWorkspace";
 
 const TEST_MODEL = SETTINGS_MODELS[0].id;
@@ -99,8 +99,8 @@ vi.mock("next/navigation", async () => {
   };
 });
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getDocumentFile: vi.fn(),
   getPlaybookPeople: vi.fn(),
   listPlaybookShares: vi.fn(),
@@ -661,7 +661,7 @@ describe("playbooks page", () => {
     const detail =
       "This playbook is being replaced. Wait for the import to finish.";
     vi.mocked(updatePlaybook).mockRejectedValue(
-      new MikeApiError({ message: detail, status: 409 }),
+      new LinkMaiApiError({ message: detail, status: 409 }),
     );
     clearToasts();
     render(<PlaybooksPage />);

@@ -2,9 +2,9 @@
 # Build from the repository root: `docker build -f frontend/Dockerfile .`
 # (docker-compose.yml does the same). The image mirrors the repository layout
 # under /app: the frontend at /app/frontend plus the sibling directories
-# production code reaches through tsconfig `paths` aliases, `@mike/contracts`
-# -> /app/packages/contracts, `@mike/ui` -> /app/packages/ui and
-# `@mike/client` -> /app/packages/client. Nothing else. The layout matters:
+# production code reaches through tsconfig `paths` aliases, `@linkmai/contracts`
+# -> /app/packages/contracts, `@linkmai/ui` -> /app/packages/ui and
+# `@linkmai/client` -> /app/packages/client. Nothing else. The layout matters:
 # next.config.ts sets the Turbopack root to the frontend's parent directory,
 # which must contain the packages. `next build` type-checks
 # tsconfig.build.json, which leaves test files -- and their imports of shared
@@ -48,18 +48,18 @@ ENV NEXT_PUBLIC_LINKMAI_SITE_URL=$NEXT_PUBLIC_LINKMAI_SITE_URL \
     NEXT_PUBLIC_LINKMAI_PRIVACY_URL=$NEXT_PUBLIC_LINKMAI_PRIVACY_URL
 # Release identity: the product version (VERSION, or VERSION-dev.<run> for a
 # main build) and the commit, both from the publish workflow. Together they
-# make the release `mike@<version>+<sha12>` for the browser bundle (inlined)
-# and the Next server; a local build without them is `mike@0.0.0...`.
-ARG MIKE_VERSION=
+# make the release `linkmai@<version>+<sha12>` for the browser bundle (inlined)
+# and the Next server; a local build without them is `linkmai@0.0.0...`.
+ARG LINKMAI_VERSION=
 ARG GIT_SHA=
 ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN \
     NEXT_PUBLIC_SENTRY_DISABLED=$NEXT_PUBLIC_SENTRY_DISABLED \
     NEXT_PUBLIC_SENTRY_INSTALL=$NEXT_PUBLIC_SENTRY_INSTALL \
     NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
     NEXT_PUBLIC_SENTRY_RELEASE=$NEXT_PUBLIC_SENTRY_RELEASE \
-    NEXT_PUBLIC_MIKE_VERSION=$MIKE_VERSION \
+    NEXT_PUBLIC_LINKMAI_VERSION=$LINKMAI_VERSION \
     NEXT_PUBLIC_GIT_SHA=$GIT_SHA \
-    MIKE_VERSION=$MIKE_VERSION \
+    LINKMAI_VERSION=$LINKMAI_VERSION \
     GIT_SHA=$GIT_SHA
 
 # Sentry source-map upload (docs/observability.md). Needs all three; the token

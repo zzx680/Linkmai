@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { SiteLogo } from "@/app/components/site-logo";
-import { authGlassCardUIClassName } from "@mike/ui";
+import { authGlassCardUIClassName } from "@linkmai/ui";
 
 // A form step fits the narrow card; the provider grid wants room for two
 // columns of cards.

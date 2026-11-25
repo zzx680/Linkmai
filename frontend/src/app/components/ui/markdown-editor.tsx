@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useEditor, EditorContent, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -25,7 +25,7 @@ import {
   DropdownContent,
   DropdownItem,
   DropdownTrigger,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { cn } from "@/app/lib/utils";
 
 export interface MarkdownEditorProps {

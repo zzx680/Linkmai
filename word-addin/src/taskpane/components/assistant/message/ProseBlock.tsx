@@ -1,5 +1,5 @@
 import React from "react";
-import { EXCERPT_SOURCE_PROPS } from "@mike/ui";
+import { EXCERPT_SOURCE_PROPS } from "@linkmai/ui";
 import { Markdown } from "../../../../shared/chat/Markdown";
 import { projectCitationMarkdown } from "../../../lib/citations";
 import { useMarkdownCheckpoint } from "../../../lib/markdownCheckpoint";

@@ -1,8 +1,8 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
-import type { DocumentVersion } from "@/app/lib/mikeApi";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
+import type { DocumentVersion } from "@/app/lib/linkmaiApi";
 import type { Document } from "./types";
 import { DocumentSidePanel } from "./DocumentSidePanel";
 

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { PlaybookRunHistoryItem } from "@/app/lib/mikeApi";
+import type { PlaybookRunHistoryItem } from "@/app/lib/linkmaiApi";
 import { SidebarPlaybookRunItem } from "./SidebarPlaybookRunItem";
 
 const run = {

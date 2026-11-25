@@ -14,7 +14,7 @@
 // that vintage would carry), upgrade it with schema.applySchema, and demand
 // the result fingerprints identically to a fresh install through the same
 // code. Needs the fetched pg binaries (`npm run local:fetch`, or
-// MIKE_LOCAL_FETCH_ONLY=postgres for just these) and git history reaching
+// LINKMAI_LOCAL_FETCH_ONLY=postgres for just these) and git history reaching
 // BASELINE_REF (CI checks out with fetch-depth: 0).
 
 const test = require("node:test");
@@ -40,10 +40,10 @@ const FINGERPRINT_SQL = path.join(BACKEND, "scripts", "schema-fingerprint.sql");
 const pgAvailable = fs.existsSync(path.join(PG_BIN, "postgres"));
 const gitHasBaseline =
   spawnSync("git", ["-C", REPO, "cat-file", "-e", `${BASELINE_REF}^{commit}`]).status === 0;
-const required = process.env.MIKE_REQUIRE_LOCAL_STACK === "1";
+const required = process.env.LINKMAI_REQUIRE_LOCAL_STACK === "1";
 if (required) {
-  assert.ok(pgAvailable, `MIKE_REQUIRE_LOCAL_STACK=1 but no postgres at ${PG_BIN} — run local:fetch`);
-  assert.ok(gitHasBaseline, `MIKE_REQUIRE_LOCAL_STACK=1 but git cannot see ${BASELINE_REF} — shallow clone?`);
+  assert.ok(pgAvailable, `LINKMAI_REQUIRE_LOCAL_STACK=1 but no postgres at ${PG_BIN} — run local:fetch`);
+  assert.ok(gitHasBaseline, `LINKMAI_REQUIRE_LOCAL_STACK=1 but git cannot see ${BASELINE_REF} — shallow clone?`);
 }
 const skip = !pgAvailable
   ? `bundled postgres not fetched (${PG_BIN})`

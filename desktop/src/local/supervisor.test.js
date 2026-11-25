@@ -77,7 +77,7 @@ test("refuses to start the backend on an Electron whose Node is below the backen
   });
   assert.throws(
     () => assertBackendNodeSupported(backendDir, fakeNode("22.14.0")),
-    /Electron's Node\. Mike's backend needs Node >=22\.19\.0 .* this is Node 22\.14\.0/,
+    /Electron's Node\. LinkMai's backend needs Node >=22\.19\.0 .* this is Node 22\.14\.0/,
   );
   assert.doesNotThrow(() => assertBackendNodeSupported(backendDir, fakeNode("22.22.0")));
   // The Node this test runs on (the same floor applies to it).

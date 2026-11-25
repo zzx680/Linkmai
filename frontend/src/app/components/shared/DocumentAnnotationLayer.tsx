@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import type { ReactNode } from "react";
 
 /** Shared panel header above the viewer toolbar. The annotation (citation

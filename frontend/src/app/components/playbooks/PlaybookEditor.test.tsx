@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { PlaybookContent, PlaybookRule } from "@/app/lib/mikeApi";
+import type { PlaybookContent, PlaybookRule } from "@/app/lib/linkmaiApi";
 import { PlaybookEditor } from "./PlaybookEditor";
 
 const rule = (id: string): PlaybookRule => ({

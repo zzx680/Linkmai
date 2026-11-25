@@ -2,7 +2,7 @@ import { act } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { expect, it, vi } from "vitest";
-import MikeLayout from "./layout";
+import LinkMaiLayout from "./layout";
 
 const state = vi.hoisted(() => ({ loading: true }));
 vi.mock("next/navigation", () => ({
@@ -20,7 +20,7 @@ vi.mock("@/app/components/shared/AppSidebar", () => ({ AppSidebar: () => <aside>
 it("preloads account-menu icons in the server loading shell before the menu mounts", () => {
     state.loading = true;
     const container = document.createElement("div");
-    container.innerHTML = renderToString(<MikeLayout><p>Workspace</p></MikeLayout>);
+    container.innerHTML = renderToString(<LinkMaiLayout><p>Workspace</p></LinkMaiLayout>);
     expect(container).not.toHaveTextContent("Sidebar");
     const images = Array.from(container.querySelectorAll('link[rel="preload"][as="image"]'))
         .map((link) => link.getAttribute("href"));
@@ -32,7 +32,7 @@ it("preloads account-menu icons in the server loading shell before the menu moun
 it("hydrates the server loading shell even when auth resolved before this boundary", async () => {
     state.loading = true;
     const container = document.createElement("div");
-    container.innerHTML = renderToString(<MikeLayout><p>Workspace</p></MikeLayout>);
+    container.innerHTML = renderToString(<LinkMaiLayout><p>Workspace</p></LinkMaiLayout>);
     document.body.append(container);
     // An outer provider can finish its request before this streamed/lazy
     // boundary hydrates, so its context already differs from the SSR snapshot.
@@ -41,7 +41,7 @@ it("hydrates the server loading shell even when auth resolved before this bounda
     let root!: ReturnType<typeof hydrateRoot>;
     try {
         await act(async () => {
-            root = hydrateRoot(container, <MikeLayout><p>Workspace</p></MikeLayout>, {
+            root = hydrateRoot(container, <LinkMaiLayout><p>Workspace</p></LinkMaiLayout>, {
                 onRecoverableError: recoverableError,
             });
         });

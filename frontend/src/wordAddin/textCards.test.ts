@@ -14,7 +14,7 @@ import {
 } from "../../../word-addin/src/taskpane/lib/wordChatEvents";
 
 const { open, resume } = vi.hoisted(() => ({ open: vi.fn(), resume: vi.fn() }));
-vi.mock("../../../word-addin/src/taskpane/api/mikeApi", async () => ({
+vi.mock("../../../word-addin/src/taskpane/api/linkmaiApi", async () => ({
   readSSE: (await import("../../../word-addin/src/taskpane/api/client"))
     .readSSE,
   streamWordChat: open,

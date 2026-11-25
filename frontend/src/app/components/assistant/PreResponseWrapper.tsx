@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { PreResponseWrapperUI } from "@mike/ui";
+import { PreResponseWrapperUI } from "@linkmai/ui";
 
 export function PreResponseWrapper({
     children,

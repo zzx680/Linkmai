@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
   useCallback,
@@ -57,7 +57,7 @@ import {
 import { useHasMultipleWorkspaces } from "@/app/hooks/useHasMultipleWorkspaces";
 import {
   type McpConnectorSummary,
-  MikeApiError,
+  LinkMaiApiError,
   isConnectorSetupError,
   createMcpConnector,
   deleteMcpConnector,
@@ -68,11 +68,11 @@ import {
   setMcpToolEnabled,
   startMcpConnectorOAuth,
   updateMcpConnector,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import { reportFault } from "@/app/lib/userFacingError";
 import { SettingsDescription } from "@/app/components/settings/SettingsText";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
-import { PillButtonUI, LIQUID_GLASS_SUBTLE_CLASS, ToggleSwitchUI } from "@mike/ui";
+import { PillButtonUI, LIQUID_GLASS_SUBTLE_CLASS, ToggleSwitchUI } from "@linkmai/ui";
 
 /** What the user was doing, for "Couldn't ..." and honest retry text. */
 const CONNECTOR_ACTION_LABELS = {
@@ -99,7 +99,7 @@ const CONNECTOR_ACTION_LABELS = {
 function connectorMessage(error: unknown, action: string): string {
   return reportFault(error, {
     action,
-    fallback: uiText`Mike couldn't ${action}. Try again.`,
+    fallback: uiText`LinkMai couldn't ${action}. Try again.`,
     operation: "settings.connectors",
   }).message;
 }
@@ -770,7 +770,7 @@ function WorkspaceConnectors({
   ): Promise<McpConnectorSummary | null> => {
     const popup = window.open(
       "about:blank",
-      "mike_mcp_oauth",
+      "linkmai_mcp_oauth",
       "popup,width=560,height=720,menubar=no,toolbar=no,location=no,status=no",
     );
     let started: Awaited<ReturnType<typeof startMcpConnectorOAuth>>;
@@ -1013,7 +1013,7 @@ function WorkspaceConnectors({
           setAddAuthMessage(null);
         }
         if (
-          err instanceof MikeApiError &&
+          err instanceof LinkMaiApiError &&
           err.code === "connector_cleanup_failed"
         ) {
           // Creation failed after the backend inserted the row and its own
@@ -1177,7 +1177,7 @@ function WorkspaceConnectors({
         try {
           replaceConnector(await refreshMcpConnectorTools(connectorId));
         } catch (err) {
-          if (err instanceof MikeApiError && err.code === "oauth_required") {
+          if (err instanceof LinkMaiApiError && err.code === "oauth_required") {
             // COOP-strict providers make the consent popup's fate
             // unobservable, so without an explicit escape hatch a
             // closed popup would leave the Refresh button stuck

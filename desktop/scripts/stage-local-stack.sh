@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stage the built product into local-stack/app/ for packaging. After this,
-# `npm run dist:local` produces a Mike.app that carries the whole stack
+# `npm run dist:local` produces a LinkMai.app that carries the whole stack
 # (config.js resolves these paths under process.resourcesPath when packaged).
 #
 # Prereqs: scripts/fetch-local-stack.sh (binaries) and

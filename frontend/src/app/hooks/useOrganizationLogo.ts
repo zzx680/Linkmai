@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getOrgLogo, type Org } from "@/app/lib/mikeApi";
+import { getOrgLogo, type Org } from "@/app/lib/linkmaiApi";
 
 // One read per version of a logo, shared by everything that shows it. The
 // version is the organization's logo_updated_at, so a changed logo is a new

@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useId, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
@@ -11,7 +11,7 @@ import {
   DropdownContent,
   DropdownTrigger,
   TextButtonUI,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import type { PlaybookListOption } from "./playbookJurisdictions";
 
 function parseList(text: string) {

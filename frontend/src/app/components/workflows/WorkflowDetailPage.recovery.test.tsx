@@ -5,10 +5,10 @@ import {
     deleteWorkflow,
     getWorkflow,
     updateWorkflow,
-} from "@/app/lib/mikeApi";
+} from "@/app/lib/linkmaiApi";
 import type { Workflow } from "@/app/components/shared/types";
 import { WorkflowDetailPage } from "./WorkflowDetailPage";
-import { ToastViewportUI, clearToasts } from "@mike/ui";
+import { ToastViewportUI, clearToasts } from "@linkmai/ui";
 
 vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -16,8 +16,8 @@ vi.mock("next/navigation", () => ({
     usePathname: () => "/workflows/wf-1",
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
     getWorkflow: vi.fn(),
     updateWorkflow: vi.fn(),
     deleteWorkflow: vi.fn(),

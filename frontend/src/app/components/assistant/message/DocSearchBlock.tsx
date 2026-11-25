@@ -1,7 +1,7 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import { useState } from "react";
-import type { DocumentSearchEvent } from "@mike/contracts";
+import type { DocumentSearchEvent } from "@linkmai/contracts";
 import { EventBlock } from "./EventBlocks";
 import { EventDisclosureButton, EventLabel } from "./EventDisclosure";
 

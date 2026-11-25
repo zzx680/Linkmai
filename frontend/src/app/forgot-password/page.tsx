@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import {
     pillButtonUIClassName,
     authGlassCardUIClassName,
     authInputUIClassName,
-} from "@mike/ui";
+} from "@linkmai/ui";
 import { SiteLogo } from "@/app/components/site-logo";
 import { requestPasswordReset } from "@/app/lib/authApi";
 import { FieldLabel } from "@/app/components/ui/form-field";
@@ -22,7 +22,7 @@ import {
 } from "@/app/lib/userFacingError";
 
 /**
- * Failures that mean the request never reached Mike. Telling the user to
+ * Failures that mean the request never reached LinkMai. Telling the user to
  * check their email after one of these would be a lie, and none of them
  * depends on whether the address exists, so saying so leaks nothing.
  */
@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
             const described = describeError(caught, {
                 action: uiText("send the reset link"),
                 fallback:
-                    uiText("Mike couldn't send the reset link. Try again in a moment."),
+                    uiText("LinkMai couldn't send the reset link. Try again in a moment."),
             });
             if (DELIVERY_FAILURE_KINDS.has(described.kind)) {
                 setError(described);
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
             }
             // Every other outcome gets the same response for existing and
             // unknown addresses, so this screen cannot be used to enumerate
-            // Mike accounts.
+            // LinkMai accounts.
             setSubmitted(true);
         } finally {
             setLoading(false);

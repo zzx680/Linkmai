@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import {
     createContext,
@@ -27,7 +27,7 @@ import {
     isOnAuthRoute,
     notifyError,
 } from "@/app/lib/userFacingError";
-import { clearToasts, dismissToastsWithKey } from "@mike/ui";
+import { clearToasts, dismissToastsWithKey } from "@linkmai/ui";
 
 type User = AuthUser;
 

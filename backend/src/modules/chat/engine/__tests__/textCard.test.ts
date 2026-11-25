@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { TextCardEvent } from "@mike/contracts";
+import type { TextCardEvent } from "@linkmai/contracts";
 
 type StreamParams = {
   tools: { function: { name: string } }[];

@@ -1,8 +1,8 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 import React from "react";
 import { Trash2 } from "lucide-react";
-import { ToggleSwitchUI, PillButtonUI as PillButton, GlassCardUI } from "@mike/ui";
+import { ToggleSwitchUI, PillButtonUI as PillButton, GlassCardUI } from "@linkmai/ui";
 import { PageTitle } from "../primitives/PageTitle";
 import type { WordChatStorageMode } from "../../lib/wordChatSettings";
 import { Modal } from "../primitives/Modal";
@@ -32,7 +32,7 @@ export function SettingsPage({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: uiText("Mike couldn't save that setting. Try again."),
+          fallback: uiText("LinkMai couldn't save that setting. Try again."),
           operation: "settings.keys",
         }).message,
       );
@@ -113,7 +113,7 @@ export function SettingsPage({
                 setError(
                   reportFault(reason, {
                     fallback:
-                      uiText("Mike couldn't delete the device-only chats. Try again."),
+                      uiText("LinkMai couldn't delete the device-only chats. Try again."),
                     operation: "settings.keys",
                   }).message,
                 ),

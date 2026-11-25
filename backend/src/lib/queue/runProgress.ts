@@ -1,4 +1,4 @@
-import type { AssistantErrorCode } from "@mike/contracts";
+import type { AssistantErrorCode } from "@linkmai/contracts";
 import { getRedisProducerConnection, withRedisTimeout } from "./connection";
 import { redisEnabled } from "../dbq/driver";
 

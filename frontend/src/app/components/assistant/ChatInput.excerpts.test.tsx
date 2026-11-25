@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
 
-vi.mock("@/app/lib/mikeApi", () => ({
+vi.mock("@/app/lib/linkmaiApi", () => ({
     listWorkflows: vi.fn(async () => []),
     uploadProjectDocument: vi.fn(),
     uploadStandaloneDocument: vi.fn(),

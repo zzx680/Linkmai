@@ -1,6 +1,6 @@
 "use client";
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
@@ -12,7 +12,7 @@ import {
 import { SearchBar } from "@/app/components/ui/search-bar";
 import { UserAvatar } from "@/app/components/ui/user-avatar";
 import { SkeletonLine } from "@/app/components/shared/TablePrimitive";
-import { DropdownButton, DropdownSurface, textButtonUIClassName } from "@mike/ui";
+import { DropdownButton, DropdownSurface, textButtonUIClassName } from "@linkmai/ui";
 
 /** A person a table can be filtered by. */
 export interface PersonOption {

@@ -33,7 +33,7 @@ clear old bytes, errors and parser state immediately; same-source visibility
 and citation changes retain the session.
 
 Tests live next to the code they test (`*.test.ts` / `*.test.tsx`). Read a
-couple of the existing suites first (`src/app/lib/mikeApi.test.ts`,
+couple of the existing suites first (`src/app/lib/linkmaiApi.test.ts`,
 `src/app/hooks/useAssistantChat.sse.test.ts`) and match their conventions:
 mock `global fetch` and the Supabase client module — no network, no real
 backend — one `describe` block per function or concern, and tests that assert
@@ -173,11 +173,11 @@ Per-file statement coverage of the gated lib layer from
 | `lib/paginatedRows.ts` | 100 | ✓ |
 | `lib/utils.ts` | 100 | ✓ |
 | `lib/supabase.ts` | 100 | ✓ |
-| `lib/mikeApi.ts` | 99.77 | ✓ — every endpoint wrapper asserted |
+| `lib/linkmaiApi.ts` | 99.77 | ✓ — every endpoint wrapper asserted |
 
 Global (lib layer): **99.81% statements / 97.09% branches / 100% functions /
 100% lines**. The only uncovered code is the dev-only logging branch and a
-couple of `?? null` default arms. `mikeApi.ts` now has a route/method/body
+couple of `?? null` default arms. `linkmaiApi.ts` now has a route/method/body
 assertion for every thin endpoint wrapper (folders, library, workflows, MCP
 connectors, document versions) on top of the earlier plumbing, mapping, and
 streaming suites.
@@ -208,7 +208,7 @@ numbers. Size guess: S ≈ an hour, M ≈ an afternoon.
       is already covered: `TabularReviewView.generation.test.tsx` and the
       "server-owned turns" block in `TRChatPanel.test.tsx` (Stop through the
       endpoint, reconnect with `from`, attach on open).
-- [x] `lib/mikeApi.ts` (rest) — the remaining thin wrappers: folders/library
+- [x] `lib/linkmaiApi.ts` (rest) — the remaining thin wrappers: folders/library
       moves, workflows share/hide, MCP connectors, document versions. Done as
       a table-driven `it.each` suite of URL/method/body assertions. (M)
 - [ ] `hooks/useSelectedModel.ts` — model choice persistence and fallback to
@@ -216,7 +216,7 @@ numbers. Size guess: S ≈ an hour, M ≈ an afternoon.
 - [ ] `hooks/useGenerateChatTitle.ts` — title generation trigger and failure
       tolerance (a failed title must never break the chat). (S)
 - [ ] `hooks/useFetchSingleDoc.ts` + `useFetchDocxBytes.ts` — fetch/refresh
-      lifecycle with mocked `mikeApi`. (S)
+      lifecycle with mocked `linkmaiApi`. (S)
 - [ ] `useAssistantChat` beyond parsing — `ask_inputs` handling and the
       tool-event placeholder lifecycle. (M) Stop, detach, return-to-thread
       and resume after a reload are covered by

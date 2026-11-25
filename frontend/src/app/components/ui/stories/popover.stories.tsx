@@ -1,4 +1,4 @@
-import { PillButtonUI } from "@mike/ui";
+import { PillButtonUI } from "@linkmai/ui";
 import {
     Popover,
     PopoverContent,

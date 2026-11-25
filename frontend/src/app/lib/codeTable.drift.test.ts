@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { CODE_KINDS } from "@mike/client";
+import { CODE_KINDS } from "@linkmai/client";
 
 /**
  * `CODE_KINDS` decides what a failure is called and whether Retry and

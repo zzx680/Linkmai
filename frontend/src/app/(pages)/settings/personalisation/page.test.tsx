@@ -7,8 +7,8 @@ const { updatePersonalisation } = vi.hoisted(() => ({
   updatePersonalisation: vi.fn(),
 }));
 
-vi.mock("@/app/lib/mikeApi", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/app/lib/mikeApi")>()),
+vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
   getCustomInstructions: vi.fn(async () => ({ content: "" })),
   updateCustomInstructions: vi.fn(async (content: string) => ({ content })),
   getResponseStyle: vi.fn(async () => ({

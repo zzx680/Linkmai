@@ -1,5 +1,5 @@
 
-import { uiText } from "@mike/client";
+import { uiText } from "@linkmai/client";
 /**
  * Search across a person's settings.
  *
@@ -97,7 +97,7 @@ export const SETTINGS_SEARCH_ENTRIES: readonly SettingsSearchEntry[] = [
         tabId: "personalisation",
         tab: uiText("Personalisation"),
         title: uiText("Response style"),
-        description: uiText("How Mike shapes its answers: verbosity, tone and language."),
+        description: uiText("How LinkMai shapes its answers: verbosity, tone and language."),
         keywords: ["verbosity", "concise", "detailed", "tone", "language", "formal", "casual", "length", "short answers", "long answers", "writing style", "output style", "translate", "locale"],
         href: "/settings/personalisation#response-style-heading",
     },
@@ -108,7 +108,7 @@ export const SETTINGS_SEARCH_ENTRIES: readonly SettingsSearchEntry[] = [
         tabId: "memory",
         tab: uiText("Memory"),
         title: uiText("Memory"),
-        description: uiText("Whether Mike remembers durable information from your conversations."),
+        description: uiText("Whether LinkMai remembers durable information from your conversations."),
         keywords: ["remember", "forget", "memories", "recall", "context", "history", "learn", "retain", "memorise", "memorize"],
         href: "/settings/memory#app-memory-settings-heading",
     },
@@ -117,8 +117,8 @@ export const SETTINGS_SEARCH_ENTRIES: readonly SettingsSearchEntry[] = [
         tabId: "memory",
         tab: uiText("Memory"),
         title: uiText("Memory file"),
-        description: uiText("Read and edit what Mike has remembered about you."),
-        keywords: ["edit memory", "memory notes", "what mike knows", "saved facts", "clear memory", "memory contents"],
+        description: uiText("Read and edit what LinkMai has remembered about you."),
+        keywords: ["edit memory", "memory notes", "what linkmai knows", "saved facts", "clear memory", "memory contents"],
         href: "/settings/memory#app-memory-file-heading",
     },
 
@@ -128,7 +128,7 @@ export const SETTINGS_SEARCH_ENTRIES: readonly SettingsSearchEntry[] = [
         tabId: "appearance",
         tab: uiText("Appearance"),
         title: uiText("Dark mode"),
-        description: uiText("Use a darker color palette throughout Mike."),
+        description: uiText("Use a darker color palette throughout LinkMai."),
         keywords: ["theme", "dark", "light mode", "night mode", "colour", "color", "palette", "display", "look", "contrast", "black background"],
         href: "/settings/appearance#appearance",
     },
@@ -179,7 +179,7 @@ export const SETTINGS_SEARCH_ENTRIES: readonly SettingsSearchEntry[] = [
         tabId: "my-activity",
         tab: uiText("My Activity"),
         title: uiText("My Activity"),
-        description: uiText("A log of what you have done in Mike."),
+        description: uiText("A log of what you have done in LinkMai."),
         keywords: ["activity log", "audit", "audit log", "history", "events", "recent actions", "what did i do", "timeline", "sessions"],
         href: "/settings/my-activity",
     },
@@ -237,7 +237,7 @@ export const SETTINGS_SEARCH_ENTRIES: readonly SettingsSearchEntry[] = [
         tabId: "models",
         tab: uiText("Model Preferences"),
         title: uiText("Subagents"),
-        description: uiText("The default model and reasoning effort for the subagents Mike hands work to."),
+        description: uiText("The default model and reasoning effort for the subagents LinkMai hands work to."),
         keywords: ["subagent", "sub-agent", "agents", "reasoning", "reasoning effort", "thinking", "delegate", "parallel", "worker model", "effort level"],
         href: "/settings/models#subagents-heading",
     },

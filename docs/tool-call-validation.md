@@ -1,6 +1,6 @@
 # Tool-call validation
 
-Mike checks the arguments of every tool call the model makes against the
+LinkMai checks the arguments of every tool call the model makes against the
 tool's JSON Schema, with `@earendil-works/pi-schema` from Earendil's
 MIT-licensed [Pi toolkit](https://github.com/earendil-works/pi), pinned at
 1.5.2 in `backend/package.json`. It does not replace the Vercel AI SDK. The
@@ -14,7 +14,7 @@ Code: `backend/src/lib/llm/toolInputValidation.ts`, wired into
 `toAiSdkTools` in `backend/src/lib/llm/aiSdk.ts`.
 
 The AI SDK parses a tool call's arguments as JSON but, given a plain
-`jsonSchema()`, never checks them against the schema. Mike now passes a
+`jsonSchema()`, never checks them against the schema. LinkMai now passes a
 `validate` function for every tool: built-in tools, web, CourtListener,
 subagent, Word add-in, Google and MCP tools alike. `TOOL_INPUT_VALIDATION`
 chooses what a mismatch does:
