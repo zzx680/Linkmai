@@ -57,6 +57,7 @@ vi.mock("@/app/contexts/SidebarContext", () => ({
     useSidebar: () => ({ setSidebarOpen: vi.fn() }),
 }));
 vi.mock("@/app/hooks/useConfiguredModels", () => ({
+    useDeploymentModelDefaults: () => null,
     useConfiguredModels: () => [],
 }));
 vi.mock("../assistant/ModelToggle", async (importOriginal) => ({

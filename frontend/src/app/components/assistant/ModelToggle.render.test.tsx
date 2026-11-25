@@ -20,6 +20,7 @@ vi.mock("@/app/hooks/useOllamaModels", () => ({
     useOllamaModels: () => [],
 }));
 vi.mock("@/app/hooks/useConfiguredModels", () => ({
+    useDeploymentModelDefaults: () => null,
     useConfiguredModels: () => configuredModels,
 }));
 

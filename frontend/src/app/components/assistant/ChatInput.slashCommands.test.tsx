@@ -17,6 +17,7 @@ vi.mock("@/app/hooks/useSelectedModel", () => ({
     useSelectedReasoning: () => ["high", vi.fn()],
 }));
 vi.mock("@/app/hooks/useConfiguredModels", () => ({
+    useDeploymentModelDefaults: () => null,
     useConfiguredModels: () => [],
 }));
 

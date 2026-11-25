@@ -12,6 +12,7 @@ vi.mock("@/app/hooks/useOllamaModels", () => ({
     useOllamaModels: () => [],
 }));
 vi.mock("@/app/hooks/useConfiguredModels", () => ({
+    useDeploymentModelDefaults: () => null,
     useConfiguredModels: () => configuredModels,
 }));
 
@@ -77,10 +78,12 @@ describe("model preferences page legacy ids", () => {
         const user = userEvent.setup();
         render(<ModelPreferencesPage />);
         const subagents = screen.getByRole("region", { name: "Subagents" });
-        const [modelRow, reasoningRow] = within(subagents).getAllByRole(
-            "button",
-            { name: "Chosen per task" },
-        );
+        const modelRow = within(subagents).getByRole("button", {
+            name: "Automatic — deployment default, otherwise chosen per task",
+        });
+        const reasoningRow = within(subagents).getByRole("button", {
+            name: "Chosen per task",
+        });
 
         await user.click(modelRow);
         await user.click(screen.getByText("GPT-6.1 Sol"));

@@ -13,6 +13,7 @@ vi.mock("@/app/contexts/UserProfileContext", () => ({
     useUserProfile: vi.fn(),
 }));
 vi.mock("@/app/hooks/useConfiguredModels", () => ({
+    useDeploymentModelDefaults: () => null,
     useConfiguredModels: () => [],
 }));
 
