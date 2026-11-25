@@ -361,6 +361,36 @@ export type DelegationEffort = "quick" | "standard" | "deep";
 export type DelegationModelTier = "light" | "standard" | "same";
 
 /**
+ * The deployment's default model per surface, already checked against the
+ * requesting user's configured models, keys and router selections. Each value
+ * is what an unconfigured surface starts on; a saved chat or profile
+ * preference still wins. Null means the deployment declares no usable default
+ * and the surface keeps its own fallback.
+ */
+export type DeploymentModelDefaults = {
+  chat: string | null;
+  title: string | null;
+  memory: string | null;
+  tabular: string | null;
+  subagent: string | null;
+};
+
+/** One deployment-declared model, as the pickers list it. */
+export type ConfiguredModelCatalogEntry = {
+  id: string;
+  label: string;
+  group: "Configured";
+  location: "cloud" | "local";
+  source: "Configured";
+};
+
+/** `GET /models/configured`. */
+export type ConfiguredModelsResponse = {
+  models: ConfiguredModelCatalogEntry[];
+  defaults: DeploymentModelDefaults;
+};
+
+/**
  * One delegated task: a subagent's own steps and the brief it returned to the
  * assistant. The brief keeps the subagent's citation markers; the assistant
  * re-cites anything it relies on.

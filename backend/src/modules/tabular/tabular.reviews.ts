@@ -39,7 +39,12 @@ import {
     type ResourcePeopleResult,
 } from "../../lib/resourcePeople";
 import { attachActiveVersionPaths } from "../../lib/documentVersions";
-import { TABULAR_MODEL_REQUIRED_DETAIL } from "../../lib/modelSelection";
+import {
+    TABULAR_MODEL_REQUIRED_DETAIL,
+    resolveDeploymentDefaultModel,
+} from "../../lib/modelSelection";
+import { deploymentDefaultModelId } from "../../lib/llm/deploymentDefaults";
+import { getUserModelSettings } from "../user/user.service";
 import { failure, internalFailure } from "../../lib/serviceResult";
 import {
     buildTabularReviewIdsOverviewRpcArgs,
@@ -693,7 +698,12 @@ export async function createTabularReview(
         model,
     } = input;
 
-    if (typeof model !== "string" || !model.trim()) {
+    // Without a deployment default a blank model is still an immediate 400:
+    // there is nothing to look up, and the request must not touch the database.
+    if (
+        (typeof model !== "string" || !model.trim()) &&
+        !deploymentDefaultModelId("tabular")
+    ) {
         return statusFailure(400, {
             code: "model_required",
             detail: TABULAR_MODEL_REQUIRED_DETAIL,
@@ -735,11 +745,34 @@ export async function createTabularReview(
         standaloneOrgId = standalone.orgId;
     }
 
+    const reviewOrgId = project_id ? projectOrgId : standaloneOrgId;
+    // A blank choice means "the deployment's default": the review records
+    // whatever model it then actually runs on, and can be switched later.
+    let requestedModel = typeof model === "string" ? model.trim() : "";
+    if (!requestedModel) {
+        const { api_keys: apiKeys } = await getUserModelSettings(userId, db, {
+            orgId: reviewOrgId,
+        });
+        const deploymentDefault = await resolveDeploymentDefaultModel({
+            kind: "tabular",
+            userId,
+            db,
+            apiKeys,
+            orgId: reviewOrgId,
+        });
+        if (!deploymentDefault) {
+            return statusFailure(400, {
+                code: "model_required",
+                detail: TABULAR_MODEL_REQUIRED_DETAIL,
+            });
+        }
+        requestedModel = deploymentDefault;
+    }
     const selectedModel = await validateSelectedModel(
-        model,
+        requestedModel,
         userId,
         db,
-        project_id ? projectOrgId : standaloneOrgId,
+        reviewOrgId,
     );
     if (!selectedModel.ok) return modelFailure(selectedModel);
     let allowedDocumentIds: string[];

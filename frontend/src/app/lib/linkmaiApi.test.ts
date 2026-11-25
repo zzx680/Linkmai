@@ -77,6 +77,7 @@ import {
     getDocumentFileUrl,
     getDocumentUrl,
     getConfiguredModels,
+    NO_DEFAULT_MODELS,
     getLibrary,
     getLibraryLevels,
     getLibraryFilterOptions,
@@ -3581,7 +3582,7 @@ describe("unwrapping and blob wrappers", () => {
         expect(lastFetchCall().url).toBe("/api/models/ollama");
     });
 
-    it("getConfiguredModels unwraps the authenticated catalog", async () => {
+    it("getConfiguredModels unwraps the authenticated catalog and its defaults", async () => {
         const models = [
             {
                 id: "local-qwen",
@@ -3591,10 +3592,29 @@ describe("unwrapping and blob wrappers", () => {
                 source: "Configured",
             },
         ];
-        fetchMock.mockResolvedValue(jsonResponse({ models }));
+        const defaults = {
+            chat: "local-qwen",
+            title: null,
+            memory: null,
+            tabular: null,
+            subagent: null,
+        };
+        fetchMock.mockResolvedValue(jsonResponse({ models, defaults }));
 
-        await expect(getConfiguredModels()).resolves.toEqual(models);
+        await expect(getConfiguredModels()).resolves.toEqual({
+            models,
+            defaults,
+        });
         expect(lastFetchCall().url).toBe("/api/models/configured");
+    });
+
+    it("getConfiguredModels tolerates a deployment that declares no defaults", async () => {
+        fetchMock.mockResolvedValue(jsonResponse({ models: [] }));
+
+        await expect(getConfiguredModels()).resolves.toEqual({
+            models: [],
+            defaults: NO_DEFAULT_MODELS,
+        });
     });
 
     it.each([

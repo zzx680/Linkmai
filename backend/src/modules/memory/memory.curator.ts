@@ -3,7 +3,11 @@ import { randomUUID } from "node:crypto";
 import { checkProjectAccess, ensureChatAccess, ensureReviewAccess, projectHasSharedAudience } from "../../lib/access";
 import { hasDirectContentGrants } from "../../lib/contentAccess";
 import { streamChatWithTools, type OpenAIToolSchema, type UserApiKeys } from "../../lib/llm";
-import { hasApiKeyForModel, resolveEffectiveChatModel } from "../../lib/modelSelection";
+import {
+  hasApiKeyForModel,
+  resolveDeploymentDefaultModel,
+  resolveEffectiveChatModel,
+} from "../../lib/modelSelection";
 import { resolveModel } from "../../lib/llm/models";
 import { can } from "../../lib/permissions";
 // The user module's facade is the one door to per-user model settings. A
@@ -116,6 +120,11 @@ export function memoryCuratorModelForChat(args: {
   memoryCuratorModel?: string | null;
   environmentOverride?: string | null;
   /**
+   * The deployment's default curator model, checked by the caller for this
+   * actor. Sits between the two overrides above and the chat model.
+   */
+  deploymentDefault?: string | null;
+  /**
    * When given, a preferred model the actor has no key for falls back to the
    * chat model instead of failing every curator run for that user. The chat
    * model is already verified against these keys by the caller.
@@ -125,6 +134,7 @@ export function memoryCuratorModelForChat(args: {
   const preferred =
     args.environmentOverride?.trim() ||
     args.memoryCuratorModel ||
+    resolveModel(args.deploymentDefault, "") ||
     args.chatModel;
   if (!args.apiKeys || preferred === args.chatModel) return preferred;
   const canonical = resolveModel(preferred, "");
@@ -1510,6 +1520,13 @@ export async function handleMemoryConsolidation(
     chatModel: resolved.model,
     memoryCuratorModel: settings.memory_curator_model,
     environmentOverride: process.env.MEMORY_CURATOR_MODEL,
+    deploymentDefault: await resolveDeploymentDefaultModel({
+      kind: "memory",
+      userId: state.actor_user_id,
+      db,
+      apiKeys: settings.api_keys,
+      orgId: conversation.orgId,
+    }),
     apiKeys: settings.api_keys,
   });
 

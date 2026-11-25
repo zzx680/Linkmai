@@ -49,7 +49,10 @@ import {
     type PendingDirectGrant,
     type PendingOrgOverride,
 } from "../modals/CreateAccessStep";
-import { useConfiguredModels } from "@/app/hooks/useConfiguredModels";
+import {
+    useConfiguredModels,
+    useDeploymentModelDefaults,
+} from "@/app/hooks/useConfiguredModels";
 import { appendMissingById } from "@/app/lib/idCollections";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -123,6 +126,7 @@ function NewTRModalForWorkspace({
     const apiKeys = useModelApiKeys();
     const modelRouterSelections = useModelRouterSelections();
     const configuredModels = useConfiguredModels();
+    const deploymentDefaults = useDeploymentModelDefaults();
     const configuredModelIds = useMemo(
         () => configuredModels.map((model) => model.id),
         [configuredModels],
@@ -219,8 +223,14 @@ function NewTRModalForWorkspace({
     }, [open, workflowReloadKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        if (!open || !profile?.tabularModel) return;
-        const defaultModel = profile.tabularModel;
+        if (!open) return;
+        // The profile's own default wins; otherwise the deployment's, which
+        // the server already checked for this account. Both are re-checked
+        // here against the live router/key state, and neither overrides a
+        // model this dialog already holds (e.g. one just picked by hand).
+        const defaultModel =
+            profile?.tabularModel ?? deploymentDefaults?.tabular ?? "";
+        if (!defaultModel) return;
         // Unknown lists (an organization's, still loading) preselect nothing.
         const routerSelectionValid =
             !!modelRouterSelections &&
@@ -231,7 +241,14 @@ function NewTRModalForWorkspace({
         if (routerSelectionValid && providerAvailable) {
             setSelectedModel((current) => current || defaultModel);
         }
-    }, [apiKeys, configuredModelIds, modelRouterSelections, open, profile]);
+    }, [
+        apiKeys,
+        configuredModelIds,
+        deploymentDefaults?.tabular,
+        modelRouterSelections,
+        open,
+        profile?.tabularModel,
+    ]);
 
     // Preselect every project document once, as soon as they're available —
     // which may be after the modal opened, since the parent's list is empty

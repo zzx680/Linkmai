@@ -1,0 +1,90 @@
+name: Deploy LinkMai
+
+on:
+  push:
+    branches:
+      - feat/linkmai-rebrand
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linkmai-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          PROD_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$PROD_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$PROD_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Sync source to server
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+        run: |
+          rsync -az --delete \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude '.next/' \
+            --exclude 'deploy/.env.prod' \
+            --exclude 'deploy/.env.rds' \
+            --exclude 'deploy/certs/' \
+            --exclude 'deploy/backups/' \
+            --exclude '*.log' \
+            --exclude '.DS_Store' \
+            -e "ssh -p $PROD_SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            ./ "$PROD_SSH_USER@$PROD_SSH_HOST:/opt/linkmai/"
+
+      - name: Build and restart stack
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+        run: |
+          ssh -p "$PROD_SSH_PORT" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$PROD_SSH_USER@$PROD_SSH_HOST" 'set -euo pipefail
+              cd /opt/linkmai
+              if grep -q CHANGE_ME deploy/.env.prod; then
+                echo "deploy/.env.prod still contains CHANGE_ME; refusing to start production" >&2
+                exit 1
+              fi
+              ./deploy/scripts/compose.sh config -q
+              ./deploy/scripts/compose.sh build
+              ./deploy/scripts/compose.sh up -d
+              ./deploy/scripts/compose.sh ps
+            '
+
+      - name: Verify public health endpoint
+        run: |
+          for attempt in $(seq 1 24); do
+            if curl -fsSL --max-time 10 https://linkmai.com/api/health; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "health check failed; recent backend logs:" >&2
+          ssh -p "$PROD_SSH_PORT" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$PROD_SSH_USER@$PROD_SSH_HOST" \
+            'cd /opt/linkmai && ./deploy/scripts/compose.sh logs --tail=80 backend || true'
+          exit 1
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}

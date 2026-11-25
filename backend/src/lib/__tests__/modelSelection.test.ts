@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
     hasApiKeyForModel,
     normalizeOptionalModelPreference,
+    resolveDeploymentDefaultModel,
+    resolveDeploymentDefaults,
     resolveEffectiveChatModel,
     resolveEffectiveReasoningLevel,
     subagentModelFor,
@@ -307,4 +309,167 @@ it("preserves a configured endpoint whose name is also a removed hosted model", 
         else process.env.LINKMAI_MODEL_CONFIG_JSON = previous;
         resetModelRegistryCache();
     }
+});
+
+
+describe("deployment default models", () => {
+    const ENV_KEYS = [
+        "LINKMAI_DEFAULT_CHAT_MODEL",
+        "LINKMAI_DEFAULT_TITLE_MODEL",
+        "LINKMAI_DEFAULT_MEMORY_MODEL",
+        "LINKMAI_DEFAULT_TABULAR_MODEL",
+        "LINKMAI_DEFAULT_SUBAGENT_MODEL",
+    ] as const;
+    const originalEnv: Record<string, string | undefined> = {};
+    const db = {} as Db;
+
+    beforeEach(() => {
+        for (const key of ENV_KEYS) {
+            originalEnv[key] = process.env[key];
+            delete process.env[key];
+        }
+    });
+
+    afterEach(() => {
+        for (const key of ENV_KEYS) {
+            if (originalEnv[key] === undefined) delete process.env[key];
+            else process.env[key] = originalEnv[key];
+        }
+    });
+
+    it("resolves nothing when the deployment declares nothing", async () => {
+        await expect(
+            resolveDeploymentDefaultModel({
+                kind: "chat",
+                userId: "user-1",
+                db,
+                apiKeys: { openai: "key" },
+            }),
+        ).resolves.toBeNull();
+    });
+
+    it("returns a declared model the account can run", async () => {
+        process.env.LINKMAI_DEFAULT_TITLE_MODEL = " gpt-6-luna ";
+        await expect(
+            resolveDeploymentDefaultModel({
+                kind: "title",
+                userId: "user-1",
+                db,
+                apiKeys: { openai: "key" },
+            }),
+        ).resolves.toBe("gpt-6-luna");
+    });
+
+    it("skips a model the account holds no key for", async () => {
+        process.env.LINKMAI_DEFAULT_CHAT_MODEL = "gpt-6-luna";
+        await expect(
+            resolveDeploymentDefaultModel({
+                kind: "chat",
+                userId: "user-1",
+                db,
+                apiKeys: {},
+            }),
+        ).resolves.toBeNull();
+    });
+
+    it("skips an id that is not a model at all", async () => {
+        process.env.LINKMAI_DEFAULT_CHAT_MODEL = "not-a-model";
+        await expect(
+            resolveDeploymentDefaultModel({
+                kind: "chat",
+                userId: "user-1",
+                db,
+                apiKeys: { openai: "key" },
+            }),
+        ).resolves.toBeNull();
+    });
+
+    it("places the deployment default after the chat and last-selected models", async () => {
+        process.env.LINKMAI_DEFAULT_CHAT_MODEL = "gpt-6-luna";
+        const apiKeys = { openai: "key" };
+        await expect(
+            resolveEffectiveChatModel({
+                chatModel: "gpt-6-astra",
+                lastSelectedModel: "gpt-6-luna",
+                apiKeys,
+                userId: "user-1",
+                db,
+            }),
+        ).resolves.toMatchObject({
+            ok: true,
+            model: "gpt-6-astra",
+            source: "chat",
+        });
+        await expect(
+            resolveEffectiveChatModel({
+                lastSelectedModel: "gpt-6-astra",
+                apiKeys,
+                userId: "user-1",
+                db,
+            }),
+        ).resolves.toMatchObject({
+            ok: true,
+            model: "gpt-6-astra",
+            source: "last_selected",
+        });
+        await expect(
+            resolveEffectiveChatModel({ apiKeys, userId: "user-1", db }),
+        ).resolves.toMatchObject({
+            ok: true,
+            model: "gpt-6-luna",
+            source: "deployment",
+        });
+    });
+
+    it("still requires a selection when the deployment default is unusable", async () => {
+        process.env.LINKMAI_DEFAULT_CHAT_MODEL = "gpt-6-luna";
+        await expect(
+            resolveEffectiveChatModel({ apiKeys: {}, userId: "user-1", db }),
+        ).resolves.toMatchObject({ ok: false, code: "model_required" });
+    });
+
+    it("puts the deployment title default above the provider low tier", () => {
+        expect(titleModelForChat("gpt-6-astra", null, "gpt-6-luna")).toBe(
+            "gpt-6-luna",
+        );
+        // A saved title model is still an explicit override.
+        expect(
+            titleModelForChat("gpt-6-astra", "claude-haiku-4-5", "gpt-6-luna"),
+        ).toBe("claude-haiku-4-5");
+        // An unknown declared default falls back to the old provider guess.
+        expect(titleModelForChat("gpt-6-astra", null, "not-a-model")).toBe(
+            "gpt-6-luna",
+        );
+    });
+
+    it("lets a checked profile or deployment model outrank the subagent tier", () => {
+        expect(
+            subagentModelFor("claude-opus-5-5", "light", "claude-sonnet-5-5"),
+        ).toBe("claude-sonnet-5-5");
+        expect(subagentModelFor("claude-opus-5-5", "light", "bogus")).toBe(
+            "claude-haiku-4-5",
+        );
+    });
+
+    it("resolves every surface's default for the settings screen", async () => {
+        process.env.LINKMAI_DEFAULT_CHAT_MODEL = "gpt-6-astra";
+        process.env.LINKMAI_DEFAULT_TITLE_MODEL = "gpt-6-luna";
+        process.env.LINKMAI_DEFAULT_MEMORY_MODEL = "gpt-6-luna";
+        process.env.LINKMAI_DEFAULT_TABULAR_MODEL = "gpt-6-luna";
+        process.env.LINKMAI_DEFAULT_SUBAGENT_MODEL = "claude-haiku-4-5";
+        await expect(
+            resolveDeploymentDefaults({
+                userId: "user-1",
+                db,
+                apiKeys: { openai: "key" },
+            }),
+        ).resolves.toEqual({
+            chat: "gpt-6-astra",
+            title: "gpt-6-luna",
+            memory: "gpt-6-luna",
+            tabular: "gpt-6-luna",
+            // No Claude key: skipped rather than shown as usable.
+            subagent: null,
+        });
+    });
 });

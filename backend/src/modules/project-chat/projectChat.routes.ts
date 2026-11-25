@@ -47,7 +47,10 @@ import {
     generateAssistantChatTitle,
     logChatTitleFailure,
 } from "../chat/chat.service";
-import { titleModelForChat } from "../../lib/modelSelection";
+import {
+    resolveDeploymentDefaultModel,
+    titleModelForChat,
+} from "../../lib/modelSelection";
 import {
     releaseMemoryConversationTurn,
     scheduleMemoryConsolidation,
@@ -233,10 +236,21 @@ projectChatRouter.post("/", requireAuth, asyncRoute(async (req, res) => {
                       .filter(Boolean)
                       .join("\n")
                 : "";
+            const titleFallbackModel = await resolveDeploymentDefaultModel({
+                kind: "title",
+                userId,
+                db,
+                apiKeys,
+                orgId,
+            });
             titlePromise = shouldGenerateTitle
                 ? generateAssistantChatTitle({
                       abortSignal: stream.signal,
-                      model: titleModelForChat(selectedModel, titleModel),
+                      model: titleModelForChat(
+                          selectedModel,
+                          titleModel,
+                          titleFallbackModel,
+                      ),
                       message: titleMessage,
                       apiKeys,
                   })

@@ -153,3 +153,29 @@ first. Once a turn does not fit, it and every older turn are sent as text only.
 
 Within a single turn, the reasoning of each tool-calling step is always passed
 to the next step, whatever this setting is.
+
+## Deployment default models
+
+An operator can name, per surface, the model a user starts on before choosing
+one. Every default is optional; unset means the surface keeps the fallback it
+had before.
+
+| Environment variable | Surface | Order (highest first) |
+| --- | --- | --- |
+| `LINKMAI_DEFAULT_CHAT_MODEL` | Main chat | saved chat model → profile's last selection → deployment default |
+| `LINKMAI_DEFAULT_TITLE_MODEL` | Chat titles | profile's title model → deployment default → provider low-tier model |
+| `LINKMAI_DEFAULT_MEMORY_MODEL` | Memory curation | `MEMORY_CURATOR_MODEL` / profile preference → deployment default → chat model |
+| `LINKMAI_DEFAULT_TABULAR_MODEL` | New tabular review | profile preference → deployment default (the review then stores it) |
+| `LINKMAI_DEFAULT_SUBAGENT_MODEL` | Subagents | model named in the conversation → profile preference → deployment default → per-task tier |
+
+A default is not a bypass. Each one is resolved and checked for the asking
+account exactly like a saved choice: it must be a configured or built-in model,
+inside the router selection that governs the account's key, and covered by a
+key that account can use. A default that fails any check is skipped — the
+surface falls back, and nothing invalid is stored in a chat, profile or review
+row or sent to a provider. `GET /models/configured` returns the checked values
+under `defaults`, which is what the settings screen describes to the user.
+
+`MEMORY_CURATOR_MODEL` stays a hard deployment override and outranks every
+default above; `LINKMAI_DEFAULT_MEMORY_MODEL` only fills the gap between a
+user's own preference and the chat model.

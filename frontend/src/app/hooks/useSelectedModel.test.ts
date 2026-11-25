@@ -166,6 +166,54 @@ describe("useSelectedReasoning", () => {
         expect(result.current[0]).toBe("low");
     });
 
+    it("uses the deployment default when nothing is saved", () => {
+        const { result } = renderHook(() =>
+            useSelectedModel({
+                deploymentDefault: "gpt-6-luna",
+                apiKeys: keys,
+            }),
+        );
+        expect(result.current[0]).toBe("gpt-6-luna");
+    });
+
+    it("keeps a saved choice in front of the deployment default", () => {
+        const { result } = renderHook(() =>
+            useSelectedModel({
+                lastSelectedModel: "claude-fable-5-1",
+                deploymentDefault: "gpt-6-luna",
+                apiKeys: keys,
+            }),
+        );
+        expect(result.current[0]).toBe("claude-fable-5-1");
+    });
+
+    it("does not flash a configured deployment default before the model list loads", () => {
+        const { result, rerender } = renderHook(
+            (props: { configuredModelIds?: string[] }) =>
+                useSelectedModel({
+                    deploymentDefault: "ops-legal-big",
+                    apiKeys: keys,
+                    ...props,
+                }),
+            { initialProps: {} as { configuredModelIds?: string[] } },
+        );
+        // Unknown deployment models are not invented before the list arrives.
+        expect(result.current[0]).toBe("");
+
+        rerender({ configuredModelIds: ["ops-legal-big"] });
+        expect(result.current[0]).toBe("ops-legal-big");
+    });
+
+    it("ignores a deployment default this account cannot run", () => {
+        const { result } = renderHook(() =>
+            useSelectedModel({
+                deploymentDefault: "gemini-3.8-flash",
+                apiKeys: keys,
+            }),
+        );
+        expect(result.current[0]).toBe("");
+    });
+
     it("defaults a new user to high", () => {
         const { result } = renderHook(() => useSelectedReasoning({}));
         expect(result.current[0]).toBe("high");

@@ -202,17 +202,14 @@ OSS_PUBLIC_ENDPOINT=https://storage.linkmai.com
 发信地址必须验证并配 SPF/DKIM。`linkmai.com` 已有企业邮箱 MX 时不要覆盖，可用
 `mail.linkmai.com` 作为发信子域。
 
-### 百炼 DeepSeek
+### DeepSeek API
 
-1. [百炼控制台](https://bailian.console.aliyun.com/) 开通服务，创建 API Key。
-2. 复制业务空间 ID（`ws-xxxx`）。
-3. 把 `.env.prod` 里的 `WORKSPACE_ID` 替换成该 ID，`DEEPSEEK_API_KEY` 填百炼 Key。
-4. 北京区域 OpenAI 兼容地址：
+1. 在 [DeepSeek 开放平台](https://platform.deepseek.com/) 创建 API Key。
+2. 把 `.env.prod` 里的 `DEEPSEEK_API_KEY` 填成该 Key。
+3. 默认使用官方 OpenAI 兼容地址 `https://api.deepseek.com/v1`。
 
-   `https://<业务空间ID>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`
-
-默认模型：`deepseek-v4-pro`（质量优先）、`deepseek-v4.1-flash`（速度/成本优先）。
-百炼是托管 API，不需要在 ECS 上装模型。
+默认模型：`deepseek-v4-pro`（质量优先）、`deepseek-flash`（速度/成本优先）。
+DeepSeek 是托管 API，不需要在 ECS 上装模型。
 
 ## 6. 安装依赖并生成配置
 
@@ -245,7 +242,7 @@ node deploy/scripts/generate-secrets.mjs
 脚本会生成 `deploy/.env.prod`（权限 600）和 anon/service JWT、数据库密码、Redis 密码、
 三个应用 secret。已存在时拒绝覆盖；确实要重建加 `--force`。
 
-然后填写 `deploy/.env.prod` 里的 `CHANGE_ME` / `WORKSPACE_ID`：
+然后填写 `deploy/.env.prod` 里的 `CHANGE_ME`：
 
 ```dotenv
 RDS_HOST=pgm-xxxx.pg.rds.aliyuncs.com
@@ -268,6 +265,22 @@ chmod 600 deploy/.env.rds
 
 密码含 `#`、空格、`$` 时用单引号包住。模板里的 `SMTP_SENDER_NAME` 和
 `LINKMAI_MODEL_CONFIG_JSON` 引号不要删。
+
+### 默认模型（可选）
+
+新用户、新会话在用户还没有选择时用部署默认模型；用户保存过的选择永远优先：
+
+| 环境变量 | 影响范围 | 回退顺序（高 → 低） |
+| --- | --- | --- |
+| `LINKMAI_DEFAULT_CHAT_MODEL` | 主对话 | 当前会话已存模型 → 用户上次选择 → 部署默认 → 让用户选 |
+| `LINKMAI_DEFAULT_TITLE_MODEL` | 标题生成 | 用户设置 → 部署默认 → 对话服务商的低成本模型 |
+| `LINKMAI_DEFAULT_MEMORY_MODEL` | 记忆整理 | `MEMORY_CURATOR_MODEL` / 用户设置 → 部署默认 → 对话模型 |
+| `LINKMAI_DEFAULT_TABULAR_MODEL` | 新建表格审阅 | 用户设置 → 部署默认 → 必须手选（旧行为） |
+| `LINKMAI_DEFAULT_SUBAGENT_MODEL` | 子任务助手 | 对话内显式指定 → 用户设置 → 部署默认 → 按任务匹配 |
+
+默认值同样要过模型校验：模型没在 `LINKMAI_MODEL_CONFIG_JSON` 里、该账号没有对应
+组织密钥、或不在它所属 router 的 Model Selections 里，都会被跳过并回退，不会写进
+数据库，也不会发给服务商。上线先设 `deepseek-v4-pro` / `deepseek-flash` 这组。
 
 ## 7. 初始化 RDS 并启动
 
@@ -307,7 +320,7 @@ curl -fsS https://word.linkmai.com/healthz   # 不做 Word 可跳过
 ```
 
 浏览器打开 `https://linkmai.com`，注册账号，按邮件确认。第一个用户创建组织后即为 owner；
-后续成员通过邀请加入。在设置里确认模型列表出现 `DeepSeek V4 Pro（百炼）`。
+后续成员通过邀请加入。在设置里确认模型列表出现 `DeepSeek V4 Pro` / `DeepSeek Flash`。
 
 再上传一个 PDF/DOCX，确认：
 

@@ -18,7 +18,10 @@ vi.mock("@/app/lib/linkmaiApi", () => ({
     // main's model registry (#339) makes the view fetch the model catalog on
     // mount; the mock has to answer or every render throws before the gate
     // this file is about is even reached.
-    getConfiguredModels: vi.fn(async () => []),
+    getConfiguredModels: vi.fn(async () => ({
+        models: [],
+        defaults: { chat: null, title: null, memory: null, tabular: null, subagent: null },
+    })),
     clearTabularCells: vi.fn(),
     deleteTabularReview: vi.fn(),
     getTabularReview: vi.fn(),

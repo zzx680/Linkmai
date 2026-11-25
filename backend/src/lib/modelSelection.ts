@@ -1,4 +1,7 @@
-import type { DelegationModelTier } from "@linkmai/contracts";
+import type {
+    DelegationModelTier,
+    DeploymentModelDefaults,
+} from "@linkmai/contracts";
 import {
     builtInModelIds,
     CLAUDE_LOW_MODELS,
@@ -36,6 +39,11 @@ import {
 import { resolveRequestedModel } from "./routerModels";
 import type { Db } from "./supabase";
 import { UserFacingError } from "./userFacingError";
+import {
+    deploymentDefaultModelId,
+    type DeploymentModelKind,
+} from "./llm/deploymentDefaults";
+import { log } from "./log";
 
 export const MODEL_REQUIRED_DETAIL =
     "Select a model before sending a message.";
@@ -118,11 +126,102 @@ export function hasApiKeyForModel(
     return !!apiKeys[provider]?.trim();
 }
 
+const warnedDeploymentDefaults = new Set<string>();
+
+function warnDeploymentDefault(
+    kind: DeploymentModelKind,
+    declared: string,
+    reason: "unknown" | "unavailable",
+): void {
+    const key = `${kind}:${declared}:${reason}`;
+    if (warnedDeploymentDefaults.has(key)) return;
+    warnedDeploymentDefaults.add(key);
+    log.warn("models", "deployment default model skipped", {
+        surface: kind,
+        declared,
+        reason,
+    });
+}
+
+/**
+ * The deployment's default model for one surface, checked for THIS user.
+ *
+ * A declared id that does not resolve, sits outside the router selection that
+ * governs the user's key, or has no usable key is skipped, so the surface
+ * falls back exactly as it would without a deployment default. Nothing here
+ * persists anything, and an invalid default is never handed to a provider.
+ */
+export async function resolveDeploymentDefaultModel(args: {
+    kind: DeploymentModelKind;
+    userId: string;
+    db: Db;
+    apiKeys: UserApiKeys;
+    /** The organization the work belongs to: its lists govern its keys. */
+    orgId?: string | null;
+}): Promise<string | null> {
+    const declared = deploymentDefaultModelId(args.kind);
+    if (!declared) return null;
+    const resolved = resolveModel(declared, "");
+    if (!resolved) {
+        warnDeploymentDefault(args.kind, declared, "unknown");
+        return null;
+    }
+    const allowed = await resolveRequestedModel(
+        resolved,
+        "",
+        args.userId,
+        args.db,
+        "fallback",
+        args.orgId,
+    );
+    if (!allowed || !hasApiKeyForModel(allowed, args.apiKeys)) {
+        warnDeploymentDefault(args.kind, declared, "unavailable");
+        return null;
+    }
+    return allowed;
+}
+
+/** Every surface's validated default, for the settings UI. */
+export async function resolveDeploymentDefaults(args: {
+    userId: string;
+    db: Db;
+    apiKeys: UserApiKeys;
+    orgId?: string | null;
+}): Promise<DeploymentModelDefaults> {
+    const kinds: readonly DeploymentModelKind[] = [
+        "chat",
+        "title",
+        "memory",
+        "tabular",
+        "subagent",
+    ];
+    const entries = await Promise.all(
+        kinds.map(async (kind) => {
+            try {
+                return [
+                    kind,
+                    await resolveDeploymentDefaultModel({ ...args, kind }),
+                ] as const;
+            } catch (error) {
+                // A defaults listing must not fail the model catalog: the
+                // request paths re-validate every default anyway.
+                log.warn("models", "deployment default lookup failed", {
+                    surface: kind,
+                    reason:
+                        error instanceof Error ? error.name : typeof error,
+                });
+                return [kind, null] as const;
+            }
+        }),
+    );
+    return Object.fromEntries(entries) as DeploymentModelDefaults;
+}
+
 type EffectiveChatModelResult =
     | {
           ok: true;
           model: string;
-          source: "request" | "chat" | "last_selected";
+          source: "request" | "chat" | "last_selected" | "deployment";
       }
     | {
           ok: false;
@@ -216,6 +315,18 @@ export async function resolveEffectiveChatModel(args: {
         }
     }
 
+    // Last: the deployment's declared default, already checked for this user.
+    const deploymentDefault = await resolveDeploymentDefaultModel({
+        kind: "chat",
+        userId: args.userId,
+        db: args.db,
+        apiKeys: args.apiKeys,
+        orgId: args.orgId,
+    });
+    if (deploymentDefault) {
+        return { ok: true, model: deploymentDefault, source: "deployment" };
+    }
+
     return {
         ok: false,
         status: 400,
@@ -235,9 +346,15 @@ export async function resolveEffectiveChatModel(args: {
 export function titleModelForChat(
     chatModel: string,
     titleOverride?: string | null,
+    deploymentTitleModel?: string | null,
 ): string {
     const override = resolveModel(titleOverride, "");
     if (override) return override;
+
+    // The deployment default replaces the provider's low-tier guess: an
+    // operator who named a cheap model means it, even for a first-party chat.
+    const deployment = resolveModel(deploymentTitleModel, "");
+    if (deployment) return deployment;
 
     const resolvedChatModel = resolveModel(chatModel, "");
     if (!resolvedChatModel) {
@@ -306,7 +423,11 @@ export function sameProviderModels(chatModel: string, apiKeys: UserApiKeys): str
 export function subagentModelFor(
     chatModel: string,
     tier: DelegationModelTier,
+    preferred?: string | null,
 ): string {
+    // A checked profile or deployment preference outranks the tier guess.
+    const explicit = resolveModel(preferred, "");
+    if (explicit) return explicit;
     const tiers = tieredModels(providerForModel(chatModel));
     if (!tiers || tier === "same") return chatModel;
     const chatRank = [tiers.light, tiers.standard].findIndex((models) =>

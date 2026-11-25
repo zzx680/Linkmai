@@ -4,6 +4,7 @@ import { BACKEND_REPORTING_OWNER } from "@linkmai/client";
 import type { Operation } from "@linkmai/client";
 import { settleWithConcurrency } from "@linkmai/client";
 import type {
+    DeploymentModelDefaults,
     TabularReviewHistoryStatus,
     AuditActor,
     AuditActorPage,
@@ -1209,12 +1210,27 @@ export async function getOllamaModels(): Promise<OllamaModelOption[]> {
     return models;
 }
 
-export async function getConfiguredModels(): Promise<ConfiguredModelOption[]> {
-    const { models } = await apiRequest<{ models: ConfiguredModelOption[] }>(
+export interface ConfiguredModels {
+    models: ConfiguredModelOption[];
+    /** The deployment's default per surface, checked for this account. */
+    defaults: DeploymentModelDefaults;
+}
+
+export async function getConfiguredModels(): Promise<ConfiguredModels> {
+    const body = await apiRequest<ConfiguredModels>(
         "settings.keys", "/models/configured",
     );
-    return models;
+    return { models: body.models ?? [], defaults: body.defaults ?? NO_DEFAULT_MODELS };
 }
+
+/** What every surface falls back to when the deployment declares nothing. */
+export const NO_DEFAULT_MODELS: DeploymentModelDefaults = {
+    chat: null,
+    title: null,
+    memory: null,
+    tabular: null,
+    subagent: null,
+};
 
 /**
  * A provider's model catalog. With `workspace` set to an organization id it

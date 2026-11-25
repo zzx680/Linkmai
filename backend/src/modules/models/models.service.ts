@@ -27,10 +27,14 @@ export type {
 // neither status exists in the shared vocabulary.
 
 import type { Db } from "../../lib/supabase";
+import type { DeploymentModelDefaults } from "@linkmai/contracts";
 import { ollamaAuthHeaders as authHeaders } from "../../lib/llm/providers";
 import { isSupportedOpenCodeGoModel } from "../../lib/llm/models";
 import { configuredEndpointSummaries } from "../../lib/llm/registry";
 import { getEffectiveApiKeys, getUserApiKeys } from "../../lib/providerCredentials/index";
+import {
+    resolveDeploymentDefaults,
+} from "../../lib/modelSelection";
 
 function catalogPrice(value: unknown): string | undefined {
     if (typeof value !== "string" && typeof value !== "number") {
@@ -121,6 +125,20 @@ export async function listConfiguredModels(
               ]
             : [],
     );
+}
+
+/**
+ * The deployment's default model per surface, checked against this user's
+ * configured endpoints and keys. The settings UI uses these to say what an
+ * "Automatic" choice will actually run on; an empty value means the surface
+ * keeps its own fallback.
+ */
+export async function listDeploymentDefaults(
+    db: Db,
+    userId: string,
+): Promise<DeploymentModelDefaults> {
+    const apiKeys = await getUserApiKeys(userId, db);
+    return resolveDeploymentDefaults({ userId, db, apiKeys });
 }
 
 /**

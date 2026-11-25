@@ -245,6 +245,12 @@ export type DelegateContext = {
     runStore: SubagentRunStore;
     /** The model id if the user can run it, with the checks a chat's model gets. */
     checkModel: (model: string) => Promise<string | null>;
+    /**
+     * The subagent model the profile saved or the deployment declared, already
+     * checked for this user. Null when neither applies, so the per-task tier
+     * picks the model as before.
+     */
+    subagentPreference?: () => Promise<string | null>;
     nonce?: string;
     signal?: AbortSignal;
     write: (chunk: string) => void;
@@ -606,7 +612,10 @@ export async function runDelegateCall(
         ? withDocumentList(ctx.systemPrompt, docStore, ctx.nonce)
         : ctx.systemPrompt;
     const preset = EFFORT_PRESETS[effort];
-    const model = delegation.model ?? subagentModelFor(ctx.chatModel, tier);
+    const model =
+        delegation.model ??
+        (await ctx.subagentPreference?.()) ??
+        subagentModelFor(ctx.chatModel, tier);
     const reasoning =
         delegation.reasoning ??
         (preset.reasoning

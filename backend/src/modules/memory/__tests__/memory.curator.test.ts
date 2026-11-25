@@ -49,6 +49,50 @@ describe("memory curator model selection", () => {
     ).toBe("gpt-5.6-sol");
   });
 
+  it("uses the deployment default before the chat model", () => {
+    expect(
+      memoryCuratorModelForChat({
+        chatModel: "gpt-5.6-sol",
+        deploymentDefault: "gpt-6-luna",
+        apiKeys: { openai: "sk-test" },
+      }),
+    ).toBe("gpt-6-luna");
+  });
+
+  it("lets the user's own curation model outrank the deployment default", () => {
+    expect(
+      memoryCuratorModelForChat({
+        chatModel: "gpt-5.6-sol",
+        memoryCuratorModel: "gpt-6.1-sol",
+        deploymentDefault: "gpt-6-luna",
+        apiKeys: { openai: "sk-test" },
+      }),
+    ).toBe("gpt-6.1-sol");
+    expect(
+      memoryCuratorModelForChat({
+        chatModel: "gpt-5.6-sol",
+        environmentOverride: "gpt-6.1-sol",
+        deploymentDefault: "gpt-6-luna",
+        apiKeys: { openai: "sk-test" },
+      }),
+    ).toBe("gpt-6.1-sol");
+  });
+
+  it("ignores a deployment default the actor holds no key for", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      expect(
+        memoryCuratorModelForChat({
+          chatModel: "gpt-5.6-sol",
+          deploymentDefault: "claude-haiku-4-5",
+          apiKeys: { openai: "sk-test" },
+        }),
+      ).toBe("gpt-5.6-sol");
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it("ignores a preferred model the actor holds no key for", () => {
     // A stale preference or a deployment-wide override for another provider
     // must not fail every curator run for this user; the verified chat

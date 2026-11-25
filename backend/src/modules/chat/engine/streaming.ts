@@ -14,6 +14,7 @@ import {
 } from "../../../lib/llm";
 import { resolveRequestedModel } from "../../../lib/routerModels";
 import {
+  resolveDeploymentDefaultModel,
   resolveEffectiveChatModel,
   sameProviderModels,
 } from "../../../lib/modelSelection";
@@ -726,6 +727,52 @@ export async function runLLMStream(params: {
   const delegationSignal = signal
     ? AbortSignal.any([signal, delegationStop.signal])
     : delegationStop.signal;
+  const checkSubagentModel = async (
+    requested: string,
+  ): Promise<string | null> => {
+    const checked = await resolveEffectiveChatModel({
+      requested,
+      apiKeys: apiKeys ?? {},
+      userId,
+      db,
+      orgId,
+    }).catch((error) => {
+      reportError(
+        new AppError("chat.context_failed", "Subagent model check failed", {
+          cause: error,
+        }),
+        { tags: { component: "chat-stream", operation: "chat.subagent" } },
+      );
+      // warn: the report above is the Sentry event; the log keeps its
+      // redacted category.
+      log.warn("subagents", "model check failed", safeError(error));
+      return null;
+    });
+    return checked?.ok ? checked.model : null;
+  };
+
+  // Resolved once per turn: a turn may start several subagents, and the
+  // preference does not change between them.
+  let subagentPreference: Promise<string | null> | null = null;
+  const resolveSubagentPreference = (): Promise<string | null> =>
+    (subagentPreference ??= (async () => {
+      // The profile's saved subagent model outranks the deployment default,
+      // which outranks the per-task tier. Each is checked for this user, so an
+      // unusable choice falls through instead of failing the delegation.
+      const saved = subagentDefaults?.model;
+      if (saved) {
+        const checked = await checkSubagentModel(saved);
+        if (checked) return checked;
+      }
+      return resolveDeploymentDefaultModel({
+        kind: "subagent",
+        userId,
+        db,
+        apiKeys: apiKeys ?? {},
+        orgId,
+      });
+    })());
+
   const delegateContextFor = (
     runStore: SubagentRunStore,
     selectedModel: string,
@@ -738,27 +785,8 @@ export async function runLLMStream(params: {
     docStore,
     docIndex,
     runStore,
-    checkModel: async (requested) => {
-      const checked = await resolveEffectiveChatModel({
-        requested,
-        apiKeys: apiKeys ?? {},
-        userId,
-        db,
-        orgId,
-      }).catch((error) => {
-        reportError(
-          new AppError("chat.context_failed", "Subagent model check failed", {
-            cause: error,
-          }),
-          { tags: { component: "chat-stream", operation: "chat.subagent" } },
-        );
-        // warn: the report above is the Sentry event; the log keeps its
-        // redacted category.
-        log.warn("subagents", "model check failed", safeError(error));
-        return null;
-      });
-      return checked?.ok ? checked.model : null;
-    },
+    checkModel: checkSubagentModel,
+    subagentPreference: resolveSubagentPreference,
     nonce,
     signal: delegationSignal,
     write,

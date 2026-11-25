@@ -25,6 +25,11 @@ export interface SelectedModelSources {
     apiKeys?: ApiKeyState;
     /** Authenticated deployment models returned by GET /models/configured. */
     configuredModelIds?: readonly string[];
+    /**
+     * The deployment's default chat model, already checked for this account.
+     * Used only when the chat and the profile hold no usable choice.
+     */
+    deploymentDefault?: string | null;
 }
 
 function usableStoredModel(
@@ -51,7 +56,7 @@ function usableStoredModel(
     return canonical;
 }
 
-/** Resolve chat model → profile last-selected model, without a product default. */
+/** Resolve chat model → profile last-selected model → deployment default. */
 export function useSelectedModel(
     sources: SelectedModelSources = {},
 ): [string, (id: string) => void] {
@@ -67,6 +72,7 @@ export function useSelectedModel(
             routerSelections: sources.routerSelections ?? null,
             apiKeys: sources.apiKeys,
             configuredModelIds,
+            deploymentDefault: sources.deploymentDefault,
         }),
         [
             sources.selectionKey,
@@ -75,6 +81,7 @@ export function useSelectedModel(
             sources.routerSelections,
             sources.apiKeys,
             configuredModelIds,
+            sources.deploymentDefault,
         ],
     );
 
@@ -98,6 +105,10 @@ export function useSelectedModel(
             usableStoredModel(selectionSources.chatModel, selectionSources) ??
             usableStoredModel(
                 selectionSources.lastSelectedModel,
+                selectionSources,
+            ) ??
+            usableStoredModel(
+                selectionSources.deploymentDefault,
                 selectionSources,
             ) ??
             "";

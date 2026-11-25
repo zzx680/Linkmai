@@ -138,8 +138,36 @@ describe("GET /models/configured", () => {
                 source: "Configured",
             },
         ]);
+        // Nothing declared: every surface keeps the fallback it had.
+        expect(response.body.defaults).toEqual({
+            chat: null,
+            title: null,
+            memory: null,
+            tabular: null,
+            subagent: null,
+        });
         expect(response.text).not.toContain("baseUrl");
         expect(response.text).not.toContain("user-openai-key");
+    });
+    it("reports the deployment defaults this account can actually run", async () => {
+        process.env.LINKMAI_DEFAULT_CHAT_MODEL = "cloud-user-key";
+        process.env.LINKMAI_DEFAULT_TITLE_MODEL = "cloud-missing-env";
+        try {
+            const response = await request(app).get("/models/configured");
+
+            expect(response.status).toBe(200);
+            expect(response.body.defaults).toEqual({
+                chat: "cloud-user-key",
+                // No key: reported as undeclared rather than offered.
+                title: null,
+                memory: null,
+                tabular: null,
+                subagent: null,
+            });
+        } finally {
+            delete process.env.LINKMAI_DEFAULT_CHAT_MODEL;
+            delete process.env.LINKMAI_DEFAULT_TITLE_MODEL;
+        }
     });
 });
 
@@ -169,6 +197,7 @@ describe("catalogs for an organization workspace", () => {
     };
     const sentKey = (fetchMock: ReturnType<typeof stubCatalog>) =>
         JSON.stringify(fetchMock.mock.calls[0]?.[1] ?? {});
+
 
     it("lists with the organization's key, not the caller's own", async () => {
         const fetchMock = stubCatalog();

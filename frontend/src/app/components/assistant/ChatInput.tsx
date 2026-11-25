@@ -74,7 +74,10 @@ import {
 } from "@/app/lib/documentUploadValidation";
 import { userFacingApiError } from "@/app/lib/userFacingError";
 import { isImeComposing, serializeExcerpts, type MessageExcerpt, type NoModelsReason } from "@linkmai/client";
-import { useConfiguredModels } from "@/app/hooks/useConfiguredModels";
+import {
+    useConfiguredModels,
+    useDeploymentModelDefaults,
+} from "@/app/hooks/useConfiguredModels";
 import { zhCN } from "@/app/lib/localization";
 
 export interface ChatInputHandle {
@@ -211,6 +214,7 @@ function ChatInputForChatImpl(
     // these are the organization's keys, not the profile's.
     const apiKeys = useModelApiKeys();
     const configuredModels = useConfiguredModels();
+    const deploymentDefaults = useDeploymentModelDefaults();
     const configuredModelIds = useMemo(
         () => configuredModels.map((model) => model.id),
         [configuredModels],
@@ -232,6 +236,7 @@ function ChatInputForChatImpl(
                 : null,
         apiKeys,
         configuredModelIds,
+        deploymentDefault: deploymentDefaults?.chat ?? null,
     });
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const controlsRef = useRef<HTMLDivElement>(null);

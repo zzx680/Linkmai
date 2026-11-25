@@ -101,7 +101,7 @@ export default function ModelPreferencesPage() {
             <div className="space-y-1">
               <SettingsLabel>{uiText("Chat title generation")}</SettingsLabel>
               <SettingsDescription>
-                {uiText("By default, titles use a low cost model from the chat provider. Choose a model here to override that.")}
+                {uiText("By default, titles use the deployment's default model when the deployment declares one, and otherwise a low cost model from the chat provider. Choose a model here to override that.")}
               </SettingsDescription>
             </div>
             <ModelPreferenceDropdown
@@ -116,7 +116,7 @@ export default function ModelPreferencesPage() {
               apiKeys={profile?.apiKeys}
               isSaving={savingField === "titleModel"}
               isSaved={savedField === "titleModel"}
-              emptyOptionLabel="Automatic — same provider as chat"
+              emptyOptionLabel={uiText("Automatic — deployment default, otherwise the chat provider")}
               onChange={(id) => handlePreferenceChange("titleModel", id)}
             />
           </SettingsRow>
@@ -124,7 +124,7 @@ export default function ModelPreferencesPage() {
             <div className="space-y-1">
               <SettingsLabel>{uiText("Tabular review model")}</SettingsLabel>
               <SettingsDescription>
-                {uiText("Preselected when creating a review. Each review stores its own model and can be changed separately.")}
+                {uiText("Preselected when creating a review: your choice here, then the deployment's default model. Each review stores its own model and can be changed separately.")}
               </SettingsDescription>
             </div>
             <ModelPreferenceDropdown
@@ -139,7 +139,7 @@ export default function ModelPreferencesPage() {
               apiKeys={profile?.apiKeys}
               isSaving={savingField === "tabularModel"}
               isSaved={savedField === "tabularModel"}
-              emptyOptionLabel="No default model"
+              emptyOptionLabel={uiText("Automatic — deployment default")}
               onChange={(id) => handlePreferenceChange("tabularModel", id)}
             />
           </SettingsRow>
@@ -147,7 +147,7 @@ export default function ModelPreferencesPage() {
             <div className="space-y-1">
               <SettingsLabel>{uiText("Memory curation model")}</SettingsLabel>
               <SettingsDescription>
-                {uiText("Used after conversations to identify durable information worth keeping. By default, memory uses the model selected for the chat.")}
+                {uiText("Used after conversations to identify durable information worth keeping. By default, memory uses the deployment's curation default when one is declared, and otherwise the model selected for the chat.")}
               </SettingsDescription>
             </div>
             <ModelPreferenceDropdown
@@ -164,7 +164,7 @@ export default function ModelPreferencesPage() {
               apiKeys={profile?.apiKeys}
               isSaving={savingField === "memoryCuratorModel"}
               isSaved={savedField === "memoryCuratorModel"}
-              emptyOptionLabel="Automatic — use chat model"
+              emptyOptionLabel={uiText("Automatic — deployment default, otherwise the chat model")}
               onChange={(id) =>
                 handlePreferenceChange("memoryCuratorModel", id)
               }
@@ -183,7 +183,7 @@ export default function ModelPreferencesPage() {
             <div className="space-y-1">
               <SettingsLabel>{uiText("Model")}</SettingsLabel>
               <SettingsDescription>
-                {uiText("The model each subagent runs on. Chosen per task lets LinkMai match the model to the work.")}
+                {uiText("The model each subagent runs on. By default, LinkMai uses the deployment's subagent default when one is declared and otherwise matches the model to the task.")}
               </SettingsDescription>
             </div>
             <ModelPreferenceDropdown
@@ -198,7 +198,7 @@ export default function ModelPreferencesPage() {
               apiKeys={profile?.apiKeys}
               isSaving={savingField === "subagentModel"}
               isSaved={savedField === "subagentModel"}
-              emptyOptionLabel="Chosen per task"
+              emptyOptionLabel={uiText("Automatic — deployment default, otherwise chosen per task")}
               onChange={(id) => handlePreferenceChange("subagentModel", id)}
             />
           </SettingsRow>

@@ -8,6 +8,7 @@
 
 import { Router, type Request, type Response } from "express";
 import { requireAuth } from "../../middleware/auth";
+import type { DeploymentModelDefaults } from "@linkmai/contracts";
 import { asyncRoute, routerErrorHandler } from "../../middleware/asyncRoute";
 import { createServerSupabase, type Db } from "../../lib/supabase";
 import { sendInternalError } from "../../lib/httpError";
@@ -19,6 +20,7 @@ import {
 import {
     listOllamaModels,
     listConfiguredModels,
+    listDeploymentDefaults,
     listOpenCodeGoModels,
     listOpenRouterModels,
     listVercelModels,
@@ -99,8 +101,15 @@ modelsRouter.get("/ollama", requireAuth, asyncRoute(async (_req, res) => {
 // GET /models/configured
 modelsRouter.get("/configured", requireAuth, asyncRoute(async (_req, res) => {
     const userId = res.locals.userId as string;
-    const models = await listConfiguredModels(createServerSupabase(), userId);
-    res.json({ models });
+    const db = createServerSupabase();
+    // One round trip: the model list and the defaults that name models in it.
+    const [models, defaults] = await Promise.all([
+        listConfiguredModels(db, userId),
+        listDeploymentDefaults(db, userId),
+    ]);
+    const body: { models: typeof models; defaults: DeploymentModelDefaults } =
+        { models, defaults };
+    res.json(body);
 }));
 
 // GET /models/openrouter

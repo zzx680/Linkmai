@@ -88,6 +88,11 @@ vi.mock("../tabular.rows", async (importOriginal) => ({
 }));
 
 const validateSelectedModel = vi.hoisted(() => vi.fn());
+const getUserModelSettings = vi.hoisted(() => vi.fn());
+vi.mock("../../user/user.service", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("../../user/user.service")>()),
+    getUserModelSettings,
+}));
 vi.mock("../tabular.shared", async (importOriginal) => ({
     ...(await importOriginal<typeof import("../tabular.shared")>()),
     validateSelectedModel,
@@ -138,6 +143,7 @@ beforeEach(() => {
         model: "claude-sonnet-5",
         apiKeys: {},
     });
+    getUserModelSettings.mockResolvedValue({ api_keys: { claude: "sk-ant" } });
 });
 
 describe("createTabularReview", () => {
@@ -165,6 +171,60 @@ describe("createTabularReview", () => {
             "model_required",
         );
         expect(calls).toEqual([]);
+    });
+
+    it("fills a blank model from the deployment default", async () => {
+        process.env.LINKMAI_DEFAULT_TABULAR_MODEL = "claude-sonnet-5";
+        try {
+            const { db, calls } = makeFakeDb({
+                tables: {
+                    tabular_reviews: { data: { id: "rev-1" }, error: null },
+                },
+            });
+            const result = await createTabularReview(db, {
+                ...WHO,
+                document_ids: [],
+                columns_config: [],
+            });
+            expect(result.ok).toBe(true);
+            // The default is checked like any hand-picked model, then stored
+            // as this review's model.
+            expect(validateSelectedModel).toHaveBeenCalledWith(
+                // Resolved to the canonical id before it is checked or stored.
+                "claude-sonnet-5-5",
+                "user-1",
+                db,
+                null,
+            );
+            expect(
+                calls.find(
+                    (call) => call.table === "tabular_reviews" && call.op === "insert",
+                ),
+            ).toBeTruthy();
+        } finally {
+            delete process.env.LINKMAI_DEFAULT_TABULAR_MODEL;
+        }
+    });
+
+    it("refuses when the deployment default cannot run for this account", async () => {
+        process.env.LINKMAI_DEFAULT_TABULAR_MODEL = "claude-sonnet-5";
+        getUserModelSettings.mockResolvedValue({ api_keys: {} });
+        try {
+            const { db, calls } = makeFakeDb();
+            const result = await createTabularReview(db, {
+                ...WHO,
+                document_ids: [],
+                columns_config: [],
+            });
+            expect(result).toMatchObject({
+                ok: false,
+                kind: "status",
+                status: 400,
+            });
+            expect(calls.some((call) => call.op === "insert")).toBe(false);
+        } finally {
+            delete process.env.LINKMAI_DEFAULT_TABULAR_MODEL;
+        }
     });
 
     it("carries a model-policy rejection through with its own status", async () => {

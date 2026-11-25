@@ -198,6 +198,42 @@ describe("runLLMStream delegation", () => {
     });
   });
 
+  it("runs a subagent on the user's saved subagent model rather than the task tier", async () => {
+    let subagentModel = "";
+    parentDelegates([delegate("d1", { effort: "quick" })], async (params) => {
+      subagentModel = params.model;
+      return { fullText: "Brief." };
+    });
+
+    await runLLMStream({
+      ...baseParams(),
+      apiKeys: { gemini: "key" },
+      subagentDefaults: { model: "gemini-3.1-pro-preview", reasoning: null },
+    });
+
+    // The quick effort would otherwise pick the light tier.
+    expect(subagentModel).toBe("gemini-3.1-pro-preview");
+  });
+
+  it("runs a subagent on the deployment default when the user has no preference", async () => {
+    const previous = process.env.LINKMAI_DEFAULT_SUBAGENT_MODEL;
+    process.env.LINKMAI_DEFAULT_SUBAGENT_MODEL = "gemini-3.1-pro-preview";
+    try {
+      let subagentModel = "";
+      parentDelegates([delegate("d1", { effort: "quick" })], async (params) => {
+        subagentModel = params.model;
+        return { fullText: "Brief." };
+      });
+
+      await runLLMStream({ ...baseParams(), apiKeys: { gemini: "key" } });
+
+      expect(subagentModel).toBe("gemini-3.1-pro-preview");
+    } finally {
+      if (previous === undefined) delete process.env.LINKMAI_DEFAULT_SUBAGENT_MODEL;
+      else process.env.LINKMAI_DEFAULT_SUBAGENT_MODEL = previous;
+    }
+  });
+
   it("keeps the text of a delegated document out of the brief", async () => {
     let subagentPrompt = "";
     parentDelegates([delegate("d1")], async (params) => {

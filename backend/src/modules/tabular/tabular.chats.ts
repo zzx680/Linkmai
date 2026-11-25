@@ -44,6 +44,7 @@ import {
     persistLastSelectedReasoningLevel,
 } from "../user/user.service";
 import {
+    resolveDeploymentDefaultModel,
     resolveEffectiveChatModel,
     titleModelForChat,
 } from "../../lib/modelSelection";
@@ -849,6 +850,13 @@ export async function prepareTabularChat(
             titleModel: titleModelForChat(
                 selectedChatModel,
                 modelSettings.title_model,
+                await resolveDeploymentDefaultModel({
+                    kind: "title",
+                    userId: args.userId,
+                    db,
+                    apiKeys: modelSettings.api_keys,
+                    orgId: review.org_id ?? null,
+                }),
             ),
             apiKeys: modelSettings.api_keys,
             orgId: review.org_id ?? null,
