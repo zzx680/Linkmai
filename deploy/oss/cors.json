@@ -1,8 +1,7 @@
 [
   {
     "AllowedOrigin": [
-      "https://linkmai.com",
-      "https://word.linkmai.com"
+      "https://linkmai.com"
     ],
     "AllowedMethod": [
       "GET",

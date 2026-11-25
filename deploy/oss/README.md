@@ -47,9 +47,8 @@ curl -sI https://storage.linkmai.com/ | head
 ossutil cors --method put oss://linkmai-prod deploy/oss/cors.json
 ```
 
-规则内容见 `deploy/oss/cors.json`：允许 `https://linkmai.com` 和
-`https://word.linkmai.com`，方法 GET/PUT/POST/HEAD/DELETE，请求头 `*`，暴露
-`ETag` 与 `x-oss-request-id`，缓存 1 小时。
+规则内容见 `deploy/oss/cors.json`：允许 `https://linkmai.com`，方法
+GET/PUT/POST/HEAD/DELETE，请求头 `*`，暴露 `ETag` 与 `x-oss-request-id`，缓存 1 小时。
 
 验证预检：
 

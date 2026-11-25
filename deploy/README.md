@@ -6,26 +6,26 @@ LinkMai 官网/工作台。小程序先「暂停服务」，旧 API 和旧站点
 
 ```
                          ┌──────────────────────────────┐
-   浏览器 / Word ───────▶│ edge (nginx, 80/443)          │
+   浏览器 ──────────────▶│ edge (nginx, 80/443)          │
                          │  apex: /auth/v1 /api /         │
-                         │  word: /                       │
-                         └───────┬───────────┬───────────┘
-                                 │           │
-                       frontend:3000     word:3200
-                                 │           │
-                                 └─────┬─────┘
-                                       ▼
-                                backend:3001 ──▶ Redis
-                                  │      │
-                                  │      └──▶ OSS (storage.linkmai.com)
-                                  ▼
-                           gateway:8000
-                           ├─ /auth/v1 → auth:9999  ──▶ db:5432
-                           └─ /rest/v1 → rest:3000  ──▶ db:5432
+                         │  www: 301 → apex               │
+                         └──────────────┬───────────────┘
+                                        ▼
+                                 frontend:3000
+                                        │
+                                        ▼
+                                 backend:3001 ──▶ Redis
+                                   │      │
+                                   │      └──▶ OSS (storage.linkmai.com)
+                                   ▼
+                            gateway:8000
+                            ├─ /auth/v1 → auth:9999  ──▶ db:5432
+                            └─ /rest/v1 → rest:3000  ──▶ db:5432
 ```
 
-> 重要：这台服务器上原来跑着小程序 API 和旧官网。切换前必须先备份，再停旧服务。
-> 旧数据不要删；小程序以后要恢复时还要用。
+> 重要：这台服务器上原来跑着小程序 API 和旧官网。旧服务已停止，旧数据库/源码已备份到
+> 本机（见仓库外的 `Linkmai-backups`），服务器只保留新栈；需要回滚时从备份恢复。
+> 不做 Word 插件，本配置不启动 `word` 容器，也不使用 `word.linkmai.com`。
 
 ## 0. 先确认三件事
 
@@ -139,7 +139,6 @@ sudo ss -lntp | grep -E ':(80|443)\b' || echo "80/443 free"
 | `api` | A | 现有 ECS EIP | 小程序暂停后删除，或先保留但服务已停 |
 | `staging-api` | A | 现有 ECS EIP | 同上 |
 | `_dnsauth` | TXT | 阿里云证书验证值 | 保留 |
-| `word` | A | 现有 ECS EIP | 做 Word 才需要 |
 | `storage` | CNAME | `<bucket>.oss-cn-<region>.aliyuncs.com` | OSS 自定义域 |
 
 `api` / `staging-api` 不要立刻删：先暂停小程序、观察一段时间，确认没有回滚需求再删。
@@ -153,7 +152,6 @@ sudo ss -lntp | grep -E ':(80|443)\b' || echo "80/443 free"
 ```
 linkmai.com.pem / linkmai.com.key
 www.linkmai.com.pem / www.linkmai.com.key
-word.linkmai.com.pem / word.linkmai.com.key
 ```
 
 旧证书常见位置：
@@ -288,7 +286,7 @@ DEEPSEEK_API_KEY=sk-...
 2. `auth` 连接本机 `db`，创建 `auth.users` 等表；
 3. `db-init` 等 `auth.users` 出现，以 `postgres` 执行 `schema.sql` 和迁移；
 4. `backend` 在 `db-init` 成功后启动；
-5. `frontend`、`word` 等 backend 健康后启动；
+5. `frontend` 在 backend 健康后启动；
 6. `edge` 最后启动，占用 80/443。
 
 观察：
@@ -308,7 +306,6 @@ DEEPSEEK_API_KEY=sk-...
 ```bash
 curl -fsS https://linkmai.com/healthz
 curl -fsS https://linkmai.com/api/health
-curl -fsS https://word.linkmai.com/healthz   # 不做 Word 可跳过
 ```
 
 浏览器打开 `https://linkmai.com`，注册账号，按邮件确认。第一个用户创建组织后即为 owner；
@@ -322,29 +319,38 @@ curl -fsS https://word.linkmai.com/healthz   # 不做 Word 可跳过
 
 ## 9. 回滚
 
-切换后如果 80/443 起不来或登录异常：
+新栈出问题时，按“代码 → 数据 → 旧小程序”分层处理：
 
 ```bash
+# 1) 先停新栈，释放 80/443
 ./deploy/scripts/compose.sh down
-sudo systemctl start nginx        # 如果旧站点是宿主机 Nginx
-pm2 start <旧API进程名>            # 如果旧 API 是 PM2
+
+# 2) 代码回滚：在本地 checkout 上一个可用 commit，push 触发 GitHub Actions
+git checkout <上一个可用 commit>
+git push linkmai HEAD:feat/linkmai-rebrand
+
+# 3) 数据回滚：从本机备份恢复 dump（先停 backend）
+./deploy/scripts/compose.sh stop backend
+docker exec -i linkmai-db-1 pg_restore -U postgres -d postgres --clean --if-exists < linkmai_production.dump
+./deploy/scripts/compose.sh up -d
 ```
 
-旧 Nginx 配置、PM2 dump、数据库备份都还在，先恢复旧服务，再排查新栈。不要删除旧数据库
-和旧 OSS Bucket，直到确认不再回滚。
+本机备份在仓库外的 `Linkmai-backups/20261125/`；服务器上不再保留旧备份。旧小程序服务
+已经删除，不能原地 `pm2 start`；如果确实要恢复旧小程序，需要从 `source.tgz` 单独解包、
+另找端口/域名部署，不能和当前 LinkMai 栈抢 80/443。
 
-## 10. Word 加载项（可选）
+## 10. 文档协作：WPS
 
-Word 站点是 `https://word.linkmai.com`，与 backend 的 `/api` 同源，Cookie 在 Office 里是
-一方 Cookie。部署步骤：
+本次**不部署 Word 加载项**：`word` 容器、`word.linkmai.com`、word 证书和 auth handoff
+都已从生产配置移除，证书只需要 `linkmai.com` + `www.linkmai.com` 两张。
 
-1. 确认 `https://word.linkmai.com/manifest.xml` 可访问。
-2. Microsoft 365 管理中心 → 设置 → 集成应用 → 上传自定义应用 → Office 加载项。
-3. 分配用户/组，在 Word「开始 → 加载项」打开「灵迈 LinkMai」。
-4. 首次打开跳转 `linkmai.com` 登录，再通过 auth handoff 回到任务窗格。
+WPS 侧目前没有现成集成：
 
-`manifest.xml` 的 Id 已是正式 GUID `0698078a-064c-477d-9add-679533795315`。不做 Word 可以
-不发布 `word` 容器、不加 `word` DNS，也不申请 word 证书。
+- 仓库里的 `word-addin/` 基于 Microsoft Office.js，不能直接安装到 WPS。
+- 现在可用的方式是“WPS 编辑 + 浏览器使用 LinkMai”：用户在 WPS 里打开/编辑文档，在
+  `https://linkmai.com` 上传、审阅、对话，再下载回 WPS。
+- 如果要做 WPS 侧边栏面板、直接读写当前文档，需要单独开发 WPS 加载项（WPS JS API +
+  manifest + 文档适配层），可复用 LinkMai 的聊天 UI 和后端，但不属于本次部署范围。
 
 ## 11. 日常运维
 
@@ -383,11 +389,10 @@ git pull
 | backend 启动即退出，提示 secret 缺失 | 三个应用 secret 未生成或仍是占位符 |
 | `PublicEndpointForbidden` | `OSS_PUBLIC_ENDPOINT` 用了 `*.aliyuncs.com`，改成 `https://storage.linkmai.com` |
 | 上传 403 `SignatureDoesNotMatch` | 预签名 `Content-Type` 与浏览器实际发送不一致 |
-| 上传 CORS 失败 | OSS CORS 的 AllowedOrigin 必须是精确的 apex/word 源，不能是 `*` |
+| 上传 CORS 失败 | OSS CORS 的 AllowedOrigin 必须是精确的 apex 源，不能是 `*` |
 | 登录邮件收不到 | SMTP、发信地址验证、SPF/DKIM；看 `auth` 日志 |
-| Word 打开空白 | `word.linkmai.com` 证书、manifest 的 `SourceLocation`、Office 缓存 |
 | SSE 不流式 | `edge` 的 `/api/` 必须 `proxy_buffering off` |
-| 502 | `edge` 到 upstream 不通；`compose ps` 看 frontend/word/backend 是否 healthy |
+| 502 | `edge` 到 upstream 不通；`compose ps` 看 frontend/backend 是否 healthy |
 
 ## 13. 安全清单
 
