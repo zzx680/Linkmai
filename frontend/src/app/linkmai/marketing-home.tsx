@@ -54,7 +54,7 @@ const principles = [
     {
         title: "可改，可扩展",
         body: "接入自己的文书库、检索源和引用引擎。代码在你手里，工作流可以按团队长出来。",
-        image: "/mike/paintings/bridge-villeneuve.webp",
+        image: "/mike/paintings/sisley-bridge-villeneuve.webp",
         alt: "莫奈《阿让特伊大桥》",
     },
     {
@@ -215,7 +215,7 @@ export function MarketingHome() {
             <main>
                 <section className={styles.hero} id="top">
                     <div className={styles.heroMedia}>
-                        <Image src="/mike/hero-bg.webp" alt="莫奈《撑阳伞的女人》" fill priority sizes="100vw" />
+                        <Image src="/mike/hero-bridge.webp" alt="莫奈《阿让特伊的铁路桥》" fill priority sizes="100vw" />
                     </div>
                     <div className={styles.heroVeil} aria-hidden="true" />
                     <div className={styles.heroInner}>

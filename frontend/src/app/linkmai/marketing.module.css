@@ -87,6 +87,7 @@
 }
 
 .eyebrow { margin-bottom: 22px !important; color: rgba(17, 24, 39, .62) !important; font-size: 9px !important; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
+.hero .eyebrow { color: rgba(255, 255, 255, .86) !important; text-shadow: 0 1px 10px rgba(15, 23, 42, .55); }
 .hero h1 {
     max-width: 1000px;
     color: #111827;
@@ -268,4 +269,8 @@
     .footerInner { min-height: 480px; padding: 34px 24px; gap: 30px; }
     .footerLinks { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 18px; }
     .footerBrand { max-width: none; }
+}
+
+@media (max-width: 560px) {
+    .heroMedia img { object-position: 72% 50%; }
 }
