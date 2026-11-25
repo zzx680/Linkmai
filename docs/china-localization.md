@@ -28,6 +28,7 @@
 
 - Web 与账号：`https://linkmai.com`
 - Word 加载项：`https://word.linkmai.com`
+- WPS 加载项：`https://linkmai.com/wps/`（任务窗格打开 LinkMai；暂不读写当前文档）
 - 对象存储：`https://storage.linkmai.com`（OSS 自定义域）
 - 支持邮箱：`support@linkmai.com`（需先在邮件服务中创建该地址）
 - 用户协议 / 隐私政策：尚未定稿。`LINKMAI_TERMS_URL` 与

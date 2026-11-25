@@ -322,29 +322,68 @@ curl -fsS https://word.linkmai.com/healthz   # 不做 Word 可跳过
 
 ## 9. 回滚
 
-切换后如果 80/443 起不来或登录异常：
+新栈出问题时，按“代码 → 数据 → 旧小程序”分层处理：
 
 ```bash
+# 1) 先停新栈，释放 80/443
 ./deploy/scripts/compose.sh down
-sudo systemctl start nginx        # 如果旧站点是宿主机 Nginx
-pm2 start <旧API进程名>            # 如果旧 API 是 PM2
+
+# 2) 代码回滚：在本地 checkout 上一个可用 commit，push 触发 GitHub Actions
+git checkout <上一个可用 commit>
+git push linkmai HEAD:feat/linkmai-rebrand
+
+# 3) 数据回滚：从本机备份恢复 dump（先停 backend）
+./deploy/scripts/compose.sh stop backend
+docker exec -i linkmai-db-1 pg_restore -U postgres -d postgres --clean --if-exists < linkmai_production.dump
+./deploy/scripts/compose.sh up -d
 ```
 
-旧 Nginx 配置、PM2 dump、数据库备份都还在，先恢复旧服务，再排查新栈。不要删除旧数据库
-和旧 OSS Bucket，直到确认不再回滚。
+本机备份在仓库外的 `Linkmai-backups/20261125/`。旧小程序服务已经删除，不能原地
+`pm2 start`；如果确实要恢复旧小程序，需要从 `source.tgz` 单独解包、另找端口/域名部署，
+不能和当前 LinkMai 栈抢 80/443。
 
-## 10. Word 加载项（可选）
+## 10. Word 与 WPS 加载项
 
-Word 站点是 `https://word.linkmai.com`，与 backend 的 `/api` 同源，Cookie 在 Office 里是
-一方 Cookie。部署步骤：
+Word 和 WPS 是两套不同的加载项 API，不能共用同一个 manifest：
 
-1. 确认 `https://word.linkmai.com/manifest.xml` 可访问。
-2. Microsoft 365 管理中心 → 设置 → 集成应用 → 上传自定义应用 → Office 加载项。
-3. 分配用户/组，在 Word「开始 → 加载项」打开「灵迈 LinkMai」。
-4. 首次打开跳转 `linkmai.com` 登录，再通过 auth handoff 回到任务窗格。
+- **Word**：`word-addin/` 是 Office.js 任务窗格，部署在 `https://word.linkmai.com`。
+- **WPS**：`frontend/public/wps/` 是 WPS JS 加载项，发布在
+  `https://linkmai.com/wps/`。
 
-`manifest.xml` 的 Id 已是正式 GUID `0698078a-064c-477d-9add-679533795315`。不做 Word 可以
-不发布 `word` 容器、不加 `word` DNS，也不申请 word 证书。
+### Word
+
+1. 给 `word.linkmai.com` 加 A 记录，指向这台 ECS 的公网 IP。
+2. 申请 `word.linkmai.com` 的 HTTPS 证书，放到 `deploy/certs/`。
+3. 在 `.env.prod` 设置 `WORD_ADDIN_URL=https://word.linkmai.com` 和
+   `AUTH_HANDOFF_ENCRYPTION_SECRET`（32+ 字节随机值），然后执行
+   `./deploy/scripts/compose.sh up -d word edge`。
+4. 确认 `https://word.linkmai.com/manifest.xml` 可访问。
+5. Microsoft 365 管理中心 → 设置 → 集成应用 → 上传自定义应用 → Office 加载项。
+6. 分配用户/组，在 Word「开始 → 加载项」打开「灵迈 LinkMai」。
+
+`word-addin/manifest.xml` 的 Id 是正式 GUID
+`0698078a-064c-477d-9add-679533795315`。
+
+### WPS
+
+WPS 加载项文件已放在 `frontend/public/wps/`，`https://linkmai.com/wps/manifest.xml`
+随 Web 一起发布。当前版本提供「灵迈 LinkMai」选项卡，点击「打开 LinkMai」会在
+WPS 任务窗格打开 `https://linkmai.com/assistant`；登录、对话、上传在页面内完成。
+
+当前版本**不读取/写入 WPS 当前文档**。如果要在 WPS 侧边栏读取选区、把审阅结果
+插回文档，需要继续接 WPS JS API（`window.Application.ActiveDocument` 等），这是
+独立于 Word 插件的开发工作。
+
+本地调试和发布：
+
+```bash
+npm install -g wpsjs
+cd frontend/public/wps
+wpsjs debug          # 启动 WPS 调试
+wpsjs publish        # 发布时服务器地址填 https://linkmai.com/wps/
+```
+
+WPS 加载项使用 WPS JS API，不是 Office.js；不要把 `word-addin/` 直接装进 WPS。
 
 ## 11. 日常运维
 

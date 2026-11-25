@@ -1,0 +1,11 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="OnAddinLoad">
+  <ribbon startFromScratch="false">
+    <tabs>
+      <tab id="linkmaiTab" label="灵迈 LinkMai">
+        <group id="linkmaiGroup" label="工作台">
+          <button id="btnOpenLinkMai" label="打开 LinkMai" onAction="OnAction" size="large"/>
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

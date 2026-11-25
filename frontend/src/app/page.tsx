@@ -1,22 +1,12 @@
 import type { Metadata } from "next";
-import { SiteFooter, SiteHeader } from "./linkmai/site-shell";
-import { HomePage } from "./linkmai/site-pages";
-import styles from "./linkmai/site.module.css";
+import { MarketingHome } from "./linkmai/marketing-home";
 
 export const metadata: Metadata = {
-    title: "灵迈 LinkMai｜官网",
+    title: "灵迈 LinkMai｜真正属于你的法律 AI",
     description:
-        "灵迈 LinkMai 官方网站。面向法律专业人士的 AI 工作台，支持文档分析、合同审阅与法律文书起草。",
+        "灵迈 LinkMai 是开源法律 AI 工作台，把材料阅读、合同审阅、法律检索与文书起草放进同一份案卷；支持自托管与自选模型。",
 };
 
 export default function RootPage() {
-    return (
-        <div className={styles.site}>
-            <SiteHeader />
-            <div className={styles.siteContent}>
-                <HomePage />
-            </div>
-            <SiteFooter />
-        </div>
-    );
+    return <MarketingHome />;
 }
