@@ -63,6 +63,7 @@ const replacements = {
   __REDIS_PASSWORD__: password(),
   __DOWNLOAD_SECRET__: hex(32),
   __USER_KEYS_SECRET__: hex(32),
+  __AUTH_HANDOFF_SECRET__: hex(32),
 };
 
 let env = readFileSync(templatePath, "utf8");

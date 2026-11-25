@@ -3,7 +3,7 @@
 ## 产品定位与范围
 
 面向中国大陆的律师、律所与企业法务，保留文档工作台、项目、资料库、
-批量审阅、工作流、审查规则和 Word 插件源码。产品对外名称为「灵迈 LinkMai」。
+批量审阅、工作流、审查规则和 Word 插件。产品对外名称为「灵迈 LinkMai」。
 
 本轮变更覆盖 Web 与 Word 的共享中文文案、主要操作与错误提示、中文字体、
 日期显示、职业资料的中文标签及输入法兼容。底层接口路径、模型 ID、
@@ -27,8 +27,7 @@
 生产地址已确定为：
 
 - Web 与账号：`https://linkmai.com`
-- Word 加载项（当前不部署）：`https://word.linkmai.com`
-- WPS：暂无加载项集成；现阶段在 WPS 中编辑、在 Web 中使用 LinkMai
+- Word 加载项：`https://word.linkmai.com`
 - 对象存储：`https://storage.linkmai.com`（OSS 自定义域）
 - 支持邮箱：`support@linkmai.com`（需先在邮件服务中创建该地址）
 - 用户协议 / 隐私政策：尚未定稿。`LINKMAI_TERMS_URL` 与
@@ -51,7 +50,7 @@ Compose 构建从根环境文件读取对应的 `LINKMAI_SITE_URL`、
 
 完整生产配置见 [`deploy/README.md`](../deploy/README.md)。
 
-Word 构建配置（当前不部署，仅保留源码）：
+Word 构建配置：
 
 ```dotenv
 REACT_APP_WEB_APP_URL=https://linkmai.com
@@ -60,7 +59,6 @@ REACT_APP_LINKMAI_SUPPORT_EMAIL=support@linkmai.com
 ```
 
 `WORD_ADDIN_PUBLIC_URL` 必须是部署后的 HTTPS origin；仍在使用示例域名时不能对外分发。
-当前生产环境不启动 Word 容器、不添加 word 证书；如以后恢复，再按上述配置构建。
 未配置支持邮箱时，插件允许复制诊断信息并明确提示联系管理员。
 Google 登录仅在后端 `/auth/options` 返回已启用时显示。
 

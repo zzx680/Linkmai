@@ -9,7 +9,7 @@
 #   - no local storage / mailpit / createbucket (OSS and SMTP are managed)
 #   - the schema bootstrap still runs from the backend image (db-init)
 #   - auth, PostgREST and the Supabase gateway stay on the private network
-#   - the edge nginx terminates TLS for the app and proxies /api
+#   - the edge nginx terminates TLS for app and word, and proxies /api
 #   - storage is Alibaba Cloud OSS through the native adapter
 #
 # WordPress-style "single host" is intentionally not supported here: OSS's
@@ -39,6 +39,7 @@ x-backend-env: &backend-env
   # Public origins. Production validation rejects http here.
   FRONTEND_URL: "${FRONTEND_URL:?FRONTEND_URL is required (https://linkmai.com)}"
   API_PUBLIC_URL: "${API_PUBLIC_URL:?API_PUBLIC_URL is required (https://linkmai.com/api)}"
+  WORD_ADDIN_URL: "${WORD_ADDIN_URL:?WORD_ADDIN_URL is required (https://word.linkmai.com)}"
   ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-}"
 
   # Supabase Auth + PostgREST through the internal gateway.
@@ -66,6 +67,8 @@ x-backend-env: &backend-env
   # Secrets that production refuses to start without.
   DOWNLOAD_SIGNING_SECRET: "${DOWNLOAD_SIGNING_SECRET:?run deploy/scripts/generate-secrets.mjs}"
   USER_API_KEYS_ENCRYPTION_SECRET: "${USER_API_KEYS_ENCRYPTION_SECRET:?run deploy/scripts/generate-secrets.mjs}"
+  AUTH_HANDOFF_ENCRYPTION_SECRET: "${AUTH_HANDOFF_ENCRYPTION_SECRET:?run deploy/scripts/generate-secrets.mjs}"
+  AUTH_HANDOFF_TTL_SECONDS: "120"
 
   # Default model: DeepSeek through its OpenAI-compatible endpoint.
   DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:?}"
@@ -109,7 +112,7 @@ services:
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: "postgres://supabase_auth_admin:${SUPABASE_AUTH_ADMIN_PASSWORD:?}@db:5432/postgres?sslmode=disable"
       GOTRUE_SITE_URL: "${FRONTEND_URL:?}"
-      GOTRUE_URI_ALLOW_LIST: "${FRONTEND_URL:?}/**"
+      GOTRUE_URI_ALLOW_LIST: "${FRONTEND_URL:?}/**,${WORD_ADDIN_URL:?}/oauth-dialog.html"
       GOTRUE_JWT_SECRET: "${GOTRUE_JWT_SECRET:?run deploy/scripts/generate-secrets.mjs}"
       GOTRUE_JWT_EXP: "3600"
       GOTRUE_JWT_AUD: authenticated
@@ -294,6 +297,36 @@ services:
     restart: unless-stopped
     logging: *default-logging
 
+  word:
+    build:
+      context: ..
+      dockerfile: word-addin/Dockerfile
+      args:
+        REACT_APP_WEB_APP_URL: "${FRONTEND_URL:?}"
+        WORD_ADDIN_PUBLIC_URL: "${WORD_ADDIN_URL:?}"
+        REACT_APP_LINKMAI_SUPPORT_EMAIL: "${LINKMAI_SUPPORT_EMAIL:?}"
+    image: "${LINKMAI_IMAGE_REPO:-linkmai}/linkmai-word-addin:${LINKMAI_IMAGE_TAG:-prod}"
+    environment:
+      PORT: "3200"
+      WORD_ADDIN_BACKEND_ORIGIN: http://backend:3001
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3200/taskpane.html').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+
   # TLS terminator and single public entry point (80/443 only).
   edge:
     image: nginx:1.27-alpine
@@ -305,6 +338,8 @@ services:
       - ./certs:/etc/nginx/certs:ro
     depends_on:
       frontend:
+        condition: service_started
+      word:
         condition: service_started
       gateway:
         condition: service_started
