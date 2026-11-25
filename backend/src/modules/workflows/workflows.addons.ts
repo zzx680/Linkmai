@@ -1,6 +1,6 @@
 import { createDocumentVersion } from "../documents/documents.service";
 // Business logic + data access for the workflow ADD-ON CATALOG — the
-// read-only `mike_workflows` rows (distribution = "addon") a user can browse
+// read-only `linkmai_workflows` rows (distribution = "addon") a user can browse
 // and import into their own `workflows` table.
 //
 // This is a topic file of the workflows module: it takes an explicit `Db`,
@@ -46,7 +46,7 @@ const ASSET_LOOKUP_BATCH_SIZE = 50;
 
 type AddonAssetRow = {
   id: string;
-  mike_workflow_id: string;
+  linkmai_workflow_id: string;
   filename: string;
   file_type: string | null;
   size_bytes: number | null;
@@ -65,7 +65,7 @@ export async function listWorkflowAddons(
   params: { type: string | null },
 ): Promise<ServiceResult<WorkflowAddonSummary[]>> {
   let query = db
-    .from("mike_workflows")
+    .from("linkmai_workflows")
     .select(ADDON_LIST_COLUMNS)
     .eq("distribution", "addon")
     .eq("active", true);
@@ -82,25 +82,25 @@ export async function listWorkflowAddons(
   const assets: AddonAssetRow[] = [];
   for (const batch of chunkArray(assistantIds, ASSET_LOOKUP_BATCH_SIZE)) {
     const { data, error: assetsError } = await db
-      .from("mike_workflow_assets")
-      .select("id, mike_workflow_id, filename, file_type, size_bytes, created_at")
-      .in("mike_workflow_id", batch)
+      .from("linkmai_workflow_assets")
+      .select("id, linkmai_workflow_id, filename, file_type, size_bytes, created_at")
+      .in("linkmai_workflow_id", batch)
       .order("created_at", { ascending: true });
     if (assetsError) return internalFailure(assetsError);
     assets.push(...((data ?? []) as AddonAssetRow[]));
   }
   const assetsByAddon = new Map<string, AddonAssetRow[]>();
   for (const asset of assets) {
-    const current = assetsByAddon.get(asset.mike_workflow_id) ?? [];
+    const current = assetsByAddon.get(asset.linkmai_workflow_id) ?? [];
     current.push(asset);
-    assetsByAddon.set(asset.mike_workflow_id, current);
+    assetsByAddon.set(asset.linkmai_workflow_id, current);
   }
   return ok(
     addons.map(({ workflow_key, ...addon }) => ({
       ...addon,
       addon_key: workflow_key,
       assets: (assetsByAddon.get(addon.id as string) ?? []).map(
-        ({ mike_workflow_id: _workflowId, ...asset }) => asset,
+        ({ linkmai_workflow_id: _workflowId, ...asset }) => asset,
       ),
     })),
   );
@@ -115,7 +115,7 @@ export async function loadWorkflowAddonAssetDisplay(
   params: { addonId: string; assetId: string },
 ): Promise<ServiceResult<DocumentDisplayPayload>> {
   const { data: addon, error: addonError } = await db
-    .from("mike_workflows")
+    .from("linkmai_workflows")
     .select("id, type")
     .eq("id", params.addonId)
     .eq("distribution", "addon")
@@ -127,10 +127,10 @@ export async function loadWorkflowAddonAssetDisplay(
   }
 
   const { data: asset, error: assetError } = await db
-    .from("mike_workflow_assets")
+    .from("linkmai_workflow_assets")
     .select("id, filename, file_type, storage_path")
     .eq("id", params.assetId)
-    .eq("mike_workflow_id", addon.id)
+    .eq("linkmai_workflow_id", addon.id)
     .maybeSingle();
   if (assetError) return internalFailure(assetError);
   if (!asset) {
@@ -158,7 +158,7 @@ export async function getWorkflowAddon(
   params: { addonId: string },
 ): Promise<ServiceResult<Record<string, unknown>>> {
   const { data, error } = await db
-    .from("mike_workflows")
+    .from("linkmai_workflows")
     .select("*")
     .eq("id", params.addonId)
     .eq("distribution", "addon")
@@ -170,9 +170,9 @@ export async function getWorkflowAddon(
   let assets = null;
   if (data.type === "assistant") {
     const { data: assistantAssets, error: assetsError } = await db
-      .from("mike_workflow_assets")
+      .from("linkmai_workflow_assets")
       .select("id, filename, file_type, size_bytes, created_at")
-      .eq("mike_workflow_id", data.id)
+      .eq("linkmai_workflow_id", data.id)
       .order("created_at", { ascending: true });
     if (assetsError) {
       return internalFailure(assetsError);
@@ -224,7 +224,7 @@ export async function importWorkflowAddon(
 ): Promise<ImportWorkflowAddonResult> {
   const { userId } = params;
   const { data: addon, error: addonError } = await db
-    .from("mike_workflows")
+    .from("linkmai_workflows")
     .select("*")
     .eq("id", params.addonId)
     .eq("distribution", "addon")
@@ -262,9 +262,9 @@ export async function importWorkflowAddon(
     const { data: assets, error: assetsError } =
       addon.type === "assistant"
         ? await db
-            .from("mike_workflow_assets")
+            .from("linkmai_workflow_assets")
             .select("filename, file_type, storage_path, size_bytes")
-            .eq("mike_workflow_id", addon.id)
+            .eq("linkmai_workflow_id", addon.id)
             .order("created_at", { ascending: true })
         : { data: [], error: null };
     if (assetsError) throw assetsError;

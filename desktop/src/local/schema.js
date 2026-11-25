@@ -83,7 +83,15 @@ function listMigrations(backendDir) {
 // tables.
 async function applySchema(withPg, backendDir, status = () => {}) {
   await pgExec(withPg, `
-    create table if not exists public.mike_schema_migrations (
+    -- Workspaces created before the LinkMai rename keep their ledger under the
+    -- upstream name; adopt it before creating the current table.
+    do $$ begin
+      if to_regclass('public.mike_schema_migrations') is not null
+         and to_regclass('public.linkmai_schema_migrations') is null then
+        alter table public.mike_schema_migrations rename to linkmai_schema_migrations;
+      end if;
+    end $$;
+    create table if not exists public.linkmai_schema_migrations (
       name text primary key,
       applied_at timestamptz not null default now()
     );
@@ -91,7 +99,7 @@ async function applySchema(withPg, backendDir, status = () => {}) {
   const migrations = listMigrations(backendDir);
   const applied = new Set(
     await withPg(async (c) =>
-      (await c.query("select name from public.mike_schema_migrations")).rows.map((r) => r.name),
+      (await c.query("select name from public.linkmai_schema_migrations")).rows.map((r) => r.name),
     ),
   );
 
@@ -101,7 +109,7 @@ async function applySchema(withPg, backendDir, status = () => {}) {
     status("Setting up the product schema…");
     const values = migrations.map((m) => `('${m.replace(/'/g, "''")}')`).join(",");
     const baseline = values
-      ? `insert into public.mike_schema_migrations (name) values ${values} on conflict do nothing;`
+      ? `insert into public.linkmai_schema_migrations (name) values ${values} on conflict do nothing;`
       : "";
     await pgExecFile(withPg,
       `${fs.readFileSync(path.join(backendDir, "schema.sql"), "utf8")}\n${baseline}`,
@@ -112,7 +120,7 @@ async function applySchema(withPg, backendDir, status = () => {}) {
       status(`Applying update ${m}…`);
       // Record a transactional file in its own transaction; for files that
       // require autocommit, runSqlFile keeps this insert after every statement.
-      const ledger = `insert into public.mike_schema_migrations (name) values ('${m.replace(/'/g, "''")}') on conflict do nothing;`;
+      const ledger = `insert into public.linkmai_schema_migrations (name) values ('${m.replace(/'/g, "''")}') on conflict do nothing;`;
       await pgExecFile(withPg,
         `${fs.readFileSync(path.join(backendDir, "migrations", m), "utf8")}\n${ledger}`, m);
     }
@@ -123,13 +131,13 @@ async function applySchema(withPg, backendDir, status = () => {}) {
     grant all privileges on all tables in schema public to service_role;
     grant all privileges on all sequences in schema public to service_role;
     -- Migration bookkeeping belongs to the database owner, not the API.
-    alter table public.mike_schema_migrations enable row level security;
-    revoke all on public.mike_schema_migrations from anon, authenticated, service_role;
+    alter table public.linkmai_schema_migrations enable row level security;
+    revoke all on public.linkmai_schema_migrations from anon, authenticated, service_role;
     do $$ begin
       if to_regclass('public.schema_migrations') is not null then
         -- Adopt only migrations the desktop runner has actually recorded.
         insert into public.schema_migrations (filename)
-          select name from public.mike_schema_migrations on conflict do nothing;
+          select name from public.linkmai_schema_migrations on conflict do nothing;
         revoke all on public.schema_migrations from anon, authenticated, service_role;
       end if;
     end $$;

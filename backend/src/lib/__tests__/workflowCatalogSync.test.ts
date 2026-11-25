@@ -124,7 +124,7 @@ describe("workflow catalog synchronization", () => {
       });
       expect(storage.uploadFile).toHaveBeenCalledOnce();
       const [name, args] = rpc.mock.calls[0];
-      expect(name).toBe("replace_mike_workflows");
+      expect(name).toBe("replace_linkmai_workflows");
       expect(args.p_source_commit).toBe(COMMIT);
       expect(args.p_workflows).toEqual(
         expect.arrayContaining([

@@ -80,7 +80,7 @@ default_project() {
 
 # Is this compose file ours? It is identified by the marker on its first lines
 # rather than by path, so worktrees and renamed checkouts are all recognised.
-is_mike_compose_file() { [ -f "$1" ] && head -5 "$1" | grep -q 'LinkMaiOSS'; }
+is_linkmai_compose_file() { [ -f "$1" ] && head -5 "$1" | grep -q 'LinkMaiOSS'; }
 
 # Inventories print "-" for empty fields (a bare tab would be collapsed by
 # `read`); blank() maps it back to the empty string.
@@ -117,7 +117,7 @@ classify_project() {
     # config_files may list several paths separated by commas; use the first.
     local first=${config%%,*}
     if [ -e "$first" ]; then
-        if is_mike_compose_file "$first"; then echo linkmai; else echo other; fi
+        if is_linkmai_compose_file "$first"; then echo linkmai; else echo other; fi
     else
         case "$project" in linkmai*) echo orphan;; *) echo other;; esac
     fi

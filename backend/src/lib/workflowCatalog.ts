@@ -119,7 +119,7 @@ export async function findCatalogWorkflow(
   const workflowKey = catalogKeyFromWorkflowId(workflowId);
   if (!workflowKey) return null;
   const { data, error } = await db
-    .from("mike_workflows")
+    .from("linkmai_workflows")
     .select("*")
     .eq("workflow_key", workflowKey)
     .order("active", { ascending: false })
@@ -137,7 +137,7 @@ export async function listActiveCatalogWorkflows(
     distribution?: "default" | "addon" | null;
   } = {},
 ): Promise<WorkflowCatalogRow[]> {
-  let query = db.from("mike_workflows").select("*").eq("active", true);
+  let query = db.from("linkmai_workflows").select("*").eq("active", true);
   if (filters.type) query = query.eq("type", filters.type);
   if (filters.distribution) {
     query = query.eq("distribution", filters.distribution);
@@ -160,7 +160,7 @@ const pendingPromptsByDb = new WeakMap<Db, Map<string, Promise<AssistantCatalogP
  * membership each turn, then load only bodies not present in the previous catalog. */
 export async function activeAssistantPrompts(db: Db): Promise<AssistantCatalogPrompt[]> {
   const active = await selectAllByKey<{ id: string }>("active assistant workflows", () =>
-    db.from("mike_workflows").select("id").eq("active", true).eq("type", "assistant"),
+    db.from("linkmai_workflows").select("id").eq("active", true).eq("type", "assistant"),
   );
   const promptCache = promptsByDb.get(db) ?? new Map<string, AssistantCatalogPrompt>();
   promptsByDb.set(db, promptCache);
@@ -171,7 +171,7 @@ export async function activeAssistantPrompts(db: Db): Promise<AssistantCatalogPr
     const loading = selectInBatches<AssistantCatalogPrompt>(
       "assistant workflow prompts",
       missing.map(row => row.id),
-      batch => db.from("mike_workflows").select("id,workflow_key,title,prompt_md").in("id", batch),
+      batch => db.from("linkmai_workflows").select("id,workflow_key,title,prompt_md").in("id", batch),
     );
     for (const { id } of missing) {
       pending.set(id, loading.then(rows => rows.find(row => row.id === id))

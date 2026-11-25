@@ -90,7 +90,7 @@ describe("docker/storage-cors.mjs", () => {
   it.each([
     ["a value that would corrupt the policy", 'https://a",b'],
     ["a URL without a scheme", "mike.example"],
-    ["an underscore host no browser sends as an Origin", "http://mike_app:3000"],
+    ["an underscore host no browser sends as an Origin", "http://linkmai_app:3000"],
   ])("never puts %s in the policy, and still exits 0", (_, frontendUrl) => {
     const { status, stdout, stderr } = corsPolicy({ FRONTEND_URL: frontendUrl, NODE_ENV: "production" });
     expect(status).toBe(0);

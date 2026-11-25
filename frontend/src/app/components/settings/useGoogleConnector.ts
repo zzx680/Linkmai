@@ -160,7 +160,7 @@ export function useGoogleConnector(
     // Open synchronously so the browser treats it as user-initiated.
     const popup = window.open(
       "about:blank",
-      `mike_${provider}_oauth`,
+      `linkmai_${provider}_oauth`,
       "popup,width=560,height=720,menubar=no,toolbar=no,location=no,status=no",
     );
     let pending: string | null = null;

@@ -213,14 +213,14 @@ test("an installation from the schema baseline upgrades through the app's runner
       assert.ok(statuses.includes(`Applying update ${m}…`), `runner must replay ${m}`);
     }
     const ledger = await withPg(async (c) =>
-      (await c.query("select name from public.mike_schema_migrations order by name")).rows.map((r) => r.name));
+      (await c.query("select name from public.linkmai_schema_migrations order by name")).rows.map((r) => r.name));
     assert.deepEqual(ledger, current, "ledger must list every shipped migration after the upgrade");
     const sharedLedger = await withPg(async (c) =>
       (await c.query("select filename from public.schema_migrations order by filename")).rows.map((r) => r.filename));
     assert.deepEqual(sharedLedger, current, "desktop upgrades must also populate the shared migration ledger");
     const privileges = await withPg(async (c) => (await c.query(`select
       has_table_privilege('service_role', 'public.schema_migrations', 'SELECT') as shared,
-      has_table_privilege('service_role', 'public.mike_schema_migrations', 'SELECT') as desktop`)).rows[0]);
+      has_table_privilege('service_role', 'public.linkmai_schema_migrations', 'SELECT') as desktop`)).rows[0]);
     assert.deepEqual(privileges, { shared: false, desktop: false });
     const upgraded = await fingerprint(withPg);
 

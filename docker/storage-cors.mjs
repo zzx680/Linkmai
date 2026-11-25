@@ -27,7 +27,7 @@
 // This script must never stop the stack: compose starts createbucket, and
 // then the backend, only after it exits 0. So every problem it can meet (an
 // image built before origins.ts existed, a FRONTEND_URL without a scheme, a
-// host WHATWG URL accepts but no browser sends, such as `mike_app`) is one
+// host WHATWG URL accepts but no browser sends, such as `linkmai_app`) is one
 // clear "storage-cors:" line on stderr and a fallback that still allows the
 // loopback development origins. Uploads from the misconfigured origin are
 // then refused by CORS, as before this script existed, and the backend's

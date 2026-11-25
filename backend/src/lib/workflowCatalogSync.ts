@@ -81,7 +81,7 @@ export async function syncWorkflowCatalog(
       );
     }
 
-    const { error } = await db.rpc("replace_mike_workflows", {
+    const { error } = await db.rpc("replace_linkmai_workflows", {
       p_source_commit: document.source_commit,
       p_workflows: databaseWorkflows,
     });

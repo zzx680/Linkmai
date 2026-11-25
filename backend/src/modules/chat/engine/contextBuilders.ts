@@ -1760,7 +1760,7 @@ export async function buildWorkflowStore(
 
   // Keep catalog IDs readable for historical chat attachments, but do not
   // expose them through list_workflows. Only active versions are loaded per
-  // turn: replace_mike_workflows retires versions (active = false) without
+  // turn: replace_linkmai_workflows retires versions (active = false) without
   // deleting them, so the full history — every prompt_md ever shipped —
   // grows with each catalog sync. read_workflow resolves a retired id on
   // demand (findCatalogWorkflow), the rare case that needs one.

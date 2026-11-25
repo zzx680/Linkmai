@@ -301,7 +301,7 @@ async function sendDriveWrite(
   if (action.etag && method === "PATCH") headers["If-Match"] = action.etag;
   let payload = JSON.stringify(body);
   if (upload) {
-    const boundary = `mike_${randomUUID()}`;
+    const boundary = `linkmai_${randomUUID()}`;
     headers["Content-Type"] = `multipart/related; boundary=${boundary}`;
     params.uploadType = "multipart";
     payload = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${payload}\r\n--${boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n${args.content}\r\n--${boundary}--\r\n`;

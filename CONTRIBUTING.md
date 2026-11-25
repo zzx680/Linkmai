@@ -54,7 +54,7 @@ How workflows reach users:
 - **Defaults.** Five workflows are marked as defaults by the ingestion policy
   in `backend/src/lib/workflowCatalogSource.ts`. The workflow sync job stores
   that classification and the Quick Action settings in
-  `mike_workflows`; Postgres installs independent, editable copies for each
+  `linkmai_workflows`; Postgres installs independent, editable copies for each
   user on first use.
 - **Add-ons.** Every other workflow in the repository ships in the Add-ons
   catalog. Users import an add-on as an independent, editable copy of the
@@ -80,7 +80,7 @@ npm run sync:workflows
 The job resolves the configured `mike-workflows` ref to an immutable commit,
 downloads and validates its archive, writes a temporary local JSON document,
 uploads reference assets to object storage, and transactionally replaces the
-active rows in `mike_workflows`. Its temporary files are deleted before the job
+active rows in `linkmai_workflows`. Its temporary files are deleted before the job
 exits. The backend only reads the database and does not download or generate a
 catalog during startup. Docker Compose runs the job automatically; managed
 deployments should run `npm run sync:workflows` as a release step.

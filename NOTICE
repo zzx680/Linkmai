@@ -13,8 +13,9 @@ LinkMai changes relative to the upstream project include a Chinese-language
 interface and dictionary, the LinkMai product identity, package, environment
 variable, and service names, LinkMai-specific deployment templates for
 Alibaba Cloud, and an in-progress LinkMai marketing site. Upstream database
-object names that begin with `mike_` are retained in this release so existing
-databases can be upgraded without a destructive rename.
+objects renamed to `linkmai_*` are upgraded in place by
+`backend/migrations/20261125_01_rename_workflow_catalog.sql`; the historic
+migrations that created the old names are left untouched.
 
 The LinkMai name, logo, and marketing site content are not part of the
 upstream project and are not covered by its copyright.

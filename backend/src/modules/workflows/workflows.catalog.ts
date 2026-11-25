@@ -5,7 +5,7 @@ import { catalogWorkflowToLegacy, ensureDefaultWorkflows, findCatalogWorkflow, l
 import { WorkflowType, ServiceFailure } from "./workflows.types";
 import { withSystemWorkflowAccess } from "./workflows.serialization";
 
-// The built-in workflows now live in the `mike_workflows` catalog table
+// The built-in workflows now live in the `linkmai_workflows` catalog table
 // rather than a compiled-in constant, so the lookup is a query and the
 // catalog row is projected back into the legacy system-workflow shape.
 export async function findSystemWorkflow(

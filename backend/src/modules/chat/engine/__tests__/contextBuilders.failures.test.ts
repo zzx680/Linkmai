@@ -108,7 +108,7 @@ describe("buildWorkflowStore", () => {
     ensureDefaultWorkflows.mockRejectedValueOnce(installError);
     const fake = scriptedDb([
       { table: "organizations", data: { kind: "team" } },
-      { table: "mike_workflows", data: [] },
+      { table: "linkmai_workflows", data: [] },
       { rpc: "get_workflows_overview", data: [] },
     ]);
 
@@ -126,7 +126,7 @@ describe("buildWorkflowStore", () => {
     const dbError = { code: "42P01", message: "relation does not exist" };
     const fake = scriptedDb([
       { table: "organizations", data: { kind: "team" } },
-      { table: "mike_workflows", error: dbError },
+      { table: "linkmai_workflows", error: dbError },
       { rpc: "get_workflows_overview", data: [] },
     ]);
 

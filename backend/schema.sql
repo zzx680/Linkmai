@@ -1860,7 +1860,7 @@ alter table public.quick_actions enable row level security;
 revoke all on public.default_workflow_installations from public, anon, authenticated;
 revoke all on public.quick_actions from public, anon, authenticated;
 
-create table if not exists public.mike_workflows (
+create table if not exists public.linkmai_workflows (
   id uuid primary key default gen_random_uuid(),
   workflow_key text not null,
   distribution text not null,
@@ -1889,27 +1889,27 @@ create table if not exists public.mike_workflows (
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint mike_workflows_key_hash_unique
+  constraint linkmai_workflows_key_hash_unique
     unique(workflow_key, content_hash),
-  constraint mike_workflows_distribution_check
+  constraint linkmai_workflows_distribution_check
     check(distribution in ('default', 'addon')),
-  constraint mike_workflows_type_check
+  constraint linkmai_workflows_type_check
     check(type in ('assistant', 'tabular')),
-  constraint mike_workflows_source_commit_check
+  constraint linkmai_workflows_source_commit_check
     check(source_commit is null or source_commit ~ '^[0-9a-f]{40}$'),
-  constraint mike_workflows_content_hash_check
+  constraint linkmai_workflows_content_hash_check
     check(content_hash ~ '^[0-9a-f]{64}$')
 );
 
-create unique index if not exists mike_workflows_active_key_idx
-  on public.mike_workflows(workflow_key)
+create unique index if not exists linkmai_workflows_active_key_idx
+  on public.linkmai_workflows(workflow_key)
   where active;
 
-create index if not exists mike_workflows_active_distribution_type_idx
-  on public.mike_workflows(active, distribution, type, title);
+create index if not exists linkmai_workflows_active_distribution_type_idx
+  on public.linkmai_workflows(active, distribution, type, title);
 
-create index if not exists mike_workflows_active_pack_idx
-  on public.mike_workflows(active, pack_key, title);
+create index if not exists linkmai_workflows_active_pack_idx
+  on public.linkmai_workflows(active, pack_key, title);
 
 alter table public.documents
   add column if not exists workflow_id uuid
@@ -1919,19 +1919,19 @@ create index if not exists idx_documents_workflow
   on public.documents(workflow_id, created_at)
   where workflow_id is not null;
 
-create table if not exists public.mike_workflow_assets (
+create table if not exists public.linkmai_workflow_assets (
   id uuid primary key default gen_random_uuid(),
-  mike_workflow_id uuid not null
-    references public.mike_workflows(id) on delete cascade,
+  linkmai_workflow_id uuid not null
+    references public.linkmai_workflows(id) on delete cascade,
   filename text not null,
   file_type text not null,
   storage_path text not null,
   size_bytes integer,
   content_hash text not null,
   created_at timestamptz not null default now(),
-  constraint mike_workflow_assets_name_unique
-    unique(mike_workflow_id, filename),
-  constraint mike_workflow_assets_hash_check
+  constraint linkmai_workflow_assets_name_unique
+    unique(linkmai_workflow_id, filename),
+  constraint linkmai_workflow_assets_hash_check
     check(content_hash ~ '^[0-9a-f]{64}$')
 );
 
@@ -1971,7 +1971,7 @@ create index if not exists workflow_addons_active_pack_idx
 
 -- Replace the active catalog as one transaction. Content-addressed historical
 -- rows remain available for old builtin-* workflow references.
-create or replace function public.replace_mike_workflows(
+create or replace function public.replace_linkmai_workflows(
   p_source_commit text,
   p_workflows jsonb
 )
@@ -1994,8 +1994,8 @@ begin
     raise exception 'workflow catalog payload must be an array';
   end if;
 
-  perform pg_advisory_xact_lock(hashtextextended('mike_workflows', 0));
-  update public.mike_workflows set active = false where active;
+  perform pg_advisory_xact_lock(hashtextextended('linkmai_workflows', 0));
+  update public.linkmai_workflows set active = false where active;
 
   for item in select value from jsonb_array_elements(p_workflows)
   loop
@@ -2006,7 +2006,7 @@ begin
       from jsonb_array_elements_text(item->'jurisdictions');
     end if;
 
-    insert into public.mike_workflows (
+    insert into public.linkmai_workflows (
       workflow_key, distribution, version, title, description, type,
       prompt_md, columns_config, contributors, language, practice,
       jurisdictions, pack_key, pack_title, pack_description, pack_version,
@@ -2070,8 +2070,8 @@ begin
       updated_at = now()
     returning id into workflow_uuid;
 
-    delete from public.mike_workflow_assets
-    where mike_workflow_id = workflow_uuid;
+    delete from public.linkmai_workflow_assets
+    where linkmai_workflow_id = workflow_uuid;
 
     -- reference_files remains a rollout-only alias for catalog payloads
     -- produced immediately before workflow assets were renamed.
@@ -2083,8 +2083,8 @@ begin
       for asset_item in
         select value from jsonb_array_elements(asset_items)
       loop
-        insert into public.mike_workflow_assets (
-          mike_workflow_id, filename, file_type, storage_path,
+        insert into public.linkmai_workflow_assets (
+          linkmai_workflow_id, filename, file_type, storage_path,
           size_bytes, content_hash
         ) values (
           workflow_uuid,
@@ -2112,7 +2112,7 @@ security definer
 set search_path = public
 as $$
 declare
-  catalog_item public.mike_workflows%rowtype;
+  catalog_item public.linkmai_workflows%rowtype;
   workflow_uuid uuid;
   installed_count integer := 0;
 begin
@@ -2120,7 +2120,7 @@ begin
 
   for catalog_item in
     select catalog.*
-    from public.mike_workflows catalog
+    from public.linkmai_workflows catalog
     where catalog.active
       and catalog.distribution = 'default'
     order by catalog.default_sort_order nulls last, catalog.workflow_key
@@ -2199,7 +2199,7 @@ end;
 $$;
 
 -- Deprecated rollback-only overload used by backend releases that predate
--- mike_workflows. New code calls the one-argument function above.
+-- linkmai_workflows. New code calls the one-argument function above.
 create or replace function public.install_missing_default_workflows(
   p_user_id text,
   p_defaults jsonb
@@ -3482,7 +3482,7 @@ drop function if exists public.get_project_ids_overview(text, text, text, text, 
 -- Workflows overview pagination
 -- ============================================================================
 -- Mirrors the Projects pagination above. Catalog workflows live in the shared
--- mike_workflows table and have no user-data growth. They are deliberately
+-- linkmai_workflows table and have no user-data growth. They are deliberately
 -- NOT part of this RPC. This migration only
 -- paginates the one part of /workflows with real growth: a user's owned +
 -- shared workflows. Every other caller of GET /workflows (the workflow picker
@@ -6889,8 +6889,8 @@ revoke all on public.hidden_workflows from anon, authenticated;
 revoke all on public.workflow_shares from anon, authenticated;
 revoke all on public.workflow_org_access_overrides from anon, authenticated;
 revoke all on public.workflow_open_source_submissions from anon, authenticated;
-revoke all on public.mike_workflows from anon, authenticated;
-revoke all on public.mike_workflow_assets from anon, authenticated;
+revoke all on public.linkmai_workflows from anon, authenticated;
+revoke all on public.linkmai_workflow_assets from anon, authenticated;
 revoke all on public.workflow_addons from anon, authenticated;
 revoke all on public.chats from anon, authenticated;
 revoke all on public.chat_access_grants from anon, authenticated;
@@ -6933,7 +6933,7 @@ revoke all on public.memory_consolidation_states from anon, authenticated;
 revoke all on public.memory_conversation_activity from anon, authenticated;
 revoke all on public.memory_conversation_turn_leases from anon, authenticated;
 revoke all on public.memory_consolidation_results from anon, authenticated;
-revoke all on function public.replace_mike_workflows(text, jsonb)
+revoke all on function public.replace_linkmai_workflows(text, jsonb)
   from public, anon, authenticated;
 revoke all on function public.install_missing_default_workflows(text)
   from public, anon, authenticated;
@@ -7016,9 +7016,9 @@ revoke all on function public.claim_upload_processing_job(text, integer, integer
 grant select, insert, update, delete
   on public.default_workflow_installations,
      public.quick_actions,
-     public.mike_workflows,
+     public.linkmai_workflows,
      public.workflow_addons,
-     public.mike_workflow_assets,
+     public.linkmai_workflow_assets,
      public.memory_files,
      public.memory_consolidation_states,
      public.memory_conversation_activity,
@@ -7027,7 +7027,7 @@ grant select, insert, update, delete
   to service_role;
 
 grant execute
-  on function public.replace_mike_workflows(text, jsonb)
+  on function public.replace_linkmai_workflows(text, jsonb)
   to service_role;
 grant execute
   on function public.install_missing_default_workflows(text)
@@ -12557,5 +12557,6 @@ insert into public.schema_migrations (filename) values
   ('20261101_24_wipe_memory_files_batch.sql'),
   ('20261107_01_playbook_review_publication.sql'),
   ('20261116_01_tabular_cache_revisions.sql'),
-  ('20261118_01_connector_write_approval_default.sql')
+  ('20261118_01_connector_write_approval_default.sql'),
+  ('20261125_01_rename_workflow_catalog.sql')
 on conflict (filename) do nothing;

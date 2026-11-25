@@ -31,7 +31,7 @@ async function fixture(t) {
 test("bundled workflows install from portable files without network and use the existing atomic catalog RPC", async (t) => {
   const f = await fixture(t);
   await installBundledWorkflows({ client: f.client, backendDir: f.root, storageRoot: path.join(f.root, "storage") });
-  assert.match(f.queries[1].sql, /replace_mike_workflows/);
+  assert.match(f.queries[1].sql, /replace_linkmai_workflows/);
   const payload = JSON.parse(f.queries[1].params[1]);
   const asset = payload[0].assets[0];
   assert.equal(asset.temporary_path, undefined);

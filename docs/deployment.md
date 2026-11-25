@@ -358,7 +358,7 @@ npm run sync:workflows
 The job resolves `LINKMAI_WORKFLOWS_REF`, downloads and validates the raw
 `Open-Legal-Products/mike-workflows` archive, uploads reference assets to the
 configured S3-compatible storage, and transactionally replaces the active
-`mike_workflows` catalog. Temporary archive and JSON files are deleted when the
+`linkmai_workflows` catalog. Temporary archive and JSON files are deleted when the
 job exits. Run this as a release job before directing traffic to the new
 backend; backend startup itself only reads the database. Docker Compose runs
 this sequence automatically for local/self-hosted deployments.
@@ -495,7 +495,7 @@ browser uploads work from anywhere other than the machine running the stack:
   as well as call the API, and changing any of them and re-running `up`
   updates the bucket. `FRONTEND_URL` and `WORD_ADDIN_URL` are reduced to their
   `scheme://host[:port]`. If either is not an absolute http(s) URL with a DNS
-  or IP host (no scheme, or an underscore host such as `mike_app`), or the
+  or IP host (no scheme, or an underscore host such as `linkmai_app`), or the
   backend image predates `origins.ts`, the job does not stop the stack: it
   logs a `storage-cors:` line naming the value and installs a policy that
   allows only the loopback development origins (plus any valid ones), so

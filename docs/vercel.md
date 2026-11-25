@@ -66,7 +66,7 @@ step is idempotent:
 - It creates the private `linkmai` Storage bucket and selects the Supabase
   Storage driver (`STORAGE_DRIVER=supabase`), unless `R2_ENDPOINT_URL` is set.
 - It generates `DOWNLOAD_SIGNING_SECRET` and `USER_API_KEYS_ENCRYPTION_SECRET`
-  once and keeps them in the table `mike_deploy.secrets`, in a schema that the
+  once and keeps them in the table `linkmai_deploy.secrets`, in a schema that the
   Supabase API does not expose. That table exists only on Vercel deployments:
   it is created here rather than by a migration, and `backend/schema.sql`
   does not list it. A value you set on the Vercel project takes precedence.

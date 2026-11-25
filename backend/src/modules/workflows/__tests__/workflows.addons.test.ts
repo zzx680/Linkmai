@@ -104,7 +104,7 @@ beforeEach(() => {
 describe("listWorkflowAddons", () => {
   it("returns active add-ons with workflow_key renamed and assets grouped", async () => {
     const { db, calls } = makeDb({
-      mike_workflows: [
+      linkmai_workflows: [
         {
           data: [
             { id: "a1", workflow_key: "draft", title: "Draft", type: "assistant" },
@@ -113,12 +113,12 @@ describe("listWorkflowAddons", () => {
           error: null,
         },
       ],
-      mike_workflow_assets: [
+      linkmai_workflow_assets: [
         {
           data: [
             {
               id: "asset-1",
-              mike_workflow_id: "a1",
+              linkmai_workflow_id: "a1",
               filename: "Precedent.docx",
               file_type: "docx",
               size_bytes: 42,
@@ -148,34 +148,34 @@ describe("listWorkflowAddons", () => {
     ]);
     // Tabular add-ons are never asset-joined.
     expect(result.data[1].assets).toEqual([]);
-    expect(filtersOf(calls, "mike_workflows")).toContainEqual([
+    expect(filtersOf(calls, "linkmai_workflows")).toContainEqual([
       "eq",
       "distribution",
       "addon",
     ]);
-    expect(filtersOf(calls, "mike_workflows")).toContainEqual(["eq", "active", true]);
-    expect(filtersOf(calls, "mike_workflow_assets")).toContainEqual([
+    expect(filtersOf(calls, "linkmai_workflows")).toContainEqual(["eq", "active", true]);
+    expect(filtersOf(calls, "linkmai_workflow_assets")).toContainEqual([
       "in",
-      "mike_workflow_id",
+      "linkmai_workflow_id",
       ["a1"],
     ]);
   });
 
   it("applies the type filter only for assistant and tabular", async () => {
-    const rows = { mike_workflows: [{ data: [], error: null }] };
+    const rows = { linkmai_workflows: [{ data: [], error: null }] };
 
     const accepted = makeDb(rows);
     await listWorkflowAddons(accepted.db, { type: "tabular" });
-    expect(filtersOf(accepted.calls, "mike_workflows")).toContainEqual([
+    expect(filtersOf(accepted.calls, "linkmai_workflows")).toContainEqual([
       "eq",
       "type",
       "tabular",
     ]);
 
-    const rejected = makeDb({ mike_workflows: [{ data: [], error: null }] });
+    const rejected = makeDb({ linkmai_workflows: [{ data: [], error: null }] });
     await listWorkflowAddons(rejected.db, { type: "anything-else" });
     expect(
-      filtersOf(rejected.calls, "mike_workflows").some(([, column]) => column === "type"),
+      filtersOf(rejected.calls, "linkmai_workflows").some(([, column]) => column === "type"),
     ).toBe(false);
   });
 
@@ -186,18 +186,18 @@ describe("listWorkflowAddons", () => {
       type: "assistant",
     }));
     const { db, calls } = makeDb({
-      mike_workflows: [{ data: addons, error: null }],
-      mike_workflow_assets: [
+      linkmai_workflows: [{ data: addons, error: null }],
+      linkmai_workflow_assets: [
         {
           data: [
-            { id: "x0", mike_workflow_id: "a0", filename: "a.docx", file_type: "docx", size_bytes: 1, created_at: "t" },
+            { id: "x0", linkmai_workflow_id: "a0", filename: "a.docx", file_type: "docx", size_bytes: 1, created_at: "t" },
           ],
           error: null,
         },
         { data: [], error: null },
         {
           data: [
-            { id: "x119", mike_workflow_id: "a119", filename: "b.docx", file_type: "docx", size_bytes: 1, created_at: "t" },
+            { id: "x119", linkmai_workflow_id: "a119", filename: "b.docx", file_type: "docx", size_bytes: 1, created_at: "t" },
           ],
           error: null,
         },
@@ -207,7 +207,7 @@ describe("listWorkflowAddons", () => {
     const result = await listWorkflowAddons(db, { type: null });
 
     const batches = calls
-      .filter((c) => c.table === "mike_workflow_assets")
+      .filter((c) => c.table === "linkmai_workflow_assets")
       .map((c) => c.filters.find(([op]) => op === "in")?.[2] as string[]);
     expect(batches.map((b) => b.length)).toEqual([50, 50, 20]);
     expect(batches.flat()).toEqual(addons.map((a) => a.id));
@@ -220,7 +220,7 @@ describe("listWorkflowAddons", () => {
 
   it("skips the asset query when no assistant add-ons matched", async () => {
     const { db, calls } = makeDb({
-      mike_workflows: [
+      linkmai_workflows: [
         { data: [{ id: "a2", workflow_key: "grid", type: "tabular" }], error: null },
       ],
     });
@@ -228,12 +228,12 @@ describe("listWorkflowAddons", () => {
     const result = await listWorkflowAddons(db, { type: "tabular" });
 
     expect(result.ok).toBe(true);
-    expect(calls.some((c) => c.table === "mike_workflow_assets")).toBe(false);
+    expect(calls.some((c) => c.table === "linkmai_workflow_assets")).toBe(false);
   });
 
   it("reports a catalog query error as an internal failure", async () => {
     const { db } = makeDb({
-      mike_workflows: [{ data: null, error: { message: "boom" } }],
+      linkmai_workflows: [{ data: null, error: { message: "boom" } }],
     });
 
     const result = await listWorkflowAddons(db, { type: null });
@@ -252,8 +252,8 @@ describe("loadWorkflowAddonAssetDisplay", () => {
   it("returns the display payload for an assistant add-on asset", async () => {
     loadDocumentDisplay.mockResolvedValue(display);
     const { db, calls } = makeDb({
-      mike_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
-      mike_workflow_assets: [
+      linkmai_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
+      linkmai_workflow_assets: [
         {
           data: {
             id: "asset-1",
@@ -278,21 +278,21 @@ describe("loadWorkflowAddonAssetDisplay", () => {
       storagePath: "mike-workflows/a1/deck.pptx",
     });
     // The asset lookup is scoped to the add-on, so a foreign asset id 404s.
-    expect(filtersOf(calls, "mike_workflow_assets")).toContainEqual([
+    expect(filtersOf(calls, "linkmai_workflow_assets")).toContainEqual([
       "eq",
-      "mike_workflow_id",
+      "linkmai_workflow_id",
       "a1",
     ]);
   });
 
   it("404s a missing add-on and a non-assistant add-on alike", async () => {
-    const missing = makeDb({ mike_workflows: [{ data: null, error: null }] });
+    const missing = makeDb({ linkmai_workflows: [{ data: null, error: null }] });
     expect(
       await loadWorkflowAddonAssetDisplay(missing.db, { addonId: "a1", assetId: "x" }),
     ).toEqual({ ok: false, kind: "not_found", detail: "Add-on not found" });
 
     const tabular = makeDb({
-      mike_workflows: [{ data: { id: "a2", type: "tabular" }, error: null }],
+      linkmai_workflows: [{ data: { id: "a2", type: "tabular" }, error: null }],
     });
     expect(
       await loadWorkflowAddonAssetDisplay(tabular.db, { addonId: "a2", assetId: "x" }),
@@ -301,8 +301,8 @@ describe("loadWorkflowAddonAssetDisplay", () => {
 
   it("404s a missing asset row and a missing storage object with distinct details", async () => {
     const noRow = makeDb({
-      mike_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
-      mike_workflow_assets: [{ data: null, error: null }],
+      linkmai_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
+      linkmai_workflow_assets: [{ data: null, error: null }],
     });
     expect(
       await loadWorkflowAddonAssetDisplay(noRow.db, { addonId: "a1", assetId: "x" }),
@@ -310,8 +310,8 @@ describe("loadWorkflowAddonAssetDisplay", () => {
 
     loadDocumentDisplay.mockResolvedValue(null);
     const noObject = makeDb({
-      mike_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
-      mike_workflow_assets: [
+      linkmai_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
+      linkmai_workflow_assets: [
         { data: { id: "asset-1", filename: "a.docx", file_type: "docx", storage_path: "p" }, error: null },
       ],
     });
@@ -327,8 +327,8 @@ describe("loadWorkflowAddonAssetDisplay", () => {
     const boom = new Error("libreoffice died");
     loadDocumentDisplay.mockRejectedValue(boom);
     const { db } = makeDb({
-      mike_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
-      mike_workflow_assets: [
+      linkmai_workflows: [{ data: { id: "a1", type: "assistant" }, error: null }],
+      linkmai_workflow_assets: [
         { data: { id: "asset-1", filename: "a.docx", file_type: "docx", storage_path: "p" }, error: null },
       ],
     });
@@ -342,10 +342,10 @@ describe("loadWorkflowAddonAssetDisplay", () => {
 describe("getWorkflowAddon", () => {
   it("renames workflow_key and attaches assistant assets", async () => {
     const { db } = makeDb({
-      mike_workflows: [
+      linkmai_workflows: [
         { data: { id: "a1", workflow_key: "draft", type: "assistant" }, error: null },
       ],
-      mike_workflow_assets: [
+      linkmai_workflow_assets: [
         { data: [{ id: "asset-1", filename: "Precedent.docx" }], error: null },
       ],
     });
@@ -365,7 +365,7 @@ describe("getWorkflowAddon", () => {
 
   it("returns an empty asset list for a tabular add-on without querying assets", async () => {
     const { db, calls } = makeDb({
-      mike_workflows: [
+      linkmai_workflows: [
         { data: { id: "a2", workflow_key: "grid", type: "tabular" }, error: null },
       ],
     });
@@ -373,11 +373,11 @@ describe("getWorkflowAddon", () => {
     const result = await getWorkflowAddon(db, { addonId: "a2" });
 
     expect(result.ok && result.data.assets).toEqual([]);
-    expect(calls.some((c) => c.table === "mike_workflow_assets")).toBe(false);
+    expect(calls.some((c) => c.table === "linkmai_workflow_assets")).toBe(false);
   });
 
   it("404s a missing row and a query error alike", async () => {
-    const missing = makeDb({ mike_workflows: [{ data: null, error: null }] });
+    const missing = makeDb({ linkmai_workflows: [{ data: null, error: null }] });
     expect(await getWorkflowAddon(missing.db, { addonId: "a1" })).toEqual({
       ok: false,
       kind: "not_found",
@@ -385,7 +385,7 @@ describe("getWorkflowAddon", () => {
     });
 
     const errored = makeDb({
-      mike_workflows: [{ data: null, error: { message: "boom" } }],
+      linkmai_workflows: [{ data: null, error: { message: "boom" } }],
     });
     expect(await getWorkflowAddon(errored.db, { addonId: "a1" })).toEqual({
       ok: false,
@@ -420,7 +420,7 @@ describe("importWorkflowAddon", () => {
   };
 
   it("404s an add-on that is not in the active catalog", async () => {
-    const { db } = makeDb({ mike_workflows: [{ data: null, error: null }] });
+    const { db } = makeDb({ linkmai_workflows: [{ data: null, error: null }] });
 
     expect(await importWorkflowAddon(db, { addonId: "a1", userId: "u1" })).toEqual({
       ok: false,
@@ -431,9 +431,9 @@ describe("importWorkflowAddon", () => {
 
   it("falls back to the catalog defaults when the row omits them", async () => {
     const { db, calls } = makeDb({
-      mike_workflows: [{ data: catalogRow, error: null }],
+      linkmai_workflows: [{ data: catalogRow, error: null }],
       workflows: [{ data: workflowRow, error: null }],
-      mike_workflow_assets: [{ data: [], error: null }],
+      linkmai_workflow_assets: [{ data: [], error: null }],
     });
 
     const result = await importWorkflowAddon(db, { addonId: "a1", userId: "u1" });
@@ -457,9 +457,9 @@ describe("importWorkflowAddon", () => {
       filename: "Precedent.pdf",
     });
     const { db, calls } = makeDb({
-      mike_workflows: [{ data: catalogRow, error: null }],
+      linkmai_workflows: [{ data: catalogRow, error: null }],
       workflows: [{ data: workflowRow, error: null }],
-      mike_workflow_assets: [
+      linkmai_workflow_assets: [
         {
           data: [
             {
@@ -516,9 +516,9 @@ describe("importWorkflowAddon", () => {
       filename: "Precedent.pdf",
     });
     const { db, calls } = makeDb({
-      mike_workflows: [{ data: catalogRow, error: null }],
+      linkmai_workflows: [{ data: catalogRow, error: null }],
       workflows: [{ data: workflowRow, error: null }, { data: null, error: null }],
-      mike_workflow_assets: [
+      linkmai_workflow_assets: [
         {
           data: [
             {

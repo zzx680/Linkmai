@@ -116,22 +116,22 @@ grant usage on schema public to service_role;
 grant all privileges on all tables in schema public to service_role;
 grant all privileges on all sequences in schema public to service_role;
 
-create schema if not exists mike_deploy;
-revoke all on schema mike_deploy from public;
+create schema if not exists linkmai_deploy;
+revoke all on schema linkmai_deploy from public;
 do $$
 begin
   if exists (select from pg_roles where rolname = 'anon') then
-    revoke all on schema mike_deploy from anon, authenticated, service_role;
+    revoke all on schema linkmai_deploy from anon, authenticated, service_role;
   end if;
 end $$;
-create table if not exists mike_deploy.secrets (
+create table if not exists linkmai_deploy.secrets (
   name text primary key,
   value text not null,
   created_at timestamptz not null default now()
 );
 -- gen_random_uuid() draws from the server's strong random source; two of
 -- them are 244 random bits, well over the 32 characters the backend wants.
-insert into mike_deploy.secrets (name, value)
+insert into linkmai_deploy.secrets (name, value)
 select name, replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '')
 from unnest(array['DOWNLOAD_SIGNING_SECRET', 'USER_API_KEYS_ENCRYPTION_SECRET']) as name
 on conflict (name) do nothing;
@@ -145,7 +145,7 @@ while IFS='|' read -r name value; do
   if [ -z "${!name:-}" ]; then
     export "$name=$value"
   fi
-done < <(psql_db -At -F '|' -c "select name, value from mike_deploy.secrets")
+done < <(psql_db -At -F '|' -c "select name, value from linkmai_deploy.secrets")
 
 # --- 5. First account ------------------------------------------------------
 node scripts/vercel-admin-user.mjs || true
