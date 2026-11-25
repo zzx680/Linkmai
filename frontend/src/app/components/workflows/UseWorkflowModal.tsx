@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 
@@ -41,7 +43,7 @@ function SelectedWorkflowSummary({ workflow }: { workflow: Workflow }) {
     return (
         <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
             <span className="shrink-0 text-xs font-medium text-gray-700">
-                Selected workflow
+                {uiText("Selected workflow")}
             </span>
             <span className="min-w-0 flex-1 truncate text-right text-xs text-gray-500">
                 {workflow.metadata.title}
@@ -289,14 +291,14 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
     const locationOptions =
         wf.metadata.type === "assistant"
             ? [
-                  { value: "workspace" as const, label: "Assistant" },
-                  { value: "project" as const, label: "Project assistant" },
+                  { value: "workspace" as const, label: uiText("Assistant") },
+                  { value: "project" as const, label: uiText("Project assistant") },
               ]
             : [
-                  { value: "workspace" as const, label: "Tabular reviews" },
+                  { value: "workspace" as const, label: uiText("Tabular reviews") },
                   {
                       value: "project" as const,
-                      label: "Project tabular reviews",
+                      label: uiText("Project tabular reviews"),
                   },
               ];
 
@@ -310,7 +312,7 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
                       onClick={() => setScreen("select")}
                       className="transition-colors hover:text-gray-700"
                   >
-                      Workflows
+                      {uiText("Workflows")}
                   </button>,
                   wf.metadata.title,
                   wf.metadata.type === "assistant" ? "New Chat" : "New Review",
@@ -334,17 +336,17 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
             secondaryAction={
                 screen === "select"
                     ? {
-                          label: "Edit",
+                          label: uiText("Edit"),
                           onClick: selectPageAction,
                       }
                     : screen === "details"
                       ? {
-                            label: "Back",
+                            label: uiText("Back"),
                             onClick: () => setScreen("select"),
                             disabled: saving,
                         }
                       : {
-                            label: "Back",
+                            label: uiText("Back"),
                             onClick: () => setScreen("details"),
                             disabled: saving,
                         }
@@ -352,12 +354,12 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
             primaryAction={
                 screen === "select"
                     ? {
-                          label: "Use",
+                          label: uiText("Use"),
                           onClick: () => setScreen("details"),
                       }
                     : screen === "details"
                       ? {
-                            label: "Next",
+                            label: uiText("Next"),
                             onClick: () => setScreen("documents"),
                             disabled:
                                 saving ||
@@ -370,12 +372,12 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
                         }
                       : wf.metadata.type === "assistant"
                         ? {
-                              label: saving ? "Starting…" : "Start Chat",
+                              label: saving ? uiText("Starting…") : uiText("Start Chat"),
                               onClick: handleStartChat,
                               disabled: saving || (inProject && !selectedProjectId),
                           }
                         : {
-                              label: saving ? "Creating…" : "Create Review",
+                              label: saving ? uiText("Creating…") : uiText("Create Review"),
                               onClick: handleCreateReview,
                               disabled:
                                   saving ||
@@ -412,7 +414,7 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
 
                     <div className="space-y-6">
                         <div>
-                            <FieldLabel as="p">Use in</FieldLabel>
+                            <FieldLabel as="p">{uiText("Use in")}</FieldLabel>
                             <ModalSegmentedToggle
                                 value={location}
                                 onChange={(value) => {
@@ -426,7 +428,7 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
 
                         {inProject && (
                             <div>
-                                <FieldLabel htmlFor="workflow-project">Project</FieldLabel>
+                                <FieldLabel htmlFor="workflow-project">{uiText("Project")}</FieldLabel>
                                 <ModalSelect
                                     id="workflow-project"
                                     value={selectedProjectId ?? ""}
@@ -440,10 +442,10 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
                                     }}
                                     placeholder={
                                         dirLoading
-                                            ? "Loading projects..."
+                                            ? uiText("Loading projects...")
                                             : projects.length
-                                              ? "Select project..."
-                                              : "No projects found"
+                                              ? uiText("Select project...")
+                                              : uiText("No projects found")
                                     }
                                     disabled={dirLoading || projects.length === 0}
                                 />
@@ -453,13 +455,13 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
                         {wf.metadata.type === "assistant" && (
                             <div>
                                 <FieldLabel htmlFor="workflow-additional-message">
-                                    Additional message
+                                    {uiText("Additional message")}
                                 </FieldLabel>
                                 <ModalTextarea
                                     id="workflow-additional-message"
                                     value={assistantPrompt}
                                     onChange={(e) => setAssistantPrompt(e.target.value)}
-                                    placeholder="Add any additional instructions..."
+                                    placeholder={uiText("Add any additional instructions...")}
                                     rows={4}
                                 />
                             </div>
@@ -467,7 +469,7 @@ function UseWorkflowModalForWorkspace({ workflow, onClose, skipSelect = false }:
 
                         {wf.metadata.type === "tabular" && (
                             <div>
-                                <FieldLabel as="p">Model</FieldLabel>
+                                <FieldLabel as="p">{uiText("Model")}</FieldLabel>
                                 <ModelToggle
                                     value={selectedModel}
                                     onChange={setSelectedModel}

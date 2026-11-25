@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React from "react";
 import { MikeIcon } from "../../../shared/chat/mike-icon";
 import { cn } from "../../../shared/lib/utils";
@@ -22,7 +24,7 @@ export function WordAddinLogo({
           large ? "text-4xl" : "text-2xl"
         )}
       >
-        Mike
+        {uiText("Mike")}
       </span>
     </div>
   );

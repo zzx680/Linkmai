@@ -1,4 +1,7 @@
 "use client";
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, Loader2, Plus, X } from "lucide-react";
@@ -52,7 +55,7 @@ export function buildChatHistoryItems({
                     .includes(query.trim().toLowerCase()),
         )
         .map((chat) => {
-            const title = chat.title ?? "New Chat";
+            const title = chat.title ?? uiText("New Chat");
             const activityAt = chatActivityAt(chat);
             const elapsed = formatElapsedTime(activityAt, now);
             const responseStatus = responseStatuses[chat.id];
@@ -64,7 +67,7 @@ export function buildChatHistoryItems({
                     responseStatus === "loading" ? (
                         <Loader2
                             role="status"
-                            aria-label={`${title} response loading`}
+                            aria-label={uiText`${title} response loading`}
                             className="h-3.5 w-3.5 shrink-0 animate-spin text-blue-600 motion-reduce:animate-none"
                         />
                     ) : (
@@ -175,7 +178,7 @@ export function ChatPanelHeader({
                         <FormTextInput
                             ref={titleInputRef}
                             variant="minimal"
-                            aria-label="Chat title"
+                            aria-label={uiText("Chat title")}
                             value={titleEdit.value}
                             onFocus={(event) => event.currentTarget.select()}
                             onChange={(event) =>
@@ -184,6 +187,7 @@ export function ChatPanelHeader({
                             onBlur={titleEdit.onSave}
                             onKeyDown={(event) => {
                                 if (event.nativeEvent.isComposing) return;
+                                if (isImeComposing(event)) return;
                                 if (event.key === "Enter") {
                                     event.preventDefault();
                                     titleEdit.onSave();
@@ -217,7 +221,7 @@ export function ChatPanelHeader({
                                     )}
                                 >
                                     <span className="min-w-0 truncate text-xs font-medium">
-                                        {currentTitle ?? "New Chat"}
+                                        {currentTitle ?? uiText("New Chat")}
                                     </span>
                                     <ChevronDown
                                         className={cn(
@@ -250,7 +254,7 @@ export function ChatPanelHeader({
                                 type="button"
                                 onClick={onNewChat}
                                 disabled={newChatDisabled}
-                                aria-label="New chat"
+                                aria-label={uiText("New chat")}
                                 className={cn(
                                     HEADER_PILL_BUTTON_CLASS,
                                     "disabled:cursor-not-allowed disabled:opacity-40",
@@ -267,8 +271,8 @@ export function ChatPanelHeader({
                             <button
                                 type="button"
                                 onClick={onClose}
-                                aria-label="Close chat panel"
-                                title="Close chat panel"
+                                aria-label={uiText("Close chat panel")}
+                                title={uiText("Close chat panel")}
                                 className={HEADER_PILL_BUTTON_CLASS}
                             >
                                 <X aria-hidden="true" className="h-3.5 w-3.5" />

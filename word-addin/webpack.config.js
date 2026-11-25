@@ -243,6 +243,7 @@ module.exports = async (_env, options) => {
       }),
       // Expose env vars to the bundle so TypeScript process.env calls compile
       new webpack.EnvironmentPlugin({
+        REACT_APP_LINKMAI_SUPPORT_EMAIL: "",
         // Development defaults stay on the HTTPS dev-server origin, whose
         // proxies reach the HTTP backends without mixed-content failures.
         // Production hosting must reverse-proxy this same-origin path to the
@@ -257,7 +258,7 @@ module.exports = async (_env, options) => {
         // The Mike web app origin — the task pane links here (e.g. the
         // account/api-keys page); it never fetches from it.
         REACT_APP_WEB_APP_URL: isDev
-          ? process.env.REACT_APP_WEB_APP_URL || "https://app.mikeoss.com"
+          ? process.env.REACT_APP_WEB_APP_URL || "https://localhost:3000"
           : undefined,
         // Sentry is off unless a DSN is baked in at build time (the pane is
         // a static bundle; there is no runtime environment to read).

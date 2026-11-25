@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import type { ReactNode } from "react";
 export { TextCardUI } from "./TextCardUI";
 
@@ -84,7 +86,7 @@ export function DocReadBlockUI({
         >
             <div className="flex min-w-0 items-center gap-1.5">
                 <span className="shrink-0 font-medium">
-                    {isStreaming ? "Reading" : interrupted ? "Read stopped" : "Read"}
+                    {isStreaming ? uiText("Reading") : interrupted ? uiText("Read stopped") : uiText("Read")}
                 </span>
                 {!isStreaming && onClick ? (
                     <button
@@ -135,10 +137,10 @@ export function DocFindBlockUI({
             dotColor={!interrupted && totalMatches > 0 ? "green" : "gray"}
         >
             <span className="font-medium">
-                {isStreaming ? "Finding" : interrupted ? "Find stopped" : "Found"}
+                {isStreaming ? uiText("Finding") : interrupted ? uiText("Find stopped") : uiText("Found")}
             </span>{" "}
             <span>
-                &ldquo;{query}&rdquo;{matchSuffix}
+                {uiText("&ldquo;")}{query}{uiText("&rdquo;")}{matchSuffix}
                 <span className="ml-1 text-gray-400">in </span>
                 {!isStreaming && onClick ? (
                     <button

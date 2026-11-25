@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { SvgAssetIcon } from "@/app/components/ui/svg-asset-icon";
 import ide from "../../../../public/icons/features/ide-new.svg";
@@ -44,10 +46,10 @@ export default function IdePage() {
                             height={32}
                         />
                     }
-                    title="Integrated Drafting Environment"
+                    title={uiText("Integrated Drafting Environment")}
                     description={
                         projectPicker.error ??
-                        "Open a Project to start drafting and reviewing with the help of the Project Assistant."
+                        uiText("Open a Project to start drafting and reviewing with the help of the Project Assistant.")
                     }
                     tone={projectPicker.error ? "error" : "default"}
                     action={
@@ -58,14 +60,14 @@ export default function IdePage() {
                                 onClick={() => void projectPicker.openPicker()}
                                 loading={projectPicker.loading}
                             >
-                                Open project
+                                {uiText("Open project")}
                             </PillButtonUI>
                             <PillButtonUI
                                 tone="white"
                                 size="sm"
                                 onClick={() => setNewProjectOpen(true)}
                             >
-                                New project
+                                {uiText("New project")}
                             </PillButtonUI>
                         </div>
                     }
@@ -79,9 +81,9 @@ export default function IdePage() {
                 loading={projectPicker.loading}
                 selectedId={projectPicker.selectedId}
                 onSelect={projectPicker.setSelectedId}
-                breadcrumbs={["IDE", "Open project"]}
+                breadcrumbs={[uiText("IDE"), uiText("Open project")]}
                 primaryAction={{
-                    label: "Open",
+                    label: uiText("Open"),
                     variant: "blue",
                     type: "button",
                     onClick: openSelectedProject,

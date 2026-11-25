@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import {
   FieldLabel,
@@ -51,19 +53,19 @@ export function McpConnectorForm({
   return (
     <div className={`grid gap-3 ${className}`}>
       <div className="min-w-0">
-        <FieldLabel htmlFor={labelId}>Label</FieldLabel>
+        <FieldLabel htmlFor={labelId}>{uiText("Label")}</FieldLabel>
         <FormTextInput
           id={labelId}
           value={draft.name}
           onChange={(event) =>
             onDraftChange({ ...draft, name: event.target.value })
           }
-          placeholder="Connector label"
+          placeholder={uiText("Connector label")}
           disabled={disabled}
         />
       </div>
       <div className="min-w-0">
-        <FieldLabel htmlFor={urlId}>URL endpoint</FieldLabel>
+        <FieldLabel htmlFor={urlId}>{uiText("URL endpoint")}</FieldLabel>
         <FormTextInput
           id={urlId}
           value={draft.serverUrl}
@@ -76,9 +78,9 @@ export function McpConnectorForm({
       </div>
       <div className="min-w-0">
         <div className="flex items-baseline justify-between gap-2">
-          <FieldLabel htmlFor={tokenId}>Bearer token</FieldLabel>
+          <FieldLabel htmlFor={tokenId}>{uiText("Bearer token")}</FieldLabel>
           <p className="mb-2 shrink-0 text-xs text-gray-500">
-            Tokens are stored encrypted.
+            {uiText("Tokens are stored encrypted.")}
           </p>
         </div>
         <div className="relative">
@@ -108,7 +110,7 @@ export function McpConnectorForm({
                 tokenAction ? "right-[3.75rem]" : "right-1.5"
               } flex items-center ${settingsGlassIconButtonClassName}`}
               onClick={() => onShowTokenChange(!showToken)}
-              aria-label={showToken ? "Hide token" : "Show token"}
+              aria-label={showToken ? uiText("Hide token") : uiText("Show token")}
               disabled={disabled}
             >
               {showToken ? (
@@ -141,9 +143,9 @@ export function McpConnectorForm({
       </div>
       <div className="min-w-0">
         <div className="flex items-baseline justify-between gap-2">
-          <FieldLabel htmlFor={headersId}>Custom headers</FieldLabel>
+          <FieldLabel htmlFor={headersId}>{uiText("Custom headers")}</FieldLabel>
           <p className="mb-2 shrink-0 text-xs text-gray-500">
-            Secrets are stored encrypted.
+            {uiText("Secrets are stored encrypted.")}
           </p>
         </div>
         <textarea

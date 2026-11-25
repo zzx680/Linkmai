@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useState } from "react";
 import { Check, Eye, Pen } from "lucide-react";
 import type { WordEditApplyMode } from "../../lib/wordChatSettings";
@@ -17,14 +19,14 @@ interface ApplyModeOption {
 
 const REVIEW_OPTION: ApplyModeOption = {
   mode: "approval",
-  label: "Review",
-  description: "Review proposed changes before applying them to the document",
+  label: uiText("Review"),
+  description: uiText("Review proposed changes before applying them to the document"),
   Icon: Eye,
 };
 const DIRECT_OPTION: ApplyModeOption = {
   mode: "direct",
-  label: "Edit",
-  description: "Apply streamed edits immediately as tracked changes",
+  label: uiText("Edit"),
+  description: uiText("Apply streamed edits immediately as tracked changes"),
   Icon: Pen,
 };
 const OPTIONS = [REVIEW_OPTION, DIRECT_OPTION];
@@ -49,8 +51,8 @@ export function EditApplyModeMenu({
       <DropdownTrigger asChild>
         <button
           type="button"
-          aria-label="Choose how edits are applied"
-          title="Choose how edits are applied"
+          aria-label={uiText("Choose how edits are applied")}
+          title={uiText("Choose how edits are applied")}
           data-testid="edit-apply-toggle"
           className={`flex h-8 shrink-0 items-center gap-1 rounded-full px-1.5 text-sm text-gray-400 transition-colors hover:text-gray-700 ${
             open ? "text-gray-700" : ""

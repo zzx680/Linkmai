@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     useEffect,
     useRef,
@@ -378,7 +380,7 @@ export function DocumentTabBar({
             {onClosePanel && (
                 <CloseButton
                     onClick={onClosePanel}
-                    label="Close panel"
+                    label={uiText("Close panel")}
                     className="mt-2 ml-2 mr-2 self-start"
                 />
             )}

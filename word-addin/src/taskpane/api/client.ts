@@ -286,6 +286,13 @@ async function apiRequest<T>(operation: AddinOperation, path: string, init?: Req
   return (await response.json()) as T;
 }
 
+/** Offer only sign-in providers actually enabled by this deployment. */
+export function getSignInOptions(): Promise<{ google: boolean }> {
+  return apiRequest("auth.options", "/auth/options", {
+    signal: AbortSignal.timeout(8_000),
+  });
+}
+
 /**
  * Options every add-in upload entry point accepts, matching the web client so
  * a pane can follow progress and cancel a batch it no longer needs.

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
@@ -84,22 +86,22 @@ export function PlaybookDetailsModal({
       onClose={() => {
         if (!saving) onClose();
       }}
-      breadcrumbs={["Playbooks", playbook.name || "Untitled playbook", "Details"]}
+      breadcrumbs={[uiText("Playbooks"), playbook.name || uiText("Untitled playbook"), uiText("Details")]}
       secondaryAction={{
-        label: "People",
+        label: uiText("People"),
         icon: <Users className="h-4 w-4" />,
         onClick: onPeople,
         disabled: saving,
       }}
       footerStatus={
         updated && !hasChanges ? (
-          <span className="text-sm text-gray-400">Updated</span>
+          <span className="text-sm text-gray-400">{uiText("Updated")}</span>
         ) : null
       }
       primaryAction={
         canEdit
           ? {
-              label: saving ? "Updating…" : "Update",
+              label: saving ? uiText("Updating…") : uiText("Update"),
               onClick: () => void save(),
               disabled: saving || !hasChanges || !trimmed.name,
             }

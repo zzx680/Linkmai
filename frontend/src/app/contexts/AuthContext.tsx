@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     createContext,
     useContext,
@@ -45,10 +47,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AUTH_SYNC_CHANNEL = "mike-auth-state";
 const AUTH_SYNC_STORAGE_KEY = "mike-auth-state-change";
 const SESSION_ERROR_MESSAGE =
-    "We could not check your session. Please try again.";
+    uiText("We could not check your session. Please try again.");
 /** One toast for the session, however many background checks fail. */
 const SESSION_TOAST_KEY = "auth-session";
-const EXPIRED_SESSION_MESSAGE = "Your session expired. Please log in again.";
+const EXPIRED_SESSION_MESSAGE = uiText("Your session expired. Please log in again.");
 /** Retry delays for a session check the server could not answer. */
 const SESSION_RETRY_BASE_MS = 1_000;
 const SESSION_RETRY_MAX_MS = 30_000;
@@ -337,7 +339,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setAuthError(null);
             broadcastAuthState("signed-out");
         } catch (error) {
-            setAuthError("Unable to sign out. Please try again.");
+            setAuthError(uiText("Unable to sign out. Please try again."));
             throw error;
         }
     }, [applySessionUser, broadcastAuthState]);

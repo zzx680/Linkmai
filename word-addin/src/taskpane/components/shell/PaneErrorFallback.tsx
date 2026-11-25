@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React from "react";
 import { PillButtonUI as PillButton } from "@mike/ui";
 
@@ -16,12 +18,12 @@ export function PaneErrorFallback({
       role="alert"
       className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center"
     >
-      <p className="text-sm font-medium text-foreground">Something went wrong</p>
+      <p className="text-sm font-medium text-foreground">{uiText("Something went wrong")}</p>
       <p className="text-xs text-muted-foreground">
-        The add-in hit an unexpected error. It has been reported.
+        {uiText("The add-in hit an unexpected error. It has been reported.")}
       </p>
       <PillButton type="button" tone="black" size="normal" onClick={resetError}>
-        Try again
+        {uiText("Try again")}
       </PillButton>
     </div>
   );

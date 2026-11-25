@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { ToggleSwitchUI } from "@mike/ui";
@@ -65,12 +67,12 @@ export function DocumentActions({
         if (cancelled) return;
         setWorkflowsError(
           reportFault(reason, {
-            fallback: "Mike couldn't load your quick actions. Try again.",
+            fallback: uiText("Mike couldn't load your quick actions. Try again."),
             operation: "quick_actions.run",
           }).message,
         );
         notifyError(reason, {
-          action: "load your quick actions",
+          action: uiText("load your quick actions"),
           dedupeKey: "quick-actions",
           page: "Quick actions",
           operation: "quick_actions.run",
@@ -140,7 +142,7 @@ export function DocumentActions({
     } catch (reason) {
       setSaveError(
         reportFault(reason, {
-          fallback: "Failed to save quick action",
+          fallback: uiText("Failed to save quick action"),
           operation: "quick_actions.run",
         }).message,
       );
@@ -168,7 +170,7 @@ export function DocumentActions({
     } catch (reason) {
       setCreateError(
         reportFault(reason, {
-          fallback: "Could not create quick action.",
+          fallback: uiText("Could not create quick action."),
           operation: "quick_actions.run",
         }).message,
       );
@@ -183,7 +185,7 @@ export function DocumentActions({
       className="flex h-full min-h-0 flex-col overflow-hidden p-3 @sm:p-4"
     >
       <PageTitle data-testid="quick-actions-page-title" className="mb-3 px-1">
-        Quick Actions
+        {uiText("Quick Actions")}
       </PageTitle>
 
       <label className="flex h-9 shrink-0 items-center gap-2 rounded-xl border border-white/70 bg-white/70 px-3 text-gray-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_7px_rgba(15,23,42,0.05)]">
@@ -191,7 +193,7 @@ export function DocumentActions({
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search quick actions..."
+          placeholder={uiText("Search quick actions...")}
           className="min-w-0 flex-1 border-0 bg-transparent text-xs text-gray-800 outline-none placeholder:text-gray-400"
         />
       </label>
@@ -199,7 +201,7 @@ export function DocumentActions({
       <div className="mt-2 min-h-0 flex-1 overflow-y-auto rounded-sm pb-3">
         {filteredActions.length === 0 ? (
           <p className="py-8 text-center text-sm text-gray-400">
-            No quick actions found.
+            {uiText("No quick actions found.")}
           </p>
         ) : (
           <div className="space-y-px">
@@ -220,7 +222,7 @@ export function DocumentActions({
                       : "shrink-0 text-xs text-gray-400"
                   }
                 >
-                  {action.enabled ? "Active" : "Inactive"}
+                  {action.enabled ? uiText("Active") : uiText("Inactive")}
                 </span>
               </button>
             ))}
@@ -239,10 +241,10 @@ export function DocumentActions({
         title={
           selectedAction
             ? quickActionDisplayName(selectedAction)
-            : "Quick action"
+            : uiText("Quick action")
         }
         primaryAction={{
-          label: saving ? "Saving…" : "Save",
+          label: saving ? uiText("Saving…") : uiText("Save"),
           disabled:
             saving || !selectedHasChanges || !selectedAction?.name?.trim(),
           onClick: () =>
@@ -297,9 +299,9 @@ export function DocumentActions({
           if (!creating) onCreateClose();
         }}
         parentLabel="Quick Actions"
-        title="New Quick Action"
+        title={uiText("New Quick Action")}
         primaryAction={{
-          label: creating ? "Creating…" : "Create",
+          label: creating ? uiText("Creating…") : uiText("Create"),
           disabled: creating || !workflowId || !name.trim(),
           onClick: () => void createAction(),
         }}
@@ -356,42 +358,42 @@ function QuickActionForm({
   return (
     <div data-modal-scroll="vertical" className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto pb-5">
       <div>
-        <ModalFieldLabel htmlFor="quick-action-name">Name</ModalFieldLabel>
+        <ModalFieldLabel htmlFor="quick-action-name">{uiText("Name")}</ModalFieldLabel>
         <ModalTextInput
           id="quick-action-name"
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
-          placeholder="Quick action name"
+          placeholder={uiText("Quick action name")}
           variant="minimal"
           autoFocus
         />
       </div>
       <div>
         <ModalFieldLabel htmlFor="quick-action-workflow">
-          Workflow used
+          {uiText("Workflow used")}
         </ModalFieldLabel>
         <ModalSelect
           id="quick-action-workflow"
           value={workflowId}
-          placeholder="Select an assistant workflow"
+          placeholder={uiText("Select an assistant workflow")}
           options={workflowOptions}
           onChange={onWorkflowChange}
         />
       </div>
       <div>
-        <ModalFieldLabel htmlFor="quick-action-prompt">Prompt</ModalFieldLabel>
+        <ModalFieldLabel htmlFor="quick-action-prompt">{uiText("Prompt")}</ModalFieldLabel>
         <ModalTextArea
           id="quick-action-prompt"
           value={prompt}
           onChange={(event) => onPromptChange(event.target.value)}
           className="h-28 min-h-28"
-          placeholder="Prompt placed in the Assistant composer"
+          placeholder={uiText("Prompt placed in the Assistant composer")}
         />
       </div>
       {enabled !== undefined && onEnabledChange && (
         <ToggleRow
-          label="Active"
-          caption="Show this action in the Assistant initial view."
+          label={uiText("Active")}
+          caption={uiText("Show this action in the Assistant initial view.")}
           checked={enabled}
           onChange={onEnabledChange}
         />

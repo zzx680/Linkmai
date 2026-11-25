@@ -64,7 +64,7 @@ describe("OnboardingPracticePage", () => {
       screen.getByRole("textbox", { name: "Other jurisdiction" }),
       "England and Wales",
     );
-    await user.click(screen.getByRole("button", { name: "Title" }));
+    await user.click(screen.getByRole("button", { name: "Professional title" }));
     await user.click(
       screen.getByRole("menuitemradio", { name: "Senior Associate" }),
     );

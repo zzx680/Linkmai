@@ -1,3 +1,5 @@
+
+import { getUiLocale, uiText } from "./localization";
 /**
  * Turns any thrown value into something a person can act on.
  *
@@ -12,7 +14,7 @@
  * framework-free and must not import from an application (`frontend/src/app/` or `word-addin/src/`).
  */
 
-export const SUPPORT_EMAIL = "support@mikeoss.com";
+export const SUPPORT_EMAIL = "";
 
 export type UserErrorKind =
     | "offline"
@@ -80,7 +82,7 @@ export class UserVisibleError extends Error {
 }
 
 export const GENERIC_FAILURE_MESSAGE =
-    "Something went wrong. Try again, and contact support if it keeps happening.";
+    uiText("Something went wrong. Try again, and contact support if it keeps happening.");
 
 const KIND_TITLES: Record<UserErrorKind, string> = {
     offline: "You're offline",
@@ -113,7 +115,7 @@ export function networkMessage(origin?: string): string {
     if (origin) {
         return `Mike couldn't reach the server at ${origin}. Check your connection and that the server is running, then try again.`;
     }
-    return "Mike couldn't reach the server. Check your connection and try again.";
+    return uiText("Mike couldn't reach the server. Check your connection and try again.");
 }
 
 /**
@@ -121,22 +123,22 @@ export function networkMessage(origin?: string): string {
  * replaces every 5xx body with it, says the same sentence.
  */
 export const SERVER_FAILURE_MESSAGE =
-    "Something went wrong on our side. Try again.";
+    uiText("Something went wrong on our side. Try again.");
 
 const KIND_MESSAGES: Record<UserErrorKind, string> = {
-    offline: "Your device is offline. Check your connection and try again.",
+    offline: uiText("Your device is offline. Check your connection and try again."),
     network: networkMessage(),
-    timeout: "The server took too long to respond. Try again.",
-    aborted: "The request was cancelled.",
-    unauthenticated: "Your session has expired. Sign in again to continue.",
-    forbidden: "You don't have permission to do this.",
-    not_found: "That item no longer exists or was moved.",
-    conflict: "This was changed somewhere else. Refresh and try again.",
-    validation: "Some of the information provided isn't valid.",
-    payload_too_large: "That's too large to upload.",
-    rate_limited: "Too many requests. Wait a moment and try again.",
+    timeout: uiText("The server took too long to respond. Try again."),
+    aborted: uiText("The request was cancelled."),
+    unauthenticated: uiText("Your session has expired. Sign in again to continue."),
+    forbidden: uiText("You don't have permission to do this."),
+    not_found: uiText("That item no longer exists or was moved."),
+    conflict: uiText("This was changed somewhere else. Refresh and try again."),
+    validation: uiText("Some of the information provided isn't valid."),
+    payload_too_large: uiText("That's too large to upload."),
+    rate_limited: uiText("Too many requests. Wait a moment and try again."),
     unavailable:
-        "Mike is temporarily unavailable. Try again in a moment.",
+        uiText("Mike is temporarily unavailable. Try again in a moment."),
     server: SERVER_FAILURE_MESSAGE,
     unknown: GENERIC_FAILURE_MESSAGE,
 };
@@ -305,7 +307,9 @@ function withoutTrailingPunctuation(text: string): string {
 function titleFor(kind: UserErrorKind, action?: string): string {
     if (action) {
         const trimmed = withoutTrailingPunctuation(action.trim());
-        if (trimmed) return `Couldn't ${trimmed}`;
+        if (trimmed) return getUiLocale() === "zh-CN"
+            ? /\p{Script=Han}/u.test(uiText(trimmed)) ? `无法${uiText(trimmed)}` : uiText("Something went wrong")
+            : `Couldn't ${trimmed}`;
     }
     return KIND_TITLES[kind];
 }
@@ -380,7 +384,7 @@ export function describeError(
     return {
         kind,
         title: titleFor(kind, options.action),
-        message,
+        message: uiText(message),
         retryable,
         supportable: SUPPORTABLE.has(kind),
         status,
@@ -401,6 +405,8 @@ export function supportPageContext(page: string): string {
 }
 
 export interface SupportMailtoContext {
+    /** This deployment's verified support mailbox. Empty means unconfigured. */
+    supportEmail?: string;
     /** Where it happened: a page URL or a screen name. */
     page?: string;
     when?: Date;
@@ -449,11 +455,13 @@ export function buildSupportMailto(
     >,
     context: SupportMailtoContext = {},
 ): string {
+    const email = context.supportEmail ?? SUPPORT_EMAIL;
+    if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) return "";
     const when = context.when ?? new Date();
     const lines: string[] = [
-        "Hi Mike team,",
+        "灵迈支持团队：",
         "",
-        "I ran into a problem and need help.",
+        "我在使用时遇到问题，需要协助。",
         "",
         `What happened: ${error.title}`,
         `Message shown: ${error.message}`,
@@ -464,12 +472,12 @@ export function buildSupportMailto(
     lines.push(...supportDetailLines(error, { ...context, when }));
     lines.push("", "Thanks,");
 
-    const subject = `Mike support: ${error.title}`;
+    const subject = `灵迈技术支持：${error.title}`;
     const params = new URLSearchParams({
         subject,
         body: lines.join("\n"),
     });
     // URLSearchParams encodes spaces as "+", which mail clients render
     // literally. Percent-encode them so the draft reads as typed.
-    return `mailto:${SUPPORT_EMAIL}?${params.toString().replace(/\+/g, "%20")}`;
+    return `mailto:${email}?${params.toString().replace(/\+/g, "%20")}`;
 }

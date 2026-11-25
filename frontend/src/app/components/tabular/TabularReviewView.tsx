@@ -1,4 +1,6 @@
 "use client";
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 
 import { RowActionMenuItems } from "@/app/components/shared/RowActions";
@@ -360,7 +362,7 @@ export function TRView({ reviewId, projectId }: Props) {
                             notifyError(err, {
                                 action: "reconnect to the running review",
                                 fallback:
-                                    "Mike lost contact with the run in progress. Results already saved are still here.",
+                                    uiText("Mike lost contact with the run in progress. Results already saved are still here."),
                                 dedupeKey: `tr-resume:${reviewId}`,
                                 // Returned, so a failed retry is reported
                                 // again by notifyError's Retry wrapper.
@@ -631,7 +633,7 @@ export function TRView({ reviewId, projectId }: Props) {
             notifyError(err, {
                 action: "add the uploaded files to this review",
                 fallback:
-                    "The files uploaded, but the review could not be refreshed. Reload to see them.",
+                    uiText("The files uploaded, but the review could not be refreshed. Reload to see them."),
                 // Re-read, never re-PATCH: each upload already attached
                 // itself, and handleAddDocuments from this closure would
                 // resend the document set and column config as they were
@@ -710,7 +712,7 @@ export function TRView({ reviewId, projectId }: Props) {
                     notifyError(err, {
                         action: "follow this cell's regeneration",
                         fallback:
-                            "The cell is still being generated, but Mike lost contact with the run. Reload to see the result.",
+                            uiText("The cell is still being generated, but Mike lost contact with the run. Reload to see the result."),
                         dedupeKey: `tr-resume:${reviewId}`,
                     }),
                 );
@@ -846,7 +848,7 @@ export function TRView({ reviewId, projectId }: Props) {
                             typeof data.message === "string" &&
                             data.message.trim()
                                 ? data.message.trim()
-                                : "The review could not be completed. Please try again.",
+                                : uiText("The review could not be completed. Please try again."),
                         );
                     }
                 }
@@ -856,7 +858,7 @@ export function TRView({ reviewId, projectId }: Props) {
                 notifyError(err, {
                     action: "show a generated cell",
                     fallback:
-                        "A result arrived that Mike couldn't display. Reload to see it.",
+                        uiText("A result arrived that Mike couldn't display. Reload to see it."),
                     dedupeKey: `tr-cell-update:${reviewId}`,
                 });
             }
@@ -1104,7 +1106,7 @@ export function TRView({ reviewId, projectId }: Props) {
                         notifyError(err, {
                             action: "refresh the review",
                             fallback:
-                                "The table may be out of date. Reload to see the latest results.",
+                                uiText("The table may be out of date. Reload to see the latest results."),
                             dedupeKey: `tr-refresh:${reviewId}`,
                             onRetry: () => {
                                 void retryRef.current?.reloadReview();
@@ -1268,7 +1270,7 @@ export function TRView({ reviewId, projectId }: Props) {
             setCells((prev) => prev.filter(removal.keepsCell));
             notifyError(err, {
                 action: "add the column",
-                fallback: "This column could not be saved. Try again.",
+                fallback: uiText("This column could not be saved. Try again."),
             });
         } finally {
             setSavingColumn(false);
@@ -1304,7 +1306,7 @@ export function TRView({ reviewId, projectId }: Props) {
             }
             notifyError(err, {
                 action: "save the column",
-                fallback: "This column could not be saved. Try again.",
+                fallback: uiText("This column could not be saved. Try again."),
                 onRetry: () => retryRef.current?.updateColumn(nextColumn),
             });
         }
@@ -1426,7 +1428,7 @@ export function TRView({ reviewId, projectId }: Props) {
                         ? "remove the document"
                         : "remove those documents",
                 fallback:
-                    "The documents were not removed and are still selected.",
+                    uiText("The documents were not removed and are still selected."),
             });
         }
     }
@@ -1542,7 +1544,7 @@ export function TRView({ reviewId, projectId }: Props) {
         if (!canEditDetails) {
             if (roleKnown) {
                 setOwnerOnlyAction({
-                    action: "edit tabular review details",
+                    action: uiText("edit tabular review details"),
                     requiredRole: "editor",
                 });
             }
@@ -1566,9 +1568,9 @@ export function TRView({ reviewId, projectId }: Props) {
         // gets an explanation instead of an unexplained failed save.
         if (projectChanged && !canMoveReview()) {
             setOwnerOnlyAction({
-                title: "Review creator only",
+                title: uiText("Review creator only"),
                 message:
-                    "Only the person who created this review can move it to another project.",
+                    uiText("Only the person who created this review can move it to another project."),
             });
             return;
         }
@@ -1653,7 +1655,7 @@ export function TRView({ reviewId, projectId }: Props) {
                     notifyError(err, {
                         action: "clear the previous results",
                         fallback:
-                            "The workflow's columns were applied, but the old results could not be cleared. Clear them from the Actions menu.",
+                            uiText("The workflow's columns were applied, but the old results could not be cleared. Clear them from the Actions menu."),
                     });
                 }
             }
@@ -1669,7 +1671,7 @@ export function TRView({ reviewId, projectId }: Props) {
                 } catch (err) {
                     notifyError(err, {
                         action: "refresh the applied workflow",
-                        fallback: "The workflow was applied, but the latest results could not be loaded.",
+                        fallback: uiText("The workflow was applied, but the latest results could not be loaded."),
                         onRetry: refreshAppliedWorkflow,
                     });
                 }
@@ -1730,7 +1732,7 @@ export function TRView({ reviewId, projectId }: Props) {
                         ...(projectId
                             ? [
                                   {
-                                      label: "Projects",
+                                      label: uiText("Projects"),
                                       onClick: () => router.push("/projects"),
                                   },
                                   loading
@@ -1741,7 +1743,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                                 router.push(
                                                     `/projects/${projectId}`,
                                                 ),
-                                            title: "Back to project",
+                                            title: uiText("Back to project"),
                                         }
                                       : {
                                             label: project?.name ?? "",
@@ -1749,26 +1751,26 @@ export function TRView({ reviewId, projectId }: Props) {
                                                 router.push(
                                                     `/projects/${projectId}`,
                                                 ),
-                                            title: "Back to project",
+                                            title: uiText("Back to project"),
                                         },
                               ]
                             : [
                                   {
-                                      label: "Tabular Reviews",
+                                      label: uiText("Tabular Reviews"),
                                       onClick: () =>
                                           router.push("/tabular-reviews"),
-                                      title: "Back to Tabular Reviews",
+                                      title: uiText("Back to Tabular Reviews"),
                                   },
                               ]),
                         ...(projectId
                             ? [
                                   {
-                                      label: "Tabular Reviews",
+                                      label: uiText("Tabular Reviews"),
                                       onClick: () =>
                                           router.push(
                                               `/projects/${projectId}/tabular-reviews`,
                                           ),
-                                      title: "Back to Tabular Reviews",
+                                      title: uiText("Back to Tabular Reviews"),
                                   },
                               ]
                             : []),
@@ -1778,7 +1780,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                   skeletonClassName: "w-40",
                               }
                             : {
-                                  label: review?.title || "Untitled Review",
+                                  label: review?.title || uiText("Untitled Review"),
                               },
                     ]}
                     actionGroups={[
@@ -1787,7 +1789,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                 type: "search",
                                 value: search,
                                 onChange: setSearch,
-                                placeholder: "Search rows…",
+                                placeholder: uiText("Search rows…"),
                             },
                             {
                                 type: "custom",
@@ -1796,26 +1798,26 @@ export function TRView({ reviewId, projectId }: Props) {
                                         items={[
                                             ...(!projectId
                                                 ? [{
-                                                      label: "Access",
+                                                      label: uiText("Access"),
                                                       icon: Users,
                                                       onSelect: () => setAccessModalOpen(true),
                                                       disabled: loading,
                                                   }]
                                                 : []),
                                             {
-                                                label: "Edit details",
+                                                label: uiText("Edit details"),
                                                 icon: Pencil,
                                                 onSelect: requestReviewDetails,
                                                 disabled: !roleKnown,
                                             },
                                             {
-                                                label: "Apply workflow",
+                                                label: uiText("Apply workflow"),
                                                 icon: WandSparkles,
                                                 onSelect: requestWorkflow,
                                                 disabled: !roleKnown,
                                             },
                                             {
-                                                label: "Export",
+                                                label: uiText("Export"),
                                                 icon: Download,
                                                 onSelect: () =>
                                                     exportTabularReviewToExcel({
@@ -1831,7 +1833,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                                     rows.length === 0,
                                             },
                                             {
-                                                label: "Clear results",
+                                                label: uiText("Clear results"),
                                                 icon: X,
                                                 onSelect: handleClearAllResults,
                                                 disabled:
@@ -1840,7 +1842,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                                     cellMutationsBlocked,
                                             },
                                             {
-                                                label: "Delete",
+                                                label: uiText("Delete"),
                                                 icon: Trash2,
                                                 onSelect: requestReviewDelete,
                                                 variant: "danger",
@@ -1864,8 +1866,8 @@ export function TRView({ reviewId, projectId }: Props) {
                                         columns.length === 0 ||
                                         rows.length === 0,
                                     title: chatOpen
-                                        ? "Close chat"
-                                        : "Open chat",
+                                        ? uiText("Close chat")
+                                        : uiText("Open chat"),
                                     icon: chatOpen ? (
                                         <MessageSquareX className="h-4 w-4" />
                                     ) : (
@@ -1873,7 +1875,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                     ),
                                     label: (
                                         <span className="hidden sm:inline">
-                                            Chat
+                                            {uiText("Chat")}
                                         </span>
                                     ),
                                 },
@@ -1896,7 +1898,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                 <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-2">
                                     <fieldset
                                         disabled={loading}
-                                        aria-label="Review generation"
+                                        aria-label={uiText("Review generation")}
                                         // The group owns the glass surface; its buttons only add hover states.
                                         className={[
                                             `flex h-7 min-w-0 max-w-full items-center rounded-full p-0 ${LIQUID_GLASS_SUBTLE_CLASS}`,
@@ -1935,10 +1937,10 @@ export function TRView({ reviewId, projectId }: Props) {
                                             }
                                             title={
                                                 stoppingGeneration
-                                                    ? "Stopping generation"
+                                                    ? uiText("Stopping generation")
                                                     : generating
-                                                      ? "Stop generation"
-                                                      : "Run review"
+                                                      ? uiText("Stop generation")
+                                                      : uiText("Run review")
                                             }
                                             className="shrink-0 whitespace-nowrap rounded-l-none"
                                         >
@@ -1949,7 +1951,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                             ) : (
                                                 <Play aria-hidden="true" className="h-3.5 w-3.5" />
                                             )}
-                                            {stoppingGeneration ? "Stopping…" : generating ? "Stop" : "Run"}
+                                            {stoppingGeneration ? uiText("Stopping…") : generating ? uiText("Stop") : uiText("Run")}
                                         </TabPillButtonUI>
                                     </fieldset>
                                     <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
@@ -2003,7 +2005,7 @@ export function TRView({ reviewId, projectId }: Props) {
                                                 className="pl-2"
                                             >
                                                 <Plus aria-hidden="true" className="h-3.5 w-3.5" />
-                                                Add Columns
+                                                {uiText("Add Columns")}
                                             </TabPillButtonUI>
                                         )}
                                         {!loading && selectedRowIds.length > 0 && (
@@ -2202,14 +2204,14 @@ export function TRView({ reviewId, projectId }: Props) {
                         onClose={() => setAddDocsOpen(false)}
                         onSelect={(docs: Document[]) => handleAddDocuments(docs)}
                         breadcrumb={[
-                            "Projects",
+                            uiText("Projects"),
                             project.name +
                                 (project.cm_number
                                     ? ` (#${project.cm_number})`
                                     : ""),
-                            "Tabular Reviews",
-                            ...(review ? [review.title || "Untitled Review"] : []),
-                            "Add Documents",
+                            uiText("Tabular Reviews"),
+                            ...(review ? [review.title || uiText("Untitled Review")] : []),
+                            uiText("Add Documents"),
                         ]}
                         uploadStateId={`tabular-review:${review?.id ?? "new"}:project`}
                         projectId={project.id}
@@ -2224,9 +2226,9 @@ export function TRView({ reviewId, projectId }: Props) {
                         onClose={() => setAddDocsOpen(false)}
                         onSelect={(docs: Document[]) => handleAddDocuments(docs)}
                         breadcrumb={[
-                            "Tabular Reviews",
-                            ...(review ? [review.title || "Untitled Review"] : []),
-                            "Add Documents",
+                            uiText("Tabular Reviews"),
+                            ...(review ? [review.title || uiText("Untitled Review")] : []),
+                            uiText("Add Documents"),
                         ]}
                         uploadStateId={`tabular-review:${review?.id ?? "new"}:library`}
                         tabs={["files", "projects"]}
@@ -2254,9 +2256,9 @@ export function TRView({ reviewId, projectId }: Props) {
                 // cannot offer the caller a Remove that locks them out.
                 currentUserId={user?.id ?? null}
                 breadcrumb={[
-                    "Tabular Reviews",
-                    review?.title || "Untitled Review",
-                    "Access",
+                    uiText("Tabular Reviews"),
+                    review?.title || uiText("Untitled Review"),
+                    uiText("Access"),
                 ]}
                 access={{
                     grants: grants ?? [],
@@ -2296,25 +2298,25 @@ export function TRView({ reviewId, projectId }: Props) {
                 breadcrumbs={[
                     ...(project
                         ? [
-                              "Projects",
+                              uiText("Projects"),
                               project.name +
                                   (project.cm_number
                                       ? ` (#${project.cm_number})`
                                       : ""),
                           ]
                         : []),
-                    "Tabular Reviews",
-                    review?.title || "Untitled Review",
-                    "Add workflow",
+                    uiText("Tabular Reviews"),
+                    review?.title || uiText("Untitled Review"),
+                    uiText("Add workflow"),
                 ]}
                 applying={applyingWorkflow}
             />
 
             <ConfirmPopup
                 open={deleteReviewConfirmOpen}
-                title="Delete tabular review?"
-                message="This will permanently delete the tabular review and its generated cells."
-                confirmLabel="Delete"
+                title={uiText("Delete tabular review?")}
+                message={uiText("This will permanently delete the tabular review and its generated cells.")}
+                confirmLabel={uiText("Delete")}
                 confirmVariant="danger"
                 confirmStatus={
                     deleteReviewStatus === "deleting"
@@ -2323,7 +2325,7 @@ export function TRView({ reviewId, projectId }: Props) {
                           ? "complete"
                           : "idle"
                 }
-                cancelLabel="Cancel"
+                cancelLabel={uiText("Cancel")}
                 onCancel={() => {
                     if (deleteReviewStatus === "deleting") return;
                     setDeleteReviewConfirmOpen(false);
@@ -2340,19 +2342,19 @@ export function TRView({ reviewId, projectId }: Props) {
             <WarningPopup
                 open={generationError !== null}
                 onClose={() => setGenerationError(null)}
-                title="Review stopped"
+                title={uiText("Review stopped")}
                 message={generationError}
             />
             <ApiKeyMissingPopup
                 open={apiKeyWarning !== null}
                 title={
                     apiKeyWarning?.kind === "rejected"
-                        ? "API key rejected"
+                        ? uiText("API key rejected")
                         : undefined
                 }
                 message={
                     apiKeyWarning?.kind === "rejected"
-                        ? `The ${apiKeyWarning.provider ? providerLabel(apiKeyWarning.provider) : "model provider"} API key was rejected. If you added your own key, check it in Settings → Bring Your Own Keys; otherwise contact your administrator.`
+                        ? uiText`The ${apiKeyWarning.provider ? providerLabel(apiKeyWarning.provider) : uiText("model provider")} API key was rejected. If you added your own key, check it in Settings → Bring Your Own Keys; otherwise contact your administrator.`
                         : undefined
                 }
                 onClose={() => setApiKeyWarning(null)}
@@ -2365,20 +2367,20 @@ export function TRView({ reviewId, projectId }: Props) {
 
             <WarningPopup
                 open={modelRequiredWarning}
-                title="Select a model"
-                message="Select a model for this tabular review before running it."
+                title={uiText("Select a model")}
+                message={uiText("Select a model for this tabular review before running it.")}
                 onClose={() => setModelRequiredWarning(false)}
             />
 
             <WarningPopup
                 open={generationGuard === "running"}
-                title="Tabular review is already running"
-                message="This review is being run in another tab or by another collaborator. Wait for that run to finish or be stopped before trying again."
+                title={uiText("Tabular review is already running")}
+                message={uiText("This review is being run in another tab or by another collaborator. Wait for that run to finish or be stopped before trying again.")}
                 onClose={() => {
                     if (!reloadingLatestReview) setGenerationGuard(null);
                 }}
                 primaryAction={{
-                    label: reloadingLatestReview ? "Checking…" : "Check again",
+                    label: reloadingLatestReview ? uiText("Checking…") : uiText("Check again"),
                     disabled: reloadingLatestReview,
                     onClick: () => void loadLatestReview(),
                 }}
@@ -2386,13 +2388,13 @@ export function TRView({ reviewId, projectId }: Props) {
 
             <WarningPopup
                 open={generationGuard === "stale"}
-                title="A newer version is available"
-                message="Load the latest version of this tabular review before running it."
+                title={uiText("A newer version is available")}
+                message={uiText("Load the latest version of this tabular review before running it.")}
                 onClose={() => {
                     if (!reloadingLatestReview) setGenerationGuard(null);
                 }}
                 primaryAction={{
-                    label: reloadingLatestReview ? "Loading…" : "Load latest",
+                    label: reloadingLatestReview ? uiText("Loading…") : uiText("Load latest"),
                     disabled: reloadingLatestReview,
                     onClick: () => void loadLatestReview(),
                 }}

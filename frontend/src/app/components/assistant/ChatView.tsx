@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { findPendingAskInput } from "@/app/lib/pendingAskInput";
 import {
     useCallback,
@@ -357,18 +359,18 @@ export function AssistantChatColumn({
                 setActionGate({
                     action: "open this document",
                     requiredRole: "editor",
-                    title: "Document not shared",
+                    title: uiText("Document not shared"),
                     message:
-                        "The person who shared this chat has not shared its documents.",
+                        uiText("The person who shared this chat has not shared its documents."),
                 });
                 return;
             }
             setActionError({
-                title: "Document unavailable",
+                title: uiText("Document unavailable"),
                 message:
                     status === "denied"
-                        ? "This document is no longer available."
-                        : "This document could not be opened. Please try again.",
+                        ? uiText("This document is no longer available.")
+                        : uiText("This document could not be opened. Please try again."),
             });
         },
         [activeChat?.project_id, activeChatRole],
@@ -727,7 +729,7 @@ export function AssistantChatColumn({
         if (!activeChat) return;
         if (!can(activeChatRole, "access.manage")) {
             setActionGate({
-                action: "rename this chat",
+                action: uiText("rename this chat"),
                 requiredRole: "owner",
             });
             return;
@@ -744,10 +746,10 @@ export function AssistantChatColumn({
         } catch (error) {
             setRenameOpen(false);
             setActionError({
-                title: "Chat not renamed",
+                title: uiText("Chat not renamed"),
                 message: userFacingApiError(
                     error,
-                    "The chat could not be renamed. Please try again.",
+                    uiText("The chat could not be renamed. Please try again."),
                 ),
             });
         } finally {
@@ -759,7 +761,7 @@ export function AssistantChatColumn({
         if (!activeChat) return;
         if (!can(activeChatRole, "container.delete")) {
             setActionGate({
-                action: "delete this chat",
+                action: uiText("delete this chat"),
                 requiredRole: "owner",
             });
             return;
@@ -770,10 +772,10 @@ export function AssistantChatColumn({
             else router.push("/assistant");
         } catch (error) {
             setActionError({
-                title: "Chat not deleted",
+                title: uiText("Chat not deleted"),
                 message: userFacingApiError(
                     error,
-                    "The chat could not be deleted. Please try again.",
+                    uiText("The chat could not be deleted. Please try again."),
                 ),
             });
         }
@@ -781,26 +783,26 @@ export function AssistantChatColumn({
 
     const chatActionItems: HeaderActionsMenuItem[] = can(activeChatRole, "access.manage") ? [
         {
-            label: "Share",
+            label: uiText("Share"),
             icon: Users,
             onSelect: handleShareChat,
             disabled: !activeChat,
         },
         {
-            label: "Rename",
+            label: uiText("Rename"),
             icon: Pencil,
             onSelect: () => void handleRenameChat(),
             disabled: !activeChat,
         },
         {
-            label: "Delete",
+            label: uiText("Delete"),
             icon: Trash2,
             onSelect: () => void handleDeleteChat(),
             disabled: !activeChat,
             variant: "danger",
         },
     ] : canLeaveChat ? [{
-        label: "Leave",
+        label: uiText("Leave"),
         icon: LogOut,
         onSelect: () => setLeaveChatId(permissionChat?.id ?? null),
     }] : [];
@@ -825,8 +827,8 @@ export function AssistantChatColumn({
                     historyMenu(
                         <button
                             type="button"
-                            aria-label="Chat history"
-                            title="Chat history"
+                            aria-label={uiText("Chat history")}
+                            title={uiText("Chat history")}
                             className={headerButtonClassName({
                                 iconOnly: true,
                             })}
@@ -837,8 +839,8 @@ export function AssistantChatColumn({
                 ) : (
                     <HeaderButtonUI
                         iconOnly
-                        aria-label="New chat"
-                        title="New chat"
+                        aria-label={uiText("New chat")}
+                        title={uiText("New chat")}
                         onClick={onNewChat}
                     >
                         <Plus className="h-4 w-4" />
@@ -853,7 +855,7 @@ export function AssistantChatColumn({
                     className="relative inline-flex"
                 >
                 <HeaderActionsMenu
-                    title="Chat actions"
+                    title={uiText("Chat actions")}
                     // One header menu at a time: opening another closes it.
                     modal={false}
                     onCloseAutoFocus={(event) => {
@@ -868,7 +870,7 @@ export function AssistantChatColumn({
                         ...(onLoadChat && !isNewChat
                             ? [
                                   {
-                                      label: "Load chat",
+                                      label: uiText("Load chat"),
                                       icon: History,
                                       onSelect: () => {
                                           loadChatRequestedRef.current = slot;
@@ -878,8 +880,8 @@ export function AssistantChatColumn({
                             : []),
                         {
                             label: panelVisible
-                                ? "Close side panel"
-                                : "Open side panel",
+                                ? uiText("Close side panel")
+                                : uiText("Open side panel"),
                             icon: panelVisible ? PanelRightClose : PanelRightOpen,
                             onSelect: panelVisible ? closePanel : showPanel,
                         },
@@ -887,7 +889,7 @@ export function AssistantChatColumn({
                         ...(onOpenSideChat && !mobile
                             ? [
                                   {
-                                      label: "Open side chat",
+                                      label: uiText("Open side chat"),
                                       icon: MessageSquare,
                                       onSelect: onOpenSideChat,
                                   },
@@ -896,14 +898,14 @@ export function AssistantChatColumn({
                         ...(onCloseSideChat
                             ? [
                                   {
-                                      label: "Close side chat",
+                                      label: uiText("Close side chat"),
                                       icon: X,
                                       onSelect: onCloseSideChat,
                                   },
                               ]
                             : []),
                         {
-                            label: "Edit quick actions",
+                            label: uiText("Edit quick actions"),
                             icon: Zap,
                             onSelect: () => setQuickActionsModalOpen(true),
                         },
@@ -991,7 +993,7 @@ export function AssistantChatColumn({
             (playbook) =>
                 input.attachPlaybook({
                     id: playbook.id,
-                    title: playbook.name || "Untitled playbook",
+                    title: playbook.name || uiText("Untitled playbook"),
                 }),
             (error) => notifyError(error, { action: "attach the playbook" }),
         );
@@ -1245,7 +1247,7 @@ export function AssistantChatColumn({
                             >
                                 <button
                                     type="button"
-                                    aria-label="Scroll to bottom"
+                                    aria-label={uiText("Scroll to bottom")}
                                     onClick={scrollToBottom}
                                     className={`cursor-pointer rounded-full p-2 transition-all ${LIQUID_GLASS_TRANSLUCENT_ACTION_CLASS}`}
                                 >
@@ -1344,11 +1346,11 @@ export function AssistantChatColumn({
 
             <ApiKeyMissingPopup
                 open={rejectedApiKey !== null}
-                title="API key rejected"
-                message={`${
+                title={uiText("API key rejected")}
+                message={uiText`${
                     rejectedKeyProvider
                         ? `The ${providerLabel(rejectedKeyProvider)} API key`
-                        : "That API key"
+                        : uiText("That API key")
                 } was rejected. If it is your own key, check it in Settings; otherwise contact your administrator.`}
                 onClose={() => onDismissInvalidApiKey?.()}
             />
@@ -1363,8 +1365,8 @@ export function AssistantChatColumn({
             />}
             <RenameModal
                 open={renameOpen}
-                breadcrumbs={["Assistant", "Rename Chat"]}
-                label="Chat title"
+                breadcrumbs={[uiText("Assistant"), uiText("Rename Chat")]}
+                label={uiText("Chat title")}
                 initialValue={activeChat?.title?.trim() || "Untitled chat"}
                 saving={renaming}
                 onClose={() => {
@@ -1374,7 +1376,7 @@ export function AssistantChatColumn({
             />
             <WarningPopup
                 open={!!actionError}
-                title={actionError?.title ?? "Chat action failed"}
+                title={actionError?.title ?? uiText("Chat action failed")}
                 message={actionError?.message ?? null}
                 onClose={() => setActionError(null)}
             />

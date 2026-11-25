@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
 import {
@@ -206,8 +208,8 @@ export function PersonFilter({
               size="sm"
               value={search}
               onValueChange={setSearch}
-              label="Search people"
-              placeholder="Search name or email"
+              label={uiText("Search people")}
+              placeholder={uiText("Search name or email")}
               maxLength={200}
               onKeyDown={(event) => {
                 if (event.key === "ArrowDown") {
@@ -222,7 +224,7 @@ export function PersonFilter({
           <div
             ref={list}
             role="group"
-            aria-label="People"
+            aria-label={uiText("People")}
             className="max-h-72 overflow-y-auto overscroll-contain"
             onScroll={(event) => {
               const target = event.currentTarget;
@@ -267,7 +269,7 @@ export function PersonFilter({
               className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left"
               onClick={() => choose(null)}
             >
-              All people{" "}
+              {uiText("All people")}{" "}
               {!value && <Check aria-hidden className="h-3.5 w-3.5" />}
             </DropdownButton>
             {users.map((user) => (
@@ -299,7 +301,7 @@ export function PersonFilter({
             {loading && !users.length ? (
               <div
                 role="status"
-                aria-label="Loading people"
+                aria-label={uiText("Loading people")}
                 className="space-y-4 px-3 py-2"
               >
                 {[0, 1, 2].map((row) => (
@@ -315,7 +317,7 @@ export function PersonFilter({
             ) : null}
             {!loading && !users.length && errorOffset === null && (
               <p className="px-3 py-4 text-center text-xs text-gray-500">
-                No people found.
+                {uiText("No people found.")}
               </p>
             )}
             {errorOffset !== null ? (
@@ -323,12 +325,12 @@ export function PersonFilter({
                 role="alert"
                 className="px-3 py-3 text-center text-xs text-gray-500"
               >
-                Could not load people.
+                {uiText("Could not load people.")}
                 <DropdownButton
                   className="mt-2 block w-full rounded-lg py-2"
                   onClick={() => void load(errorOffset)}
                 >
-                  Try again
+                  {uiText("Try again")}
                 </DropdownButton>
               </div>
             ) : nextOffset !== null ? (
@@ -340,7 +342,7 @@ export function PersonFilter({
                 {loading && (
                   <Loader2 aria-hidden className="h-3.5 w-3.5 animate-spin" />
                 )}
-                {loading ? "Loading people…" : "Load more people"}
+                {loading ? uiText("Loading people…") : uiText("Load more people")}
               </DropdownButton>
             ) : null}
           </div>

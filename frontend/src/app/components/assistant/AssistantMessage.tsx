@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useLatestRef } from "@/app/hooks/useLatestRef";
 import { useMarkdownCheckpoint } from "./message/markdownCheckpoint";
 import { createCitationPreprocessor } from "./message/citationPreprocessor";
@@ -320,7 +322,7 @@ function AssistantMessageImpl({
             notifyError(err, {
                 action: "copy this answer",
                 fallback:
-                    "Mike couldn't write to the clipboard. Check your browser's clipboard permission, then try again.",
+                    uiText("Mike couldn't write to the clipboard. Check your browser's clipboard permission, then try again."),
                 support: false,
             });
         }
@@ -452,14 +454,14 @@ function AssistantMessageImpl({
                     showConnector={showConnector}
                     isStreaming
                 >
-                    <span>Thinking...</span>
+                    <span>{uiText("Thinking...")}</span>
                 </EventBlock>
             );
         }
         if (event.type === "mcp_tool_call") {
             const isError = event.status === "error";
             const label = event.interrupted
-                ? "Connector call stopped"
+                ? uiText("Connector call stopped")
                 : event.connector_name
                   ? `${event.connector_name}: ${connectorToolLabel(event.tool_name, event.tool_title)}`
                   : toolCallLabel(event.openai_tool_name);
@@ -476,7 +478,7 @@ function AssistantMessageImpl({
                             className="h-3.5 w-3.5 shrink-0"
                         />
                         <span className="min-w-0 break-words">
-                            {event.isStreaming ? "Using connector..." : label}
+                            {event.isStreaming ? uiText("Using connector...") : label}
                         </span>
                     </span>
                     {isError && event.error && (
@@ -678,12 +680,12 @@ function AssistantMessageImpl({
                     key={globalIdx}
                     label={
                         event.isStreaming
-                            ? "Searching case law"
+                            ? uiText("Searching case law")
                             : event.error
-                              ? "Case law search failed"
+                              ? uiText("Case law search failed")
                               : event.interrupted
-                                ? "Case law search stopped"
-                                : "Searched case law"
+                                ? uiText("Case law search stopped")
+                                : uiText("Searched case law")
                     }
                     detail={detail}
                     isStreaming={!!event.isStreaming}
@@ -696,7 +698,7 @@ function AssistantMessageImpl({
         if (event.type === "courtlistener_get_cases") {
             const caseCount = event.case_count ?? event.cluster_ids.length;
             const displayLabel = `${caseCount} ${
-                caseCount === 1 ? "case" : "cases"
+                caseCount === 1 ? uiText("case") : uiText("cases")
             }`;
             const detail = event.error ? event.error : undefined;
             const items: CourtListenerBlockItem[] =
@@ -720,9 +722,9 @@ function AssistantMessageImpl({
                         event.isStreaming
                             ? `Fetching ${displayLabel}`
                             : event.error
-                              ? "Case fetch failed"
+                              ? uiText("Case fetch failed")
                               : event.interrupted
-                                ? `Fetch of ${displayLabel} stopped`
+                                ? uiText`Fetch of ${displayLabel} stopped`
                                 : `Fetched ${displayLabel}`
                     }
                     detail={detail}
@@ -753,7 +755,7 @@ function AssistantMessageImpl({
                 const caseCount = caseIds.size || searches.length;
                 const searchLabel = `${searches.length} ${
                     searches.length === 1 ? "search" : "searches"
-                } in ${caseCount} ${caseCount === 1 ? "case" : "cases"}`;
+                } in ${caseCount} ${caseCount === 1 ? uiText("case") : uiText("cases")}`;
                 const detail = event.isStreaming || event.interrupted
                     ? undefined
                     : event.error
@@ -781,9 +783,9 @@ function AssistantMessageImpl({
                         key={globalIdx}
                         label={
                             event.isStreaming
-                                ? `Running ${searchLabel}`
+                                ? uiText`Running ${searchLabel}`
                                 : event.error
-                                  ? "Case searches failed"
+                                  ? uiText("Case searches failed")
                                   : event.interrupted
                                     ? `Stopped ${searchLabel}`
                                     : `Ran ${searchLabel}`
@@ -800,7 +802,7 @@ function AssistantMessageImpl({
             const matches = event.total_matches ?? 0;
             const caseLabel =
                 [event.case_name, event.citation].filter(Boolean).join(", ") ||
-                (event.cluster_id ? `cluster ${event.cluster_id}` : "case");
+                (event.cluster_id ? `cluster ${event.cluster_id}` : uiText("case"));
             const detail = event.isStreaming || event.interrupted
                 ? event.query
                     ? `for "${event.query}" in ${caseLabel}`
@@ -813,12 +815,12 @@ function AssistantMessageImpl({
                     key={globalIdx}
                     label={
                         event.isStreaming
-                            ? "Searching case"
+                            ? uiText("Searching case")
                             : event.error
-                              ? "Case search failed"
+                              ? uiText("Case search failed")
                               : event.interrupted
-                                ? "Case search stopped"
-                                : "Searched case"
+                                ? uiText("Case search stopped")
+                                : uiText("Searched case")
                     }
                     detail={detail}
                     isStreaming={!!event.isStreaming}
@@ -832,7 +834,7 @@ function AssistantMessageImpl({
             const count = event.opinion_count ?? 0;
             const caseLabel =
                 [event.case_name, event.citation].filter(Boolean).join(", ") ||
-                "case";
+                uiText("case");
             const detail = event.isStreaming || event.interrupted
                 ? undefined
                 : event.error
@@ -889,9 +891,9 @@ function AssistantMessageImpl({
                         event.isStreaming
                             ? `Verifying ${citationLabel}`
                             : event.error
-                              ? "Citation verification failed"
+                              ? uiText("Citation verification failed")
                               : event.interrupted
-                                ? `Verification of ${citationLabel} stopped`
+                                ? uiText`Verification of ${citationLabel} stopped`
                                 : `Verified ${citationLabel}`
                     }
                     detail={detail}
@@ -1280,7 +1282,7 @@ function AssistantMessageImpl({
                         <button
                             type="button"
                             aria-label={
-                                isCopied ? "Response copied" : "Copy response"
+                                isCopied ? uiText("Response copied") : uiText("Copy response")
                             }
                             className="-ml-1.5 p-1.5 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                             onClick={handleCopy}

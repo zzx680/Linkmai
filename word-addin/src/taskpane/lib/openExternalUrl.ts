@@ -44,5 +44,8 @@ export function openExternalUrl(url: string): boolean {
 export const WEB_APP_URL: string = (
   // Read the substituted value directly: a `typeof process` guard is false
   // in the browser and would silently select the default.
-  process.env.REACT_APP_WEB_APP_URL || "https://app.mikeoss.com"
+  process.env.REACT_APP_WEB_APP_URL || "https://localhost:3000"
 ).replace(/\/+$/, "");
+
+/** Configure this deployment's mailbox; never fall back to the upstream. */
+export const PRODUCT_SUPPORT_EMAIL = process.env.REACT_APP_LINKMAI_SUPPORT_EMAIL || "";

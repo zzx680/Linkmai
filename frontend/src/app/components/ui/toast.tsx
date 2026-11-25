@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 /**
  * Web adapter for the shared toast system. Mount `<AppToasts />` once in the
  * root providers. It renders the viewport, draws every error notice as a
@@ -39,9 +41,9 @@ export function useOfflineNotice() {
         const onOffline = () => {
             offlineToastId = showToast({
                 tone: "error",
-                title: "You're offline",
+                title: uiText("You're offline"),
                 message:
-                    "Changes can't be saved until your connection is back.",
+                    uiText("Changes can't be saved until your connection is back."),
                 durationMs: null,
                 dedupeKey: OFFLINE_TOAST_KEY,
             });
@@ -52,7 +54,7 @@ export function useOfflineNotice() {
                 offlineToastId = null;
                 showToast({
                     tone: "success",
-                    message: "You're back online.",
+                    message: uiText("You're back online."),
                     dedupeKey: OFFLINE_TOAST_KEY,
                 });
             }

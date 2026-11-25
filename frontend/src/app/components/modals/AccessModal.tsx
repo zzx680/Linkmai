@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useState } from "react";
 import type {
     AccessAssignmentRole,
@@ -113,7 +115,7 @@ export function AccessModal({
           : "direct";
     const canManage = access.canManage;
     const grantsError = access.grantsUnavailable
-        ? "The list of people with access couldn't be loaded, so it may be incomplete. Retry from the notification, or reopen this dialog."
+        ? uiText("The list of people with access couldn't be loaded, so it may be incomplete. Retry from the notification, or reopen this dialog.")
         : null;
     const orgId = access.orgId ?? null;
     const resourceId = resource?.id ?? null;
@@ -152,7 +154,7 @@ export function AccessModal({
                     setError(
                         userFacingApiError(
                             cause,
-                            "Could not load access details.",
+                            uiText("Could not load access details."),
                         ),
                     );
                     setLoadedRosterKey(rosterKey);
@@ -280,7 +282,7 @@ export function AccessModal({
             // A refused grant used to escape as an unhandled rejection with no
             // message; the sibling changeRole/remove paths already report.
             setError(
-                userFacingApiError(cause, "Could not add this user. Try again."),
+                userFacingApiError(cause, uiText("Could not add this user. Try again.")),
             );
         } finally {
             setBusy(false);
@@ -298,7 +300,7 @@ export function AccessModal({
         try {
             await access.onGrant(row.email, role);
         } catch (cause) {
-            setError(userFacingApiError(cause, "Could not change that role."));
+            setError(userFacingApiError(cause, uiText("Could not change that role.")));
         } finally {
             setBusy(false);
             setPendingEmail(null);
@@ -313,7 +315,7 @@ export function AccessModal({
         try {
             await access.onRevoke(row.email);
         } catch (cause) {
-            setError(userFacingApiError(cause, "Could not remove access."));
+            setError(userFacingApiError(cause, uiText("Could not remove access.")));
         } finally {
             setBusy(false);
             setPendingEmail(null);
@@ -405,7 +407,7 @@ export function AccessModal({
                 onClose={onClose}
                 breadcrumbs={[
                     ...breadcrumb.slice(0, -1),
-                    "People",
+                    uiText("People"),
                 ]}
             >
                 <div className="flex min-h-0 flex-1 flex-col pb-5">
@@ -442,7 +444,7 @@ export function AccessModal({
         <Modal
             open={open}
             onClose={onClose}
-            breadcrumbs={[...breadcrumb.slice(0, -1), "Access"]}
+            breadcrumbs={[...breadcrumb.slice(0, -1), uiText("Access")]}
         >
             <div className="flex min-h-0 flex-1 flex-col pb-5">
                 <AccessEditor

@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { useId, useState, type ReactNode } from "react";
 import { MIKE_ICON_TINTS, MikeIcon, type MikeIconTint, TabPillButtonUI } from "@mike/ui";
 import type { AssistantEvent } from "../../shared/types";
@@ -152,7 +154,7 @@ function SubagentPill({
                     <MikeIcon size={14} tint={tint} spin={!!event.isStreaming} error={status.failed} />
                 </span>
                 <span className="min-w-0 [overflow-wrap:anywhere]">
-                    {event.title || "Subagent"}
+                    {event.title || uiText("Subagent")}
                     {/* Points down while this pill's details are open. Inline
                         and one line tall, so it follows the title's last word
                         and centres on that line; the svg's own margin and
@@ -191,7 +193,7 @@ function SubagentDetails({
         <div
             id={id}
             role="region"
-            aria-label={event.title || "Subagent"}
+            aria-label={event.title || uiText("Subagent")}
             // Flat light grey, no border or shadow: a recessed area for the
             // subagent's work rather than another raised card.
             className="mt-2 flex flex-col gap-4 rounded-xl bg-gray-100/70 px-3 py-2"
@@ -207,7 +209,7 @@ function SubagentDetails({
                 {status.text}
             </p>
             <DetailDisclosureRow
-                label="Task from Mike"
+                label={uiText("Task from Mike")}
                 showConnector={streaming || hasSteps || hasBrief || hasQuestion}
             >
                 <p className="mt-2 whitespace-pre-wrap text-gray-600 [overflow-wrap:anywhere]">
@@ -218,7 +220,7 @@ function SubagentDetails({
                 <EventBlock isStreaming>
                     <EventLabel>{toolCallLabel(event.activity ?? "")}</EventLabel>
                     <p className="mt-0.5 text-xs text-gray-400">
-                        Steps appear when the subagent finishes.
+                        {uiText("Steps appear when the subagent finishes.")}
                     </p>
                 </EventBlock>
             ) : (
@@ -228,17 +230,17 @@ function SubagentDetails({
                 <DetailDisclosureRow
                     label={
                         event.status === "incomplete"
-                            ? "Returned a partial brief to Mike"
-                            : "Returned a brief to Mike"
+                            ? uiText("Returned a partial brief to Mike")
+                            : uiText("Returned a brief to Mike")
                     }
                     showConnector={hasQuestion}
                 >
-                    <ReasoningContent text={event.brief!} label="Brief" />
+                    <ReasoningContent text={event.brief!} label={uiText("Brief")} />
                 </DetailDisclosureRow>
             )}
             {hasQuestion && (
                 <EventBlock dotColor="gray">
-                    <EventLabel>Asked Mike</EventLabel>
+                    <EventLabel>{uiText("Asked Mike")}</EventLabel>
                     <p className="mt-0.5 whitespace-pre-wrap text-gray-800 [overflow-wrap:anywhere]">
                         {event.question}
                     </p>
@@ -302,7 +304,7 @@ export function SubagentGroup({
                 runs beside them to "finished" once every subagent is done. */}
             <EventBlock dotColor="green" showConnector={!running}>
                 <EventLabel>{startedLabel(delegations)}</EventLabel>
-                <div role="group" aria-label="Subagents" className="mt-3 flex flex-wrap gap-1.5">
+                <div role="group" aria-label={uiText("Subagents")} className="mt-3 flex flex-wrap gap-1.5">
                     {delegations.map((event) => (
                         <SubagentPill
                             key={event.delegation_id}

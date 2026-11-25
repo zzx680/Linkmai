@@ -1,4 +1,8 @@
 "use client";
+
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -102,12 +106,12 @@ export function DocxCommentComposer({
     // when a selected page is virtualized, even though the range is valid.
     const range = editor.query({ type: "selection" });
     if (!range || editor.snapshot().selectionCollapsed) {
-      setError("Select text in the document, then choose New comment.");
+      setError(uiText("Select text in the document, then choose New comment."));
       return;
     }
     const retained = editor.retainSelection();
     if (!retained) {
-      setError("Select the passage again, then choose New comment.");
+      setError(uiText("Select the passage again, then choose New comment."));
       return;
     }
     pin.current = retained;
@@ -124,7 +128,7 @@ export function DocxCommentComposer({
       JSON.stringify(editor.query({ type: "selection" }))
     ) {
       setError(
-        "The selected passage changed. Your draft is still here; cancel and select the passage again before adding the comment.",
+        uiText("The selected passage changed. Your draft is still here; cancel and select the passage again before adding the comment."),
       );
       return;
     }
@@ -134,7 +138,7 @@ export function DocxCommentComposer({
       const result = editor.addComment(draft.trim(), author);
       if (!result.ok) {
         setError(
-          "This comment could not be added. Your draft is still here; try again or cancel to choose another passage.",
+          uiText("This comment could not be added. Your draft is still here; try again or cancel to choose another passage."),
         );
         return;
       }
@@ -147,7 +151,7 @@ export function DocxCommentComposer({
       openReviewPane(editor);
     } catch {
       setError(
-        "This comment could not be added. Your draft is still here; please try again.",
+        uiText("This comment could not be added. Your draft is still here; please try again."),
       );
     }
   };
@@ -170,8 +174,8 @@ export function DocxCommentComposer({
                 <TextButtonUI
                   ref={button}
                   size="icon-xs"
-                  aria-label="New comment"
-                  title={unavailable ?? "New comment"}
+                  aria-label={uiText("New comment")}
+                  title={unavailable ?? uiText("New comment")}
                   disabled={!composing && !!unavailable}
                   className="h-6"
                   onPointerDown={(event) => event.preventDefault()}
@@ -195,7 +199,7 @@ export function DocxCommentComposer({
                             the trigger, which would reorder the toolbar. */}
               <PopoverAnchor virtualRef={anchor} />
               <PopoverContent
-                aria-label="New comment"
+                aria-label={uiText("New comment")}
                 align={composing && anchorBox ? "start" : "end"}
                 // The selection anchor moves with page scroll and zoom.
                 updatePositionStrategy={
@@ -222,7 +226,7 @@ export function DocxCommentComposer({
                     }}
                   >
                     <label htmlFor={id} className="block font-medium">
-                      New comment
+                      {uiText("New comment")}
                     </label>
                     <textarea
                       id={id}
@@ -230,9 +234,10 @@ export function DocxCommentComposer({
                       rows={3}
                       value={draft}
                       className="keyboard-focus-ring w-full min-h-24 max-h-48 resize-y rounded-xl bg-[var(--dropdown-input-background)] px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2"
-                      placeholder="Write a comment…"
+                      placeholder={uiText("Write a comment…")}
                       onChange={(event) => setDraft(event.target.value)}
                       onKeyDown={(event) => {
+                          if (isImeComposing(event)) return;
                         if (
                           (event.metaKey || event.ctrlKey) &&
                           event.key === "Enter"
@@ -244,19 +249,18 @@ export function DocxCommentComposer({
                     />
                     {!editable && (
                       <p className="text-muted-foreground">
-                        This document is read-only. Your draft is kept until you
-                        cancel.
+                        {uiText("This document is read-only. Your draft is kept until you cancel.")}
                       </p>
                     )}
                     <div className="flex items-center justify-end gap-2">
-                      <TextButtonUI onClick={dismiss}>Cancel</TextButtonUI>
+                      <TextButtonUI onClick={dismiss}>{uiText("Cancel")}</TextButtonUI>
                       <PillButtonUI
                         type="submit"
                         tone="black"
                         size="xs"
                         disabled={!draft.trim() || !editable || !hasAuthor}
                       >
-                        Add comment
+                        {uiText("Add comment")}
                       </PillButtonUI>
                     </div>
                   </form>

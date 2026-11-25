@@ -1,3 +1,5 @@
+
+import { uiText } from "./localization";
 // The model catalog both clients build their pickers from, published by
 // @mike/client to the web app and the Word add-in. Pure data and functions
 // only: nothing here may import from an application or reach a framework.
@@ -534,12 +536,12 @@ export function unavailableModelMessage(
   const provider = getModelProvider(modelId);
   const label = provider
     ? providerLabel(provider, { withProduct: false })
-    : "model provider";
+    : uiText("模型服务商");
   if (provider && keys[provider]?.enabled === false) {
-    return `${label} is turned off. Turn it back on in Bring Your Own Keys before using this model.`;
+    return uiText`${label} is turned off. Turn it back on in Bring Your Own Keys before using this model.`;
   }
   const article = /^[aeiou]/i.test(label) ? "an" : "a";
-  return `Add ${article} ${label} API key before using this model.`;
+  return uiText`Add ${article} ${label} API key before using this model.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -603,17 +605,17 @@ export function noModelsReason(
 
 export const NO_MODELS_MESSAGES: Record<NoModelsReason, string> = {
   "router-models":
-    "Your router is connected, but it has no saved models. Open your provider in Bring Your Own Keys and add a model under Model Selections.",
+    uiText("Your router is connected, but it has no saved models. Open your provider in Bring Your Own Keys and add a model under Model Selections."),
   "providers-disabled":
-    "Your saved API keys are all turned off. Turn a provider back on in Bring Your Own Keys to select a model.",
+    uiText("Your saved API keys are all turned off. Turn a provider back on in Bring Your Own Keys to select a model."),
   "api-keys":
-    "Add an API key in Bring Your Own Keys before selecting a model.",
+    uiText("Add an API key in Bring Your Own Keys before selecting a model."),
   "org-router-models":
-    "Your organization has not added any models for its provider yet. Ask an organization admin to add them in Organization.",
+    uiText("Your organization has not added any models for its provider yet. Ask an organization admin to add them in Organization."),
   "org-providers-disabled":
-    "Your organization has turned its model providers off. Ask an organization admin to turn one back on in Organization.",
+    uiText("Your organization has turned its model providers off. Ask an organization admin to turn one back on in Organization."),
   "org-api-keys":
-    "Your organization has not set up a model provider yet. Ask an organization admin to add one in Organization.",
+    uiText("Your organization has not set up a model provider yet. Ask an organization admin to add one in Organization."),
 };
 
 /** Whether the fix for an empty picker sits with the organization's admins. */

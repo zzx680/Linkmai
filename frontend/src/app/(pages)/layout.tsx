@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { PanelLeft } from "lucide-react";
@@ -154,8 +156,8 @@ export default function MikeLayout({
                                             <HeaderButtonUI
                                                 iconOnly
                                                 onClick={handleSidebarToggle}
-                                                title="Open sidebar"
-                                                aria-label="Open sidebar"
+                                                title={uiText("Open sidebar")}
+                                                aria-label={uiText("Open sidebar")}
                                             >
                                                 <PanelLeft className="h-4 w-4" />
                                             </HeaderButtonUI>

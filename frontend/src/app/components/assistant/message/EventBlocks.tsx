@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { useMarkdownCheckpoint } from "./markdownCheckpoint";
 import { memo, useEffect, useRef, useState, type ReactNode } from "react";
 import { useReasoningDisclosure, DocEditBlockUI, DocFindBlockUI, DocReadBlockUI } from "@mike/ui";
@@ -202,7 +204,7 @@ export function ReasoningBlock({
                 label={
                     isStreaming
                         ? THINKING_PHRASES[thinkingIndex]
-                        : "Thought process"
+                        : uiText("Thought process")
                 }
             />
             {isContentOpen && <ReasoningContent text={text} streaming={isStreaming} />}
@@ -296,10 +298,10 @@ export function DocCreatedBlock({
             <div className="flex min-w-0 items-center gap-1.5">
                 <EventLabel className="shrink-0">
                     {isStreaming
-                        ? "Creating"
+                        ? uiText("Creating")
                         : interrupted
-                          ? "Creation stopped"
-                          : "Created"}
+                          ? uiText("Creation stopped")
+                          : uiText("Created")}
                 </EventLabel>
                 {isStreaming || !onClick ? (
                     <span className="flex min-w-0 items-center gap-1.5">
@@ -362,12 +364,12 @@ export function DocReplicatedBlock({
     }) => void;
 }) {
     const label = isStreaming
-        ? "Replicating"
+        ? uiText("Replicating")
         : hasError
-          ? "Replication failed"
+          ? uiText("Replication failed")
           : interrupted
-            ? "Replication stopped"
-            : "Replicated";
+            ? uiText("Replication stopped")
+            : uiText("Replicated");
     const suffix =
         !isStreaming && !hasError && !interrupted && count > 1
             ? ` ${count} times`
@@ -508,7 +510,7 @@ export function DocDownloadBlock({
         <button
             type="button"
             onClick={handleDownload}
-            aria-label={`Download ${filename}`}
+            aria-label={uiText`Download ${filename}`}
             className="shrink-0 flex items-center bg-white/25 px-4 text-gray-500 transition-colors hover:bg-white/55 hover:text-gray-700 cursor-pointer @md:px-6"
         >
             <Download className="size-3 @md:size-[13px]" />
@@ -571,12 +573,12 @@ export function WorkflowAppliedBlock({
     return (
         <EventBlock showConnector={showConnector} dotColor="green">
             <div className="flex min-w-0 items-center gap-1.5">
-                <EventLabel className="shrink-0">Read</EventLabel>
+                <EventLabel className="shrink-0">{uiText("Read")}</EventLabel>
                 {onClick ? (
                     <button
                         type="button"
                         onClick={onClick}
-                        aria-label={`Open workflow ${title}`}
+                        aria-label={uiText`Open workflow ${title}`}
                         className="flex min-w-0 cursor-pointer items-center gap-1.5 text-left transition-colors hover:text-gray-700"
                     >
                         <WorkflowSkeuoIcon className="h-3.5 w-3.5 shrink-0" />
@@ -609,11 +611,11 @@ export function AskInputsBlock({
     const onlyApprovals = event.items.every((item) => item.kind === "approval");
     const label = onlyApprovals
         ? response
-            ? "Asked for approval"
-            : "Asking for approval"
+            ? uiText("Asked for approval")
+            : uiText("Asking for approval")
         : response
-          ? "Asked for input"
-          : "Asking for input";
+          ? uiText("Asked for input")
+          : uiText("Asking for input");
     return (
         <EventBlock
             showConnector={showConnector}
@@ -651,15 +653,15 @@ export function AskInputsBlock({
                                 <p className="text-xs text-gray-500">
                                     {index + 1}.{" "}
                                     {item.kind === "documents"
-                                        ? "Documents"
+                                        ? uiText("Documents")
                                         : item.kind === "approval"
-                                          ? "Approval"
-                                          : "Question"}
+                                          ? uiText("Approval")
+                                          : uiText("Question")}
                                 </p>
                                 <p className="mt-0.5 [overflow-wrap:anywhere]">
                                     {item.kind === "documents"
                                         ? item.document_types.join(", ") ||
-                                          "Documents requested"
+                                          uiText("Documents requested")
                                         : item.kind === "approval"
                                           ? `${item.connector_name}: ${item.title}`
                                           : item.question}
@@ -797,12 +799,12 @@ export function DocEditBlock({
     onClick?: () => void;
 }) {
     const label = isStreaming
-        ? "Editing"
+        ? uiText("Editing")
         : hasError
-          ? "Edit failed"
+          ? uiText("Edit failed")
           : interrupted
-            ? "Edit stopped"
-            : "Edited";
+            ? uiText("Edit stopped")
+            : uiText("Edited");
 
     return (
         <DocEditBlockUI

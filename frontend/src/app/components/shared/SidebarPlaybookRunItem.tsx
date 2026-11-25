@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import {
@@ -38,7 +40,7 @@ export function SidebarPlaybookRunItem({
         <Link
             href={playbookRunPath(run)}
             title={fullTitle}
-            aria-label={`Playbook run: ${fullTitle}${status === "loading" ? " (Running)" : status === "complete" ? " (Complete)" : ""}`}
+            aria-label={`Playbook run: ${fullTitle}${status === "loading" ? uiText(" (Running)") : status === "complete" ? uiText(" (Complete)") : ""}`}
             onClick={onOpen}
             aria-current={isActive ? "page" : undefined}
             {...slideHandlers}
@@ -53,7 +55,7 @@ export function SidebarPlaybookRunItem({
                 {status === "loading" ? (
                     <Loader2
                         role="status"
-                        aria-label={`${documentName} review running`}
+                        aria-label={uiText`${documentName} review running`}
                         className="h-3.5 w-3.5 animate-spin text-blue-600 motion-reduce:animate-none"
                     />
                 ) : status === "complete" ? (

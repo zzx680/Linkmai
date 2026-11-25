@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useState } from "react";
 import { Users } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
@@ -109,7 +111,7 @@ export function ProjectDetailsModal({
     // UUID. The row already carries the name — use it.
     const orgOptions = useMemo(() => {
         const options = [
-            { value: PERSONAL_WORKSPACE, label: "No organization" },
+            { value: PERSONAL_WORKSPACE, label: uiText("No organization") },
             ...orgs.map((org) => ({ value: org.id, label: org.name })),
         ];
         if (
@@ -118,7 +120,7 @@ export function ProjectDetailsModal({
         ) {
             options.push({
                 value: project.org_id,
-                label: project.organization_name ?? "Organisation",
+                label: project.organization_name ?? uiText("Organisation"),
             });
         }
         return options;
@@ -149,7 +151,7 @@ export function ProjectDetailsModal({
             // An intentional 4xx (a name conflict, a refusal) says something
             // the generic line cannot; anything else still falls back to it.
             setError(
-                userFacingApiError(err, "Could not update project details."),
+                userFacingApiError(err, uiText("Could not update project details.")),
             );
         } finally {
             setSaving(false);
@@ -160,11 +162,11 @@ export function ProjectDetailsModal({
         <Modal
             open={open}
             onClose={onClose}
-            breadcrumbs={["Projects", project.name, "Details"]}
+            breadcrumbs={[uiText("Projects"), project.name, uiText("Details")]}
             secondaryAction={
                 onShareProject
                     ? {
-                          label: "Share",
+                          label: uiText("Share"),
                           icon: <Users className="h-4 w-4" />,
                           onClick: onShareProject,
                       }
@@ -174,13 +176,13 @@ export function ProjectDetailsModal({
                 error ? (
                     <span className="text-sm text-red-600">{error}</span>
                 ) : saved ? (
-                    <span className="text-sm text-gray-400">Updated</span>
+                    <span className="text-sm text-gray-400">{uiText("Updated")}</span>
                 ) : null
             }
             primaryAction={
                 canEdit
                     ? {
-                          label: saving ? "Updating..." : "Update",
+                          label: saving ? uiText("Updating...") : uiText("Update"),
                           onClick: () => void handleSave(),
                           disabled: saving || !hasChanges || !trimmedName,
                       }
@@ -191,7 +193,7 @@ export function ProjectDetailsModal({
             <div className="flex min-h-0 flex-1 flex-col gap-6 py-1">
                 <div>
                     <FieldLabel htmlFor="project-details-name">
-                        Project name
+                        {uiText("Project name")}
                     </FieldLabel>
                     <FormTextInput
                         id="project-details-name"
@@ -202,14 +204,14 @@ export function ProjectDetailsModal({
                             setError(null);
                         }}
                         disabled={!canEdit || saving}
-                        placeholder="Add project name"
+                        placeholder={uiText("Add project name")}
                         variant="minimal"
                     />
                 </div>
 
                 <div>
                     <FieldLabel htmlFor="project-details-cm">
-                        CM number
+                        {uiText("CM number")}
                     </FieldLabel>
                     <FormTextInput
                         id="project-details-cm"
@@ -220,7 +222,7 @@ export function ProjectDetailsModal({
                             setError(null);
                         }}
                         disabled={!canEdit || saving}
-                        placeholder="Add a CM number..."
+                        placeholder={uiText("Add a CM number...")}
                         variant="minimal"
                         className="text-xl text-gray-600"
                     />
@@ -228,7 +230,7 @@ export function ProjectDetailsModal({
 
                 <div>
                     <FieldLabel htmlFor="project-details-practice">
-                        Practice
+                        {uiText("Practice")}
                     </FieldLabel>
                     <ProjectPracticeField
                         id="project-details-practice"
@@ -244,7 +246,7 @@ export function ProjectDetailsModal({
 
                 <div>
                     <FieldLabel htmlFor="project-details-org">
-                        Organisation
+                        {uiText("Organisation")}
                     </FieldLabel>
                     <ModalSelect
                         id="project-details-org"

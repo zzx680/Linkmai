@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { CornerDownRight } from "lucide-react";
 import type { Document, TabularReviewRow } from "../shared/types";
@@ -61,7 +63,7 @@ export function TRFirstColumnCell({
                 checked={selected}
                 onChange={onToggleSelection}
                 className={TABLE_CHECKBOX_CLASS}
-                aria-label={`Select ${row.label}`}
+                aria-label={uiText`Select ${row.label}`}
             />
             {row.row_type === "folder" ? (
                 <button
@@ -82,7 +84,7 @@ export function TRFirstColumnCell({
                         if (rowDocument) onDocumentOpen(rowDocument);
                     }}
                     disabled={!rowDocument}
-                    aria-label={`Open ${row.label}`}
+                    aria-label={uiText`Open ${row.label}`}
                     className="flex min-w-0 flex-1 items-center rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:cursor-default"
                 >
                     <FileTypeIcon
@@ -114,7 +116,7 @@ export function TRFirstColumnCell({
                                         onDocumentOpen(document);
                                     }}
                                     className="flex min-h-7 w-full items-center rounded-md py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-                                    aria-label={`Open ${document.filename}`}
+                                    aria-label={uiText`Open ${document.filename}`}
                                 >
                                     <CornerDownRight
                                         className="mr-2 h-3.5 w-3.5 shrink-0 text-gray-400"

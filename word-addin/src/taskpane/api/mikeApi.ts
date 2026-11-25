@@ -1,4 +1,5 @@
 /// <reference types="office-js" />
+import { uiText } from "@mike/client";
 /**
  * Configured API barrel for the Word add-in — the single place the typed client
  * is wired to the add-in's backend-managed cookie session. Mirrors
@@ -54,7 +55,7 @@ async function recheckSession(): Promise<void> {
   if (outcome.kind === "refreshed") {
     // Screens that failed on the unchecked 401 load again by themselves.
     announceSessionRecovered();
-    notifySuccess("You're signed back in.");
+    notifySuccess(uiText("You're signed back in."));
     return;
   }
   if (outcome.kind === "expired") {

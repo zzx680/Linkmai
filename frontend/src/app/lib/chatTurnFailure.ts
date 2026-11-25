@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER, CODE_KINDS } from "@mike/client";
 import { UserVisibleError, describeError } from "@/app/lib/userFacingError";
 
@@ -7,18 +9,18 @@ import { UserVisibleError, describeError } from "@/app/lib/userFacingError";
 // here once instead of drifting apart in each.
 
 /** A turn the server failed; re-sending it is honest. */
-export const TURN_FAILED_MESSAGE = "Mike couldn't finish this answer. Try again.";
+export const TURN_FAILED_MESSAGE = uiText("Mike couldn't finish this answer. Try again.");
 
 /** The bubble line for an answer whose stream broke part-way. */
-export const TURN_INTERRUPTED_MESSAGE = "The answer stopped before it finished.";
+export const TURN_INTERRUPTED_MESSAGE = uiText("The answer stopped before it finished.");
 
 /** The request may have reached the server; re-sending could ask twice. */
 export const TURN_MAY_BE_RUNNING_MESSAGE =
-    "The answer may still be running. Check chat history before sending the question again.";
+    uiText("The answer may still be running. Check chat history before sending the question again.");
 
 /** A Retry raised for one thread fired after the view moved to another. */
 export const CHAT_CHANGED_MESSAGE =
-    "This chat has changed. Send the message again from the chat it belongs to.";
+    uiText("This chat has changed. Send the message again from the chat it belongs to.");
 
 /**
  * The failure a server `error` frame stands for. `safe_to_display` marks text
@@ -77,7 +79,7 @@ export function isUncertainDelivery(
  * so a chat the request may have created shows up.
  */
 export function checkHistoryLabel(chatKnown: boolean): string {
-    return chatKnown ? "Check chat" : "Refresh history";
+    return chatKnown ? uiText("Check chat") : uiText("Refresh history");
 }
 
 export function uncertainDeliveryError(cause: unknown): UserVisibleError {

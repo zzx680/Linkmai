@@ -6,7 +6,7 @@ describe("buildSystemPrompt", () => {
     it("always contains the core identity and rules", () => {
         for (const prompt of [buildSystemPrompt(true), buildSystemPrompt(false)]) {
             expect(prompt).toContain(
-                "You are Mike, an AI legal assistant for lawyers and legal professionals.",
+                "You are 灵迈 LinkMai, an AI legal assistant for lawyers and legal professionals.",
             );
             expect(prompt).toContain("Do not fabricate document content.");
             expect(prompt).toContain(
@@ -17,6 +17,19 @@ describe("buildSystemPrompt", () => {
             );
             expect(prompt).toContain("DOCX GENERATION:");
             expect(prompt).toContain("DOCUMENT EDITING:");
+        }
+    });
+
+    it("sets Chinese defaults without overriding the matter's language or governing law", () => {
+        for (const prompt of [buildSystemPrompt(true), buildSystemPrompt(false)]) {
+            expect(prompt).toContain("Default to Simplified Chinese");
+            expect(prompt).toContain("has selected a response language");
+            expect(prompt).toContain("governing-law clause take precedence");
+            expect(prompt).toContain("an explicitly stated working assumption");
+            expect(prompt).toContain("Do not invent laws, article numbers");
+            expect(prompt).toContain("United States authorities only");
+            expect(prompt).toContain("never claim to have searched a source you could not access");
+            expect(prompt).toContain("Do not silently convert USD to CNY");
         }
     });
 

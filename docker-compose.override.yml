@@ -1,0 +1,5 @@
+# Apple Silicon local override: the pinned upstream Postgres image has a
+# broken ARM64 layer on this Docker Desktop installation.
+services:
+  db:
+    image: supabase/postgres:15.1.0.147

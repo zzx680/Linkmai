@@ -1,5 +1,9 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
+
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import LuckyExcel, { type LuckyExcelSheet } from "luckyexcel";
@@ -31,12 +35,12 @@ type PreviewFailure = "unsupported-ole" | "unreadable";
 // renders those controls (see the `fileActions` prop).
 const PREVIEW_FAILURE_COPY: Record<PreviewFailure, { reason: string; advice: string }> = {
     "unsupported-ole": {
-        reason: "Legacy or encrypted Excel files cannot be previewed here.",
-        advice: "For preview, save an unencrypted .xlsx copy and upload it.",
+        reason: uiText("Legacy or encrypted Excel files cannot be previewed here."),
+        advice: uiText("For preview, save an unencrypted .xlsx copy and upload it."),
     },
     unreadable: {
-        reason: "This spreadsheet could not be displayed.",
-        advice: "Download the original, or try saving a new .xlsx copy.",
+        reason: uiText("This spreadsheet could not be displayed."),
+        advice: uiText("Download the original, or try saving a new .xlsx copy."),
     },
 };
 
@@ -590,7 +594,7 @@ function SpreadsheetSourceView({
             ? `${failureCopy.reason} ${failureCopy.advice}`
             : failureCopy.reason
         : fetchError
-          ? "Failed to load spreadsheet."
+          ? uiText("Failed to load spreadsheet.")
           : null;
     if (message) {
         return (

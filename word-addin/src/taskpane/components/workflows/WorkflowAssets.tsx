@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useRef, useState } from "react";
 import type { Document } from "../../types";
 import {
@@ -44,7 +46,7 @@ export function WorkflowAssets({
           setFiles([]);
           setError(
             reportFault(reason, {
-              fallback: "Mike couldn't load this workflow's files. Try again.",
+              fallback: uiText("Mike couldn't load this workflow's files. Try again."),
               operation: "workflows.run",
             }).message,
           );
@@ -62,13 +64,13 @@ export function WorkflowAssets({
       await reload();
       setError(
         outcomes.some((outcome) => outcome.status === "error")
-          ? `${file.name} could not be uploaded. Please try again.`
+          ? uiText`${file.name} could not be uploaded. Please try again.`
           : null,
       );
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Mike couldn't upload that file. Try again.",
+          fallback: uiText("Mike couldn't upload that file. Try again."),
           operation: "workflows.run",
         }).message,
       );
@@ -87,7 +89,7 @@ export function WorkflowAssets({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Mike couldn't upload the new version. Try again.",
+          fallback: uiText("Mike couldn't upload the new version. Try again."),
           operation: "workflows.run",
         }).message,
       );
@@ -101,9 +103,9 @@ export function WorkflowAssets({
     <section className="mt-2 shrink-0 rounded-xl border border-white/70 bg-white/55 p-3 text-xs">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="font-medium text-gray-700">Assets</p>
+          <p className="font-medium text-gray-700">{uiText("Assets")}</p>
           <p className="mt-0.5 text-[11px] text-gray-400">
-            Available when this workflow runs.
+            {uiText("Available when this workflow runs.")}
           </p>
         </div>
         {!readOnly && (
@@ -113,7 +115,7 @@ export function WorkflowAssets({
             onClick={() => uploadRef.current?.click()}
             className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] text-gray-600 disabled:opacity-50"
           >
-            Add file
+            {uiText("Add file")}
           </button>
         )}
       </div>
@@ -139,7 +141,7 @@ export function WorkflowAssets({
         }}
       />
       {files.length === 0 ? (
-        <p className="mt-2 text-[11px] text-gray-400">No assets.</p>
+        <p className="mt-2 text-[11px] text-gray-400">{uiText("No assets.")}</p>
       ) : (
         <div className="mt-2 max-h-24 space-y-1 overflow-y-auto">
           {files.map((file) => (
@@ -158,7 +160,7 @@ export function WorkflowAssets({
                     .catch((reason: unknown) =>
                       setError(
                         reportFault(reason, {
-                          fallback: "Mike couldn't open that file. Try again.",
+                          fallback: uiText("Mike couldn't open that file. Try again."),
                           operation: "workflows.run",
                         }).message,
                       ),
@@ -166,7 +168,7 @@ export function WorkflowAssets({
                 }
                 className="text-[10px] text-gray-500"
               >
-                Download
+                {uiText("Download")}
               </button>
               {!readOnly && (
                 <>
@@ -178,7 +180,7 @@ export function WorkflowAssets({
                     }}
                     className="text-[10px] text-gray-500"
                   >
-                    Upload new version
+                    {uiText("Upload new version")}
                   </button>
                   <button
                     type="button"
@@ -189,7 +191,7 @@ export function WorkflowAssets({
                           setError(
                             reportFault(reason, {
                               fallback:
-                                "Mike couldn't delete that file. Try again.",
+                                uiText("Mike couldn't delete that file. Try again."),
                               operation: "workflows.run",
                             }).message,
                           ),
@@ -197,7 +199,7 @@ export function WorkflowAssets({
                     }
                     className="text-[10px] text-red-500"
                   >
-                    Delete
+                    {uiText("Delete")}
                   </button>
                 </>
               )}

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useDocumentWorkspace } from "@/app/contexts/WorkspaceContext";
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 
@@ -54,7 +56,7 @@ function QuickActionsModalForWorkspace({
     if (!open || workflows.length > 0) return;
     void listWorkflows("assistant", workspace ?? "personal")
       .then((rows) => setWorkflows(rows))
-      .catch(() => setError("Could not load assistant workflows."));
+      .catch(() => setError(uiText("Could not load assistant workflows.")));
   }, [open, workflows.length, workspace]);
 
   const availableWorkflows = useMemo(() => {
@@ -112,7 +114,7 @@ function QuickActionsModalForWorkspace({
           operation: "quick_actions.run",
         });
       setError(
-        userFacingApiError(reason, "Could not save quick action."),
+        userFacingApiError(reason, uiText("Could not save quick action.")),
       );
     } finally {
       setSaving(false);
@@ -136,7 +138,7 @@ function QuickActionsModalForWorkspace({
           operation: "quick_actions.run",
         });
       setError(
-        userFacingApiError(reason, "Could not create quick action."),
+        userFacingApiError(reason, uiText("Could not create quick action.")),
       );
     } finally {
       setSaving(false);
@@ -163,7 +165,7 @@ function QuickActionsModalForWorkspace({
       secondaryAction={
         screen !== "list"
           ? {
-              label: "Back",
+              label: uiText("Back"),
               variant: "primary",
               onClick: resetToList,
               disabled: saving,
@@ -174,7 +176,7 @@ function QuickActionsModalForWorkspace({
       primaryAction={
         screen === "list"
           ? {
-              label: "Add",
+              label: uiText("Add"),
               icon: <Plus className="h-3.5 w-3.5" />,
               variant: "blue",
               onClick: () => setScreen("create"),
@@ -182,13 +184,13 @@ function QuickActionsModalForWorkspace({
             }
           : screen === "create"
             ? {
-                label: saving ? "Creating…" : "Create",
+                label: saving ? uiText("Creating…") : uiText("Create"),
                 variant: "blue",
                 disabled: saving || !workflowId || !name.trim(),
                 onClick: () => void create(),
               }
             : {
-                label: saving ? "Saving…" : "Save",
+                label: saving ? uiText("Saving…") : uiText("Save"),
                 variant: "blue",
                 disabled:
                   saving || !selectedHasChanges || !selected?.name.trim(),
@@ -202,7 +204,7 @@ function QuickActionsModalForWorkspace({
             <SearchBar
               value={search}
               onValueChange={setSearch}
-              placeholder="Search quick actions..."
+              placeholder={uiText("Search quick actions...")}
               autoFocus
             />
           </div>
@@ -218,7 +220,7 @@ function QuickActionsModalForWorkspace({
             )}
             {filteredActions.length === 0 ? (
               <p className="py-10 text-center text-sm text-gray-400">
-                No quick actions found.
+                {uiText("No quick actions found.")}
               </p>
             ) : (
               filteredActions.map((action) => (
@@ -241,7 +243,7 @@ function QuickActionsModalForWorkspace({
                         : "text-xs text-gray-400"
                     }
                   >
-                    {action.enabled ? "Active" : "Inactive"}
+                    {action.enabled ? uiText("Active") : uiText("Inactive")}
                   </span>
                 </button>
               ))
@@ -348,46 +350,46 @@ function QuickActionForm({
       className="flex min-h-0 flex-1 flex-col gap-6 px-2 pt-1 pb-5"
     >
       <div>
-        <FieldLabel htmlFor="quick-action-name">Name</FieldLabel>
+        <FieldLabel htmlFor="quick-action-name">{uiText("Name")}</FieldLabel>
         <FormTextInput
           id="quick-action-name"
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
-          placeholder="Quick action name"
+          placeholder={uiText("Quick action name")}
           variant="minimal"
           autoFocus
         />
       </div>
       <div>
-        <FieldLabel htmlFor="quick-action-workflow">Workflow used</FieldLabel>
+        <FieldLabel htmlFor="quick-action-workflow">{uiText("Workflow used")}</FieldLabel>
         <ModalSelect
           id="quick-action-workflow"
           value={workflowId}
-          placeholder="Select an assistant workflow"
+          placeholder={uiText("Select an assistant workflow")}
           options={workflowOptions}
           onChange={onWorkflowChange}
         />
       </div>
       <div>
-        <FieldLabel htmlFor="quick-action-prompt">Prompt</FieldLabel>
+        <FieldLabel htmlFor="quick-action-prompt">{uiText("Prompt")}</FieldLabel>
         <ModalTextarea
           id="quick-action-prompt"
           value={prompt}
           onChange={(event) => onPromptChange(event.target.value)}
           className="h-28 min-h-28"
-          placeholder="Prompt placed in the Assistant composer"
+          placeholder={uiText("Prompt placed in the Assistant composer")}
         />
       </div>
       <ToggleRow
-        label="Request document upload"
-        caption="Ask for source documents before launching this workflow."
+        label={uiText("Request document upload")}
+        caption={uiText("Ask for source documents before launching this workflow.")}
         checked={documentUpload}
         onChange={onDocumentUploadChange}
       />
       {enabled !== undefined && onEnabledChange && (
         <ToggleRow
-          label="Active"
-          caption="Show this action in the Assistant initial view."
+          label={uiText("Active")}
+          caption={uiText("Show this action in the Assistant initial view.")}
           checked={enabled}
           onChange={onEnabledChange}
         />

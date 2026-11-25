@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     forwardRef,
     type ReactNode,
@@ -134,7 +136,7 @@ export const TRTable = forwardRef<TRTableHandle, Props>(function TRTable(
     const cellsByRow = useMemo(() => indexReviewCells(cells), [cells]);
     const selectedRows = useIdSet(selectedRowIds);
     const firstColumnLabel =
-        documentGrouping === "folder" ? "Folder / Document" : "Document";
+        documentGrouping === "folder" ? uiText("Folder / Document") : uiText("Document");
     const totalContentWidth =
         DOC_COL_W_PX + sortedColumns.length * DATA_COL_W_PX + 32;
     const skeletonContentWidth =
@@ -266,8 +268,8 @@ export const TRTable = forwardRef<TRTableHandle, Props>(function TRTable(
                     <EmptyState
                         className="mx-auto w-full max-w-xs flex-1 justify-center"
                         icon={<TabularReviewSkeuoIcon />}
-                        title="Tabular Review"
-                        description="Add columns and documents to get started."
+                        title={uiText("Tabular Review")}
+                        description={uiText("Add columns and documents to get started.")}
                         action={
                             <div className="flex items-center gap-2">
                                 <PillButtonUI
@@ -276,7 +278,7 @@ export const TRTable = forwardRef<TRTableHandle, Props>(function TRTable(
                                     onClick={onAddColumn}
                                 >
                                     <Plus className="h-3.5 w-3.5" />
-                                    Add Columns
+                                    {uiText("Add Columns")}
                                 </PillButtonUI>
                                 <PillButtonUI
                                     tone="white"
@@ -284,7 +286,7 @@ export const TRTable = forwardRef<TRTableHandle, Props>(function TRTable(
                                     onClick={onAddDocuments}
                                 >
                                     <Upload className="h-3.5 w-3.5" />
-                                    Add Documents
+                                    {uiText("Add Documents")}
                                 </PillButtonUI>
                             </div>
                         }
@@ -366,7 +368,7 @@ export const TRTable = forwardRef<TRTableHandle, Props>(function TRTable(
                                 type="checkbox"
                                 disabled
                                 className="mr-3 h-2.5 w-2.5 shrink-0 rounded border-gray-200 cursor-default accent-black disabled:opacity-100"
-                                aria-label={`Select ${filename}`}
+                                aria-label={uiText`Select ${filename}`}
                             />
                             <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin shrink-0" />
                             <span className="line-clamp-1" title={filename}>

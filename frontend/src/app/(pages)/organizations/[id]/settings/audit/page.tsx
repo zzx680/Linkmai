@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useRouter } from "next/navigation";
 import { AuditHistory } from "@/app/components/history/AuditHistory";
 import {
@@ -16,8 +18,8 @@ export default function OrganizationAuditPage() {
   if (!isOrgAdmin(org.role))
     return (
       <EmptyState
-        title="Audit log"
-        description="Only organization owners and admins can view the audit log."
+        title={uiText("Audit log")}
+        description={uiText("Only organization owners and admins can view the audit log.")}
       />
     );
   return (

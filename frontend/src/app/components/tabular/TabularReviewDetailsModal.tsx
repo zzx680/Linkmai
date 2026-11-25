@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "../modals/Modal";
 import { ModalSelect } from "../modals/ModalSelect";
@@ -57,7 +59,7 @@ export function TabularReviewDetailsModal({
                           project.name +
                           (project.cm_number ? ` (#${project.cm_number})` : ""),
                   }))
-                : [{ value: "", label: "No projects found" }],
+                : [{ value: "", label: uiText("No projects found") }],
         [projects],
     );
     const hasChanges = useMemo(() => {
@@ -90,7 +92,7 @@ export function TabularReviewDetailsModal({
             });
             setSaved(true);
         } catch {
-            setError("Could not update tabular review details.");
+            setError(uiText("Could not update tabular review details."));
         } finally {
             setSaving(false);
         }
@@ -101,21 +103,21 @@ export function TabularReviewDetailsModal({
             open={open}
             onClose={onClose}
             breadcrumbs={[
-                "Tabular Reviews",
-                review.title || "Untitled Review",
-                "Details",
+                uiText("Tabular Reviews"),
+                review.title || uiText("Untitled Review"),
+                uiText("Details"),
             ]}
             footerStatus={
                 error ? (
                     <span className="text-sm text-red-600">{error}</span>
                 ) : saved ? (
-                    <span className="text-sm text-gray-400">Updated</span>
+                    <span className="text-sm text-gray-400">{uiText("Updated")}</span>
                 ) : null
             }
             primaryAction={
                 canEdit
                     ? {
-                          label: saving ? "Saving..." : "Save",
+                          label: saving ? uiText("Saving...") : uiText("Save"),
                           onClick: () => void handleSave(),
                           disabled:
                               saving ||
@@ -130,7 +132,7 @@ export function TabularReviewDetailsModal({
             <div className="space-y-6">
                 <div>
                     <FieldLabel htmlFor="tabular-review-details-title">
-                        Review name
+                        {uiText("Review name")}
                     </FieldLabel>
                     <FormTextInput
                         id="tabular-review-details-title"
@@ -141,7 +143,7 @@ export function TabularReviewDetailsModal({
                             setSaved(false);
                             setError(null);
                         }}
-                        placeholder="Review name"
+                        placeholder={uiText("Review name")}
                         variant="minimal"
                         className="placeholder:text-gray-400"
                         disabled={!canEdit || saving}
@@ -151,7 +153,7 @@ export function TabularReviewDetailsModal({
 
                 {!lockProject && (
                     <div className="space-y-3">
-                        <FieldLabel as="p">Project</FieldLabel>
+                        <FieldLabel as="p">{uiText("Project")}</FieldLabel>
                         <ToggleSwitchUI
                             checked={underProject}
                             disabled={!canEdit || saving}
@@ -162,7 +164,7 @@ export function TabularReviewDetailsModal({
                                 setError(null);
                             }}
                         >
-                            Move under a project
+                            {uiText("Move under a project")}
                         </ToggleSwitchUI>
 
                         {underProject && (
@@ -175,7 +177,7 @@ export function TabularReviewDetailsModal({
                                     setSaved(false);
                                     setError(null);
                                 }}
-                                placeholder="Select project..."
+                                placeholder={uiText("Select project...")}
                                 disabled={
                                     !canEdit || saving || projects.length === 0
                                 }

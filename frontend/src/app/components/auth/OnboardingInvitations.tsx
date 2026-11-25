@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { ConnectorCard } from "@/app/components/settings/ConnectorCard";
 import { OrganizationSkeuoIcon } from "@/app/components/shared/AppSidebarSkeuoIcons";
@@ -41,7 +43,7 @@ export function OnboardingInvitations({
         void listMyOrgInvitations().then((items) => {
             if (!cancelled) setInvitations(items);
         }, (error) => {
-            if (!cancelled) setLoadError(userFacingApiError(error, "Could not load your invitations."));
+            if (!cancelled) setLoadError(userFacingApiError(error, uiText("Could not load your invitations.")));
         }).finally(() => {
             if (!cancelled) onBusyChange(false);
         });
@@ -69,7 +71,7 @@ export function OnboardingInvitations({
             setJoined((current) => ({ ...current, [invitation.id]: accepted.role }));
             notifyOrganizationInvitationsChanged();
         } catch (error) {
-            if (mounted.current) setAnswerError(userFacingApiError(error, "Could not accept this invitation. Please try again."));
+            if (mounted.current) setAnswerError(userFacingApiError(error, uiText("Could not accept this invitation. Please try again.")));
         } finally {
             accepting.current = false;
             if (mounted.current) { setAnsweringId(null); onBusyChange(false); }
@@ -77,13 +79,13 @@ export function OnboardingInvitations({
     }
 
     return (
-        <section aria-label="Organization invitations" className="space-y-3">
+        <section aria-label={uiText("Organization invitations")} className="space-y-3">
             {invitations?.length === 0 && !loadError ? (
-                <p role="status" className="text-sm text-gray-500">You have no pending invitations. You can join an organization later from Settings.</p>
+                <p role="status" className="text-sm text-gray-500">{uiText("You have no pending invitations. You can join an organization later from Settings.")}</p>
             ) : null}
             {invitations === null && !loadError ? (
                 <GlassCardUI>
-                    <div role="status" aria-label="Checking your invitations" className="flex flex-wrap items-center gap-3 px-4 py-3">
+                    <div role="status" aria-label={uiText("Checking your invitations")} className="flex flex-wrap items-center gap-3 px-4 py-3">
                         <SkeletonLine className="h-9 w-9 shrink-0" />
                         <div className="min-w-0 flex-1 space-y-2"><SkeletonLine className="w-32 max-w-full" /><SkeletonLine className="w-24 max-w-full" /></div>
                         <SkeletonLine className="h-7 w-16" />
@@ -94,7 +96,7 @@ export function OnboardingInvitations({
                 <div className="space-y-2">
                     <p role="alert" className="text-sm text-red-600">{loadError || answerError}</p>
                     <PillButtonUI type="button" tone="white" size="sm" disabled={disabled || answeringId !== null} onClick={reload}>
-                        {loadError ? "Try again" : "Refresh invitations"}
+                        {loadError ? uiText("Try again") : uiText("Refresh invitations")}
                     </PillButtonUI>
                 </div>
             ) : null}
@@ -105,21 +107,21 @@ export function OnboardingInvitations({
                     <ConnectorCard key={invitation.id} kind="invitation" name={name}
                         icon={<OrganizationSkeuoIcon className="h-6 w-6" />}
                         detail={<>
-                            <span className="block [overflow-wrap:anywhere]">{joinedRole ? "Joined as" : "Invited as"} {ORG_ROLE_LABELS[joinedRole ?? invitation.role]}</span>
-                            {invitation.invited_by_email ? <span className="block [overflow-wrap:anywhere]">From {invitation.invited_by_email}</span> : null}
+                            <span className="block [overflow-wrap:anywhere]">{joinedRole ? uiText("Joined as") : uiText("Invited as")} {ORG_ROLE_LABELS[joinedRole ?? invitation.role]}</span>
+                            {invitation.invited_by_email ? <span className="block [overflow-wrap:anywhere]">{uiText("From")} {invitation.invited_by_email}</span> : null}
                         </>}
                         action={joinedRole ? (
-                            <span role="status" className="text-xs font-medium text-gray-500">Joined</span>
+                            <span role="status" className="text-xs font-medium text-gray-500">{uiText("Joined")}</span>
                         ) : (
-                            <PillButtonUI type="button" tone="blue" size="sm" aria-label={`Accept ${name}`}
+                            <PillButtonUI type="button" tone="blue" size="sm" aria-label={uiText`Accept ${name}`}
                                 disabled={disabled || answeringId !== null}
-                                loading={answeringId === invitation.id} onClick={() => void accept(invitation)}>Accept</PillButtonUI>
+                                loading={answeringId === invitation.id} onClick={() => void accept(invitation)}>{uiText("Accept")}</PillButtonUI>
                         )}
                     />
                 );
             })}
             {Object.keys(joined).length > 0 ? (
-                <p role="status" className="text-xs text-gray-500">Invitation accepted. Finish setup to open your organization workspace.</p>
+                <p role="status" className="text-xs text-gray-500">{uiText("Invitation accepted. Finish setup to open your organization workspace.")}</p>
             ) : null}
         </section>
     );

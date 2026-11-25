@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { deleteChat, renameChat } from "@/app/lib/mikeApi";
@@ -68,10 +70,10 @@ export default function ProjectAssistantPage({ params }: Props) {
             await renameChat(chatId, trimmed);
         } catch (error) {
             setActionNotice({
-                title: "The chat was not renamed",
+                title: uiText("The chat was not renamed"),
                 message: userFacingApiError(
                     error,
-                    "The chat could not be renamed. Please try again.",
+                    uiText("The chat could not be renamed. Please try again."),
                 ),
             });
             return;
@@ -101,10 +103,10 @@ export default function ProjectAssistantPage({ params }: Props) {
             await deleteChat(chat.id);
         } catch (error) {
             setActionNotice({
-                title: "The chat was not deleted",
+                title: uiText("The chat was not deleted"),
                 message: userFacingApiError(
                     error,
-                    "The chat could not be deleted. Please try again.",
+                    uiText("The chat could not be deleted. Please try again."),
                 ),
             });
             return;
@@ -160,7 +162,7 @@ export default function ProjectAssistantPage({ params }: Props) {
         ].filter((notice): notice is string => notice !== null);
         if (notices.length > 0)
             setActionNotice({
-                title: "Some chats were not deleted",
+                title: uiText("Some chats were not deleted"),
                 message: notices.join(" "),
             });
     }, [chats, selectedChatIds, setProjectChats]);
@@ -195,11 +197,11 @@ export default function ProjectAssistantPage({ params }: Props) {
                 open={confirmDeleteSelectedOpen && selectedChatIds.length > 0}
                 title={
                     selectedChatIds.length === 1
-                        ? "Delete chat?"
-                        : `Delete ${selectedChatIds.length} chats?`
+                        ? uiText("Delete chat?")
+                        : uiText`Delete ${selectedChatIds.length} chats?`
                 }
-                message="This cannot be undone."
-                confirmLabel="Delete"
+                message={uiText("This cannot be undone.")}
+                confirmLabel={uiText("Delete")}
                 confirmVariant="danger"
                 onCancel={() => setConfirmDeleteSelectedOpen(false)}
                 onConfirm={() => void handleDeleteSelectedChats()}

@@ -1,5 +1,7 @@
 "use client";
 
+import { isImeComposing, uiText } from "@mike/client";
+
 import * as React from "react";
 import { ArrowRight, Square } from "lucide-react";
 
@@ -49,7 +51,7 @@ export function ChatInput({
     onSubmit,
     isLoading = false,
     onCancel,
-    placeholder = "How can I help?",
+    placeholder = uiText("How can I help?"),
     disabled = false,
     leftSlot,
     rightSlot,
@@ -113,6 +115,8 @@ export function ChatInput({
     const handleKeyDown = (
         e: React.KeyboardEvent<HTMLTextAreaElement>,
     ): void => {
+        // Let the IME confirm a Chinese candidate before parent shortcuts run.
+        if (isImeComposing(e)) return;
         onKeyDown?.(e);
         if (e.defaultPrevented) return;
         if (e.key === "Enter" && !e.shiftKey) {
@@ -163,7 +167,7 @@ export function ChatInput({
                             isLoading ? onCancel?.() : canSend && onSubmit()
                         }
                         disabled={!isLoading && !canSend}
-                        aria-label={isLoading ? "Stop response" : "Send message"}
+                        aria-label={isLoading ? uiText("停止回复") : uiText("发送消息")}
                         className={cn(
                             COMPOSER_SEND_BUTTON_CLASS,
                             "h-8 w-8 shrink-0 rounded-[11px]",

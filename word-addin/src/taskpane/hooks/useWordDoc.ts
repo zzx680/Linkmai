@@ -1,4 +1,5 @@
 /// <reference types="office-js" />
+import { uiText } from "@mike/client";
 
 import { useCallback, useMemo } from "react";
 import { createRevisionIndex, type RevisionIndex } from "../lib/revisionIndex";
@@ -270,7 +271,7 @@ function logErrorMessage(error: unknown): string {
   ) {
     return error.message;
   }
-  return "Word operation failed.";
+  return uiText("Word operation failed.");
 }
 
 /**

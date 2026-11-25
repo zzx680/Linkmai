@@ -179,6 +179,6 @@
 
 /* The variables the app and the Word add-in tokens read (globals.css). */
 :root {
-    --font-inter: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
-    --font-eb-garamond: "EB Garamond", "EB Garamond Fallback", Georgia, serif;
+    --font-inter: "Inter", "Inter Fallback", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", ui-sans-serif, system-ui, sans-serif;
+    --font-eb-garamond: "EB Garamond", "EB Garamond Fallback", "Songti SC", "SimSun", "Noto Serif CJK SC", Georgia, serif;
 }

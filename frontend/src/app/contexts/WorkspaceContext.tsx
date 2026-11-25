@@ -19,6 +19,7 @@ import {
     type ReactNode,
 } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
+import { zhCN } from "@/app/lib/localization";
 import {
     getOrgApiKeys,
     listOrgs,
@@ -27,7 +28,7 @@ import {
 } from "@/app/lib/mikeApi";
 
 export const PERSONAL_WORKSPACE = "personal";
-export const PERSONAL_WORKSPACE_LABEL = "Personal";
+export const PERSONAL_WORKSPACE_LABEL = zhCN.navigation.personalWorkspace;
 
 const STORAGE_PREFIX = "mike.activeWorkspace.";
 

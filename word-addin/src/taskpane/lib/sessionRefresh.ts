@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 /**
  * What a failed session refresh actually means.
  *
@@ -21,11 +23,11 @@ export type SessionRefreshOutcome =
 
 /** Shown for `unreachable`. The session may well still be perfectly good. */
 export const SESSION_CHECK_FAILED_MESSAGE =
-  "Couldn't check your session. Check your connection and try again.";
+  uiText("Couldn't check your session. Check your connection and try again.");
 
 /** Shown for `expired`, by the toast and by any screen that failed on it. */
 export const SESSION_EXPIRED_MESSAGE =
-  "Your session has expired. Sign in again to continue.";
+  uiText("Your session has expired. Sign in again to continue.");
 
 /**
  * Codes the API client gives the error for a 401 this layer has already

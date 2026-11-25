@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
@@ -48,48 +50,48 @@ const DELETE_ROWS: {
 }[] = [
   {
     kind: "chats",
-    label: "Delete all chats",
+    label: uiText("Delete all chats"),
     description:
-      "Permanently delete the organization's assistant, project and tabular review chat history.",
-    title: "Delete all organization chats?",
+      uiText("Permanently delete the organization's assistant, project and tabular review chat history."),
+    title: uiText("Delete all organization chats?"),
     message:
-      "This will permanently delete assistant, project and tabular review chat history across the organization, for every member. Consider exporting anything you need to keep first. This action cannot be undone.",
+      uiText("This will permanently delete assistant, project and tabular review chat history across the organization, for every member. Consider exporting anything you need to keep first. This action cannot be undone."),
   },
   {
     kind: "tabular-reviews",
-    label: "Delete all tabular reviews",
+    label: uiText("Delete all tabular reviews"),
     description:
-      "Permanently delete every tabular review in the organization, including cells and review chats.",
-    title: "Delete all organization tabular reviews?",
+      uiText("Permanently delete every tabular review in the organization, including cells and review chats."),
+    title: uiText("Delete all organization tabular reviews?"),
     message:
-      "This will permanently delete every tabular review in the organization, including their cells and review chats, for every member. Consider exporting anything you need to keep first. This action cannot be undone.",
+      uiText("This will permanently delete every tabular review in the organization, including their cells and review chats, for every member. Consider exporting anything you need to keep first. This action cannot be undone."),
   },
   {
     kind: "projects",
-    label: "Delete all projects",
+    label: uiText("Delete all projects"),
     description:
-      "Permanently delete every project in the organization, including documents, chats, and tabular reviews.",
-    title: "Delete all organization projects?",
+      uiText("Permanently delete every project in the organization, including documents, chats, and tabular reviews."),
+    title: uiText("Delete all organization projects?"),
     message:
-      "This will permanently delete every project in the organization, including their documents, chats, and tabular reviews, for every member. Consider exporting anything you need to keep first. This action cannot be undone.",
+      uiText("This will permanently delete every project in the organization, including their documents, chats, and tabular reviews, for every member. Consider exporting anything you need to keep first. This action cannot be undone."),
   },
   {
     kind: "playbooks",
-    label: "Delete all playbooks",
+    label: uiText("Delete all playbooks"),
     description:
-      "Permanently delete every playbook in the organization, including review history and reference documents.",
-    title: "Delete all organization playbooks?",
+      uiText("Permanently delete every playbook in the organization, including review history and reference documents."),
+    title: uiText("Delete all organization playbooks?"),
     message:
-      "This will permanently delete every playbook in the organization, public and private, including their review history and reference documents, for every member. Consider exporting anything you need to keep first. This action cannot be undone.",
+      uiText("This will permanently delete every playbook in the organization, public and private, including their review history and reference documents, for every member. Consider exporting anything you need to keep first. This action cannot be undone."),
   },
   {
     kind: "memories",
-    label: "Delete all memory",
+    label: uiText("Delete all memory"),
     description:
-      "Permanently delete the memory of every project in the organization.",
-    title: "Delete all organization memory?",
+      uiText("Permanently delete the memory of every project in the organization."),
+    title: uiText("Delete all organization memory?"),
     message:
-      "This permanently deletes the memory of every project in the organization. Memory remains enabled and can be rebuilt from future conversations. This action cannot be undone.",
+      uiText("This permanently deletes the memory of every project in the organization. Memory remains enabled and can be rebuilt from future conversations. This action cannot be undone."),
   },
 ];
 
@@ -100,13 +102,13 @@ const POLICY_ROWS: {
 }[] = [
   {
     key: "allow_member_exports",
-    label: "Let members export their data",
+    label: uiText("Let members export their data"),
     description: (orgName) =>
       `Members can export their own chats, tabular reviews, projects and memory in ${orgName} from Settings › Privacy & Data. Owners always can.`,
   },
   {
     key: "allow_member_deletes",
-    label: "Let members delete their data in bulk",
+    label: uiText("Let members delete their data in bulk"),
     description: (orgName) =>
       `Members can delete all of their own chats, tabular reviews, projects or memory in ${orgName} at once. Deleting one item at a time is not affected.`,
   },
@@ -154,7 +156,7 @@ function MemberDataPolicySection() {
 
   return (
     <section aria-labelledby="org-privacy-members" className="space-y-3">
-      <SettingsHeading id="org-privacy-members">Members&apos; data</SettingsHeading>
+      <SettingsHeading id="org-privacy-members">{uiText("Members&apos; data")}</SettingsHeading>
       <GlassCardUI>
         {POLICY_ROWS.map((row) => (
           <SettingsRow key={row.key}>
@@ -184,8 +186,8 @@ function MemberDataPolicySection() {
           setPendingMfa(null);
           if (pending) void save(pending.next, pending.key);
         }}
-        title="Two-factor verification required"
-        message="This setting is sensitive. Enter a code from your authenticator app to continue."
+        title={uiText("Two-factor verification required")}
+        message={uiText("This setting is sensitive. Enter a code from your authenticator app to continue.")}
       />
     </section>
   );
@@ -204,15 +206,15 @@ export function OrganizationPrivacyData() {
     return (
       <EmptyState
         icon={<OrganizationSkeuoIcon />}
-        title="Privacy & Data"
-        description="Only this organization's owners can manage its data."
+        title={uiText("Privacy & Data")}
+        description={uiText("Only this organization's owners can manage its data.")}
         action={
           <PillButtonUI
             tone="white"
             size="sm"
             onClick={() => router.push(organizationSettingsHref(orgId))}
           >
-            Back to General
+            {uiText("Back to General")}
           </PillButtonUI>
         }
       />
@@ -239,7 +241,7 @@ export function OrganizationPrivacyData() {
         setMfaKind(kind);
         return;
       }
-      setWarningMessage("Failed to delete data. Please try again.");
+      setWarningMessage(uiText("Failed to delete data. Please try again."));
     } finally {
       setDeletingKind(null);
     }
@@ -255,22 +257,20 @@ export function OrganizationPrivacyData() {
       {org && isOrgOwner(org.role) ? (
         <section aria-labelledby="org-privacy-departed" className="space-y-3">
           <SettingsHeading id="org-privacy-departed">
-            Departed members
+            {uiText("Departed members")}
           </SettingsHeading>
           <GlassCardUI>
             <SettingsRow>
               <div className="space-y-1">
-                <SettingsLabel>Work left by departed members</SettingsLabel>
+                <SettingsLabel>{uiText("Work left by departed members")}</SettingsLabel>
                 <SettingsDescription>
-                  Private, unshared work a member leaves behind is kept for 30
-                  days, then permanently deleted. Reassign or delete it from
-                  the Members page.
+                  {uiText("Private, unshared work a member leaves behind is kept for 30 days, then permanently deleted. Reassign or delete it from the Members page.")}
                 </SettingsDescription>
               </div>
               <PillButtonUI
                 tone="black"
                 size="sm"
-                aria-label="Review departed members"
+                aria-label={uiText("Review departed members")}
                 onClick={() =>
                   router.push(
                     `${organizationSettingsHref(orgId, "members")}?view=departed`,
@@ -278,14 +278,14 @@ export function OrganizationPrivacyData() {
                 }
                 className="w-full shrink-0 sm:w-auto"
               >
-                Review
+                {uiText("Review")}
               </PillButtonUI>
             </SettingsRow>
           </GlassCardUI>
         </section>
       ) : null}
       <section aria-labelledby="org-privacy-delete" className="space-y-3">
-        <SettingsHeading id="org-privacy-delete">Delete data</SettingsHeading>
+        <SettingsHeading id="org-privacy-delete">{uiText("Delete data")}</SettingsHeading>
         <GlassCardUI>
           {DELETE_ROWS.map((row) => (
             <SettingsRow key={row.kind}>
@@ -304,7 +304,7 @@ export function OrganizationPrivacyData() {
                 className="w-full shrink-0 sm:w-auto"
               >
                 <Trash2 className="h-4 w-4 shrink-0" />
-                Delete
+                {uiText("Delete")}
               </PillButtonUI>
             </SettingsRow>
           ))}
@@ -314,10 +314,10 @@ export function OrganizationPrivacyData() {
         open={pendingKind !== null}
         title={pendingRow?.title}
         message={pendingRow?.message}
-        confirmLabel="Delete"
+        confirmLabel={uiText("Delete")}
         confirmVariant="danger"
         confirmStatus={deletingKind ? "loading" : "idle"}
-        cancelLabel="Cancel"
+        cancelLabel={uiText("Cancel")}
         onCancel={() => {
           if (deletingKind) return;
           setPendingKind(null);
@@ -335,12 +335,12 @@ export function OrganizationPrivacyData() {
           setMfaKind(null);
           if (kind) void deleteData(kind);
         }}
-        title="Two-factor verification required"
-        message="This action is sensitive. Enter a code from your authenticator app to continue."
+        title={uiText("Two-factor verification required")}
+        message={uiText("This action is sensitive. Enter a code from your authenticator app to continue.")}
       />
       <WarningPopup
         open={!!warningMessage}
-        title="Action failed"
+        title={uiText("Action failed")}
         message={warningMessage}
         onClose={() => setWarningMessage(null)}
       />

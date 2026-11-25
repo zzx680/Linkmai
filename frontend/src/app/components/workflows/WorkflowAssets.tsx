@@ -1,5 +1,9 @@
 "use client";
 
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import {
   forwardRef,
   useEffect,
@@ -66,7 +70,7 @@ function formatBytes(bytes: number | null) {
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString(undefined, {
+  return new Date(value).toLocaleDateString(uiDateLocale(), {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -130,7 +134,7 @@ export const WorkflowAssets = forwardRef<
       setError("");
     } catch (caught) {
       reportFault(caught, ASSET_FLOW);
-      setError(userFacingApiError(caught, "Unable to load assets."));
+      setError(userFacingApiError(caught, uiText("Unable to load assets.")));
     } finally {
       setLoading(false);
     }
@@ -219,8 +223,8 @@ export const WorkflowAssets = forwardRef<
         ...ASSET_FLOW,
         fallback:
           supported.length === 1
-            ? `${supported[0]?.name ?? "That file"} could not be uploaded. Try again.`
-            : "Those files could not be uploaded. Try again.",
+            ? `${supported[0]?.name ?? uiText("That file")} could not be uploaded. Try again.`
+            : uiText("Those files could not be uploaded. Try again."),
         onRetry: () => void upload(supported),
       });
     } finally {
@@ -248,7 +252,7 @@ export const WorkflowAssets = forwardRef<
       setFiles((current) => [...current, ...created]);
     } catch (caught) {
       reportFault(caught, ASSET_FLOW);
-      setError(userFacingApiError(caught, "Unable to add saved files."));
+      setError(userFacingApiError(caught, uiText("Unable to add saved files.")));
     } finally {
       uploadInFlightRef.current = false;
       setBusyId(null);
@@ -270,7 +274,7 @@ export const WorkflowAssets = forwardRef<
       });
     } catch (caught) {
       reportFault(caught, ASSET_FLOW);
-      setError(userFacingApiError(caught, "Unable to load asset versions."));
+      setError(userFacingApiError(caught, uiText("Unable to load asset versions.")));
     } finally {
       setLoadingVersionAssetIds((current) => {
         const next = new Set(current);
@@ -296,7 +300,7 @@ export const WorkflowAssets = forwardRef<
       await refreshVersionState(target.id);
     } catch (caught) {
       reportFault(caught, ASSET_FLOW);
-      setError(userFacingApiError(caught, "Version upload failed."));
+      setError(userFacingApiError(caught, uiText("Version upload failed.")));
     } finally {
       setBusyId(null);
     }
@@ -312,7 +316,7 @@ export const WorkflowAssets = forwardRef<
       anchor.click();
     } catch (caught) {
       reportFault(caught, ASSET_FLOW);
-      setError(userFacingApiError(caught, "Download failed."));
+      setError(userFacingApiError(caught, uiText("Download failed.")));
     } finally {
       setBusyId(null);
     }
@@ -343,7 +347,7 @@ export const WorkflowAssets = forwardRef<
       await deleteAsset(file);
     } catch (caught) {
       reportFault(caught, ASSET_FLOW);
-      setError(userFacingApiError(caught, "Delete failed."));
+      setError(userFacingApiError(caught, uiText("Delete failed.")));
     } finally {
       setBusyId(null);
       setPendingDeleteFile(null);
@@ -393,11 +397,11 @@ export const WorkflowAssets = forwardRef<
         header={
           <TableHeaderRow>
             <TableStickyCell header widthClassName={ASSET_NAME_COL_W}>
-              Name
+              {uiText("Name")}
             </TableStickyCell>
-            <TableHeaderCell className="ml-auto w-20">Type</TableHeaderCell>
-            <TableHeaderCell className="w-24">Size</TableHeaderCell>
-            <TableHeaderCell className="w-32">Updated</TableHeaderCell>
+            <TableHeaderCell className="ml-auto w-20">{uiText("Type")}</TableHeaderCell>
+            <TableHeaderCell className="w-24">{uiText("Size")}</TableHeaderCell>
+            <TableHeaderCell className="w-32">{uiText("Updated")}</TableHeaderCell>
             <TableHeaderCell className="w-8" />
           </TableHeaderRow>
         }
@@ -429,8 +433,8 @@ export const WorkflowAssets = forwardRef<
         ) : files.length === 0 ? (
           <TableEmptyState>
             <EmptyState
-              title="Assets"
-              description="Upload assets that this workflow can use when it runs."
+              title={uiText("Assets")}
+              description={uiText("Upload assets that this workflow can use when it runs.")}
             />
           </TableEmptyState>
         ) : (
@@ -535,18 +539,18 @@ export const WorkflowAssets = forwardRef<
       />
       <ConfirmPopup
         open={pendingDeleteFile !== null}
-        title="Delete asset?"
+        title={uiText("Delete asset?")}
         message={
           pendingDeleteFile ? (
             <p>
               <span className="font-medium text-gray-950">
                 {pendingDeleteFile.filename}
               </span>{" "}
-              will be permanently deleted.
+              {uiText("will be permanently deleted.")}
             </p>
           ) : undefined
         }
-        confirmLabel="Delete"
+        confirmLabel={uiText("Delete")}
         confirmVariant="danger"
         confirmStatus={deleteStatus}
         onConfirm={() => void confirmRemove()}

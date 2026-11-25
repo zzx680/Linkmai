@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Workflow } from "../../types";
 import { Spinner } from "../../../shared/ui/spinner";
@@ -97,7 +99,7 @@ export function WorkflowPicker({
         if (cancelled) return;
         setFetchFailed(true);
         notifyError(reason, {
-          action: "load your workflows",
+          action: uiText("load your workflows"),
           dedupeKey: "workflow-list",
           page: "Workflows",
           operation: "workflows.run",
@@ -204,7 +206,7 @@ export function WorkflowPicker({
           setSaveError(
             reportFault(reason, {
               fallback:
-                "Mike couldn't save these instructions. Try again.",
+                uiText("Mike couldn't save these instructions. Try again."),
               operation: "workflows.run",
             }).message
           );
@@ -230,7 +232,7 @@ export function WorkflowPicker({
           data-testid="workflows-page-title"
           className="mb-3 px-1"
         >
-          Workflows
+          {uiText("Workflows")}
         </PageTitle>
         <WorkflowList
           workflows={workflows}
@@ -239,7 +241,7 @@ export function WorkflowPicker({
           onSelect={openWorkflow}
           loading={fetchLoading}
           loadFailed={fetchFailed}
-          emptyMessage="No workflows found."
+          emptyMessage={uiText("No workflows found.")}
         />
       </div>
     );
@@ -262,9 +264,9 @@ export function WorkflowPicker({
         >
           {saveError ??
             (saveStatus === "saving"
-              ? "Saving…"
+              ? uiText("Saving…")
               : saveStatus === "saved"
-                ? "Saved"
+                ? uiText("Saved")
                 : "")}
         </span>
       </div>
@@ -281,7 +283,7 @@ export function WorkflowPicker({
             <Suspense
               fallback={
                 <div className="flex h-full items-center justify-center">
-                  <Spinner label="Loading editor…" />
+                  <Spinner label={uiText("Loading editor…")} />
                 </div>
               }
             >

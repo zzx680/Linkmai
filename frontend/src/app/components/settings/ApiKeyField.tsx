@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -129,9 +131,9 @@ export function ApiKeyField({
     }
     notifyInfo(
       valueRef.current.trim().length > 0
-        ? `Your ${label} has changed since that attempt. Press Save to store the key now in the field.`
-        : `The ${label} field is empty, so there is nothing to retry. Enter the key again and press Save.`,
-      "Nothing was sent",
+        ? uiText`Your ${label} has changed since that attempt. Press Save to store the key now in the field.`
+        : uiText`The ${label} field is empty, so there is nothing to retry. Enter the key again and press Save.`,
+      uiText("Nothing was sent"),
     );
   };
 
@@ -170,11 +172,11 @@ export function ApiKeyField({
         // The caller reports failure as `false`, with no error to classify.
         notifyError(
           new UserVisibleError(
-            `Mike couldn't save your ${label}. The key was not changed.`,
+            uiText`Mike couldn't save your ${label}. The key was not changed.`,
             { retryable: true },
           ),
           {
-            action: `save your ${label}`,
+            action: uiText`save your ${label}`,
             onRetry: () => retrySave(attempted, attemptedSetting),
           },
         );
@@ -187,7 +189,7 @@ export function ApiKeyField({
         // shown as written, with no Retry (the same value would be refused
         // again); a transient failure offers one.
         notifyError(error, {
-          action: `save your ${label}`,
+          action: uiText`save your ${label}`,
           onRetry: () => retrySave(attempted, attemptedSetting),
         });
       }
@@ -205,15 +207,15 @@ export function ApiKeyField({
       }
       const ok = await onRemove();
       if (ok) {
-        notifySuccess(`${label} removed.`);
+        notifySuccess(uiText`${label} removed.`);
       } else {
         notifyError(
           new UserVisibleError(
-            `Mike couldn't remove your ${label}. The key is still saved.`,
+            uiText`Mike couldn't remove your ${label}. The key is still saved.`,
             { retryable: true },
           ),
           {
-            action: `remove your ${label}`,
+            action: uiText`remove your ${label}`,
             onRetry: () => void handleRemove(),
           },
         );
@@ -223,7 +225,7 @@ export function ApiKeyField({
         setPendingMfaAction("remove");
       } else {
         notifyError(error, {
-          action: `remove your ${label}`,
+          action: uiText`remove your ${label}`,
           onRetry: () => void handleRemove(),
         });
       }
@@ -243,12 +245,12 @@ export function ApiKeyField({
   };
 
   const saveAction = {
-    label: isSaving ? "Saving..." : saved ? "Saved" : "Save",
+    label: isSaving ? uiText("Saving...") : saved ? uiText("Saved") : uiText("Save"),
     onClick: handleSave,
     disabled: isSaving || !dirty || saved,
   };
   const removeAction = hasSavedKey ? {
-    label: "Remove",
+    label: uiText("Remove"),
     onClick: handleRemove,
     disabled: isSaving,
   } : undefined;
@@ -296,7 +298,7 @@ export function ApiKeyField({
                 type="button"
                 onClick={() => setReveal((current) => !current)}
                 className={`absolute inset-y-1 right-1.5 flex items-center ${settingsGlassIconButtonClassName}`}
-                aria-label={reveal ? "Hide key" : "Show key"}
+                aria-label={reveal ? uiText("Hide key") : uiText("Show key")}
               >
                 {reveal ? (
                   <EyeOff className="h-4 w-4" />

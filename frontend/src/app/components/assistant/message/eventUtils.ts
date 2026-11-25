@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import type { AssistantEvent } from "../../shared/types";
 
 export function isRenderableEvent(event: AssistantEvent): boolean {
@@ -73,5 +75,5 @@ export function toolCallLabel(name: string): string {
     if (name === "read_webpage") return "Reading web page...";
     if (name === "delegate") return "Starting a subagent...";
     if (name.startsWith("mcp_")) return "Using connector...";
-    return name ? `Running ${name}...` : "Working...";
+    return name ? uiText`Running ${name}...` : uiText("Working...");
 }

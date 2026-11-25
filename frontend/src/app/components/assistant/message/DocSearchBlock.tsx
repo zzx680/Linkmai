@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { useState } from "react";
 import type { DocumentSearchEvent } from "@mike/contracts";
 import { EventBlock } from "./EventBlocks";
@@ -24,15 +26,15 @@ export function DocSearchBlock({ event, isStreaming, interrupted, showConnector 
             {interrupted ? (
                 // No result arrived, so there is no match count to disclose.
                 <EventLabel className="[overflow-wrap:anywhere]">
-                    Search stopped in {scope} for &ldquo;{event.query}&rdquo;
+                    {uiText("Search stopped in")} {scope} {uiText("for &ldquo;")}{event.query}{uiText("&rdquo;")}
                 </EventLabel>
             ) : (
                 <EventDisclosureButton
                     open={open}
                     onToggle={() => setOpen(value => !value)}
                     label={<span className="[overflow-wrap:anywhere]">
-                        {isStreaming ? "Searching" : event.error ? "Search failed in" : "Searched"}{" "}
-                        {scope} for &ldquo;{event.query}&rdquo;
+                        {isStreaming ? uiText("Searching") : event.error ? uiText("Search failed in") : uiText("Searched")}{" "}
+                        {scope} {uiText("for &ldquo;")}{event.query}{uiText("&rdquo;")}
                     </span>}
                     isStreaming={isStreaming}
                 />

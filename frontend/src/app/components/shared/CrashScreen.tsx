@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { ReactNode } from "react";
 import { useCrashBoundary } from "@/app/hooks/useCrashBoundary";
 import { PillButtonUI, textButtonUIClassName } from "@mike/ui";
@@ -30,11 +32,10 @@ export function CrashScreen({
         <div className="min-h-screen bg-white flex items-center justify-center px-4">
             <div className="text-center max-w-md">
                 <h1 className="text-3xl font-eb-garamond font-light text-gray-900 mb-3">
-                    Something went wrong
+                    {uiText("Something went wrong")}
                 </h1>
                 <p className="text-[0.9375rem] text-gray-500 leading-relaxed mb-8">
-                    This page didn&apos;t load. Try again, and contact support
-                    if it keeps happening.
+                    {uiText("This page didn&apos;t load. Try again, and contact support if it keeps happening.")}
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center gap-3">
@@ -45,7 +46,7 @@ export function CrashScreen({
                             size="normal"
                             onClick={() => reset()}
                         >
-                            Try again
+                            {uiText("Try again")}
                         </PillButtonUI>
                     )}
                     {secondaryAction(reset ? "white" : "black")}
@@ -59,11 +60,11 @@ export function CrashScreen({
                             className: "px-0",
                         })}
                     >
-                        Contact support
+                        {uiText("Contact support")}
                     </a>
                     {error.digest && (
                         <span className="ml-2 text-gray-400">
-                            Error reference: {error.digest}
+                            {uiText("Error reference:")} {error.digest}
                         </span>
                     )}
                 </p>

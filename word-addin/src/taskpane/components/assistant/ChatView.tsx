@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { createMessageEditStateSelector, EMPTY_MESSAGE_EDIT_STATE } from "../../lib/messageEditState";
 import React, {
     useCallback,
@@ -278,12 +280,12 @@ export function ChatView({
             notifyError(
                 new UserVisibleError(
                     status === "not-found"
-                        ? "Mike couldn't find that passage in this document. It may have changed since the answer was written."
-                        : "Word couldn't scroll to that passage. Try finding it with Word's search.",
+                        ? uiText("Mike couldn't find that passage in this document. It may have changed since the answer was written.")
+                        : uiText("Word couldn't scroll to that passage. Try finding it with Word's search."),
                     { kind: status === "not-found" ? "not_found" : "unknown" },
                 ),
                 {
-                    action: "go to that passage",
+                    action: uiText("go to that passage"),
                     dedupeKey: "citation-locate",
                     page: "Assistant",
                     operation: "word.document_read",
@@ -807,7 +809,7 @@ export function ChatView({
                 >
                     <button
                         type="button"
-                        aria-label="Scroll to bottom"
+                        aria-label={uiText("Scroll to bottom")}
                         onClick={scrollToBottom}
                         className="cursor-pointer rounded-full bg-white/30 p-2 shadow-[0_5px_16px_rgba(15,23,42,0.13),inset_0_1px_0_rgba(255,255,255,0.75),inset_0_-8px_18px_rgba(255,255,255,0.26)] backdrop-blur-xl transition-all hover:bg-white/45 hover:shadow-[0_7px_20px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.85),inset_0_-8px_18px_rgba(255,255,255,0.32)]"
                     >

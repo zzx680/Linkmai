@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { WorkflowSlashCommandUI } from "@mike/ui";
@@ -177,7 +179,7 @@ export function NewWorkflowModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Mike couldn't create that workflow. Try again.",
+          fallback: uiText("Mike couldn't create that workflow. Try again."),
           operation: "workflows.run",
         }).message
       );
@@ -194,7 +196,7 @@ export function NewWorkflowModal({
     if (!/\.(?:md|markdown)$/i.test(file.name)) {
       setImportedMarkdown("");
       setImportedFileName(null);
-      setError("Choose a .md or .markdown file.");
+      setError(uiText("Choose a .md or .markdown file."));
       event.target.value = "";
       return;
     }
@@ -205,7 +207,7 @@ export function NewWorkflowModal({
     } catch {
       setImportedMarkdown("");
       setImportedFileName(null);
-      setError("Could not read that Markdown file.");
+      setError(uiText("Could not read that Markdown file."));
     }
   };
 
@@ -214,14 +216,14 @@ export function NewWorkflowModal({
       open={open}
       onClose={close}
       parentLabel="Workflows"
-      title="New workflow"
+      title={uiText("New workflow")}
       primaryAction={{
-        label: creating ? "Creating…" : "Create workflow",
+        label: creating ? uiText("Creating…") : uiText("Create workflow"),
         onClick: () => void create(),
         disabled: !title.trim() || creating,
       }}
       secondaryAction={{
-        label: importedFileName ?? "Upload markdown",
+        label: importedFileName ?? uiText("Upload markdown"),
         icon: <Upload className="h-3.5 w-3.5" />,
         onClick: () => markdownInputRef.current?.click(),
         disabled: creating,
@@ -231,13 +233,13 @@ export function NewWorkflowModal({
         <div className="space-y-6">
           <div>
             <ModalFieldLabel htmlFor="new-workflow-title">
-              Title
+              {uiText("Title")}
             </ModalFieldLabel>
             <ModalTextInput
               id="new-workflow-title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Add workflow name"
+              placeholder={uiText("Add workflow name")}
               variant="minimal"
               autoFocus
             />
@@ -246,7 +248,7 @@ export function NewWorkflowModal({
 
           <div>
             <ModalFieldLabel htmlFor="new-workflow-language">
-              Language
+              {uiText("Language")}
             </ModalFieldLabel>
             <ModalSelect
               id="new-workflow-language"
@@ -261,7 +263,7 @@ export function NewWorkflowModal({
               <ModalTextInput
                 value={customLanguage}
                 onChange={(event) => setCustomLanguage(event.target.value)}
-                placeholder="Enter language…"
+                placeholder={uiText("Enter language…")}
                 className="mt-2"
               />
             )}
@@ -269,7 +271,7 @@ export function NewWorkflowModal({
 
           <div>
             <ModalFieldLabel htmlFor="new-workflow-practice">
-              Practice area
+              {uiText("Practice area")}
             </ModalFieldLabel>
             <ModalSelect
               id="new-workflow-practice"
@@ -284,7 +286,7 @@ export function NewWorkflowModal({
               <ModalTextInput
                 value={customPractice}
                 onChange={(event) => setCustomPractice(event.target.value)}
-                placeholder="Enter practice area…"
+                placeholder={uiText("Enter practice area…")}
                 className="mt-2"
               />
             )}
@@ -292,7 +294,7 @@ export function NewWorkflowModal({
 
           <div>
             <ModalFieldLabel htmlFor="new-workflow-jurisdiction">
-              Jurisdiction
+              {uiText("Jurisdiction")}
             </ModalFieldLabel>
             <ModalSelect
               id="new-workflow-jurisdiction"
@@ -317,8 +319,8 @@ export function NewWorkflowModal({
                 onChange={setJurisdictionRegion}
                 placeholder={
                   jurisdiction === "United States"
-                    ? "Select state…"
-                    : "Select province…"
+                    ? uiText("Select state…")
+                    : uiText("Select province…")
                 }
                 className="mt-2"
               />
@@ -327,7 +329,7 @@ export function NewWorkflowModal({
               <ModalTextInput
                 value={customJurisdiction}
                 onChange={(event) => setCustomJurisdiction(event.target.value)}
-                placeholder="Enter jurisdiction…"
+                placeholder={uiText("Enter jurisdiction…")}
                 className="mt-2"
               />
             )}
@@ -335,7 +337,7 @@ export function NewWorkflowModal({
 
           {importedFileName && (
             <p className="text-xs text-gray-500">
-              The imported Markdown will become the workflow instructions.
+              {uiText("The imported Markdown will become the workflow instructions.")}
             </p>
           )}
           {error && (

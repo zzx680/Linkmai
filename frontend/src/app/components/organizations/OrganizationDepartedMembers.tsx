@@ -1,5 +1,9 @@
 "use client";
 
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import {
   useCallback,
   useEffect,
@@ -71,23 +75,23 @@ type Kind = OrgDepartureItem["kind"];
 /** The types of work, in the order a departure lists them. */
 const KIND_GROUPS: { kind: Kind; label: string; one: string; many: string }[] =
   [
-    { kind: "project", label: "Projects", one: "project", many: "projects" },
+    { kind: "project", label: uiText("Projects"), one: "project", many: "projects" },
     {
       kind: "workflow",
-      label: "Workflows",
+      label: uiText("Workflows"),
       one: "workflow",
       many: "workflows",
     },
-    { kind: "chat", label: "Chats", one: "chat", many: "chats" },
+    { kind: "chat", label: uiText("Chats"), one: "chat", many: "chats" },
     {
       kind: "tabular_review",
-      label: "Tabular reviews",
+      label: uiText("Tabular reviews"),
       one: "tabular review",
       many: "tabular reviews",
     },
     {
       kind: "document",
-      label: "Library files",
+      label: uiText("Library files"),
       one: "library file",
       many: "library files",
     },
@@ -109,7 +113,7 @@ const count = (n: number, one: string, many = `${one}s`) =>
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(uiDateLocale(), {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -122,7 +126,7 @@ function deadline(expiresAt: string, now: number) {
   const distance =
     days <= 0 ? "today" : days === 1 ? "tomorrow" : `in ${days} days`;
   return {
-    text: `${formatDate(expiresAt)} · ${distance}`,
+    text: uiText`${formatDate(expiresAt)} · ${distance}`,
     soon: days <= SOON_DAYS,
   };
 }
@@ -138,7 +142,7 @@ function contentsLabel(item: OrgDepartureItem) {
   ].filter(Boolean);
   if (parts.length) return parts.join(", ");
   // A workflow with no files of its own still has its steps.
-  return item.kind === "project" ? "Empty" : "";
+  return item.kind === "project" ? uiText("Empty") : "";
 }
 
 /** A deleted account leaves no name behind. */
@@ -243,7 +247,7 @@ export function OrganizationDepartedMembers({
     } catch (error) {
       if (ticket !== requestRef.current) return;
       setLoadError(
-        userFacingApiError(error, "Could not load departed members."),
+        userFacingApiError(error, uiText("Could not load departed members.")),
       );
     }
   }, [orgId]);
@@ -351,7 +355,7 @@ export function OrganizationDepartedMembers({
         );
       await load();
     } catch (error) {
-      setFailure(userFacingApiError(error, "Could not reassign this work."));
+      setFailure(userFacingApiError(error, uiText("Could not reassign this work.")));
     } finally {
       setWorking(false);
     }
@@ -367,12 +371,12 @@ export function OrganizationDepartedMembers({
         setFailure(
           `${count(result.unresolved, "item")} could not be deleted. Try again.`,
         );
-      else notifySuccess("Archived work deleted.");
+      else notifySuccess(uiText("Archived work deleted."));
       await load();
     } catch (error) {
       setDeleting(null);
       if (isMfaRequiredError(error)) setMfaTarget(target);
-      else setFailure(userFacingApiError(error, "Could not delete this work."));
+      else setFailure(userFacingApiError(error, uiText("Could not delete this work.")));
     } finally {
       setWorking(false);
     }
@@ -391,7 +395,7 @@ export function OrganizationDepartedMembers({
           }}
         >
           <UserRoundCheck className="h-3.5 w-3.5" />
-          {onSelection ? "Reassign selected…" : "Reassign…"}
+          {onSelection ? uiText("Reassign selected…") : uiText("Reassign…")}
         </DropdownItem>
         <DropdownItem
           variant="destructive"
@@ -401,7 +405,7 @@ export function OrganizationDepartedMembers({
           }}
         >
           <Trash2 className="h-3.5 w-3.5" />
-          {onSelection ? "Delete selected" : "Delete"}
+          {onSelection ? uiText("Delete selected") : uiText("Delete")}
         </DropdownItem>
       </>
     );
@@ -412,12 +416,12 @@ export function OrganizationDepartedMembers({
       title={title}
       items={[
         {
-          label: "Reassign…",
+          label: uiText("Reassign…"),
           icon: UserRoundCheck,
           onSelect: () => openReassign(target),
         },
         {
-          label: "Delete",
+          label: uiText("Delete"),
           icon: Trash2,
           variant: "danger",
           onSelect: () => openDelete(target),
@@ -471,7 +475,7 @@ export function OrganizationDepartedMembers({
                 checkbox(visibleIds, "Select all archived work")
               )}
               <span className="mr-1">
-                Name
+                {uiText("Name")}
                 {list && !loadError ? (
                   <>
                     {" "}
@@ -482,10 +486,10 @@ export function OrganizationDepartedMembers({
                 ) : null}
               </span>
             </TableStickyCell>
-            <TableHeaderCell className="ml-auto w-64">Email</TableHeaderCell>
-            <TableHeaderCell className="w-56">Contents</TableHeaderCell>
-            <TableHeaderCell className="w-32">Left</TableHeaderCell>
-            <TableHeaderCell className="w-48">Deletes</TableHeaderCell>
+            <TableHeaderCell className="ml-auto w-64">{uiText("Email")}</TableHeaderCell>
+            <TableHeaderCell className="w-56">{uiText("Contents")}</TableHeaderCell>
+            <TableHeaderCell className="w-32">{uiText("Left")}</TableHeaderCell>
+            <TableHeaderCell className="w-48">{uiText("Deletes")}</TableHeaderCell>
             <TableHeaderCell className="w-10" />
           </TableHeaderRow>
         }
@@ -517,7 +521,7 @@ export function OrganizationDepartedMembers({
           <TableEmptyState>
             <EmptyState
               icon={<OrganizationSkeuoIcon />}
-              title="Departed members"
+              title={uiText("Departed members")}
               description={loadError}
               tone="error"
               action={
@@ -530,7 +534,7 @@ export function OrganizationDepartedMembers({
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                 >
                   <Loader2 className="h-3.5 w-3.5" />
-                  Try again
+                  {uiText("Try again")}
                 </button>
               }
             />
@@ -539,14 +543,14 @@ export function OrganizationDepartedMembers({
           <TableEmptyState>
             <EmptyState
               icon={<OrganizationSkeuoIcon />}
-              title="Departed members"
-              description="No work is waiting for a decision. Private work a member leaves behind is kept here for 30 days, then permanently deleted."
+              title={uiText("Departed members")}
+              description={uiText("No work is waiting for a decision. Private work a member leaves behind is kept here for 30 days, then permanently deleted.")}
             />
           </TableEmptyState>
         ) : departures.length === 0 ? (
           <TableEmptyState>
             <p className="text-sm text-gray-400">
-              No departed members or archived work match this search.
+              {uiText("No departed members or archived work match this search.")}
             </p>
           </TableEmptyState>
         ) : (
@@ -591,7 +595,7 @@ export function OrganizationDepartedMembers({
                         <button
                           type="button"
                           aria-label={
-                            open ? `Collapse ${name}` : `Expand ${name}`
+                            open ? uiText`Collapse ${name}` : uiText`Expand ${name}`
                           }
                           onClick={() =>
                             toggleIn(setOpenDepartures, departure.key)
@@ -617,7 +621,7 @@ export function OrganizationDepartedMembers({
                   <TableCell className="ml-auto w-64">
                     {departure.member
                       ? departure.member.email || "—"
-                      : "Account deleted"}
+                      : uiText("Account deleted")}
                   </TableCell>
                   <TableCell className="w-56">
                     {count(departure.items.length, "item")}
@@ -682,8 +686,8 @@ export function OrganizationDepartedMembers({
                                   type="button"
                                   aria-label={
                                     groupOpen
-                                      ? `Collapse ${groupName}`
-                                      : `Expand ${groupName}`
+                                      ? uiText`Collapse ${groupName}`
+                                      : uiText`Expand ${groupName}`
                                   }
                                   onClick={() =>
                                     toggleIn(setOpenGroups, groupKey)
@@ -779,8 +783,7 @@ export function OrganizationDepartedMembers({
             })}
             {list.truncated ? (
               <p className="px-3 py-3 text-xs text-gray-400">
-                Only the work that is deleted soonest is listed. The rest
-                appears as this is reassigned or deleted.
+                {uiText("Only the work that is deleted soonest is listed. The rest appears as this is reassigned or deleted.")}
               </p>
             ) : null}
           </TableBody>
@@ -792,34 +795,33 @@ export function OrganizationDepartedMembers({
         onClose={() => {
           if (!working) setReassigning(null);
         }}
-        breadcrumbs={["Organization", "Departed members", "Reassign"]}
+        breadcrumbs={[uiText("Organization"), uiText("Departed members"), uiText("Reassign")]}
         size="sm"
         cancelAction={{
-          label: "Cancel",
+          label: uiText("Cancel"),
           disabled: working,
           onClick: () => setReassigning(null),
         }}
         primaryAction={{
-          label: working ? "Reassigning..." : "Reassign",
+          label: working ? uiText("Reassigning...") : uiText("Reassign"),
           disabled: working || !successor,
           onClick: () => void reassign(),
         }}
       >
         <div className="space-y-4 pb-4">
           <p className="text-sm text-gray-700 [overflow-wrap:anywhere]">
-            Choose who takes over {reassigning?.label}. Projects and workflows
-            keep their contents, and the work stays private to its new owner.
+            {uiText("Choose who takes over")} {reassigning?.label}{uiText(". Projects and workflows keep their contents, and the work stays private to its new owner.")}
           </p>
           <ModalSelect
             id="departed-work-owner"
-            aria-label="Reassign to"
+            aria-label={uiText("Reassign to")}
             value={successor}
             onChange={setSuccessor}
             wrapLabels
             disabled={working}
             options={members.map((member) => ({
               value: member.user_id,
-              label: member.display_name || member.email || "Unnamed member",
+              label: member.display_name || member.email || uiText("Unnamed member"),
               suffix:
                 member.display_name && member.email
                   ? `(${member.email})`
@@ -830,9 +832,9 @@ export function OrganizationDepartedMembers({
       </Modal>
       <ConfirmPopup
         open={deleting !== null}
-        title="Delete archived work?"
+        title={uiText("Delete archived work?")}
         message={`Permanently delete ${deleting?.label ?? "this work"}, with its contents? This cannot be undone.`}
-        confirmLabel="Delete"
+        confirmLabel={uiText("Delete")}
         confirmVariant="danger"
         confirmStatus={working ? "loading" : "idle"}
         onCancel={() => {
@@ -855,8 +857,8 @@ export function OrganizationDepartedMembers({
         open={failure !== null || (loadError !== null && list !== null)}
         title={
           failure !== null
-            ? "Archived work not changed"
-            : "Archived work not refreshed"
+            ? uiText("Archived work not changed")
+            : uiText("Archived work not refreshed")
         }
         message={failure ?? loadError}
         onClose={() => {

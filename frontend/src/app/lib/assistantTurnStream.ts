@@ -1,4 +1,6 @@
 "use client";
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 
 import { streamChatTurn } from "@/app/lib/mikeApi";
@@ -320,7 +322,7 @@ export function createTurnEventSink(
     cancelled = true;
     eventsRef.current = [
       ...cancelStreamingEvents(eventsRef.current),
-      { type: "content" as const, text: "Cancelled by user." },
+      { type: "content" as const, text: uiText("Cancelled by user.") },
     ];
     publish();
   };

@@ -1,5 +1,4 @@
 /// <reference types="office-js" />
-
 /**
  * Ambient declaration for webpack EnvironmentPlugin substitutions.
  * These values are replaced while webpack builds the task-pane bundle.
@@ -9,6 +8,7 @@ declare const process: {
     readonly REACT_APP_API_BASE_URL: string | undefined;
     readonly REACT_APP_DEFAULT_MODEL: string | undefined;
     readonly REACT_APP_WEB_APP_URL: string | undefined;
+    readonly REACT_APP_LINKMAI_SUPPORT_EMAIL: string | undefined;
     readonly REACT_APP_SENTRY_DISABLED: string | undefined;
     readonly REACT_APP_SENTRY_DSN: string | undefined;
     readonly REACT_APP_SENTRY_INSTALL: string | undefined;

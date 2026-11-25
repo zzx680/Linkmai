@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Lock } from "lucide-react";
 import { WarningPopup } from "../popups/WarningPopup";
 import {
@@ -39,8 +41,8 @@ const ROLE_SUBJECT: Record<
     NonNullable<Props["requiredRole"]>,
     { title: string; subject: string }
 > = {
-    owner: { title: "Owner-only action", subject: "an owner" },
-    editor: { title: "Editors only", subject: "an editor" },
+    owner: { title: uiText("Owner-only action"), subject: "an owner" },
+    editor: { title: uiText("Editors only"), subject: "an editor" },
 };
 
 /**
@@ -118,13 +120,13 @@ export function PermissionDeniedPopup({
         >
             {contact && (
                 <p className="mt-1 text-xs text-gray-600">
-                    Ask{" "}
+                    {uiText("Ask")}{" "}
                     <span className="text-gray-600">
                         {contact.name
                             ? `${contact.name} (${contact.email})`
                             : contact.email}
                     </span>{" "}
-                    if you need {PROJECT_ROLE_LABELS[requiredRole].toLowerCase()}{" "}
+                    {uiText("if you need")} {PROJECT_ROLE_LABELS[requiredRole].toLowerCase()}{" "}
                     access.
                 </p>
             )}

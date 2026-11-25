@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useId } from "react";
 import { ModalTextarea } from "@/app/components/modals/ModalTextarea";
 import { FieldLabel, FormTextInput } from "@/app/components/ui/form-field";
@@ -67,12 +69,12 @@ export function PlaybookDetailsFields({
   return (
     <>
       <div>
-        <FieldLabel htmlFor={nameId}>Playbook name</FieldLabel>
+        <FieldLabel htmlFor={nameId}>{uiText("Playbook name")}</FieldLabel>
         <FormTextInput
           id={nameId}
           value={value.name}
           onChange={(event) => onChange({ ...value, name: event.target.value })}
-          placeholder="Add playbook name"
+          placeholder={uiText("Add playbook name")}
           variant="minimal"
           maxLength={200}
           disabled={disabled}
@@ -80,41 +82,41 @@ export function PlaybookDetailsFields({
         />
       </div>
       <div>
-        <FieldLabel htmlFor={partyId}>Represented party</FieldLabel>
+        <FieldLabel htmlFor={partyId}>{uiText("Represented party")}</FieldLabel>
         <FormTextInput
           id={partyId}
           value={value.representedParty}
           onChange={(event) =>
             onChange({ ...value, representedParty: event.target.value })
           }
-          placeholder="Buyer, Licensee"
+          placeholder={uiText("Buyer, Licensee")}
           disabled={disabled}
         />
       </div>
       <PlaybookListField
-        label="Document types"
+        label={uiText("Document types")}
         value={value.documentTypes}
-        placeholder="NDA, MSA"
+        placeholder={uiText("NDA, MSA")}
         onChange={(documentTypes) => onChange({ ...value, documentTypes })}
         disabled={disabled}
       />
       <PlaybookListField
-        label="Jurisdictions"
+        label={uiText("Jurisdictions")}
         value={value.jurisdictions}
-        placeholder="England and Wales, New York"
+        placeholder={uiText("England and Wales, New York")}
         options={PLAYBOOK_JURISDICTION_OPTIONS}
         onChange={(jurisdictions) => onChange({ ...value, jurisdictions })}
         disabled={disabled}
       />
       <div>
-        <FieldLabel htmlFor={descriptionId}>Description</FieldLabel>
+        <FieldLabel htmlFor={descriptionId}>{uiText("Description")}</FieldLabel>
         <ModalTextarea
           id={descriptionId}
           value={value.description}
           onChange={(event) =>
             onChange({ ...value, description: event.target.value })
           }
-          placeholder="What this playbook is for"
+          placeholder={uiText("What this playbook is for")}
           disabled={disabled}
         />
       </div>

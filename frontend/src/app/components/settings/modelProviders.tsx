@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import Image from "next/image";
 import { Plug, type LucideIcon } from "lucide-react";
 import type { ApiKeyProvider } from "@/app/lib/mikeApi";
@@ -22,80 +24,80 @@ export const MODEL_API_KEY_FIELDS: readonly ModelApiKeyField[] = [
         provider: "claude",
         name: "Anthropic (Claude)",
         logo: "anthropic",
-        label: "Anthropic (Claude) API Key",
+        label: uiText("Anthropic (Claude) API Key"),
     },
     {
         provider: "gemini",
         name: "Google (Gemini)",
         logo: "gemini-color",
-        label: "Google (Gemini) API Key",
+        label: uiText("Google (Gemini) API Key"),
     },
     {
         provider: "openai",
         name: "OpenAI",
         logo: "openai",
-        label: "OpenAI API Key",
+        label: uiText("OpenAI API Key"),
     },
     {
         provider: "mistral",
         name: "Mistral AI",
         logo: "mistral-color",
-        label: "Mistral AI API Key",
+        label: uiText("Mistral AI API Key"),
     },
     {
         provider: "xai",
         name: "xAI",
         logo: "xai",
-        label: "xAI API Key",
+        label: uiText("xAI API Key"),
     },
     {
         provider: "bedrock",
         name: "Amazon Bedrock",
         logo: "bedrock-color",
-        label: "Amazon Bedrock API Key",
+        label: uiText("Amazon Bedrock API Key"),
     },
     {
         provider: "azure",
         name: "Azure OpenAI",
         logo: "azure-color",
-        label: "Azure OpenAI API Key",
+        label: uiText("Azure OpenAI API Key"),
     },
     {
         provider: "azure-foundry",
         name: "Azure AI Foundry",
         logo: "azureai-color",
-        label: "Azure AI Foundry API Key",
+        label: uiText("Azure AI Foundry API Key"),
     },
     {
         provider: "vertex",
         name: "Google Vertex AI",
         logo: "vertexai-color",
-        label: "Google Vertex AI service-account key",
-        keyLabel: "Service-account key (JSON)",
+        label: uiText("Google Vertex AI service-account key"),
+        keyLabel: uiText("Service-account key (JSON)"),
     },
     {
         provider: "openrouter",
         name: "OpenRouter",
         logo: "openrouter-color",
-        label: "OpenRouter API Key",
+        label: uiText("OpenRouter API Key"),
     },
     {
         provider: "vercel",
         name: "Vercel AI Gateway",
         logo: "vercel",
-        label: "Vercel AI Gateway API Key",
+        label: uiText("Vercel AI Gateway API Key"),
     },
     {
         provider: "opencode-go",
         name: "OpenCode Go",
         logo: "opencode",
-        label: "OpenCode Go API Key",
+        label: uiText("OpenCode Go API Key"),
     },
     {
         provider: "custom",
-        name: "OpenAI-compatible endpoint",
+        name: uiText("OpenAI-compatible endpoint"),
         icon: Plug,
-        label: "OpenAI-compatible endpoint API Key",
+        label: uiText("OpenAI-compatible endpoint API Key"),
     },
 ];
 

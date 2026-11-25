@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { UserAvatar } from "@/app/components/ui/user-avatar";
 
 import {
@@ -59,6 +61,7 @@ import { notifyError } from "@/app/lib/userFacingError";
 import { useAssignLatest } from "@/app/hooks/useLatestRef";
 import type { Project } from "@/app/components/shared/types";
 import { cn } from "@/app/lib/utils";
+import { zhCN } from "@/app/lib/localization";
 import { useAssistantHistoryStatuses } from "@/app/hooks/useAssistantHistoryStatuses";
 import { useSidebarHistory } from "@/app/hooks/useSidebarHistory";
 import { useTabularHistoryStatuses } from "@/app/hooks/useTabularHistoryStatuses";
@@ -76,17 +79,17 @@ import {
 const WORKSPACE_HOME = "/assistant";
 
 const NAV_ITEMS = [
-    { href: "/assistant", label: "Assistant", icon: ChatSkeuoIcon },
-    { href: "/ide", label: "IDE", icon: IdeSkeuoIcon },
-    { href: "/projects", label: "Projects", icon: FolderSkeuoIcon },
-    { href: "/library", label: "Library", icon: LibrarySkeuoIcon },
+    { href: "/assistant", label: zhCN.navigation.assistant, icon: ChatSkeuoIcon },
+    { href: "/ide", label: zhCN.navigation.ide, icon: IdeSkeuoIcon },
+    { href: "/projects", label: zhCN.navigation.projects, icon: FolderSkeuoIcon },
+    { href: "/library", label: zhCN.navigation.library, icon: LibrarySkeuoIcon },
     {
         href: "/tabular-reviews",
-        label: "Tabular Review",
+        label: zhCN.navigation.tabularReview,
         icon: TabularReviewSkeuoIcon,
     },
-    { href: "/workflows", label: "Workflows", icon: WorkflowSkeuoIcon },
-    { href: "/playbooks", label: "Playbooks", icon: PlaybookSkeuoIcon },
+    { href: "/workflows", label: zhCN.navigation.workflows, icon: WorkflowSkeuoIcon },
+    { href: "/playbooks", label: zhCN.navigation.playbooks, icon: PlaybookSkeuoIcon },
 ];
 
 const RECENT_PROJECT_PAGE_SIZE = 10;
@@ -272,7 +275,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
             workspaceId !== PERSONAL_WORKSPACE &&
             organizations === null
           ? null
-          : "Mike";
+          : uiText("Mike");
     const [recentProjects, setRecentProjects] = useState<Project[] | null>(
         null,
     );
@@ -398,7 +401,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
             // The current page survives; the user is told the next one did
             // not arrive instead of scrolling at a list that stopped growing.
             notifyError(error, {
-                action: "load more projects",
+                action: uiText("load more projects"),
                 dedupeKey: "sidebar-recent-projects-more",
                 onRetry: () => retryLoadMoreRecentProjectsRef.current?.(),
             });
@@ -445,7 +448,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
             .then(() => router.push("/"))
             .catch((error) => {
                 notifyError(error, {
-                    action: "sign out",
+                    action: uiText("sign out"),
                     dedupeKey: "sign-out",
                     onRetry: handleSignOut,
                 });
@@ -516,7 +519,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                     <span
                                         data-slot="sidebar-heading-loading"
                                         role="status"
-                                        aria-label="Loading workspace"
+                                        aria-label={zhCN.navigation.loadingWorkspace}
                                         className={cn("h-5 w-28 rounded bg-gray-200", shouldAnimate ? "sidebar-heading-enter" : "animate-pulse")}
                                     />
                                 ) : (
@@ -540,13 +543,13 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                         }}
                         onPointerEnter={() => setToggleHoverSuppressed(false)}
                         onPointerLeave={() => setToggleHoverSuppressed(false)}
-                        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+                        aria-label={isOpen ? zhCN.navigation.closeSidebar : zhCN.navigation.openSidebar}
                         className={cn(
                             "group flex h-8 w-8 shrink-0 items-center justify-center transition-[border-radius] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/40",
                             isOpen ? "rounded-md" : "rounded-[16px]",
                             !toggleHoverSuppressed && LIQUID_GLASS_HOVER_CLASS,
                         )}
-                        title={isOpen ? "Close sidebar" : "Open sidebar"}
+                        title={isOpen ? zhCN.navigation.closeSidebar : zhCN.navigation.openSidebar}
                     >
                         {isOpen ? (
                             <PanelLeft aria-hidden="true" className="h-4 w-4 shrink-0" />
@@ -624,7 +627,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                         shouldAnimate ? "sidebar-fade-in" : ""
                                     }`}
                                 >
-                                    <span>Recent Projects</span>
+                                    <span>{zhCN.navigation.recentProjects}</span>
                                     <ChevronDown
                                         className={`h-3.5 w-3.5 transition-transform ${
                                             projectsCollapsed ? "-rotate-90" : ""
@@ -668,7 +671,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                                         : ""
                                                 }`}
                                             >
-                                                No projects yet
+                                                {zhCN.navigation.noProjects}
                                             </div>
                                         ) : (
                                             <div
@@ -730,7 +733,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                         shouldAnimate ? "sidebar-fade-in" : ""
                                     }`}
                                 >
-                                    <span>History</span>
+                                    <span>{zhCN.navigation.history}</span>
                                     <ChevronDown
                                         className={`h-3.5 w-3.5 transition-transform ${
                                             historyCollapsed ? "-rotate-90" : ""
@@ -740,7 +743,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                 <div
                                     id="sidebar-history"
                                     role="region"
-                                    aria-label="History"
+                                    aria-label={zhCN.navigation.history}
                                     className={cn(
                                         "min-h-0 flex-1 overflow-y-auto",
                                         historyCollapsed && "hidden",
@@ -772,7 +775,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                                     : ""
                                             }`}
                                         >
-                                            {!history.error && "No history yet"}
+                                            {!history.error && zhCN.navigation.noHistory}
                                         </div>
                                     ) : (
                                         <>
@@ -786,7 +789,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                                 {history.items.map((entry) => {
                                                     if (entry.kind === "review") {
                                                         const review = entry.item;
-                                                        const title = review.title?.trim() || "Untitled review";
+                                                        const title = review.title?.trim() || uiText("Untitled review");
                                                         const projectName = review.project_name?.trim();
                                                         const fullTitle = projectName ? `${projectName}: ${title}` : title;
                                                         const href = review.project_id
@@ -799,7 +802,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                                                 key={`review:${review.id}`}
                                                                 href={href}
                                                                 title={fullTitle}
-                                                                aria-label={`Tabular review: ${fullTitle}${status === "loading" ? " (Running)" : status === "complete" ? " (Complete)" : ""}`}
+                                                                aria-label={`Tabular review: ${fullTitle}${status === "loading" ? uiText(" (Running)") : status === "complete" ? uiText(" (Complete)") : ""}`}
                                                                 onClick={() => reviewStatuses.clearStatus(review.id)}
                                                                 aria-current={active ? "page" : undefined}
                                                                 className={cn(
@@ -811,7 +814,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                                             >
                                                                 <span className="flex h-4 w-4 shrink-0 items-center justify-center">
                                                                     {status === "loading" ? (
-                                                                        <Loader2 role="status" aria-label={`${title} review running`} className="h-3.5 w-3.5 animate-spin text-blue-600 motion-reduce:animate-none" />
+                                                                        <Loader2 role="status" aria-label={uiText`${title} review running`} className="h-3.5 w-3.5 animate-spin text-blue-600 motion-reduce:animate-none" />
                                                                     ) : status === "complete" ? (
                                                                         <TabularReviewCompleteIcon className="h-3.5 w-3.5" />
                                                                     ) : (
@@ -898,7 +901,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                             onClick={() => void history.retry()}
                                             className="mx-3.5 my-2 rounded text-left text-xs text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                                         >
-                                            Some history could not be loaded. Try again
+                                            {zhCN.navigation.historyLoadFailed}
                                         </button>
                                     )}
                                 </div>
@@ -917,7 +920,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                           <DropdownTrigger asChild>
                             <button
                                 type="button"
-                                aria-label="Account menu"
+                                aria-label={zhCN.navigation.accountMenu}
                                 className={cn(
                                     "flex h-9 w-full shrink-0 items-center px-[7px] outline-none [transition:border-radius_300ms_cubic-bezier(0.4,0,0.2,1),background-color_150ms,color_150ms] focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2",
                                     isOpen ? "rounded-xl" : "rounded-[18px]",
@@ -964,10 +967,10 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                           and weight of the sidebar's own
                                           section headings. */}
                                       <DropdownLabel className="px-2 text-xs font-semibold normal-case tracking-normal">
-                                          Workspace
+                                          {zhCN.navigation.workspace}
                                       </DropdownLabel>
                                       <DropdownRadioGroup
-                                          aria-label="Workspace"
+                                          aria-label={zhCN.navigation.workspace}
                                           value={
                                               workspaceId ?? PERSONAL_WORKSPACE
                                           }
@@ -1000,7 +1003,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                   className="h-8 gap-2 rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:text-gray-700 focus:text-gray-700 data-[selected=true]:text-gray-900 data-[selected=true]:hover:text-gray-900 data-[selected=true]:focus:text-gray-900"
                               >
                                   <SettingsSkeuoIcon className="h-4 w-4 text-black" />
-                                  Settings
+                                  {zhCN.navigation.settings}
                               </DropdownItem>
                               {/* The active organization's own settings.
                                   In the personal workspace there is none:
@@ -1016,7 +1019,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                       className="h-8 gap-2 rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:text-gray-700 focus:text-gray-700 data-[selected=true]:text-gray-900 data-[selected=true]:hover:text-gray-900 data-[selected=true]:focus:text-gray-900"
                                   >
                                       <OrganizationSkeuoIcon className="h-4 w-4 text-black" />
-                                      Organization
+                                      {zhCN.navigation.organization}
                                   </DropdownItem>
                               ) : null}
                               <DropdownItem
@@ -1026,7 +1029,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                   className="h-8 gap-2 rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:text-gray-700 focus:text-gray-700 data-[selected=true]:text-gray-900 data-[selected=true]:hover:text-gray-900 data-[selected=true]:focus:text-gray-900"
                               >
                                   <SignOutSkeuoIcon className="h-4 w-4 text-black" />
-                                  Sign out
+                                  {zhCN.navigation.signOut}
                               </DropdownItem>
                           </DropdownContent>
                         </Dropdown>

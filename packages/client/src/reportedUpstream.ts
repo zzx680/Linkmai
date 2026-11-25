@@ -1,3 +1,5 @@
+
+import { uiText } from "./localization";
 /** Ownership is explicit; a status or display code never establishes it. */
 export const BACKEND_REPORTING_OWNER = "backend";
 
@@ -13,7 +15,7 @@ export const BACKEND_REPORTING_OWNER = "backend";
  */
 export const SCHEMA_OUT_OF_DATE_CODE = "schema_out_of_date";
 export const SCHEMA_OUT_OF_DATE_MESSAGE =
-    "The server's database needs an update before this can load. Please contact your administrator.";
+    uiText("The server's database needs an update before this can load. Please contact your administrator.");
 /**
  * A dependency is unreachable: the gateway cannot reach the backend, or the
  * backend cannot reach GoTrue (503). Whoever saw it reports it once per
@@ -21,7 +23,7 @@ export const SCHEMA_OUT_OF_DATE_MESSAGE =
  */
 export const UPSTREAM_UNAVAILABLE_CODE = "upstream_unavailable";
 export const UPSTREAM_UNAVAILABLE_MESSAGE =
-    "The server is temporarily unreachable. Please try again shortly.";
+    uiText("The server is temporarily unreachable. Please try again shortly.");
 
 const REPORTED_UPSTREAM_MESSAGES: Readonly<Record<string, string>> = {
     [SCHEMA_OUT_OF_DATE_CODE]: SCHEMA_OUT_OF_DATE_MESSAGE,

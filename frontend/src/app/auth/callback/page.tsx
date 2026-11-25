@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -57,7 +59,7 @@ function AuthCallbackContent() {
         process.env.NODE_ENV !== "production" &&
         searchParams.get("preview") === "confirmation-error";
     const displayedMessage = isErrorPreview
-        ? "This confirmation link is invalid or has expired."
+        ? uiText("This confirmation link is invalid or has expired.")
         : (error?.message ?? null);
 
     useEffect(() => {
@@ -77,7 +79,7 @@ function AuthCallbackContent() {
                         new UserVisibleError(providerError, {
                             kind: "validation",
                         }),
-                        { action: "confirm your request" },
+                        { action: uiText("confirm your request") },
                     ),
                 );
                 return;
@@ -110,7 +112,7 @@ function AuthCallbackContent() {
                             new UserVisibleError(LINK_SPENT_MESSAGE, {
                                 kind: "validation",
                             }),
-                            { action: "confirm your request" },
+                            { action: uiText("confirm your request") },
                         ),
                     );
                     return;
@@ -138,7 +140,7 @@ function AuthCallbackContent() {
                     {displayedMessage ? (
                         <>
                             <h1 className="text-2xl font-medium font-serif text-gray-950">
-                                Unable to confirm
+                                {uiText("Unable to confirm")}
                             </h1>
                             <p
                                 role="alert"
@@ -155,7 +157,7 @@ function AuthCallbackContent() {
                                         )}
                                         className="font-medium underline underline-offset-2"
                                     >
-                                        Contact support
+                                        {uiText("Contact support")}
                                     </a>
                                 </p>
                             )}
@@ -167,17 +169,17 @@ function AuthCallbackContent() {
                                     className: "mt-6",
                                 })}
                             >
-                                Return to login
+                                {uiText("Return to login")}
                             </Link>
                         </>
                     ) : (
                         <>
                             <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
                             <h1 className="mt-4 text-2xl font-medium font-serif text-gray-950">
-                                Confirming your request
+                                {uiText("Confirming your request")}
                             </h1>
                             <p className="mt-2 text-sm text-gray-500">
-                                This should only take a moment.
+                                {uiText("This should only take a moment.")}
                             </p>
                         </>
                     )}

@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import type { ResourceAccessScope } from "./types";
 
 interface AccessScopeLabelProps {
@@ -13,9 +15,9 @@ interface AccessScopeLabelProps {
 //   Private           its creator only (and, in an organization, its owners)
 //   Private (Shared)  not public, but shared with at least one other person
 const ACCESS_SCOPE_LABELS: Record<ResourceAccessScope, string> = {
-  organization: "Public",
-  private: "Private",
-  shared: "Private (Shared)",
+  organization: uiText("Public"),
+  private: uiText("Private"),
+  shared: uiText("Private (Shared)"),
 };
 
 export function AccessScopeLabel({
@@ -35,12 +37,12 @@ export function AccessScopeLabel({
     scope === "organization"
       ? organizationName
         ? `Shared with everyone in ${organizationName}`
-        : "Shared with everyone in the organisation"
+        : uiText("Shared with everyone in the organisation")
       : hasDirectGrantCount
         ? `Shared with ${accessUserCount} ${accessUserCount === 1 ? "user" : "users"}`
         : scope === "shared"
-          ? "Shared with individuals"
-          : "Private";
+          ? uiText("Shared with individuals")
+          : uiText("Private");
 
   return (
     <span

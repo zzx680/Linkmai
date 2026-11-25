@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { QuoteIcon } from "@radix-ui/react-icons";
@@ -114,12 +116,12 @@ export function CitationQuotesSection({
         <div className="px-2 pb-2">
             <div className={`${RESPONSE_GLASS_SURFACE} p-2`}>
                 <div className="mb-2 flex items-center justify-between">
-                    <ContextNumberBadge number={citationRef} label="Citation" />
+                    <ContextNumberBadge number={citationRef} label={uiText("Citation")} />
                     <div className="ml-auto flex items-center gap-2">
                         {hasMultipleQuotes && (
                             <div className="flex items-center gap-1">
                                 <span className="mr-0.5 text-xs font-medium text-gray-500">
-                                    Quotes
+                                    {uiText("Quotes")}
                                 </span>
                                 {quotes.map((quote, index) => {
                                     const isUnverified =
@@ -170,12 +172,12 @@ export function CitationQuotesSection({
                         />
                     ) : (
                         <RelevantQuoteMessage>
-                            No relevant quotes.
+                            {uiText("No relevant quotes.")}
                         </RelevantQuoteMessage>
                     )}
                     {onClose && (isLoading || error || !currentQuote) && (
                         <div className="mt-2 flex justify-end">
-                            <TextButtonUI size="xs" title="Close citation" onClick={onClose}>Close</TextButtonUI>
+                            <TextButtonUI size="xs" title={uiText("Close citation")} onClick={onClose}>{uiText("Close")}</TextButtonUI>
                         </div>
                     )}
                 </div>
@@ -248,7 +250,7 @@ function QuoteItem({
                                 : "text-gray-700"
                         }`}
                     >
-                        &ldquo;{quote.quote.replace(/"/g, "'")}&rdquo;
+                        {uiText("&ldquo;")}{quote.quote.replace(/"/g, "'")}{uiText("&rdquo;")}
                         {quoteLabel && (
                             <span
                                 className={`text-sm ${
@@ -273,8 +275,8 @@ function QuoteItem({
                     />
                 )}
                 {onClose && (
-                    <TextButtonUI size="xs" title="Close citation" onClick={onClose} className="ml-auto">
-                        Close
+                    <TextButtonUI size="xs" title={uiText("Close citation")} onClick={onClose} className="ml-auto">
+                        {uiText("Close")}
                     </TextButtonUI>
                 )}
                 <PillButtonUI
@@ -283,7 +285,7 @@ function QuoteItem({
                     disabled={isUnverified}
                     onClick={onView}
                 >
-                    View
+                    {uiText("View")}
                 </PillButtonUI>
             </div>
         </div>
@@ -331,7 +333,7 @@ function CiteQuoteButton({
             tone="white"
             size="xs"
             onClick={handleClick}
-            title="Copy Quote and Citation"
+            title={uiText("Copy Quote and Citation")}
         >
             {isCopied ? (
                 <Check aria-hidden="true" className="h-3 w-3 text-green-600" />
@@ -339,7 +341,7 @@ function CiteQuoteButton({
                 <QuoteIcon aria-hidden="true" className="h-3 w-3" />
             )}
             {/* The visible label is the accessible name; do not override it. */}
-            <span role="status">{isCopied ? "Copied" : "Cite"}</span>
+            <span role="status">{isCopied ? uiText("Copied") : uiText("Cite")}</span>
         </PillButtonUI>
     );
 }

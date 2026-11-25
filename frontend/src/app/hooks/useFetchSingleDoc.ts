@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { API_BASE } from "@/app/lib/mikeApi";
 import { authenticatedFetch } from "@/app/lib/authEvents";
@@ -108,7 +110,7 @@ export function useFetchSingleDoc(
                 // The message stays generic; the event carries the identity
                 // (a 5xx with its request id, or the transport failure).
                 reportDocumentLoadFailure(error, url);
-                setError("Failed to load document.");
+                setError(uiText("Failed to load document."));
             } finally {
                 if (!cancelled) setLoading(false);
             }

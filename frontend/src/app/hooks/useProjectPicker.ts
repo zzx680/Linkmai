@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import type { Project } from "@/app/components/shared/types";
 import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
@@ -44,7 +46,7 @@ export function useProjectPicker() {
                     open: false,
                     error: userFacingApiError(
                         error,
-                        "Projects could not be loaded. Please try again.",
+                        uiText("Projects could not be loaded. Please try again."),
                     ),
                 }));
             },

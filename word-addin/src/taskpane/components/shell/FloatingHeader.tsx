@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useState } from "react";
 import type { WordChatOpenHandler } from "../../lib/wordChatTypes";
 import {
@@ -63,19 +65,19 @@ interface FloatingHeaderProps {
 }
 
 const SECTIONS = [
-  { value: "chat" as const, label: "Assistant", icon: chatIcon },
+  { value: "chat" as const, label: uiText("Assistant"), icon: chatIcon },
   {
     value: "history" as const,
-    label: "Chat History",
+    label: uiText("Chat History"),
     icon: chatHistoryIcon,
   },
   {
     value: "actions" as const,
-    label: "Quick Actions",
+    label: uiText("Quick Actions"),
     icon: quickActionsIcon,
   },
-  { value: "workflows" as const, label: "Workflows", icon: workflowIcon },
-  { value: "settings" as const, label: "Settings", icon: settingsIcon },
+  { value: "workflows" as const, label: uiText("Workflows"), icon: workflowIcon },
+  { value: "settings" as const, label: uiText("Settings"), icon: settingsIcon },
 ];
 
 export function FloatingHeader({
@@ -131,8 +133,8 @@ export function FloatingHeader({
           <LiquidActionRow className="pointer-events-auto">
             <DropdownTrigger asChild>
               <LiquidIconButton
-                aria-label={menuOpen ? "Close menu" : "Open menu"}
-                title={menuOpen ? "Close menu" : "Menu"}
+                aria-label={menuOpen ? uiText("Close menu") : uiText("Open menu")}
+                title={menuOpen ? uiText("Close menu") : uiText("Menu")}
               >
                 {menuOpen ? (
                   <X className="h-4 w-4" />
@@ -170,7 +172,7 @@ export function FloatingHeader({
                 draggable={false}
                 className="h-4 w-4 shrink-0 object-contain"
               />
-              <span className="min-w-0 flex-1">Sign out</span>
+              <span className="min-w-0 flex-1">{uiText("Sign out")}</span>
             </DropdownItem>
           </DropdownContent>
         </Dropdown>
@@ -181,11 +183,11 @@ export function FloatingHeader({
           >
             <LiquidTextButton
               onClick={onWorkflowBack}
-              aria-label="Back to workflows"
-              title="Back to workflows"
+              aria-label={uiText("Back to workflows")}
+              title={uiText("Back to workflows")}
             >
               <ChevronLeft className="h-3.5 w-3.5" />
-              Workflows
+              {uiText("Workflows")}
             </LiquidTextButton>
           </LiquidActionRow>
         )}
@@ -197,8 +199,8 @@ export function FloatingHeader({
             <HeaderButtonUI
               iconOnly
               onClick={onNewChat}
-              aria-label="New chat"
-              title="New chat"
+              aria-label={uiText("New chat")}
+              title={uiText("New chat")}
             >
               <Plus className="h-4 w-4" />
             </HeaderButtonUI>
@@ -220,8 +222,8 @@ export function FloatingHeader({
             <DropdownTrigger asChild>
               <HeaderButtonUI
                 iconOnly
-                aria-label="Workflow actions"
-                title="Workflow actions"
+                aria-label={uiText("Workflow actions")}
+                title={uiText("Workflow actions")}
               >
                 <Ellipsis className="h-4 w-4" />
               </HeaderButtonUI>
@@ -229,7 +231,7 @@ export function FloatingHeader({
             <DropdownContent align="end" sideOffset={8} className="min-w-40">
               <DropdownItem onSelect={() => onOpenWorkflowDetails?.()}>
                 <Pencil className="h-3.5 w-3.5" />
-                <span>Edit details</span>
+                <span>{uiText("Edit details")}</span>
               </DropdownItem>
               <DropdownItem
                 disabled={!canDeleteWorkflow}
@@ -237,13 +239,13 @@ export function FloatingHeader({
                 className="text-red-600"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                <span>Delete</span>
+                <span>{uiText("Delete")}</span>
               </DropdownItem>
             </DropdownContent>
           </Dropdown>
           <LiquidTextButton onClick={onUseWorkflow}>
             <Check className="h-3.5 w-3.5" />
-            Use
+            {uiText("Use")}
           </LiquidTextButton>
         </HeaderButtonsUI>
       ) : section === "history" ? (
@@ -251,8 +253,8 @@ export function FloatingHeader({
           <HeaderButtonUI
             iconOnly
             onClick={onNewChat}
-            aria-label="New chat"
-            title="New chat"
+            aria-label={uiText("New chat")}
+            title={uiText("New chat")}
           >
             <Plus className="h-4 w-4" />
           </HeaderButtonUI>
@@ -262,8 +264,8 @@ export function FloatingHeader({
           <HeaderButtonUI
             iconOnly
             onClick={onNewWorkflow}
-            aria-label="New workflow"
-            title="New workflow"
+            aria-label={uiText("New workflow")}
+            title={uiText("New workflow")}
           >
             <Plus className="h-4 w-4" />
           </HeaderButtonUI>
@@ -273,8 +275,8 @@ export function FloatingHeader({
           <HeaderButtonUI
             iconOnly
             onClick={onNewQuickAction}
-            aria-label="New quick action"
-            title="New quick action"
+            aria-label={uiText("New quick action")}
+            title={uiText("New quick action")}
           >
             <Plus className="h-4 w-4" />
           </HeaderButtonUI>

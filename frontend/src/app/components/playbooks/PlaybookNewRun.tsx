@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useId, useState } from "react";
 import { AlertCircle, Loader2, Play } from "lucide-react";
 import { ModalSegmentedToggle } from "@/app/components/modals/ModalSegmentedToggle";
@@ -86,12 +88,12 @@ export function PlaybookNewRun({
     useState<NoModelsReason | null>(null);
   const pending = documents.filter((item) => item.status !== "completed");
   const startLabel = reviewing
-    ? "Starting…"
+    ? uiText("Starting…")
     : pending.length > 0 && pending.every((item) => item.status === "failed")
-      ? "Retry failed documents"
+      ? uiText("Retry failed documents")
       : pending.length > 1
         ? `Start ${pending.length} reviews`
-        : "Start review";
+        : uiText("Start review");
 
   return (
     <section
@@ -100,7 +102,7 @@ export function PlaybookNewRun({
     >
       <div className={PLAYBOOK_PANE_HEADER_CLASS}>
         <h2 id={headingId} className={PLAYBOOK_PANE_TITLE_CLASS}>
-          New run
+          {uiText("New run")}
         </h2>
       </div>
       <div
@@ -120,7 +122,7 @@ export function PlaybookNewRun({
             id={documentsLabelId}
             className={`mb-2 block ${PLAYBOOK_LABEL_CLASS}`}
           >
-            Add documents
+            {uiText("Add documents")}
           </p>
           <PlaybookReviewDocuments
             documents={documents}
@@ -133,39 +135,39 @@ export function PlaybookNewRun({
         </div>
         <div className="grid min-w-0 gap-5 @[36rem]:grid-cols-2">
           <ChoiceField
-            label="Scope"
+            label={uiText("Scope")}
             value={scope}
             onChange={onScopeChange}
             disabled={disabled}
             options={[
-              { value: "full", label: "Full review" },
-              { value: "issues", label: "Issues only" },
+              { value: "full", label: uiText("Full review") },
+              { value: "issues", label: uiText("Issues only") },
             ]}
             description={
               scope === "issues"
-                ? "Reports only unacceptable, missing, and needs-review terms."
-                : "Checks every rule, and lists what passed as well as what needs attention."
+                ? uiText("Reports only unacceptable, missing, and needs-review terms.")
+                : uiText("Checks every rule, and lists what passed as well as what needs attention.")
             }
           />
           <ChoiceField
-            label="Posture"
+            label={uiText("Posture")}
             value={mode}
             onChange={onModeChange}
             disabled={disabled}
             options={[
-              { value: "strict", label: "Strict" },
-              { value: "permissive", label: "Permissive" },
+              { value: "strict", label: uiText("Strict") },
+              { value: "permissive", label: uiText("Permissive") },
             ]}
             description={
               mode === "permissive"
-                ? "An acceptable fallback position passes, and the review says which one applied."
-                : "Clauses that only meet a fallback position are flagged for review."
+                ? uiText("An acceptable fallback position passes, and the review says which one applied.")
+                : uiText("Clauses that only meet a fallback position are flagged for review.")
             }
           />
         </div>
         <div className="min-w-0">
           <p id={modelId} className={`mb-2 block ${PLAYBOOK_LABEL_CLASS}`}>
-            Review model
+            {uiText("Review model")}
           </p>
           <div role="group" aria-labelledby={modelId}>
             <ModelToggle
@@ -185,7 +187,7 @@ export function PlaybookNewRun({
             htmlFor={instructionsId}
             className={`mb-2 block ${PLAYBOOK_LABEL_CLASS}`}
           >
-            Additional instructions
+            {uiText("Additional instructions")}
           </label>
           {/* Empty by default: the review already knows how to review. */}
           <textarea
@@ -197,7 +199,7 @@ export function PlaybookNewRun({
             className={PLAYBOOK_TEXTAREA_CLASS}
           />
           <p id={instructionsHelpId} className={PLAYBOOK_HELP_CLASS}>
-            Optional.
+            {uiText("Optional.")}
           </p>
         </div>
       </div>
@@ -211,7 +213,7 @@ export function PlaybookNewRun({
             disabled={reviewing}
             className="rounded-md px-2 py-1.5 text-sm text-gray-500 transition-colors hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Cancel
+            {uiText("Cancel")}
           </button>
           <PillButtonUI
             tone="blue"

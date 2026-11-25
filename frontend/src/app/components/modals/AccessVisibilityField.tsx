@@ -1,13 +1,15 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useId } from "react";
 import type { ContentVisibility } from "@/app/components/shared/types";
 import { FieldLabel } from "@/app/components/ui/form-field";
 import { ModalSegmentedToggle } from "./ModalSegmentedToggle";
 
 const OPTIONS: { value: ContentVisibility; label: string }[] = [
-    { value: "private", label: "Private" },
-    { value: "organization", label: "Public" },
+    { value: "private", label: uiText("Private") },
+    { value: "organization", label: uiText("Public") },
 ];
 
 /**
@@ -51,7 +53,7 @@ export function AccessVisibilityField({
             aria-describedby={descriptionId}
         >
             <FieldLabel as="p" id={labelId}>
-                Organisational Access
+                {uiText("Organisational Access")}
             </FieldLabel>
             {/* The choice, and beside it what the choice means. The text takes
                 the room the toggle leaves and wraps within it; where there is
@@ -70,7 +72,7 @@ export function AccessVisibilityField({
                     className="min-w-0 flex-[1_1_8rem] text-xs leading-4 text-gray-500"
                 >
                     {visibility === "organization"
-                        ? `Everyone in ${organizationLabel} can ${publicAbility} this ${resourceNoun}.`
+                        ? uiText`Everyone in ${organizationLabel} can ${publicAbility} this ${resourceNoun}.`
                         : `Only the people you share this ${resourceNoun} with can open it.`}
                 </p>
             </div>

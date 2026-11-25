@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { ConnectorApprovalItem } from "@mike/contracts";
 import { ChevronRight } from "lucide-react";
 
@@ -23,7 +25,7 @@ const labels: Record<string, string> = {
   draft_id: "Draft",
   message_id: "Message",
   summary: "Title",
-  description: "Description",
+  description: uiText("Description"),
   location: "Location",
   start: "Start",
   end: "End (exclusive for all-day events)",
@@ -86,11 +88,11 @@ export function ConnectorActionCard({ item }: { item: ConnectorApprovalItem }) {
         <h4 className="text-sm font-medium text-gray-900">{item.title}</h4>
         <p className="mt-0.5 text-xs text-gray-500 [overflow-wrap:anywhere]">
           {item.connector_name}
-          {item.account ? ` · ${item.account}` : ""}
+          {item.account ? uiText` · ${item.account}` : ""}
         </p>
         {item.requested_by && (
           <p className="mt-0.5 text-xs text-gray-500 [overflow-wrap:anywhere]">
-            Requested by subagent: {item.requested_by}
+            {uiText("Requested by subagent:")} {item.requested_by}
           </p>
         )}
       </div>
@@ -107,7 +109,7 @@ export function ConnectorActionCard({ item }: { item: ConnectorApprovalItem }) {
           ))}
         </dl>
       ) : (
-        <p className="text-sm text-gray-500">This action takes no details.</p>
+        <p className="text-sm text-gray-500">{uiText("This action takes no details.")}</p>
       )}
       {item.before !== undefined && (
         <details className="group/approval-details">
@@ -116,7 +118,7 @@ export function ConnectorActionCard({ item }: { item: ConnectorApprovalItem }) {
               aria-hidden="true"
               className="size-3 shrink-0 group-open/approval-details:rotate-90"
             />
-            Current item before this change
+            {uiText("Current item before this change")}
           </summary>
           <pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap font-sans text-xs text-gray-700 [overflow-wrap:anywhere]">
             {display(item.before)}

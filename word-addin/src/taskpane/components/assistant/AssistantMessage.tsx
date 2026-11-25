@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React from "react";
 import { LoaderCircle } from "lucide-react";
 import { ProseBlock } from "./message/ProseBlock";
@@ -305,7 +307,7 @@ function AssistantMessageImpl({
     const groupBusyLabel = (action: "accept" | "reject") => (
       <>
         <LoaderCircle aria-hidden="true" className="h-3 w-3 animate-spin" />
-        <span>{action === "accept" ? "Accepting..." : "Rejecting..."}</span>
+        <span>{action === "accept" ? uiText("Accepting...") : uiText("Rejecting...")}</span>
       </>
     );
     return (
@@ -326,7 +328,7 @@ function AssistantMessageImpl({
               >
                 {groupBusyAction === "accept"
                   ? groupBusyLabel("accept")
-                  : "Accept all"}
+                  : uiText("Accept all")}
               </PillButton>
               <PillButton
                 tone="white"
@@ -340,7 +342,7 @@ function AssistantMessageImpl({
               >
                 {groupBusyAction === "reject"
                   ? groupBusyLabel("reject")
-                  : "Reject all"}
+                  : uiText("Reject all")}
               </PillButton>
             </>
           ) : undefined
@@ -464,7 +466,7 @@ function AssistantMessageImpl({
                         isStreaming
                         dotColor="gray"
                       >
-                        Thinking...
+                        {uiText("Thinking...")}
                       </EventBlock>
                     );
                   }

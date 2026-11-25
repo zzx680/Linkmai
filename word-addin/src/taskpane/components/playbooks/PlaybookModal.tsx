@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useMemo, useState } from "react";
 import type { Playbook } from "../../types";
 import { listPlaybooks } from "../../api/mikeApi";
@@ -7,7 +9,7 @@ import { reportFault } from "../../lib/notify";
 
 /** What a playbook is called in the picker and on its pill. */
 export function playbookTitle(playbook: Pick<Playbook, "name">): string {
-  return playbook.name.trim() || "Untitled playbook";
+  return playbook.name.trim() || uiText("Untitled playbook");
 }
 
 interface PlaybookModalProps {
@@ -50,7 +52,7 @@ export function PlaybookModal({
         setPlaybooks([]);
         setError(
           reportFault(reason, {
-            fallback: "Mike couldn't load your playbooks. Try again.",
+            fallback: uiText("Mike couldn't load your playbooks. Try again."),
             operation: "playbooks.review",
           }).message,
         );
@@ -83,9 +85,9 @@ export function PlaybookModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Add playbook"
+      title={uiText("Add playbook")}
       primaryAction={{
-        label: "Use",
+        label: uiText("Use"),
         disabled: !selected,
         onClick: () => {
           if (!selected) return;
@@ -101,9 +103,9 @@ export function PlaybookModal({
         loading={loading}
         error={error}
         selectedId={selectedId}
-        searchPlaceholder="Search playbooks..."
-        loadingLabel="Loading playbooks…"
-        emptyMessage="No playbooks found"
+        searchPlaceholder={uiText("Search playbooks...")}
+        loadingLabel={uiText("Loading playbooks…")}
+        emptyMessage={uiText("No playbooks found")}
         onSelect={(id) => setSelectedId(id === selectedId ? "" : id)}
       />
     </Modal>

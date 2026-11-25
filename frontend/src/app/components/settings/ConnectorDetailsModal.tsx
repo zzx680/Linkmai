@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState, type ReactNode } from "react";
 import { ChevronDown, Loader2, RefreshCw } from "lucide-react";
 import { FieldLabel } from "@/app/components/ui/form-field";
@@ -94,12 +96,12 @@ export function ConnectorDetailsModal({
         <Modal
             open={!!connector}
             onClose={onClose}
-            breadcrumbs={["Connectors", connector?.name ?? "Connector"]}
+            breadcrumbs={[uiText("Connectors"), connector?.name ?? uiText("Connector")]}
             size="lg"
             secondaryAction={
                 connector
                     ? {
-                          label: "Delete",
+                          label: uiText("Delete"),
                           variant: "danger",
                           onClick: onDelete,
                           disabled: busyKey !== null,
@@ -119,7 +121,7 @@ export function ConnectorDetailsModal({
                                     active={section === tab}
                                     onClick={() => setSection(tab)}
                                 >
-                                    {tab === "details" ? "Details" : "Tools"}
+                                    {tab === "details" ? uiText("Details") : uiText("Tools")}
                                 </TabPillButtonUI>
                             ))}
                         </div>
@@ -131,7 +133,7 @@ export function ConnectorDetailsModal({
                             {connector.accountEmail && (
                                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                                     <p className="text-sm font-medium text-gray-700">
-                                        Account
+                                        {uiText("Account")}
                                     </p>
                                     <p className="min-w-0 text-sm text-gray-500 [overflow-wrap:anywhere]">
                                         {connector.accountEmail}
@@ -142,10 +144,10 @@ export function ConnectorDetailsModal({
                             <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
                                     <p id={`read-only-${connector.id}`} className="text-sm font-medium text-gray-700">
-                                        Read-only
+                                        {uiText("Read-only")}
                                     </p>
                                     <p id={`read-only-description-${connector.id}`} className="mt-0.5 text-xs text-gray-500">
-                                        Disable all write tools. Turn off to restore your individual tool settings.
+                                        {uiText("Disable all write tools. Turn off to restore your individual tool settings.")}
                                     </p>
                                 </div>
                                 <ToggleSwitchUI
@@ -167,13 +169,12 @@ export function ConnectorDetailsModal({
                                                 id={`write-approval-${connector.id}`}
                                                 className="text-sm font-medium text-gray-700"
                                             >
-                                                Ask for permission for write
-                                                actions
+                                                {uiText("Ask for permission for write actions")}
                                             </p>
                                             <p className="mt-0.5 text-xs text-gray-500">
                                                 {hasWriteTools || toolsLoading
-                                                    ? "Mike asks you in the chat before running an action that changes data."
-                                                    : "This connector has no write actions right now."}
+                                                    ? uiText("Mike asks you in the chat before running an action that changes data.")
+                                                    : uiText("This connector has no write actions right now.")}
                                             </p>
                                         </div>
                                         <ToggleSwitchUI
@@ -197,7 +198,7 @@ export function ConnectorDetailsModal({
                                 <div className="flex items-baseline justify-between gap-2">
                                     <FieldLabel as="p">
                                         {toolCount}{" "}
-                                        {toolCount === 1 ? "Tool" : "Tools"}
+                                        {toolCount === 1 ? uiText("Tool") : uiText("Tools")}
                                     </FieldLabel>
                                     <div className="mb-2 flex items-center gap-3">
                                         {reconnecting && onCancelReconnect && (
@@ -206,7 +207,7 @@ export function ConnectorDetailsModal({
                                                 onClick={onCancelReconnect}
                                                 className="rounded text-xs font-medium text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                                             >
-                                                Cancel
+                                                {uiText("Cancel")}
                                             </button>
                                         )}
                                         <button
@@ -221,7 +222,7 @@ export function ConnectorDetailsModal({
                                             ) : (
                                                 <RefreshCw className="h-3.5 w-3.5" />
                                             )}
-                                            Refresh
+                                            {uiText("Refresh")}
                                         </button>
                                     </div>
                                 </div>
@@ -283,7 +284,7 @@ function ToolList({
             <div
                 className={`min-h-0 flex-1 rounded-lg px-3 py-3 text-sm text-gray-500 ${LIQUID_GLASS_FLAT_CLASS}`}
             >
-                No tools discovered yet.
+                {uiText("No tools discovered yet.")}
             </div>
         );
     }
@@ -306,7 +307,7 @@ function ToolList({
                                     }
                                     className="inline-flex h-5 w-5 items-center justify-center rounded text-gray-400 transition-colors hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                                     aria-expanded={isExpanded}
-                                    aria-label={`${isExpanded ? "Collapse" : "Expand"} ${tool.title}`}
+                                    aria-label={`${isExpanded ? uiText("Collapse") : uiText("Expand")} ${tool.title}`}
                                 >
                                     <ChevronDown
                                         className={`h-3.5 w-3.5 transition-transform ${
@@ -318,7 +319,7 @@ function ToolList({
                                     {tool.title}
                                     {tool.write && (
                                         <span className="ml-2 text-xs font-normal text-gray-500">
-                                            Write
+                                            {uiText("Write")}
                                         </span>
                                     )}
                                 </p>

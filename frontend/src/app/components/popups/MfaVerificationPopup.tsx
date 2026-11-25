@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     useEffect,
     useRef,
@@ -95,7 +97,7 @@ export function MfaVerificationPopup({
                             ? listError.message
                             : String(listError),
                 });
-                setError("Authenticator verification could not be loaded.");
+                setError(uiText("Authenticator verification could not be loaded."));
                 setFactors([]);
                 setSelectedFactorId("");
             }
@@ -130,7 +132,7 @@ export function MfaVerificationPopup({
                         ? verifyError.message
                         : String(verifyError),
             });
-            setError("The verification code is invalid or expired.");
+            setError(uiText("The verification code is invalid or expired."));
             return;
         }
 
@@ -155,7 +157,7 @@ export function MfaVerificationPopup({
             size="sm"
             className="h-auto min-h-[310px] max-h-[min(92vh,400px)]"
             cancelAction={{
-                label: "Cancel",
+                label: uiText("Cancel"),
                 onClick: onCancel,
                 disabled: verifying,
             }}
@@ -163,10 +165,10 @@ export function MfaVerificationPopup({
                 label: verifying ? (
                     <span className="inline-flex items-center gap-1.5">
                         <Loader2 className="h-3 w-3 animate-spin" />
-                        Verifying...
+                        {uiText("Verifying...")}
                     </span>
                 ) : (
-                    "Verify"
+                    uiText("Verify")
                 ),
                 onClick: () => void verify(),
                 disabled: !canVerify,
@@ -177,12 +179,11 @@ export function MfaVerificationPopup({
                 {loading ? (
                     <div className="flex h-13 items-center justify-center text-sm text-gray-500">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading authenticator...
+                        {uiText("Loading authenticator...")}
                     </div>
                 ) : factors.length === 0 ? (
                     <p className="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-600">
-                        No verified authenticator factor is available for this
-                        session.
+                        {uiText("No verified authenticator factor is available for this session.")}
                     </p>
                 ) : (
                     <div className="space-y-4">
@@ -197,7 +198,7 @@ export function MfaVerificationPopup({
                                 {factors.map((factor) => (
                                     <option key={factor.id} value={factor.id}>
                                         {factor.friendly_name ||
-                                            "Authenticator app"}
+                                            uiText("Authenticator app")}
                                     </option>
                                 ))}
                             </select>
@@ -294,7 +295,7 @@ export function VerificationCodeInput({
         <div
             className="flex justify-center gap-2"
             role="group"
-            aria-label="Six digit verification code"
+            aria-label={uiText("Six digit verification code")}
         >
             {digits.map((digit, index) => (
                 <input
@@ -311,7 +312,7 @@ export function VerificationCodeInput({
                     onPaste={handlePaste}
                     onKeyDown={(event) => handleKeyDown(event, index)}
                     className="h-13 w-12 rounded-lg border border-gray-300 bg-gray-50 text-center text-2xl font-medium font-serif text-gray-950 shadow-none outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-300/45 disabled:cursor-not-allowed disabled:opacity-45"
-                    aria-label={`Verification code digit ${index + 1}`}
+                    aria-label={uiText`Verification code digit ${index + 1}`}
                     maxLength={1}
                 />
             ))}

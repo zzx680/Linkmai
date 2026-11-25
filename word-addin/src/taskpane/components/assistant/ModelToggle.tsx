@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { uiText } from "@mike/client";
 import {
   ModelToggleUI,
   nearestReasoningLevelForModel,
@@ -96,14 +97,14 @@ export function ModelToggle({
       models={models}
       selectedLabel={
         keyStatusLoading
-          ? (selected?.label ?? "Select model")
+          ? (selected?.label ?? uiText("Select model"))
           : (selected?.label ??
-            (models.length > 0 ? "Select model" : "No Models"))
+            (models.length > 0 ? uiText("Select model") : uiText("No Models")))
       }
       selectedAvailable={selected !== undefined}
       loading={keyStatusLoading}
       compact={compact}
-      emptyLabel="No Models"
+      emptyLabel={uiText("No Models")}
       onEmptyClick={onNoModelsClick}
       reasoningLevel={normalizedReasoningLevel}
       onReasoningChange={onReasoningChange}

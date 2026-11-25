@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { UserAvatar } from "@/app/components/ui/user-avatar";
 
 import { useState, type ReactNode } from "react";
@@ -43,7 +45,7 @@ const INPUT_GROUP_ROLE_TRIGGER_CLASS =
     "flex h-10 shrink-0 items-center gap-1.5 px-3 text-xs shadow-none transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/40 data-[state=open]:opacity-80 [&[data-state=open]>svg]:rotate-180 disabled:cursor-not-allowed disabled:opacity-50";
 
 function accessRoleLabel(role: AccessAssignmentRole): string {
-    return role === "deny" ? "Deny" : PROJECT_ROLE_LABELS[role];
+    return role === "deny" ? uiText("Deny") : PROJECT_ROLE_LABELS[role];
 }
 
 function accessRoleTone(role: AccessAssignmentRole): string {
@@ -151,7 +153,7 @@ function RemoveActionDropdown({
             <DropdownTrigger asChild>
                 <button
                     type="button"
-                    aria-label={`Actions for ${label}`}
+                    aria-label={uiText`Actions for ${label}`}
                     disabled={disabled}
                     className="flex h-6 w-6 items-center justify-center rounded-full text-xs text-gray-500 hover:bg-gray-200/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 disabled:opacity-50"
                 >
@@ -166,7 +168,7 @@ function RemoveActionDropdown({
                     onSelect={onRemove}
                     className="text-red-500 hover:!bg-red-500/10 focus:!bg-red-500/10 data-[highlighted]:!bg-red-500/10"
                 >
-                    Remove
+                    {uiText("Remove")}
                 </DropdownItem>
             </DropdownContent>
         </Dropdown>
@@ -317,7 +319,7 @@ function OrganizationMemberPicker({
                         })
                     ) : (
                         <p className="px-3 py-2 text-xs text-gray-400">
-                            No matching organization members.
+                            {uiText("No matching organization members.")}
                         </p>
                     )}
                 </div>
@@ -368,7 +370,7 @@ function OrganizationAssignmentList({
             {loading ? (
                 <div className="flex min-h-26 items-center justify-center gap-2 text-xs text-gray-400">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Loading organization members…
+                    {uiText("Loading organization members…")}
                 </div>
             ) : assignments.length === 0 ? (
                 <div className="flex min-h-26 items-center justify-center text-xs text-gray-400">
@@ -405,7 +407,7 @@ function OrganizationAssignmentList({
                                         label={
                                             assignment.email ??
                                             assignment.display_name ??
-                                            "member"
+                                            uiText("member")
                                         }
                                         // The creator is always an Owner.
                                         editable={
@@ -424,7 +426,7 @@ function OrganizationAssignmentList({
                                         label={
                                             assignment.email ??
                                             assignment.display_name ??
-                                            "member"
+                                            uiText("member")
                                         }
                                         onRemove={() =>
                                             void onRemove(assignment)
@@ -593,11 +595,11 @@ export function OrganizationAccessEditor({
             : "project");
     const organizationLabel = organizationName || "the organisation";
     const peopleDescription = isPublic
-        ? `Everyone in ${organizationLabel} can already open and run this ${resourceNoun}. Add members who should edit or own it; they are added as Editors, and you can change a person's role in the list below.`
+        ? uiText`Everyone in ${organizationLabel} can already open and run this ${resourceNoun}. Add members who should edit or own it; they are added as Editors, and you can change a person's role in the list below.`
         : `Share this ${resourceNoun} with members of ${organizationLabel}. They are added as Editors; change a person's role in the list below. It cannot be shared outside the organisation.`;
     // Everyone can already open and edit a public item, so the only standing
     // left to hand out is ownership of it.
-    const ownerDescription = `Add ${organizationLabel} members as owners with rights to manage access, settings and delete the ${resourceNoun}. Everyone in ${organizationLabel} can already open and edit it.`;
+    const ownerDescription = uiText`Add ${organizationLabel} members as owners with rights to manage access, settings and delete the ${resourceNoun}. Everyone in ${organizationLabel} can already open and edit it.`;
     const denyDescription = `Deny ${organizationLabel} members from accessing this ${resourceNoun}, although it is open to everyone else.`;
     // A wall only means something on a public item; on a private one, not
     // being added is the wall. An existing list is still shown, so that
@@ -614,7 +616,7 @@ export function OrganizationAccessEditor({
                     <OrganizationMemberPicker
                         id="organization-owner-picker"
                         label={ownerLabel}
-                        placeholder="Search members…"
+                        placeholder={uiText("Search members…")}
                         description={ownerDescription}
                         members={availableMembers}
                         disabled={disabled || loading}
@@ -626,8 +628,8 @@ export function OrganizationAccessEditor({
                     // be seen beside the person it belongs to.
                     <OrganizationMemberPicker
                         id="organization-people-picker"
-                        label="People"
-                        placeholder="Search members…"
+                        label={uiText("People")}
+                        placeholder={uiText("Search members…")}
                         description={peopleDescription}
                         members={availableMembers}
                         disabled={disabled || loading}
@@ -636,15 +638,15 @@ export function OrganizationAccessEditor({
                 )}
                 <OrganizationAssignmentList
                     label={
-                        pickOwners ? `${ownerLabel} list` : "People with access"
+                        pickOwners ? `${ownerLabel} list` : uiText("People with access")
                     }
                     assignments={sharedAssignments}
                     emptyMessage={
                         pickOwners
-                            ? "No additional Owners added."
+                            ? uiText("No additional Owners added.")
                             : isPublic
-                              ? "Nobody has been given more than view access."
-                              : "Not shared with anyone yet."
+                              ? uiText("Nobody has been given more than view access.")
+                              : uiText("Not shared with anyone yet.")
                     }
                     loading={loading}
                     disabled={disabled}
@@ -677,7 +679,7 @@ export function OrganizationAccessEditor({
                                 <span>
                                     {denyCount > 0
                                         ? `Deny list (${denyCount})`
-                                        : "Deny list"}
+                                        : uiText("Deny list")}
                                 </span>
                                 <ChevronDown
                                     aria-hidden="true"
@@ -697,17 +699,17 @@ export function OrganizationAccessEditor({
                         >
                             <OrganizationMemberPicker
                                 id="organization-deny-picker"
-                                label="Deny list"
+                                label={uiText("Deny list")}
                                 showLabel={false}
-                                placeholder="Search members…"
+                                placeholder={uiText("Search members…")}
                                 members={availableMembers}
                                 disabled={disabled || loading}
                                 onSelect={(member) => onAssign(member, "deny")}
                             />
                             <OrganizationAssignmentList
-                                label="Deny list entries"
+                                label={uiText("Deny list entries")}
                                 assignments={deniedAssignments}
-                                emptyMessage="No members denied."
+                                emptyMessage={uiText("No members denied.")}
                                 loading={loading}
                                 disabled={disabled}
                                 onRemove={onRemove}
@@ -773,7 +775,7 @@ export function AccessEditor({
                     <InfoLabelTooltip
                         label={
                             <h2 className="text-sm font-medium text-gray-700">
-                                Share Access
+                                {uiText("Share Access")}
                             </h2>
                         }
                         tooltipId="access-role-rights"
@@ -781,7 +783,7 @@ export function AccessEditor({
                     >
                         <div>
                             <p className="mb-2 text-xs font-medium text-gray-700">
-                                Roles and rights
+                                {uiText("Roles and rights")}
                             </p>
                             <dl className="space-y-2">
                                 {PROJECT_ROLES.map((role) => (
@@ -806,7 +808,7 @@ export function AccessEditor({
                         onAdd={onAdd}
                         validateEmail={validateEmail}
                         busy={busy}
-                        placeholder="Add by email..."
+                        placeholder={uiText("Add by email...")}
                         autoFocus
                         submitLabel="Add"
                         submitVariant="attached"
@@ -860,18 +862,17 @@ export function AccessEditor({
             <section className="flex min-h-0 flex-1 flex-col">
                 {scope === "project" ? (
                     <p className="mb-3 text-xs text-gray-500">
-                        Access is inherited from the project and must be changed
-                        from the project&apos;s Access panel.
+                        {uiText("Access is inherited from the project and must be changed from the project&apos;s Access panel.")}
                     </p>
                 ) : null}
 
                 <div className="mb-1 hidden sm:grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5rem_1.5rem] gap-3 px-2 text-xs font-medium text-gray-500">
                     <div className="flex items-center gap-2">
-                        <span>Name</span>
+                        <span>{uiText("Name")}</span>
                         {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
                     </div>
-                    <span className="justify-self-start text-left">Email</span>
-                    <span className="justify-self-start text-left">Role</span>
+                    <span className="justify-self-start text-left">{uiText("Email")}</span>
+                    <span className="justify-self-start text-left">{uiText("Role")}</span>
                     <span aria-hidden="true" />
                 </div>
 
@@ -898,7 +899,7 @@ export function AccessEditor({
                     // underneath it reads as a contradiction.
                     scope === "project" ? null : (
                         <div className="flex min-h-0 flex-1 items-center justify-center text-sm text-gray-400">
-                            No one has access yet.
+                            {uiText("No one has access yet.")}
                         </div>
                     )
                 ) : (

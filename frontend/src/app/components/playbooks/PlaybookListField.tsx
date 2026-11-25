@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useId, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { FieldLabel, FormTextInput } from "@/app/components/ui/form-field";
@@ -88,8 +90,8 @@ export function PlaybookListField({
                 type="button"
                 size="icon-xs"
                 disabled={disabled}
-                aria-label={`Choose ${label.toLowerCase()}`}
-                title={`Choose ${label.toLowerCase()}`}
+                aria-label={uiText`Choose ${label.toLowerCase()}`}
+                title={uiText`Choose ${label.toLowerCase()}`}
                 className="absolute right-2 top-1/2 h-6 -translate-y-1/2"
               >
                 <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />

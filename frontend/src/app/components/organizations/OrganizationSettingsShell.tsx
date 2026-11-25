@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
   createContext,
   useCallback,
@@ -104,7 +106,7 @@ export function OrganizationSettingsProvider({
       setLoadError(null);
     } catch (error) {
       setLoadError(
-        userFacingApiError(error, "Could not load this organization."),
+        userFacingApiError(error, uiText("Could not load this organization.")),
       );
     }
   }, [inWorkspace, orgId]);
@@ -131,15 +133,15 @@ export function OrganizationSettingsProvider({
       <TableEmptyState>
         <EmptyState
           icon={<OrganizationSkeuoIcon />}
-          title="Organization"
-          description="These settings are not available."
+          title={uiText("Organization")}
+          description={uiText("These settings are not available.")}
           action={
             <PillButtonUI
               tone="white"
               size="sm"
               onClick={() => router.push("/settings/organizations")}
             >
-              Your organizations
+              {uiText("Your organizations")}
             </PillButtonUI>
           }
         />
@@ -155,7 +157,7 @@ export function OrganizationSettingsProvider({
       <TableEmptyState>
         <EmptyState
           icon={<OrganizationSkeuoIcon />}
-          title="Organization"
+          title={uiText("Organization")}
           description={loadError}
           tone="error"
           action={
@@ -167,7 +169,7 @@ export function OrganizationSettingsProvider({
                 void reload();
               }}
             >
-              Try again
+              {uiText("Try again")}
             </PillButtonUI>
           }
         />
@@ -194,13 +196,13 @@ export function OrganizationSettingsFrame({
     () => [
       {
         id: "general",
-        label: "General",
+        label: uiText("General"),
         href: organizationSettingsHref(orgId),
       },
       // A table page of its own; its header leads back here.
       {
         id: "members",
-        label: "Members",
+        label: uiText("Members"),
         href: organizationSettingsHref(orgId, "members"),
       },
       // Not offered to a member, nor before the caller's role is known.
@@ -208,13 +210,13 @@ export function OrganizationSettingsFrame({
         ? [
             {
               id: "audit",
-              label: "Audit log",
+              label: uiText("Audit log"),
               href: organizationSettingsHref(orgId, "audit"),
             },
             {
               id: "providers",
               // Named as the same setting is in a person's own settings.
-              label: "Bring Your Own Keys",
+              label: uiText("Bring Your Own Keys"),
               href: organizationSettingsHref(orgId, "providers"),
             },
           ]
@@ -225,7 +227,7 @@ export function OrganizationSettingsFrame({
             {
               id: "privacy-data",
               // Named as the same page is in a person's own settings.
-              label: "Privacy & Data",
+              label: uiText("Privacy & Data"),
               href: organizationSettingsHref(orgId, "privacy-data"),
             },
           ]
@@ -236,7 +238,7 @@ export function OrganizationSettingsFrame({
 
   return (
     <SettingsShell
-      title="Organization"
+      title={uiText("Organization")}
       navLabel="Organization"
       tabs={tabs}
       rootHref={organizationSettingsHref(orgId)}

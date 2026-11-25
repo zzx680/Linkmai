@@ -36,3 +36,7 @@ backend/supabase/*
 
 # Local review artifact; it is a nested repository, not application source.
 /pr-267-analysis-site/
+
+# Local Playwright/browser scratch artifacts
+.playwright-cli/
+.playwright-mcp/

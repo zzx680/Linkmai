@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import * as React from "react";
 import {
   AlertCircle,
@@ -42,12 +44,12 @@ export const REASONING_LEVELS = [
 export type ReasoningLevel = (typeof REASONING_LEVELS)[number];
 
 export const REASONING_LEVEL_LABELS: Record<ReasoningLevel, string> = {
-  none: "None",
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-  xhigh: "XHigh",
-  max: "Max",
+  none: uiText("None"),
+  low: uiText("Low"),
+  medium: uiText("Medium"),
+  high: uiText("High"),
+  xhigh: uiText("XHigh"),
+  max: uiText("Max"),
 };
 
 const STANDARD_REASONING_LEVELS: readonly ReasoningLevel[] =
@@ -188,7 +190,7 @@ export function ModelToggleUI({
   modalInput = false,
   toolbar = false,
   triggerClassName,
-  emptyLabel = "No Models",
+  emptyLabel = uiText("No Models"),
   onEmptyClick,
   reasoningLevel,
   onReasoningChange,
@@ -212,7 +214,7 @@ export function ModelToggleUI({
   const label =
     selectedLabel ??
     selected?.label ??
-    (models.length > 0 ? "Select model" : emptyLabel);
+    (models.length > 0 ? uiText("Select model") : emptyLabel);
   const reasoningIndex = reasoningLevel
     ? Math.max(0, reasoningLevels.indexOf(reasoningLevel))
     : 0;
@@ -230,8 +232,8 @@ export function ModelToggleUI({
     return (
       <TriggerButton
         type="button"
-        aria-label="No models available"
-        title="Configure models"
+        aria-label={uiText("No models available")}
+        title={uiText("Configure models")}
         onClick={onEmptyClick}
         disabled={!onEmptyClick}
         className={
@@ -257,15 +259,15 @@ export function ModelToggleUI({
       <DropdownTrigger asChild>
         <TriggerButton
           type="button"
-          aria-label="Choose model"
+          aria-label={uiText("Choose model")}
           title={
             loading
-              ? "Checking API keys"
+              ? uiText("Checking API keys")
               : models.length === 0
-                ? "No API key configured"
+                ? uiText("No API key configured")
                 : selectedAvailable
-                  ? `Choose model — ${label}`
-                  : "API key missing for selected model"
+                  ? uiText`Choose model — ${label}`
+                  : uiText("API key missing for selected model")
           }
           disabled={loading}
           className={
@@ -369,7 +371,7 @@ export function ModelToggleUI({
           <div className="shrink-0">
             <DropdownSeparator />
             <DropdownItem
-              aria-label={`Reasoning level: ${REASONING_LEVEL_LABELS[reasoningLevel]}`}
+              aria-label={uiText`Reasoning level: ${REASONING_LEVEL_LABELS[reasoningLevel]}`}
               onSelect={(event) => event.preventDefault()}
               onFocus={(event) => {
                 if (event.target === event.currentTarget) {
@@ -380,7 +382,7 @@ export function ModelToggleUI({
             >
               <div>
                 <div className="mb-1.5 flex items-center gap-2 text-xs text-gray-700">
-                  <span className="font-medium">Reasoning</span>
+                  <span className="font-medium">{uiText("Reasoning")}</span>
                   <span className="ml-auto text-[10px] text-gray-500">
                     {REASONING_LEVEL_LABELS[reasoningLevel]}
                   </span>
@@ -404,7 +406,7 @@ export function ModelToggleUI({
                   <input
                     ref={reasoningInputRef}
                     type="range"
-                    aria-label="Reasoning level"
+                    aria-label={uiText("Reasoning level")}
                     aria-valuetext={REASONING_LEVEL_LABELS[reasoningLevel]}
                     min={0}
                     max={reasoningLevels.length - 1}

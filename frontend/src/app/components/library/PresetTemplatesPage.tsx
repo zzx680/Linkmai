@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useWorkspaceParam } from "@/app/contexts/WorkspaceContext";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -123,7 +125,7 @@ export function PresetTemplatesPage({
         setError(
           userFacingApiError(
             caught,
-            "Could not add this preset. Please try again.",
+            uiText("Could not add this preset. Please try again."),
           ),
         );
       } finally {
@@ -178,12 +180,12 @@ export function PresetTemplatesPage({
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
         breadcrumbs={[
-          { label: "Library", onClick: () => router.push("/library") },
+          { label: uiText("Library"), onClick: () => router.push("/library") },
           {
-            label: "Templates",
+            label: uiText("模板"),
             onClick: () => router.push("/library/templates"),
           },
-          { label: "Presets" },
+          { label: uiText("Presets") },
           ...folderBreadcrumbs,
         ]}
         actions={[
@@ -191,12 +193,15 @@ export function PresetTemplatesPage({
             type: "search",
             value: search,
             onChange: setSearch,
-            placeholder: "Search presets...",
+            placeholder: uiText("Search presets..."),
           },
         ]}
       />
 
       <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+        <p className="px-4 py-3 text-xs leading-5 text-gray-500">
+          此目录包含境外机构发布的原文模板。用于中国境内业务前，请核对适用法律、主体、交易安排及发布方许可；中文翻译不代表已完成中国法适配。
+        </p>
         <TableToolbar
           leading={
             <TabPillButtonUI
@@ -204,7 +209,7 @@ export function PresetTemplatesPage({
               className="pl-2"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
-              Back
+              {uiText("返回")}
             </TabPillButtonUI>
           }
           actions={
@@ -225,7 +230,7 @@ export function PresetTemplatesPage({
           loading={false}
           search={search}
           operations={CATALOG_OPERATIONS}
-          emptyStateTitle="Presets"
+          emptyStateTitle={uiText("Presets")}
           onSelectionActionsChange={setSelectionActions}
           onFolderViewBackActionChange={handleFolderBackActionChange}
           onFolderViewChange={handleFolderViewChange}

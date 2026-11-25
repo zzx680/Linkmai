@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { useWorkspace } from "@/app/contexts/WorkspaceContext";
@@ -47,7 +49,7 @@ function VisibleNoModelsWarning({
         <WarningPopup
             open
             onClose={onClose}
-            title="No models available"
+            title={uiText("No models available")}
             message={NO_MODELS_MESSAGES[reason]}
             icon={
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" />
@@ -55,7 +57,7 @@ function VisibleNoModelsWarning({
             primaryAction={
                 settingsHref
                     ? {
-                          label: "Open Organization",
+                          label: uiText("Open Organization"),
                           onClick: () => {
                               onClose();
                               router.push(settingsHref);
@@ -64,7 +66,7 @@ function VisibleNoModelsWarning({
                     : organizationFix
                       ? undefined
                       : {
-                            label: "Open Bring Your Own Keys",
+                            label: uiText("Open Bring Your Own Keys"),
                             onClick: () => {
                                 onClose();
                                 router.push("/settings/byok");

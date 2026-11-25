@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useRef } from "react";
 import {
     ClipboardCheck,
@@ -38,8 +40,8 @@ export function AddDocButton({
                 <button
                     type="button"
                     className="flex h-7.5 items-center gap-1 rounded-lg px-2 text-sm text-gray-400 transition-colors hover:text-gray-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-                    title="Add to message"
-                    aria-label="Add to message"
+                    title={uiText("Add to message")}
+                    aria-label={uiText("Add to message")}
                 >
                     <PlusIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
                 </button>
@@ -59,14 +61,14 @@ export function AddDocButton({
             >
                 <DropdownItem onSelect={onLocalFiles}>
                     <Upload aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-500" />
-                    Upload Documents
+                    {uiText("Upload Documents")}
                 </DropdownItem>
                 <DropdownItem onSelect={() => {
                     openingDialog.current = true;
                     onBrowseAll();
                 }}>
                     <Cloud aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-500" />
-                    Saved Documents
+                    {uiText("Saved Documents")}
                 </DropdownItem>
                 {(onWorkflows || onPlaybooks) && <DropdownSeparator />}
                 {onWorkflows && (
@@ -75,7 +77,7 @@ export function AddDocButton({
                         onWorkflows();
                     }}>
                         <Waypoints aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-500" />
-                        Workflows
+                        {uiText("Workflows")}
                     </DropdownItem>
                 )}
                 {onPlaybooks && (
@@ -84,7 +86,7 @@ export function AddDocButton({
                         onPlaybooks();
                     }}>
                         <ClipboardCheck aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-500" />
-                        Playbooks
+                        {uiText("Playbooks")}
                     </DropdownItem>
                 )}
             </DropdownContent>

@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React from "react";
 import { Trash2 } from "lucide-react";
 import { ToggleSwitchUI, PillButtonUI as PillButton, GlassCardUI } from "@mike/ui";
@@ -30,7 +32,7 @@ export function SettingsPage({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Mike couldn't save that setting. Try again.",
+          fallback: uiText("Mike couldn't save that setting. Try again."),
           operation: "settings.keys",
         }).message,
       );
@@ -41,22 +43,21 @@ export function SettingsPage({
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto p-4">
-      <PageTitle className="mb-5 px-1">Settings</PageTitle>
+      <PageTitle className="mb-5 px-1">{uiText("Settings")}</PageTitle>
       <section>
         <GlassCardUI>
           <div className="p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <h2 className="text-sm font-medium text-gray-900">
-                  Save chats in the cloud
+                  {uiText("Save chats in the cloud")}
                 </h2>
                 <p className="mt-1 text-xs leading-5 text-gray-500">
-                  Cloud chats are linked to this Word document and available on
-                  your other devices.
+                  {uiText("Cloud chats are linked to this Word document and available on your other devices.")}
                 </p>
               </div>
               <ToggleSwitchUI
-                aria-label="Save chats in the cloud"
+                aria-label={uiText("Save chats in the cloud")}
                 checked={storageMode === "cloud"}
                 disabled={saving}
                 onCheckedChange={(checked) => void updateMode(checked)}
@@ -77,11 +78,10 @@ export function SettingsPage({
           <div className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
               <h2 className="text-sm font-medium text-gray-900">
-                Device-only chats
+                {uiText("Device-only chats")}
               </h2>
               <p className="mt-1 text-xs leading-5 text-gray-500">
-                Local chats remain readable in this device profile after
-                sign-out until you delete them.
+                {uiText("Local chats remain readable in this device profile after sign-out until you delete them.")}
               </p>
             </div>
             <PillButton
@@ -90,7 +90,7 @@ export function SettingsPage({
               className="shrink-0"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Delete
+              {uiText("Delete")}
             </PillButton>
           </div>
         </GlassCardUI>
@@ -99,9 +99,9 @@ export function SettingsPage({
       <Modal
         open={clearConfirmOpen}
         onClose={() => !clearing && setClearConfirmOpen(false)}
-        title="Delete device-only chats?"
+        title={uiText("Delete device-only chats?")}
         primaryAction={{
-          label: clearing ? "Deleting…" : "Delete chats",
+          label: clearing ? uiText("Deleting…") : uiText("Delete chats"),
           tone: "danger",
           disabled: clearing,
           onClick: () => {
@@ -113,7 +113,7 @@ export function SettingsPage({
                 setError(
                   reportFault(reason, {
                     fallback:
-                      "Mike couldn't delete the device-only chats. Try again.",
+                      uiText("Mike couldn't delete the device-only chats. Try again."),
                     operation: "settings.keys",
                   }).message,
                 ),
@@ -122,15 +122,14 @@ export function SettingsPage({
           },
         }}
         secondaryAction={{
-          label: "Cancel",
+          label: uiText("Cancel"),
           disabled: clearing,
           onClick: () => setClearConfirmOpen(false),
         }}
         className="h-auto max-h-[calc(100vh-2rem)]"
       >
         <p className="pb-5 text-sm leading-6 text-gray-600">
-          This permanently deletes every device-only Word chat saved for this
-          account on this device. Cloud chats are not affected.
+          {uiText("This permanently deletes every device-only Word chat saved for this account on this device. Cloud chats are not affected.")}
         </p>
       </Modal>
     </div>

@@ -1,4 +1,6 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+
+import { uiText } from "@mike/client";
+import React, { useEffect, useState } from "react";
 import quickActionsIcon from "@icons/features/quick-actions.svg";
 import { getUserProfile } from "../../api/mikeApi";
 import { MikeIcon } from "../../../shared/chat/mike-icon";
@@ -7,7 +9,6 @@ import { useQuickActions } from "../../lib/quickActionStore";
 import { quickActionDisplayName } from "../../lib/quickActions";
 
 const ICON_SIZE = 26;
-const GREETING_GAP = 6;
 
 export function InitialView({
   onSelect,
@@ -15,78 +16,40 @@ export function InitialView({
   onSelect: (action: QuickAction) => void;
 }): React.ReactElement {
   const [name, setName] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [iconOffset, setIconOffset] = useState(0);
-  const [textOffset, setTextOffset] = useState(0);
   const quickActions = useQuickActions();
-  const textRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     void getUserProfile()
       .then((profile) => {
         const displayName = profile.displayName?.trim();
-        if (!cancelled) setName(displayName || "there");
+        if (!cancelled) setName(displayName || "");
       })
       .catch(() => {
         // Only the greeting's name is at stake; "Hi there" is a complete
         // greeting, so a failed profile read needs no interruption.
-        if (!cancelled) setName("there");
+        if (!cancelled) setName("");
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  useLayoutEffect(() => {
-    if (!name || !textRef.current) return;
-    setLoaded(false);
-    const textWidth = textRef.current.offsetWidth;
-    setIconOffset((textWidth + GREETING_GAP) / 2);
-    setTextOffset((ICON_SIZE + GREETING_GAP) / 2);
-  }, [name]);
-
-  useEffect(() => {
-    if (!name || !iconOffset) return;
-    const timer = window.setTimeout(() => setLoaded(true), 100);
-    return () => window.clearTimeout(timer);
-  }, [iconOffset, name]);
-
   return (
     <div className="flex w-full flex-col items-center text-center">
-      <div className="relative mb-8 h-10 w-full">
-        {name && (
+      <div className="mb-8 flex min-h-10 w-full items-center justify-center gap-2">
+        {name === null ? (
+          <div role="status" aria-label="正在加载个人信息" className="flex min-h-10 items-center gap-2">
+            <span className="h-[26px] w-[26px] animate-pulse rounded bg-gray-200" />
+            <span className="h-8 w-32 animate-pulse rounded bg-gray-200" />
+          </div>
+        ) : (
           <>
-            <div
-              data-testid="initial-mike-icon"
-              className="absolute h-[26px] w-[26px]"
-              style={{
-                left: "50%",
-                top: "50%",
-                transform: loaded
-                  ? `translate(calc(-50% - ${iconOffset}px), -50%)`
-                  : "translate(-50%, -50%)",
-                transition:
-                  "transform 900ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-              }}
-            >
+            <span data-testid="initial-mike-icon" className="shrink-0" aria-hidden="true">
               <MikeIcon size={ICON_SIZE} />
-            </div>
-            <h1
-              ref={textRef}
-              className="absolute whitespace-nowrap font-serif text-3xl font-light text-gray-900"
-              style={{
-                left: "50%",
-                top: "50%",
-                transform: loaded
-                  ? `translate(calc(-50% + ${textOffset}px), -50%)`
-                  : "translate(-50%, -50%)",
-                opacity: loaded ? 1 : 0,
-                transition:
-                  "transform 900ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 800ms ease-in-out 300ms",
-              }}
-            >
-              Hi, {name}
+            </span>
+            <h1 className="min-w-0 font-serif text-2xl font-light leading-relaxed text-gray-900 [overflow-wrap:anywhere]">
+              你好{name ? `，${name}` : ""}
             </h1>
           </>
         )}
@@ -100,7 +63,7 @@ export function InitialView({
             draggable={false}
             className="h-3.5 w-3.5 shrink-0 object-contain"
           />
-          Quick actions
+          {uiText("快捷操作")}
         </span>
       </div>
       <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs">

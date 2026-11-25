@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { authInputUIClassName, InputUI, PillButtonUI, GlassCardUI } from "@mike/ui";
 import {
@@ -94,9 +96,9 @@ export function PasswordSettingsSection() {
       // contradicts Mike's policy, so the code decides the text instead.
       setPasswordSetError(
         describeError(error, {
-          action: "set your password",
+          action: uiText("set your password"),
           codeMessages: PASSWORD_ERROR_MESSAGES,
-          fallback: "Unable to set your password. Try again.",
+          fallback: uiText("Unable to set your password. Try again."),
         }),
       );
     } finally {
@@ -114,10 +116,10 @@ export function PasswordSettingsSection() {
     } catch (error) {
       setPasswordStatus(
         describeError(error, {
-          action: "send the reset email",
+          action: uiText("send the reset email"),
           codeMessages: PASSWORD_ERROR_MESSAGES,
           fallback:
-            "Unable to send a password-reset email right now. Try again.",
+            uiText("Unable to send a password-reset email right now. Try again."),
         }).message,
       );
     } finally {
@@ -128,7 +130,7 @@ export function PasswordSettingsSection() {
   /** A failure the form found itself; the text is already user-facing. */
   function localPasswordError(message: string): UserFacingError {
     return describeError(new UserVisibleError(message, { kind: "validation" }), {
-      action: "set your password",
+      action: uiText("set your password"),
     });
   }
 
@@ -142,17 +144,17 @@ export function PasswordSettingsSection() {
 
   return (
     <section className="space-y-3">
-      <SettingsHeading id="password">Password</SettingsHeading>
+      <SettingsHeading id="password">{uiText("Password")}</SettingsHeading>
       <GlassCardUI>
         <SettingsRow>
           <div className="min-w-0 space-y-1">
             <SettingsLabel>
-              {needsInitialPassword ? "Set password" : "Reset password"}
+              {needsInitialPassword ? uiText("Set password") : uiText("Reset password")}
             </SettingsLabel>
             <SettingsDescription>
               {needsInitialPassword
-                ? "Add a password to sign in with your email and change your account email."
-                : `Send a secure password-reset link to ${user?.email}.`}
+                ? uiText("Add a password to sign in with your email and change your account email.")
+                : uiText`Send a secure password-reset link to ${user?.email}.`}
             </SettingsDescription>
             {passwordStatus && (
               <p className="text-xs text-gray-500">{passwordStatus}</p>
@@ -170,10 +172,10 @@ export function PasswordSettingsSection() {
             className="shrink-0"
           >
             {needsInitialPassword
-              ? "Set password"
+              ? uiText("Set password")
               : passwordResetSending
-                ? "Sending..."
-                : "Send reset email"}
+                ? uiText("Sending...")
+                : uiText("Send reset email")}
           </PillButtonUI>
         </SettingsRow>
       </GlassCardUI>
@@ -181,26 +183,26 @@ export function PasswordSettingsSection() {
       <Modal
         open={setPasswordOpen}
         onClose={closeSetPassword}
-        breadcrumbs={["Security", "Set password"]}
+        breadcrumbs={[uiText("Security"), uiText("Set password")]}
         size="sm"
         className="h-auto"
         cancelAction={{
-          label: "Cancel",
+          label: uiText("Cancel"),
           onClick: closeSetPassword,
           disabled: passwordSaving,
         }}
         primaryAction={{
-          label: passwordSaving ? "Setting..." : "Set password",
+          label: passwordSaving ? uiText("Setting...") : uiText("Set password"),
           onClick: () => void addPassword(),
           disabled: passwordSaving || !password || !confirmPassword,
         }}
       >
         <div className="space-y-4 pb-5">
           <p className="text-sm text-gray-500">
-            Use at least {MIN_PASSWORD_LENGTH} characters.
+            {uiText("Use at least")} {MIN_PASSWORD_LENGTH} {uiText("characters.")}
           </p>
           <div>
-            <FieldLabel htmlFor="new-account-password">Password</FieldLabel>
+            <FieldLabel htmlFor="new-account-password">{uiText("Password")}</FieldLabel>
             <InputUI
               id="new-account-password"
               type="password"
@@ -212,7 +214,7 @@ export function PasswordSettingsSection() {
           </div>
           <div>
             <FieldLabel htmlFor="confirm-account-password">
-              Confirm password
+              {uiText("Confirm password")}
             </FieldLabel>
             <InputUI
               id="confirm-account-password"
@@ -234,7 +236,7 @@ export function PasswordSettingsSection() {
                   )}
                   className="ml-2 underline underline-offset-2"
                 >
-                  Contact support
+                  {uiText("Contact support")}
                 </a>
               )}
             </p>

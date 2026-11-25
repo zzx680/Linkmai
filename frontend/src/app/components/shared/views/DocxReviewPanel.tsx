@@ -1,4 +1,6 @@
 "use client";
+
+import { uiText } from "@mike/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -198,7 +200,7 @@ function CommentColumn({
     return (
         <aside
             ref={ref}
-            aria-label="Document comments"
+            aria-label={uiText("Document comments")}
             className="flex min-h-0 w-[calc(var(--mike-docx-comment-width)+24px)] flex-none flex-col text-xs text-foreground"
             onKeyDown={(event) => {
                 event.stopPropagation();
@@ -211,11 +213,11 @@ function CommentColumn({
             }}
         >
             <div className="flex flex-none items-center justify-between py-3 pr-2 pl-3">
-                <h2 className="text-sm font-medium">Comments</h2>
+                <h2 className="text-sm font-medium">{uiText("Comments")}</h2>
                 <TextButtonUI
                     size="icon-xs"
-                    aria-label="Close comments"
-                    title="Close comments"
+                    aria-label={uiText("Close comments")}
+                    title={uiText("Close comments")}
                     onClick={() => editor.exec({ type: "toggleReviewPane" })}
                 >
                     <X aria-hidden="true" className="h-4 w-4" />
@@ -226,7 +228,7 @@ function CommentColumn({
                 className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-3"
             >
                 {items.length === 0 && (
-                    <p className="py-3 text-muted-foreground">No comments.</p>
+                    <p className="py-3 text-muted-foreground">{uiText("No comments.")}</p>
                 )}
                 {threads.map((item) => (
                     <DocxCommentCard

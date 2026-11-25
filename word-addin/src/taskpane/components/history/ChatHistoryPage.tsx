@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 import { ChatHistoryList } from "./ChatHistoryList";
@@ -26,14 +28,14 @@ export function ChatHistoryPage({
       className="flex h-full min-h-0 flex-col overflow-hidden p-3 @sm:p-4"
     >
       <PageTitle data-testid="chat-history-page-title" className="mb-3 px-1">
-        Chat History
+        {uiText("Chat History")}
       </PageTitle>
       <label className="flex h-9 shrink-0 items-center gap-2 rounded-xl border border-white/70 bg-white/70 px-3 text-gray-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_7px_rgba(15,23,42,0.05)]">
         <Search className="h-3.5 w-3.5" />
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search chat history..."
+          placeholder={uiText("Search chat history...")}
           className="min-w-0 flex-1 border-0 bg-transparent text-xs text-gray-800 outline-none placeholder:text-gray-400"
         />
       </label>

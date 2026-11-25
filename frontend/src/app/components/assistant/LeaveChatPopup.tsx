@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { ConfirmPopup } from "@/app/components/popups/ConfirmPopup";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
@@ -29,7 +31,7 @@ export function LeaveChatPopup({
         } catch (cause) {
             setError(userFacingApiError(
                 cause,
-                "The chat could not be left. Please try again.",
+                uiText("The chat could not be left. Please try again."),
             ));
         } finally {
             setLeaving(false);
@@ -40,16 +42,16 @@ export function LeaveChatPopup({
         <>
             <ConfirmPopup
                 open={!error}
-                title="Leave chat?"
-                message="Your shared access will be removed. An owner can share this chat with you again."
-                confirmLabel="Leave"
+                title={uiText("Leave chat?")}
+                message={uiText("Your shared access will be removed. An owner can share this chat with you again.")}
+                confirmLabel={uiText("Leave")}
                 confirmStatus={leaving ? "loading" : "idle"}
                 onConfirm={() => void confirmLeave()}
                 onCancel={() => { if (!leaving) onClose(); }}
             />
             <WarningPopup
                 open={!!error}
-                title="Chat not left"
+                title={uiText("Chat not left")}
                 message={error}
                 onClose={() => { setError(null); onClose(); }}
             />

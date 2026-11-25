@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 const AUTH_REDIRECT_PATHS = new Set([
     "/assistant",
     "/login",
@@ -54,5 +56,5 @@ export function authErrorDescription(
     if (/access.denied|cancel/i.test(error)) {
         return "Authentication was cancelled or denied.";
     }
-    return "Authentication could not be completed. Please try again.";
+    return uiText("Authentication could not be completed. Please try again.");
 }

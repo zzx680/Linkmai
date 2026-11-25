@@ -1857,6 +1857,8 @@ function reviewPrompt(
 
 ${instructions?.trim() ? `ADDITIONAL REVIEW INSTRUCTIONS:\n${instructions.trim().slice(0, 8_000)}\n` : ""}
 
+Write summary and analysis in Simplified Chinese unless the additional instructions explicitly request another language. Keep quotes, insertAfter anchors and source references exact. Write suggestedText in the language of the contract being revised; do not translate a foreign-law clause into a Chinese-law clause or change its currency. Apply the stated playbook and governing law; do not invent Chinese legal requirements or infer jurisdiction from language.
+
 Return JSON only:
 {"summary":"","findings":[{"topicId":"topic-1|null","ruleId":"topic-1-rule-1|null","ruleName":"","status":"not_applicable|acceptable|needs_review|unacceptable|missing_required|outside_scope","quote":"exact contract text or empty when missing","location":"section or heading","analysis":"","suggestedText":"","insertAfter":"exact contract text, only for missing_required"}]}
 

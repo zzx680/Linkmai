@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { ReactNode } from "react";
 import { Loader2, X } from "lucide-react";
 import { FileTypeIcon } from "@/app/components/shared/FileTypeIcon";
@@ -52,7 +54,7 @@ export function DocumentPill({
   );
   return (
     <div
-      title={status ? `${filename} · ${status}` : filename}
+      title={status ? uiText`${filename} · ${status}` : filename}
       className={cn(
         "inline-flex items-center rounded-[10px] text-xs",
         tone === "error" ? "text-red-600" : "text-gray-800",
@@ -64,7 +66,7 @@ export function DocumentPill({
         <button
           type="button"
           onClick={onOpen}
-          aria-label={`Open ${filename}`}
+          aria-label={uiText`Open ${filename}`}
           className="inline-flex min-w-0 items-center gap-1 py-0.5 pl-2 transition-colors hover:text-gray-950"
         >
           {label}
@@ -84,7 +86,7 @@ export function DocumentPill({
           type="button"
           onClick={onRemove}
           disabled={removeDisabled}
-          aria-label={`Remove ${filename}`}
+          aria-label={uiText`Remove ${filename}`}
           className="mx-1 rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-900/5 hover:text-gray-700 disabled:pointer-events-none disabled:opacity-40"
         >
           <X className="h-2.5 w-2.5" />

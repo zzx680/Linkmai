@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, {
   forwardRef,
   useEffect,
@@ -243,7 +245,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
           // indistinguishable from "you have no workflows", so say so.
           setSlashWorkflows([]);
           notifyError(reason, {
-            action: "load your workflows",
+            action: uiText("load your workflows"),
             dedupeKey: "slash-workflows",
             page: "Assistant",
             operation: "word_chat.turn",
@@ -281,7 +283,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
             // cannot serve), but the toggle will look wrong until this
             // succeeds, so the user is told rather than left guessing.
             notifyError(error, {
-              action: "load your models",
+              action: uiText("load your models"),
               dedupeKey: "model-preflight",
               page: "Assistant",
               operation: "word_chat.turn",
@@ -362,14 +364,14 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       const { supported, unsupported } = partitionSupportedDocumentFiles(files);
       if (supported.length === 0) {
         setDocumentUploadError(
-          "Only PDF, Word, Excel, and PowerPoint files can be uploaded.",
+          uiText("Only PDF, Word, Excel, and PowerPoint files can be uploaded."),
         );
         return;
       }
 
       setUploadingLocalFiles(true);
       setDocumentUploadError(
-        unsupported.length > 0 ? "Unsupported files were skipped." : null,
+        unsupported.length > 0 ? uiText("Unsupported files were skipped.") : null,
       );
       // Documents that finished are kept even when the batch as a whole did
       // not: attach them as they land, and again from whatever accounting the
@@ -425,7 +427,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
         } else {
           setDocumentUploadError(
             reportFault(reason, {
-              fallback: "Documents could not be uploaded. Try again.",
+              fallback: uiText("Documents could not be uploaded. Try again."),
               operation: "documents.upload",
             }).message,
           );
@@ -466,7 +468,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       }
       if ((!content && !hasAnnotatedExcerpt) || isResponseLoading) return;
       if (!model) {
-        setModelError("Select a model before sending your message.");
+        setModelError(uiText("Select a model before sending your message."));
         return;
       }
       if (!isModelAvailable(model, keyStatus)) {
@@ -515,7 +517,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
             accept={SUPPORTED_DOCUMENT_ACCEPT}
             multiple
             className="hidden"
-            aria-label="Upload desktop files"
+            aria-label={uiText("Upload desktop files")}
             onChange={(event) => void handleLocalFiles(event)}
           />
           {composerError && (
@@ -531,7 +533,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                   setDocumentUploadError(null);
                   setModelError(null);
                 }}
-                aria-label="Dismiss error"
+                aria-label={uiText("Dismiss error")}
                 className="shrink-0 rounded p-0.5 text-gray-400 hover:bg-gray-900/5 hover:text-gray-700"
               >
                 <X className="h-3.5 w-3.5" />
@@ -600,7 +602,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               isLoading={isResponseLoading}
               onCancel={onCancel}
               disabled={false}
-              placeholder="How can I help?"
+              placeholder={uiText("How can I help?")}
               canSubmitEmpty={hasAnnotatedExcerpt}
               attachments={
                 selectedWorkflow ||
@@ -617,7 +619,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                         <button
                           type="button"
                           onClick={() => onSelectedWorkflowChange(null)}
-                          aria-label={`Remove workflow ${selectedWorkflow.title}`}
+                          aria-label={uiText`Remove workflow ${selectedWorkflow.title}`}
                           className="ml-0.5 rounded-full p-0.5 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
                         >
                           <X className="h-2.5 w-2.5" />
@@ -653,7 +655,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                               current.filter((item) => item.id !== document.id),
                             )
                           }
-                          aria-label={`Remove document ${document.filename}`}
+                          aria-label={uiText`Remove document ${document.filename}`}
                           className="ml-0.5 rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-900/5 hover:text-gray-700"
                         >
                           <X className="h-2.5 w-2.5" />

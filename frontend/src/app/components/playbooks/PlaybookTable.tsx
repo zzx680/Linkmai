@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -67,8 +69,8 @@ export function accessScope(playbook: Playbook): ResourceAccessScope {
 // it is its creator's alone or shared with individuals.
 type AccessFilter = "public" | "private";
 const ACCESS_FILTER_OPTIONS: TableFilterOption<AccessFilter>[] = [
-  { value: "public", label: "Public" },
-  { value: "private", label: "Private" },
+  { value: "public", label: uiText("Public") },
+  { value: "private", label: uiText("Private") },
 ];
 
 type Filters = {
@@ -87,7 +89,7 @@ const NO_FILTERS: Filters = {
 };
 
 function creatorLabel(playbook: Playbook) {
-  return playbook.isCreator ? "Me" : playbook.creatorName?.trim() || "Unknown";
+  return playbook.isCreator ? uiText("Me") : playbook.creatorName?.trim() || uiText("Unknown");
 }
 
 function listText(values: string[]) {
@@ -151,12 +153,12 @@ export function PlaybookActionItems({
   const [playbook] = playbooks;
   const actions: MenuAction[] = [
     ...(onDeselect
-      ? [{ label: "Deselect rows", icon: X, run: onDeselect }]
+      ? [{ label: uiText("Deselect rows"), icon: X, run: onDeselect }]
       : []),
     ...(playbooks.length > 1
       ? [
           {
-            label: `Delete ${playbooks.length} playbooks`,
+            label: uiText`Delete ${playbooks.length} playbooks`,
             icon: Trash2,
             run: onDeleteSelected,
             destructive: true,
@@ -165,16 +167,16 @@ export function PlaybookActionItems({
         ]
       : playbook
         ? [
-            { label: "Open", icon: Eye, run: () => onOpen(playbook.id) },
+            { label: uiText("Open"), icon: Eye, run: () => onOpen(playbook.id) },
             {
-              label: "Details",
+              label: uiText("Details"),
               icon: Info,
               run: () => onDetails(playbook.id),
             },
-            { label: "Run", icon: Play, run: () => onRun(playbook.id) },
-            { label: "People", icon: Users, run: () => onPeople(playbook) },
+            { label: uiText("Run"), icon: Play, run: () => onRun(playbook.id) },
+            { label: uiText("People"), icon: Users, run: () => onPeople(playbook) },
             {
-              label: "Delete",
+              label: uiText("Delete"),
               icon: Trash2,
               run: () => onDelete(playbook.id),
               destructive: true,
@@ -346,7 +348,7 @@ export function PlaybookTable({
     <TableScrollArea>
       <div
         role="table"
-        aria-label="Playbooks"
+        aria-label={uiText("Playbooks")}
         aria-busy={loading}
         className="flex min-h-full min-w-0 flex-col"
       >
@@ -358,7 +360,7 @@ export function PlaybookTable({
             <TableHeaderCell role="columnheader" className={NAME_COLUMN}>
               <input
                 type="checkbox"
-                aria-label="Select all playbooks"
+                aria-label={uiText("Select all playbooks")}
                 className={TABLE_CHECKBOX_CLASS}
                 disabled={loading || disabled || !displayed.length}
                 checked={
@@ -379,16 +381,16 @@ export function PlaybookTable({
                   )
                 }
               />
-              Name
+              {uiText("Name")}
             </TableHeaderCell>
             <TableHeaderCell
               role="columnheader"
               className={`${CREATOR_COLUMN} gap-1`}
             >
-              <span>Creator</span>
+              <span>{uiText("Creator")}</span>
               {showFilters && (
                 <TableFilters
-                  label="Filter by creator"
+                  label={uiText("Filter by creator")}
                   value={active.creator}
                   allLabel="All Creators"
                   widthClassName="w-48"
@@ -401,10 +403,10 @@ export function PlaybookTable({
               role="columnheader"
               className={`${ACCESS_COLUMN} gap-1`}
             >
-              <span>Access</span>
+              <span>{uiText("Access")}</span>
               {showFilters && (
                 <TableFilters
-                  label="Filter by access"
+                  label={uiText("Filter by access")}
                   value={active.access}
                   allLabel="All Access"
                   widthClassName="w-40"
@@ -417,10 +419,10 @@ export function PlaybookTable({
               role="columnheader"
               className={`${TYPE_COLUMN} gap-1`}
             >
-              <span>Type</span>
+              <span>{uiText("Type")}</span>
               {showFilters && (
                 <TableFilters
-                  label="Filter by document type"
+                  label={uiText("Filter by document type")}
                   value={active.type}
                   allLabel="All Types"
                   widthClassName="w-48"
@@ -433,10 +435,10 @@ export function PlaybookTable({
               role="columnheader"
               className={`${REPRESENTED_COLUMN} gap-1`}
             >
-              <span>Represented</span>
+              <span>{uiText("Represented")}</span>
               {showFilters && (
                 <TableFilters
-                  label="Filter by represented party"
+                  label={uiText("Filter by represented party")}
                   value={active.represented}
                   allLabel="All Parties"
                   widthClassName="w-48"
@@ -449,10 +451,10 @@ export function PlaybookTable({
               role="columnheader"
               className={`${JURISDICTION_COLUMN} gap-1`}
             >
-              <span>Jurisdiction</span>
+              <span>{uiText("Jurisdiction")}</span>
               {showFilters && (
                 <TableFilters
-                  label="Filter by jurisdiction"
+                  label={uiText("Filter by jurisdiction")}
                   value={active.jurisdiction}
                   allLabel="All Jurisdictions"
                   widthClassName="w-52"
@@ -462,13 +464,13 @@ export function PlaybookTable({
               )}
             </TableHeaderCell>
             <TableHeaderCell role="columnheader" className={RULES_COLUMN}>
-              Rules
+              {uiText("Rules")}
             </TableHeaderCell>
             <TableHeaderCell role="columnheader" className={UPDATED_COLUMN}>
-              Updated
+              {uiText("Updated")}
             </TableHeaderCell>
             <TableHeaderCell role="columnheader" className={ACTIONS_COLUMN}>
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{uiText("Actions")}</span>
             </TableHeaderCell>
           </TableHeaderRow>
         </div>
@@ -516,11 +518,11 @@ export function PlaybookTable({
           <TableEmptyState>
             <EmptyState
               tone="error"
-              title="Couldn’t load playbooks"
+              title={uiText("Couldn’t load playbooks")}
               description={error}
               action={
                 <PillButtonUI tone="white" onClick={onRetry}>
-                  Try again
+                  {uiText("Try again")}
                 </PillButtonUI>
               }
             />
@@ -530,21 +532,21 @@ export function PlaybookTable({
             <EmptyState
               title={
                 filtered
-                  ? "No matching playbooks"
+                  ? uiText("No matching playbooks")
                   : emptyContext === "shared"
-                    ? "No shared playbooks"
+                    ? uiText("No shared playbooks")
                     : emptyContext === "public"
-                      ? "No public playbooks"
-                      : "No playbooks yet"
+                      ? uiText("No public playbooks")
+                      : uiText("No playbooks yet")
               }
               description={
                 filtered
-                  ? "Try another name or description."
+                  ? uiText("Try another name or description.")
                   : emptyContext === "shared"
-                    ? "Playbooks shared with your email address will appear here."
+                    ? uiText("Playbooks shared with your email address will appear here.")
                     : emptyContext === "public"
-                      ? "Playbooks made public to this workspace will appear here."
-                      : "Turn a Word negotiation guide into rules, or write your own."
+                      ? uiText("Playbooks made public to this workspace will appear here.")
+                      : uiText("Turn a Word negotiation guide into rules, or write your own.")
               }
               action={
                 !filtered &&
@@ -555,14 +557,14 @@ export function PlaybookTable({
                       onClick={onImport}
                       disabled={disabled}
                     >
-                      Import
+                      {uiText("Import")}
                     </PillButtonUI>
                     <PillButtonUI
                       tone="white"
                       onClick={onCreate}
                       disabled={disabled}
                     >
-                      Create
+                      {uiText("Create")}
                     </PillButtonUI>
                   </div>
                 )
@@ -572,8 +574,8 @@ export function PlaybookTable({
         ) : displayed.length === 0 && newImports.length === 0 ? (
           <TableEmptyState>
             <EmptyState
-              title="No matching playbooks"
-              description="Adjust the table filters to see more playbooks."
+              title={uiText("No matching playbooks")}
+              description={uiText("Adjust the table filters to see more playbooks.")}
               action={
                 <PillButtonUI
                   tone="white"
@@ -582,7 +584,7 @@ export function PlaybookTable({
                     onSelect(new Set());
                   }}
                 >
-                  Clear filters
+                  {uiText("Clear filters")}
                 </PillButtonUI>
               }
             />
@@ -609,11 +611,11 @@ export function PlaybookTable({
                       className="mr-3 h-2.5 w-2.5 shrink-0 animate-spin text-gray-400 motion-reduce:animate-none"
                     />
                     <span className="min-w-0 truncate text-gray-500" title={name}>
-                      <span className="sr-only">Compiling </span>
+                      <span className="sr-only">{uiText("Compiling")} </span>
                       {name}
                     </span>
                     <span className="ml-2 shrink-0 text-xs text-gray-400" aria-hidden="true">
-                      Compiling…
+                      {uiText("Compiling…")}
                     </span>
                   </TableCell>
                   <TableCell role="cell" className={CREATOR_COLUMN}>
@@ -661,7 +663,7 @@ export function PlaybookTable({
                 <TableCell role="cell" className={NAME_COLUMN}>
                   <input
                     type="checkbox"
-                    aria-label={`Select ${playbook.name}`}
+                    aria-label={uiText`Select ${playbook.name}`}
                     className={TABLE_CHECKBOX_CLASS}
                     disabled={disabled}
                     checked={selectedIds.has(playbook.id)}
@@ -710,7 +712,7 @@ export function PlaybookTable({
                         aria-hidden="true"
                         className="h-3 w-3 animate-spin motion-reduce:animate-none"
                       />
-                      Compiling…
+                      {uiText("Compiling…")}
                     </span>
                   )}
                 </TableCell>
@@ -776,7 +778,7 @@ export function PlaybookTable({
                     </span>
                   ) : (
                     <RowActions
-                      ariaLabel={`Actions for ${playbook.name}`}
+                      ariaLabel={uiText`Actions for ${playbook.name}`}
                       renderItems={(onActionChosen) =>
                         renderActions(playbook, onActionChosen)
                       }

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import React, { useSyncExternalStore } from "react";
 import { Settings2 } from "lucide-react";
 import { cn } from "@/app/lib/utils";
@@ -96,8 +98,8 @@ export function TableToolbar<T extends string>({
                     <DropdownTrigger asChild>
                         <button
                             type="button"
-                            title="Toolbar actions"
-                            aria-label="Toolbar actions"
+                            title={uiText("Toolbar actions")}
+                            aria-label={uiText("Toolbar actions")}
                             className={`ml-auto inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-700 ${LIQUID_GLASS_SUBTLE_CLASS} ${LIQUID_GLASS_HOVER_CLASS} transition-colors hover:text-gray-900 active:scale-[0.98]`}
                         >
                             <Settings2 className="h-3.5 w-3.5" />

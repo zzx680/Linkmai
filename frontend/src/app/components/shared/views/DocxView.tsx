@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useFetchDocxBytes } from "@/app/hooks/useFetchDocxBytes";
@@ -13,7 +15,7 @@ import { WarningPopup } from "@/app/components/popups/WarningPopup";
 import { viewRoundingClass, type ViewRounding } from "./viewRounding";
 
 const DocxRenderer = lazy(() => import("./EigenpalDocxRenderer"));
-const RENDER_ERROR = "This document could not be displayed. Please download it to view it.";
+const RENDER_ERROR = uiText("This document could not be displayed. Please download it to view it.");
 const bufferIds = new WeakMap<ArrayBuffer, number>();
 let nextBufferId = 0;
 
@@ -181,7 +183,7 @@ function DocxViewContent(props: Props) {
                 type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             }), /\.docx$/i.test(name) ? name : `${name}.docx`);
         } catch {
-            setDownloadError("This document could not be downloaded. Your edits are still open; please try again.");
+            setDownloadError(uiText("This document could not be downloaded. Your edits are still open; please try again."));
         } finally {
             setDownloading(false);
         }
@@ -203,7 +205,7 @@ function DocxViewContent(props: Props) {
     const pending = !message && (loading && !bytes || bytes && readyKey !== renderKey);
     return (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <WarningPopup open={!!downloadError} title="Download failed" message={downloadError} onClose={() => setDownloadError(null)} />
+            <WarningPopup open={!!downloadError} title={uiText("Download failed")} message={downloadError} onClose={() => setDownloadError(null)} />
             <div
                 className={`document-canvas relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden ${viewRoundingClass(rounded)}`}
                 data-document-id={documentId}
@@ -221,12 +223,12 @@ function DocxViewContent(props: Props) {
                 {warning && (
                     <div className="absolute left-2 top-2 z-20 flex items-center gap-2 rounded-md bg-app-floating px-2 py-1 text-xs text-foreground shadow-sm">
                         <span>{warning}</span>
-                        <button type="button" onClick={onWarningDismiss} aria-label="Dismiss warning"
+                        <button type="button" onClick={onWarningDismiss} aria-label={uiText("Dismiss warning")}
                             className="rounded px-1 focus-visible:outline-2 focus-visible:outline-blue-500/40">×</button>
                     </div>
                 )}
                 {pending && (
-                    <div role="status" aria-label="Loading document" className="absolute inset-0 z-10 flex items-center justify-center bg-app-surface">
+                    <div role="status" aria-label={uiText("Loading document")} className="absolute inset-0 z-10 flex items-center justify-center bg-app-surface">
                         <Loader2 aria-hidden="true" className="h-7 w-7 animate-spin text-muted-foreground" />
                     </div>
                 )}

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
   useEffect,
   useId,
@@ -116,7 +118,7 @@ export function PlaybookPanels({
             aria-valuenow={Math.round(width)}
             aria-valuetext={`${Math.round(width)} pixels`}
             tabIndex={0}
-            title="Drag to resize, or use the left and right arrow keys"
+            title={uiText("Drag to resize, or use the left and right arrow keys")}
             onPointerDown={(event) => {
               if (event.button !== 0) return;
               event.preventDefault();

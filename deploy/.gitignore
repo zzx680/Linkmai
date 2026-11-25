@@ -1,0 +1,4 @@
+.env.prod
+.env.rds
+certs/*
+!certs/README.md

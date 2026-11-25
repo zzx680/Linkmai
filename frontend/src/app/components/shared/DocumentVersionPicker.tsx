@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { listDocumentVersions, type DocumentVersion } from "@/app/lib/mikeApi";
@@ -58,15 +60,15 @@ export function DocumentVersionPicker({
     const label = displayedNumber ? (
         <VersionChip n={displayedNumber} />
     ) : (
-        <span className="text-[10px]">Version</span>
+        <span className="text-[10px]">{uiText("Version")}</span>
     );
     if (error)
         return (
             <TextButtonUI
                 size="xs"
                 className="h-auto p-0.5"
-                aria-label="Retry loading document versions"
-                title="Could not load versions. Click to retry."
+                aria-label={uiText("Retry loading document versions")}
+                title={uiText("Could not load versions. Click to retry.")}
                 onClick={() => setRetry((value) => value + 1)}
             >
                 {label}
@@ -90,12 +92,12 @@ export function DocumentVersionPicker({
                     aria-label={
                         displayedNumber
                             ? `Choose document version, currently V${displayedNumber}`
-                            : "Choose document version"
+                            : uiText("Choose document version")
                     }
                     title={
                         disabled
-                            ? "Save changes before switching versions"
-                            : "Choose document version"
+                            ? uiText("Save changes before switching versions")
+                            : uiText("Choose document version")
                     }
                 >
                     {label}
@@ -119,7 +121,7 @@ export function DocumentVersionPicker({
                         >
                             {version.version_number
                                 ? `V${version.version_number}`
-                                : "Version"}
+                                : uiText("Version")}
                             {version.filename && (
                                 <span className="max-w-48 truncate">
                                     {version.filename}
@@ -127,7 +129,7 @@ export function DocumentVersionPicker({
                             )}
                             {version.id === result?.current_version_id && (
                                 <span className="text-muted-foreground">
-                                    Current
+                                    {uiText("Current")}
                                 </span>
                             )}
                         </DropdownRadioItem>

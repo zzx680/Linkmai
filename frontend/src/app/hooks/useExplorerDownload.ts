@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useRef, useState } from "react";
 import { downloadDocumentsZip, getDocumentUrl } from "@/app/lib/mikeApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
@@ -43,7 +45,7 @@ export function useExplorerDownload() {
             setError(
                 userFacingApiError(
                     cause,
-                    "The file or folder could not be downloaded. Please try again.",
+                    uiText("The file or folder could not be downloaded. Please try again."),
                 ),
             );
         } finally {

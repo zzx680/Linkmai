@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 /**
  * Decisions that keep a user-driven "Retry" from quietly changing the
  * document twice, and that keep the pane from claiming an outcome it cannot
@@ -25,11 +27,11 @@
 
 /** Shown when an edit's stable ID is already in the document's applied set. */
 export const ALREADY_APPLIED_MESSAGE =
-  "This change was already applied to the document.";
+  uiText("This change was already applied to the document.");
 
 /** Shown when Word faulted and the verification read proved nothing. */
 export const UNVERIFIED_APPLY_MESSAGE =
-  "Mike couldn't confirm whether this change was applied — check the document before retrying.";
+  uiText("Mike couldn't confirm whether this change was applied — check the document before retrying.");
 
 /**
  * How many applied stable edit IDs a document remembers. Office document

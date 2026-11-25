@@ -1,5 +1,9 @@
 "use client";
 
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { indexFolderDirectory } from "./folderDirectoryIndex";
 import {
   type ReactNode,
@@ -42,9 +46,9 @@ const DIRECTORY_ROW_ACTION_CLASS =
     "col-span-5 grid min-w-0 grid-cols-[14px_minmax(0,1fr)_48px_84px_64px] items-center gap-2 text-left";
 
 const DIRECTORY_TABS: { value: DirectoryTab; label: string }[] = [
-    { value: "files", label: "Documents" },
-    { value: "templates", label: "Templates" },
-    { value: "projects", label: "Projects" },
+    { value: "files", label: uiText("Documents") },
+    { value: "templates", label: uiText("Templates") },
+    { value: "projects", label: uiText("Projects") },
 ];
 const ALL_DIRECTORY_TAB_VALUES = DIRECTORY_TABS.map((tab) => tab.value);
 
@@ -68,7 +72,7 @@ function mergeDirectoryRows<T extends { id: string }>(current: T[], next: T[]) {
 
 function formatDate(iso: string | null) {
     if (!iso) return null;
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString(uiDateLocale(), {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -625,7 +629,7 @@ function WorkspaceFileDirectory({
                     checked={selected}
                     indeterminate={false}
                     disabled={disabled}
-                    label={`Select ${doc.filename}`}
+                    label={uiText`Select ${doc.filename}`}
                     onChange={() => toggle(doc)}
                 />
                 <DocFileIcon fileType={doc.file_type} />
@@ -687,15 +691,15 @@ function WorkspaceFileDirectory({
                             }
                             label={
                                 folderSelectionReady
-                                    ? `Select all files in ${folder.name}`
-                                    : `Expand ${folder.name} and load all files before selecting it`
+                                    ? uiText`Select all files in ${folder.name}`
+                                    : uiText`Expand ${folder.name} and load all files before selecting it`
                             }
                             onChange={() => toggleDocuments(directory.collect(folder.id))}
                         />
                         <button
                             type="button"
                             aria-expanded={isExpanded}
-                            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${folder.name}`}
+                            aria-label={`${isExpanded ? uiText("Collapse") : uiText("Expand")} ${folder.name}`}
                             onClick={() =>
                                 toggleLibraryFolder(
                                     folder.id,
@@ -725,7 +729,7 @@ function WorkspaceFileDirectory({
                         </span>
                         <span className="truncate text-right text-gray-400">
                             {summary.count}{" "}
-                            {summary.count === 1 ? "file" : "files"}
+                            {summary.count === 1 ? uiText("file") : uiText("files")}
                         </span>
                         </button>
                     </div>
@@ -816,7 +820,7 @@ function WorkspaceFileDirectory({
                       paddingLeft: indentedRowPadding(depth + 1),
                                     }}
                                 >
-                                    Empty
+                                    {uiText("Empty")}
                                 </p>
                             )}
                         </div>
@@ -832,7 +836,7 @@ function WorkspaceFileDirectory({
                 <SearchBar
                     value={search}
                     onValueChange={setSearch}
-                    placeholder="Search..."
+                    placeholder={uiText("Search...")}
                     autoFocus
                     wrapperClassName={showTabs ? "mb-4" : "mb-3"}
                 />
@@ -884,7 +888,7 @@ function WorkspaceFileDirectory({
                 <SearchBar
                     value={search}
                     onValueChange={setSearch}
-                    placeholder="Search..."
+                    placeholder={uiText("Search...")}
                     autoFocus
                     wrapperClassName={showTabs ? "mb-4" : "mb-3"}
                 />
@@ -899,7 +903,7 @@ function WorkspaceFileDirectory({
                 )}
                 <div className="min-h-0 flex-1 overflow-y-auto">
                     <p className="text-center text-sm text-gray-400 py-8">
-                        No documents yet
+                        {uiText("No documents yet")}
                     </p>
                 </div>
             </div>
@@ -911,7 +915,7 @@ function WorkspaceFileDirectory({
             <SearchBar
                 value={search}
                 onValueChange={setSearch}
-                placeholder="Search..."
+                placeholder={uiText("Search...")}
                 autoFocus
                 wrapperClassName={showTabs ? "mb-4" : "mb-3"}
             />
@@ -927,14 +931,14 @@ function WorkspaceFileDirectory({
             {activeTabHasNoResults ? (
                 <div className="min-h-0 flex-1 overflow-y-auto">
                     <p className="text-center text-sm text-gray-400 py-8">
-                        No matches found
+                        {uiText("No matches found")}
                     </p>
                 </div>
             ) : (
                 <div className="flex min-h-0 flex-1 flex-col">
                     <FileDirectoryHeader />
                     <div
-                      aria-label="File directory"
+                      aria-label={uiText("File directory")}
                       className="min-h-0 flex-1 overflow-y-auto"
                       onScroll={handleDirectoryScroll}
                     >
@@ -1028,7 +1032,7 @@ function WorkspaceFileDirectory({
                                 directoryFileFolders.length === 0 &&
                                 visibleUploadingFilenames.length === 0 && (
                                     <p className="text-center text-sm text-gray-400 py-8">
-                                        No documents yet
+                                        {uiText("No documents yet")}
                                     </p>
                                 )}
                         </>
@@ -1076,7 +1080,7 @@ function WorkspaceFileDirectory({
                                 visibleTemplateDocs.length === 0 &&
                                 directoryTemplateFolders.length === 0 && (
                                     <p className="text-center text-sm text-gray-400 py-8">
-                                        No templates yet
+                                        {uiText("No templates yet")}
                                     </p>
                                 )}
                         </>
@@ -1125,8 +1129,8 @@ function WorkspaceFileDirectory({
                                             }
                                             label={
                                                 projectSelectionReady
-                                                    ? `Select all files in ${project.name}`
-                                                    : `Expand ${project.name} and load all files before selecting it`
+                                                    ? uiText`Select all files in ${project.name}`
+                                                    : uiText`Expand ${project.name} and load all files before selecting it`
                                             }
                                             onChange={() =>
                                                 toggleDocuments(docs)
@@ -1135,7 +1139,7 @@ function WorkspaceFileDirectory({
                                         <button
                                             type="button"
                                             aria-expanded={isExpanded}
-                                            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${project.name}`}
+                                            aria-label={`${isExpanded ? uiText("Collapse") : uiText("Expand")} ${project.name}`}
                                             onClick={() =>
                                                 toggleFolder(project.id)
                                             }
@@ -1160,7 +1164,7 @@ function WorkspaceFileDirectory({
                         {formatDate(project.created_at) ?? "--"}
                                         </span>
                                         <span className="truncate text-right text-gray-400">
-                        {docs.length} {docs.length === 1 ? "file" : "files"}
+                        {docs.length} {docs.length === 1 ? uiText("file") : uiText("files")}
                                         </span>
                                         </button>
                                     </div>
@@ -1169,11 +1173,11 @@ function WorkspaceFileDirectory({
                         {loadingProjectLevels.has(`${project.id}:root`) ? (
                           <p className="flex items-center gap-2 pl-7 py-2 text-xs text-gray-400">
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            Loading project files
+                            {uiText("Loading project files")}
                           </p>
                         ) : docs.length === 0 && projectFolders.length === 0 ? (
                                                 <p className="pl-7 py-1 text-xs text-gray-400">
-                                                    Empty
+                                                    {uiText("Empty")}
                                                 </p>
                                             ) : (
                                                 <>
@@ -1222,7 +1226,7 @@ function WorkspaceFileDirectory({
                         !q &&
                         visibleDirectoryProjects.length === 0 && (
                             <p className="text-center text-sm text-gray-400 py-8">
-                                No projects yet
+                                {uiText("No projects yet")}
                             </p>
                         )}
             {activeTab === "projects" && !q && (
@@ -1257,10 +1261,10 @@ function FileDirectoryHeader() {
         <div
             className={`${DIRECTORY_GRID_CLASS} px-2 pb-1 pt-0.5 text-[11px] font-medium text-gray-400`}
         >
-            <span className="col-span-3">Name</span>
-            <span>Version</span>
-            <span>Created</span>
-            <span className="text-right">Size</span>
+            <span className="col-span-3">{uiText("Name")}</span>
+            <span>{uiText("Version")}</span>
+            <span>{uiText("Created")}</span>
+            <span className="text-right">{uiText("Size")}</span>
         </div>
     );
 }
@@ -1318,7 +1322,7 @@ function FileDirectoryControls({
             )}
             {selectedCount > 0 && (
                 <span className="shrink-0 text-xs text-gray-400">
-                    {selectedCount} selected
+                    {selectedCount} {uiText("selected")}
                 </span>
             )}
         </div>

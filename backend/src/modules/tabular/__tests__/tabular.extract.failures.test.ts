@@ -61,6 +61,17 @@ afterEach(() => {
 });
 
 describe("queryTabularCell", () => {
+    it("keeps source money and format tokens intact while requesting Chinese explanations", async () => {
+        completeText.mockResolvedValue('{"summary":"USD 50,000","flag":"grey","reasoning":"原文金额"}');
+        const result = await queryTabularCell("m", "跨境合同.pdf", "Fee: USD 50,000", "提取价款", "monetary_amount");
+        const call = completeText.mock.calls[0][0];
+        expect(call.systemPrompt).toContain("Simplified Chinese");
+        expect(call.systemPrompt).toContain("keep required JSON keys and format tokens unchanged");
+        expect(call.systemPrompt).toContain("Do not infer governing law from the language alone");
+        expect(call.user).toContain("USD 50,000");
+        expect(result?.summary).toBe("USD 50,000");
+    });
+
     it("answers null and reports the provider failure once, under its kind, with the cause", async () => {
         const cause = providerError();
         completeText.mockRejectedValue(cause);

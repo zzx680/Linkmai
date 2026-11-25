@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 // global-error replaces the root layout, so it imports the layout's CSS
 // itself; without these the design-system classes below would not apply.
 import "./fonts/fonts.css";
@@ -15,9 +17,9 @@ export default function GlobalError({
     reset?: () => void;
 }) {
     return (
-        <html lang="en">
+        <html lang="zh-CN">
             <head>
-                <title>Something went wrong – Mike</title>
+                <title>{uiText("Something went wrong – Mike")}</title>
             </head>
             <body className="font-sans antialiased">
                 <CrashScreen
@@ -34,7 +36,7 @@ export default function GlobalError({
                             size="normal"
                             onClick={() => window.history.back()}
                         >
-                            Back
+                            {uiText("Back")}
                         </PillButtonUI>
                     )}
                 />

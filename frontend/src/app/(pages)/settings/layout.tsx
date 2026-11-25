@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -14,39 +16,39 @@ import { SettingsSearch } from "@/app/components/settings/SettingsSearch";
 import { SETTINGS_SEARCH_ENTRIES } from "@/app/lib/settingsSearch";
 
 const TABS: SettingsShellTab[] = [
-    { id: "account", label: "Account", href: "/settings" },
+    { id: "account", label: uiText("Account"), href: "/settings" },
     {
         id: "personalisation",
-        label: "Personalisation",
+        label: uiText("Personalisation"),
         href: "/settings/personalisation",
     },
-    { id: "memory", label: "Memory", href: "/settings/memory" },
-    { id: "appearance", label: "Appearance", href: "/settings/appearance" },
-    { id: "features", label: "Features", href: "/settings/features" },
+    { id: "memory", label: uiText("Memory"), href: "/settings/memory" },
+    { id: "appearance", label: uiText("Appearance"), href: "/settings/appearance" },
+    { id: "features", label: uiText("Features"), href: "/settings/features" },
     {
         id: "privacy-data",
-        label: "Privacy & Data",
+        label: uiText("Privacy & Data"),
         href: "/settings/privacy-data",
     },
     {
         id: "my-activity",
-        label: "My Activity",
+        label: uiText("My Activity"),
         href: "/settings/my-activity",
     },
-    { id: "security", label: "Security", href: "/settings/security" },
-    { id: "models", label: "Model Preferences", href: "/settings/models" },
+    { id: "security", label: uiText("Security"), href: "/settings/security" },
+    { id: "models", label: uiText("Model Preferences"), href: "/settings/models" },
     {
         id: "byok",
-        label: "Bring Your Own Keys",
+        label: uiText("Bring Your Own Keys"),
         href: "/settings/byok",
     },
-    { id: "connectors", label: "Connectors", href: "/settings/connectors" },
+    { id: "connectors", label: uiText("Connectors"), href: "/settings/connectors" },
     // The organizations the person belongs to, and their invitations. Each
     // organization's own settings are a separate area, opened from here or
     // from the account menu.
     {
         id: "organizations",
-        label: "Organizations",
+        label: uiText("Organizations"),
         href: "/settings/organizations",
     },
 ];
@@ -107,7 +109,7 @@ export default function SettingsLayout({
 
     return (
         <SettingsShell
-            title="Settings"
+            title={uiText("Settings")}
             navLabel="Settings"
             search={<SettingsSearch entries={searchEntries} />}
             tabs={visibleTabs.map((tab) =>

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -51,9 +53,9 @@ export default function ForgotPasswordPage() {
             setSubmitted(true);
         } catch (caught) {
             const described = describeError(caught, {
-                action: "send the reset link",
+                action: uiText("send the reset link"),
                 fallback:
-                    "Mike couldn't send the reset link. Try again in a moment.",
+                    uiText("Mike couldn't send the reset link. Try again in a moment."),
             });
             if (DELIVERY_FAILURE_KINDS.has(described.kind)) {
                 setError(described);
@@ -89,12 +91,10 @@ export default function ForgotPasswordPage() {
                     {submitted ? (
                         <div>
                             <h1 className="text-2xl font-medium font-serif text-gray-950">
-                                Check your email
+                                {uiText("Check your email")}
                             </h1>
                             <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                                If an account exists for {email.trim()}, we sent
-                                a password-reset link. The link expires and can
-                                only be used once.
+                                {uiText("If an account exists for")} {email.trim()}{uiText(", we sent a password-reset link. The link expires and can only be used once.")}
                             </p>
                             <Link
                                 href="/login"
@@ -104,17 +104,16 @@ export default function ForgotPasswordPage() {
                                     className: "mt-6",
                                 })}
                             >
-                                Return to login
+                                {uiText("Return to login")}
                             </Link>
                         </div>
                     ) : (
                         <>
                             <h1 className="text-2xl font-medium font-serif text-gray-950">
-                                Reset your password
+                                {uiText("Reset your password")}
                             </h1>
                             <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                                Enter your account email and we will send you a
-                                secure reset link.
+                                {uiText("Enter your account email and we will send you a secure reset link.")}
                             </p>
                             <form
                                 onSubmit={handleSubmit}
@@ -122,7 +121,7 @@ export default function ForgotPasswordPage() {
                             >
                                 <div>
                                     <FieldLabel htmlFor="email">
-                                        Email
+                                        {uiText("Email")}
                                     </FieldLabel>
                                     <InputUI
                                         id="email"
@@ -151,7 +150,7 @@ export default function ForgotPasswordPage() {
                                                 disabled={loading}
                                                 className="ml-2 underline underline-offset-2 disabled:no-underline disabled:opacity-60"
                                             >
-                                                Retry
+                                                {uiText("Retry")}
                                             </button>
                                         )}
                                         {error.supportable && (
@@ -162,7 +161,7 @@ export default function ForgotPasswordPage() {
                                                 )}
                                                 className="ml-2 underline underline-offset-2"
                                             >
-                                                Contact support
+                                                {uiText("Contact support")}
                                             </a>
                                         )}
                                     </div>
@@ -175,8 +174,8 @@ export default function ForgotPasswordPage() {
                                     className="w-full"
                                 >
                                     {loading
-                                        ? "Sending reset link..."
-                                        : "Send reset link"}
+                                        ? uiText("Sending reset link...")
+                                        : uiText("Send reset link")}
                                 </PillButtonUI>
                             </form>
                             <div className="mt-5 text-center">
@@ -184,7 +183,7 @@ export default function ForgotPasswordPage() {
                                     href="/login"
                                     className="text-sm font-medium text-gray-500 transition-colors hover:text-gray-950"
                                 >
-                                    Return to login
+                                    {uiText("Return to login")}
                                 </Link>
                             </div>
                         </>

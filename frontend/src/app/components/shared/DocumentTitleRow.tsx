@@ -1,5 +1,9 @@
 "use client";
 
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { Download, ExternalLink, SquarePen } from "lucide-react";
 import { downloadDocumentFile } from "@/app/lib/downloadDocument";
@@ -107,14 +111,14 @@ export function DocumentTitleRow({
                     {onToggleToolbar && (
                         <TextButtonUI
                             size="icon-xs"
-                            aria-label="Edit"
+                            aria-label={uiText("Edit")}
                             aria-expanded={toolbarVisible}
                             aria-pressed={toolbarVisible}
                             className={toolbarVisible ? "text-foreground" : undefined}
                             title={
                                 toolbarVisible
-                                    ? "Stop editing"
-                                    : "Enable editing"
+                                    ? uiText("Stop editing")
+                                    : uiText("Enable editing")
                             }
                             onClick={onToggleToolbar}
                         >
@@ -176,11 +180,11 @@ function DocxSaveStatus({ state }: { state: DocxSaveState }) {
         return () => clearTimeout(timer);
     }, [saved, state]);
     const label = state.error
-        ? "Not saved"
+        ? uiText("Not saved")
         : state.dirty || state.status === "saving"
-          ? "Saving…"
+          ? uiText("Saving…")
           : saved && expired !== state
-            ? "Saved"
+            ? uiText("Saved")
             : null;
     return (
         <span
@@ -204,7 +208,7 @@ function formatMetadataValue(item: PanelDocument["metadata"][number]): string {
         ? new Date(`${value}T00:00:00Z`)
         : new Date(value);
     if (Number.isNaN(date.getTime())) return value;
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(uiDateLocale(), {
         month: "long",
         day: "numeric",
         year: "numeric",
@@ -223,8 +227,8 @@ function UrlDownloadButton({
             target="_blank"
             rel="noopener noreferrer"
             download
-            aria-label="Download"
-            title="Download"
+            aria-label={uiText("Download")}
+            title={uiText("Download")}
             className={textButtonUIClassName({
                 size: "icon-xs",
             })}
@@ -241,8 +245,8 @@ function ExternalSourceLinkButton({ href }: { href: string }) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Open link"
-            title="Open link"
+            aria-label={uiText("Open link")}
+            title={uiText("Open link")}
             className={textButtonUIClassName({
                 size: "icon-xs",
             })}
@@ -283,7 +287,7 @@ function DownloadButton({
             setError(
                 userFacingApiError(
                     cause,
-                    "This file could not be downloaded. Please try again.",
+                    uiText("This file could not be downloaded. Please try again."),
                 ),
             );
         } finally {
@@ -296,14 +300,14 @@ function DownloadButton({
         <>
             <WarningPopup
                 open={!!error}
-                title="Download failed"
+                title={uiText("Download failed")}
                 message={error}
                 onClose={() => setError(null)}
             />
             <TextButtonUI
                 size="icon-xs"
-                aria-label="Download"
-                title="Download"
+                aria-label={uiText("Download")}
+                title={uiText("Download")}
                 onClick={handleClick}
                 loading={!!spinning}
             >

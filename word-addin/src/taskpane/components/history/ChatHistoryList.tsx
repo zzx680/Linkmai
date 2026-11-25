@@ -1,3 +1,7 @@
+
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
 import React, { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { Spinner } from "../../../shared/ui/spinner";
@@ -30,7 +34,7 @@ interface ChatHistoryListViewProps
 }
 
 function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString(undefined, {
+  return new Date(value).toLocaleDateString(uiDateLocale(), {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -39,7 +43,7 @@ function formatDate(value: string): string {
 
 /** A stored chat's name, or the stand-in for one that was never titled. */
 export function chatTitle(chat: { title?: string | null }): string {
-  return chat.title?.trim() || "Untitled chat";
+  return chat.title?.trim() || uiText("Untitled chat");
 }
 
 export function formatRelativeDate(value: string): string {
@@ -148,16 +152,16 @@ export function ChatHistoryListView({
             onClick={retry}
             className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200"
           >
-            Retry
+            {uiText("Retry")}
           </button>
         </div>
       ) : loading ? (
         <div className="flex min-h-32 items-center justify-center">
-          <Spinner label="Loading chats…" />
+          <Spinner label={uiText("Loading chats…")} />
         </div>
       ) : filteredChats.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-400">
-          {search ? "No matches found" : "No chats saved for this document"}
+          {search ? uiText("No matches found") : uiText("No chats saved for this document")}
         </p>
       ) : (
         <div className="space-y-px">
@@ -189,12 +193,12 @@ export function ChatHistoryListView({
           ))}
           {loadingMore && (
             <div className="flex justify-center py-3">
-              <Spinner label="Loading more chats…" />
+              <Spinner label={uiText("Loading more chats…")} />
             </div>
           )}
           {!hasMore && chats.length > pageSize && (
             <p className="py-3 text-center text-[10px] text-gray-400">
-              All chats loaded
+              {uiText("All chats loaded")}
             </p>
           )}
         </div>

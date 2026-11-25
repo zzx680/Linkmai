@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React from "react";
 import { ClipboardCheck, Loader2, Plus, Waypoints } from "lucide-react";
 import { ComposerButton } from "../primitives/ComposerButton";
@@ -35,8 +37,8 @@ export function DocumentSourceMenu({
         <ComposerButton
           disabled={disabled || uploading}
           active={attachedCount > 0}
-          aria-label="Add documents"
-          title="Add documents"
+          aria-label={uiText("Add documents")}
+          title={uiText("Add documents")}
         >
           {uploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -62,7 +64,7 @@ export function DocumentSourceMenu({
             draggable={false}
             className="h-4 w-4 shrink-0 object-contain"
           />
-          Desktop Files
+          {uiText("Desktop Files")}
         </DropdownItem>
         <DropdownItem onSelect={onWebFiles}>
           <img
@@ -72,18 +74,18 @@ export function DocumentSourceMenu({
             draggable={false}
             className="h-4 w-4 shrink-0 object-contain"
           />
-          Web files
+          {uiText("Web files")}
         </DropdownItem>
         <DropdownItem onSelect={onWorkflows}>
           <Waypoints className="h-4 w-4 shrink-0 text-gray-500" />
-          Workflows
+          {uiText("Workflows")}
         </DropdownItem>
         <DropdownItem onSelect={onPlaybooks}>
           <ClipboardCheck
             aria-hidden="true"
             className="h-4 w-4 shrink-0 text-gray-500"
           />
-          Playbooks
+          {uiText("Playbooks")}
         </DropdownItem>
       </DropdownContent>
     </Dropdown>

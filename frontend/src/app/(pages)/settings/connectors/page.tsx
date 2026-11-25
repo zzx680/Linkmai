@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
   useCallback,
   useEffect,
@@ -77,7 +79,7 @@ const CONNECTOR_ACTION_LABELS = {
   create: "add this connector",
   save: "save this connector",
   "clear-token": "clear the stored token",
-  delete: "delete this connector",
+  delete: uiText("delete this connector"),
   refresh: "refresh this connector",
   "connector-enabled": "change this connector",
   "tool-enabled": "change this tool",
@@ -97,7 +99,7 @@ const CONNECTOR_ACTION_LABELS = {
 function connectorMessage(error: unknown, action: string): string {
   return reportFault(error, {
     action,
-    fallback: `Mike couldn't ${action}. Try again.`,
+    fallback: uiText`Mike couldn't ${action}. Try again.`,
     operation: "settings.connectors",
   }).message;
 }
@@ -691,7 +693,7 @@ function WorkspaceConnectors({
     if (connector.loadFailed) {
       setAddErrorGuideUrl(null);
       setAddError(
-        `Could not load ${connector.name}. Reload this page and try again.`,
+        uiText`Could not load ${connector.name}. Reload this page and try again.`,
       );
       return;
     }
@@ -699,7 +701,7 @@ function WorkspaceConnectors({
       setAddErrorGuideUrl(googleSetupGuideUrl(provider));
       setAddError(
         `An administrator needs to apply the ${
-          provider === "google-drive" ? "Google Drive" : "Gmail and Calendar"
+          provider === "google-drive" ? uiText("Google Drive") : uiText("Gmail and Calendar")
         } database migration and restart the server before you can add ${connector.name}.`,
       );
       return;
@@ -1001,7 +1003,7 @@ function WorkspaceConnectors({
           const discarded = await discardCreatedConnector();
           if (!discarded) {
             setAddError(
-              "Authorization was cancelled, but the incomplete connector could not be removed. Remove it from Installed before trying again.",
+              uiText("Authorization was cancelled, but the incomplete connector could not be removed. Remove it from Installed before trying again."),
             );
           }
           return;
@@ -1392,23 +1394,23 @@ function WorkspaceConnectors({
           className={`${savedFor ? "mb-1" : "mb-4"} flex items-center justify-between gap-3`}
         >
           <SettingsHeading id="installed-connectors-heading">
-            Installed
+            {uiText("Installed")}
           </SettingsHeading>
           <PillButtonUI
             tone="white"
             size="xs"
             onClick={() => setAddOpen(true)}
-            aria-label="Add custom connector"
+            aria-label={uiText("Add custom connector")}
             className={`h-7 ${LIQUID_GLASS_SUBTLE_CLASS}`}
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-            Custom
+            {uiText("Custom")}
           </PillButtonUI>
         </div>
         {savedFor && (
           <div className="mb-4">
             <SettingsDescription>
-              Saved for {savedFor}. Each workspace has its own connectors.
+              {uiText("Saved for")} {savedFor}{uiText(". Each workspace has its own connectors.")}
             </SettingsDescription>
           </div>
         )}
@@ -1486,7 +1488,7 @@ function WorkspaceConnectors({
             installedGoogle.length === 0 &&
             !courtListener.installed && (
               <div className="@min-[32rem]:col-span-2">
-                <SettingsDescription>No connectors yet.</SettingsDescription>
+                <SettingsDescription>{uiText("No connectors yet.")}</SettingsDescription>
               </div>
             )}
         </div>
@@ -1494,7 +1496,7 @@ function WorkspaceConnectors({
       <section className="mt-6" aria-labelledby="discover-connectors-heading">
         <div className="mb-4">
           <SettingsHeading id="discover-connectors-heading">
-            Discover
+            {uiText("Discover")}
           </SettingsHeading>
         </div>
         {!initialLoading &&
@@ -1502,7 +1504,7 @@ function WorkspaceConnectors({
           !discoverCourtListener &&
           discoverPresets.length === 0 && (
             <SettingsDescription>
-              Every available connector is installed.
+              {uiText("Every available connector is installed.")}
             </SettingsDescription>
           )}
         <div
@@ -1538,7 +1540,7 @@ function WorkspaceConnectors({
                 if (courtListener.loadFailed) {
                   setAddErrorGuideUrl(null);
                   setAddError(
-                    `Could not load ${COURTLISTENER_NAME}. Reload this page and try again.`,
+                    uiText`Could not load ${COURTLISTENER_NAME}. Reload this page and try again.`,
                   );
                   return;
                 }
@@ -1629,8 +1631,8 @@ function WorkspaceConnectors({
                   ? {
                       label:
                         clearedBearerTokenConnectorId === selectedConnector.id
-                          ? "Cleared"
-                          : "Clear",
+                          ? uiText("Cleared")
+                          : uiText("Clear"),
                       loading:
                         busyKey === `clear-token:${selectedConnector.id}`,
                       cleared:
@@ -1703,7 +1705,7 @@ function WorkspaceConnectors({
                 }
               >
                 <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
-                Add files from Google Drive
+                {uiText("Add files from Google Drive")}
               </PillButtonUI>
               <p role="status" className="text-xs text-gray-500">
                 {drivePicker.message}
@@ -1748,7 +1750,7 @@ function WorkspaceConnectors({
       />
       <WarningPopup
         open={!!addError}
-        title="Could not add connector"
+        title={uiText("Could not add connector")}
         message={addError}
         onClose={() => {
           setAddError(null);
@@ -1761,13 +1763,13 @@ function WorkspaceConnectors({
       </WarningPopup>
       <WarningPopup
         open={!!detailError}
-        title="Connector update failed"
+        title={uiText("Connector update failed")}
         message={detailError}
         onClose={() => setDetailError(null)}
       />
       <WarningPopup
         open={!!detailSetupNotice}
-        title="Administrator setup required"
+        title={uiText("Administrator setup required")}
         message={detailSetupNotice}
         onClose={() => setDetailSetupNotice(null)}
       >
@@ -1859,11 +1861,11 @@ function DiscoverCard({
           loading={adding}
           aria-label={
             authorizing
-              ? `Cancel ${name} authorization`
-              : `Add ${name} connector`
+              ? uiText`Cancel ${name} authorization`
+              : uiText`Add ${name} connector`
           }
         >
-          {authorizing ? "Cancel" : adding ? "Adding..." : "Add"}
+          {authorizing ? uiText("Cancel") : adding ? uiText("Adding...") : uiText("Add")}
         </PillButtonUI>
       }
     />

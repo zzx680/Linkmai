@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { Loader2, RotateCw, X } from "lucide-react";
 import { AddUserInput } from "@/app/components/shared/AddUserInput";
@@ -56,7 +58,7 @@ async function refreshQuietly(
 
 /** Appended to a success notice whose follow-up refresh did not land. */
 const STALE_LIST_NOTICE =
-  "The list below may be out of date — reload to see the current one.";
+  uiText("The list below may be out of date — reload to see the current one.");
 
 export function CreateOrganizationModal({
   open,
@@ -103,7 +105,7 @@ export function CreateOrganizationModal({
       if (invitations.failed.length > 0) {
         setCreatedOrg(org);
         setError(
-          "Organization created, but some invitations could not be sent. You can add them later.",
+          uiText("Organization created, but some invitations could not be sent. You can add them later."),
         );
         return;
       }
@@ -126,13 +128,13 @@ export function CreateOrganizationModal({
           if (creating) return;
           onClose();
         }}
-        breadcrumbs={["Organizations", "New organization"]}
+        breadcrumbs={[uiText("Organizations"), uiText("New organization")]}
         primaryAction={{
           label: createdOrg
-            ? "Open organization"
+            ? uiText("Open organization")
             : creating
-              ? "Creating..."
-              : "Create",
+              ? uiText("Creating...")
+              : uiText("Create"),
           icon: creating ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : undefined,
@@ -143,7 +145,7 @@ export function CreateOrganizationModal({
         <div className="space-y-5 py-1">
           <div>
             <FieldLabel htmlFor="new-organization-name">
-              Organization name
+              {uiText("Organization name")}
             </FieldLabel>
             <FormTextInput
               id="new-organization-name"
@@ -163,16 +165,16 @@ export function CreateOrganizationModal({
               }}
             />
             <p className="mt-2 text-xs text-gray-400">
-              You will become the first administrator.
+              {uiText("You will become the first administrator.")}
             </p>
           </div>
 
           <div>
-            <FieldLabel as="p">Invite members</FieldLabel>
+            <FieldLabel as="p">{uiText("Invite members")}</FieldLabel>
             <AddUserInput
               requireExistingUser={false}
               busy={creating || createdOrg !== null}
-              placeholder="Add member by email…"
+              placeholder={uiText("Add member by email…")}
               submitLabel="Add member"
               validateEmail={(email) =>
                 memberEmails.includes(email)
@@ -195,7 +197,7 @@ export function CreateOrganizationModal({
                     <span className="min-w-0 flex-1 truncate">{email}</span>
                     <button
                       type="button"
-                      aria-label={`Remove ${email}`}
+                      aria-label={uiText`Remove ${email}`}
                       disabled={creating || createdOrg !== null}
                       onClick={() =>
                         setMemberEmails((current) =>
@@ -211,8 +213,7 @@ export function CreateOrganizationModal({
               </div>
             ) : null}
             <p className="mt-2 text-xs text-gray-400">
-              Members receive an invitation. You can also add people later from
-              the organization page.
+              {uiText("Members receive an invitation. You can also add people later from the organization page.")}
             </p>
           </div>
         </div>
@@ -221,8 +222,8 @@ export function CreateOrganizationModal({
         open={open && error !== null}
         title={
           createdOrg
-            ? "Some invitations were not sent"
-            : "Organization not created"
+            ? uiText("Some invitations were not sent")
+            : uiText("Organization not created")
         }
         message={error}
         onClose={() => setError(null)}
@@ -316,7 +317,7 @@ export function InviteOrganizationMemberModal({
       <Modal
         open={open}
         onClose={onClose}
-        breadcrumbs={["Organizations", org.name, "Add member"]}
+        breadcrumbs={[uiText("Organizations"), org.name, uiText("Add member")]}
         size="md"
         footerStatus={
           notice ? (
@@ -329,7 +330,7 @@ export function InviteOrganizationMemberModal({
           <div>
             {invitableRoles.length > 1 ? (
               <>
-                <FieldLabel htmlFor="organization-invite-role">Role</FieldLabel>
+                <FieldLabel htmlFor="organization-invite-role">{uiText("Role")}</FieldLabel>
                 <ModalSelect
                   id="organization-invite-role"
                   value={role}
@@ -342,7 +343,7 @@ export function InviteOrganizationMemberModal({
               </>
             ) : (
               <>
-                <FieldLabel as="p">Role</FieldLabel>
+                <FieldLabel as="p">{uiText("Role")}</FieldLabel>
                 <p className="text-sm text-gray-700">
                   {ORG_ROLE_LABELS[role]}
                 </p>
@@ -357,11 +358,11 @@ export function InviteOrganizationMemberModal({
           </div>
 
           <div>
-            <FieldLabel as="p">Email address</FieldLabel>
+            <FieldLabel as="p">{uiText("Email address")}</FieldLabel>
             <AddUserInput
               autoFocus
               requireExistingUser={false}
-              placeholder="Invite by email…"
+              placeholder={uiText("Invite by email…")}
               submitLabel="Send invitation"
               onAdd={(user) => invite(user.email)}
             />
@@ -370,7 +371,7 @@ export function InviteOrganizationMemberModal({
           {pending.length > 0 ? (
             <div className="min-h-0 border-t border-white/60 pt-4">
               <p className="mb-2 text-xs font-medium text-gray-600">
-                Pending invitations
+                {uiText("Pending invitations")}
               </p>
               <div className="max-h-48 space-y-1 overflow-y-auto">
                 {pending.map((invitation) => {
@@ -392,8 +393,8 @@ export function InviteOrganizationMemberModal({
                         <p className="text-[10px] text-gray-400">
                           {ORG_ROLE_LABELS[invitation.role]} ·{" "}
                           {invitation.status === "expired"
-                            ? "Expired"
-                            : "Pending"}
+                            ? uiText("Expired")
+                            : uiText("Pending")}
                         </p>
                       </div>
                       <button
@@ -430,7 +431,7 @@ export function InviteOrganizationMemberModal({
       </Modal>
       <WarningPopup
         open={open && error !== null}
-        title="Invitation action failed"
+        title={uiText("Invitation action failed")}
         message={error}
         onClose={() => setError(null)}
       />

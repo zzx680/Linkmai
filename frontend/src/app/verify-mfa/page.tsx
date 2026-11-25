@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -106,7 +108,7 @@ export default function VerifyMfaPage() {
                                 "No verified authenticator is registered for this account. Contact support to regain access.",
                                 { kind: "forbidden" },
                             ),
-                            { action: "verify your identity" },
+                            { action: uiText("verify your identity") },
                         ),
                     );
                 }
@@ -114,10 +116,10 @@ export default function VerifyMfaPage() {
                 if (cancelled) return;
                 setError(
                     reportFault(caught, {
-                        action: "load your authenticator",
+                        action: uiText("load your authenticator"),
                         codeMessages: MFA_ERROR_MESSAGES,
                         fallback:
-                            "Unable to load authenticator verification. Try again.",
+                            uiText("Unable to load authenticator verification. Try again."),
                         operation: "auth.mfa",
                     }),
                 );
@@ -144,9 +146,9 @@ export default function VerifyMfaPage() {
             setVerifying(false);
             setError(
                 reportFault(caught, {
-                    action: "verify that code",
+                    action: uiText("verify that code"),
                     codeMessages: MFA_ERROR_MESSAGES,
-                    fallback: "That code is invalid or expired.",
+                    fallback: uiText("That code is invalid or expired."),
                     operation: "auth.mfa",
                 }),
             );
@@ -167,8 +169,8 @@ export default function VerifyMfaPage() {
         } catch (caught) {
             setError(
                 reportFault(caught, {
-                    action: "sign out",
-                    fallback: "Unable to sign out. Try again.",
+                    action: uiText("sign out"),
+                    fallback: uiText("Unable to sign out. Try again."),
                     operation: "auth.session",
                 }),
             );
@@ -183,11 +185,10 @@ export default function VerifyMfaPage() {
             <div className={`w-full max-w-md ${authGlassCardUIClassName}`}>
                 <div className="mb-8 space-y-2">
                     <h1 className="font-serif text-2xl font-medium text-gray-950">
-                        Verify your identity
+                        {uiText("Verify your identity")}
                     </h1>
                     <p className="text-sm text-gray-500">
-                        Enter the six-digit code from your authenticator app to
-                        continue.
+                        {uiText("Enter the six-digit code from your authenticator app to continue.")}
                     </p>
                 </div>
 
@@ -195,12 +196,11 @@ export default function VerifyMfaPage() {
                     {displayedLoading ? (
                         <div className="flex h-13 items-center justify-center text-sm text-gray-500">
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Loading authenticator...
+                            {uiText("Loading authenticator...")}
                         </div>
                     ) : displayedFactors.length === 0 ? (
                         <p className="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-600">
-                            No verified authenticator factor is available for
-                            this session.
+                            {uiText("No verified authenticator factor is available for this session.")}
                         </p>
                     ) : (
                         <>
@@ -218,7 +218,7 @@ export default function VerifyMfaPage() {
                                             value={factor.id}
                                         >
                                             {factor.friendly_name ||
-                                                "Authenticator app"}
+                                                uiText("Authenticator app")}
                                         </option>
                                     ))}
                                 </select>
@@ -245,7 +245,7 @@ export default function VerifyMfaPage() {
                                     )}
                                     className="ml-2 underline underline-offset-2"
                                 >
-                                    Contact support
+                                    {uiText("Contact support")}
                                 </a>
                             )}
                         </p>
@@ -258,7 +258,7 @@ export default function VerifyMfaPage() {
                             disabled={verifying}
                             className="px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:text-gray-950 disabled:cursor-not-allowed disabled:text-gray-400"
                         >
-                            Cancel
+                            {uiText("Cancel")}
                         </button>
                         <PillButtonUI
                             tone="black"
@@ -268,7 +268,7 @@ export default function VerifyMfaPage() {
                             disabled={!canVerify}
                             loading={verifying}
                         >
-                            {verifying ? "Verifying..." : "Verify"}
+                            {verifying ? uiText("Verifying...") : uiText("Verify")}
                         </PillButtonUI>
                     </div>
                 </div>

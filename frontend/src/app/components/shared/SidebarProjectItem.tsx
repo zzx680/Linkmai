@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -50,7 +52,7 @@ export function mergeProjectRecentItems(
             (chat): ProjectRecentItem => ({
                 kind: "chat",
                 id: chat.id,
-                title: chat.title?.trim() || "Untitled chat",
+                title: chat.title?.trim() || uiText("Untitled chat"),
                 href: `/projects/${projectId}/assistant/chat/${chat.id}`,
                 activityAt: chat.updated_at ?? chat.created_at,
             }),
@@ -59,7 +61,7 @@ export function mergeProjectRecentItems(
             (review): ProjectRecentItem => ({
                 kind: "review",
                 id: review.id,
-                title: review.title?.trim() || "Untitled review",
+                title: review.title?.trim() || uiText("Untitled review"),
                 href: `/projects/${projectId}/tabular-reviews/${review.id}`,
                 activityAt: review.updated_at ?? review.created_at,
             }),
@@ -238,7 +240,7 @@ export function SidebarProjectItem({
                 }}
                 className="font-medium text-gray-700 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
             >
-                Retry
+                {uiText("Retry")}
             </button>
         </li>
     );
@@ -289,7 +291,7 @@ export function SidebarProjectItem({
                     onClick={() => onExpandedChange(!expanded)}
                     aria-expanded={expanded}
                     aria-controls={expanded ? listId : undefined}
-                    aria-label={`${expanded ? "Hide" : "Show"} recent chats and reviews in ${project.name}`}
+                    aria-label={`${expanded ? uiText("Hide") : uiText("Show")} recent chats and reviews in ${project.name}`}
                     className={cn(
                         "flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-gray-400 transition-opacity hover:text-gray-700 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
                         expanded || isActive
@@ -338,7 +340,7 @@ export function SidebarProjectItem({
                         )
                     ) : items && items.length === 0 ? (
                         <li className="flex min-h-7 items-center pl-2 pr-2 text-xs text-gray-500">
-                            No chats or reviews yet
+                            {uiText("No chats or reviews yet")}
                         </li>
                     ) : (
                         <>
@@ -355,7 +357,7 @@ export function SidebarProjectItem({
                                         <Link
                                             href={item.href}
                                             title={item.title}
-                                            aria-label={`${item.kind === "chat" ? "Chat" : "Tabular review"}: ${item.title}`}
+                                            aria-label={`${item.kind === "chat" ? uiText("Chat") : uiText("Tabular review")}: ${item.title}`}
                                             aria-current={
                                                 itemActive ? "page" : undefined
                                             }
@@ -396,7 +398,7 @@ export function SidebarProjectItem({
                                         aria-controls={listId}
                                         className="flex h-7 w-full items-center rounded-md pl-2 pr-2 text-left text-xs text-gray-500 transition-colors hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/40 disabled:cursor-default"
                                     >
-                                        {loadingMore ? "Loading..." : "See more"}
+                                        {loadingMore ? uiText("Loading...") : uiText("See more")}
                                     </button>
                                 </li>
                             )}

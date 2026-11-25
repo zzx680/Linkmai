@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { DocumentTabBar } from "@/app/components/shared/DocumentTabBar";
 import { LegalSourceIcon } from "@/app/components/shared/LegalSourceIcon";
 import {
@@ -51,7 +53,7 @@ export function ProjectDocumentTabs({
 }: Props) {
     return (
         <DocumentTabBar
-            label="Project documents"
+            label={uiText("Project documents")}
             idPrefix="project-document"
             className="project-document-tabs"
             tabs={tabs.map((tab) => {

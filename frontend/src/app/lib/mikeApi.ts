@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 import type { Operation } from "@mike/client";
 import { settleWithConcurrency } from "@mike/client";
@@ -176,9 +178,9 @@ export class MikeApiError extends Error {
     }
 }
 
-export const INTERNAL_ERROR_MESSAGE = "Something went wrong. Please try again.";
+export const INTERNAL_ERROR_MESSAGE = uiText("Something went wrong. Please try again.");
 const MALFORMED_ERROR_RESPONSE_MESSAGE =
-    "The request could not be completed. Please try again.";
+    uiText("The request could not be completed. Please try again.");
 // The 5xx codes the server side already reported, and their fixed messages,
 // are shared with the Word add-in (packages/client); they are re-exported
 // here because API consumers know them as mikeApi's answers.

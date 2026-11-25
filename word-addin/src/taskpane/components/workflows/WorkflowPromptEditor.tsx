@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -315,7 +317,7 @@ export function WorkflowPromptEditor({
       <div className="flex min-h-10 shrink-0 items-center gap-0.5 border-b border-white/70 bg-white/45 px-2 py-1.5">
         {readOnly ? (
           <span className="mr-auto px-2 text-xs font-medium text-gray-500">
-            Read-only
+            {uiText("Read-only")}
           </span>
         ) : (
           <>
@@ -324,7 +326,7 @@ export function WorkflowPromptEditor({
               return (
                 <ToolbarButton
                   key={level}
-                  title={`Heading ${level}`}
+                  title={uiText`Heading ${level}`}
                   active={!rawMode && activeFormatting[`heading${level}`]}
                   onClick={() =>
                     rawMode
@@ -338,7 +340,7 @@ export function WorkflowPromptEditor({
             })}
             <span className="mx-1 h-4 w-px shrink-0 bg-gray-200" />
             <ToolbarButton
-              title="Bold"
+              title={uiText("Bold")}
               active={!rawMode && activeFormatting.bold}
               onClick={() =>
                 rawMode
@@ -349,7 +351,7 @@ export function WorkflowPromptEditor({
               <Bold className="h-4 w-4" />
             </ToolbarButton>
             <ToolbarButton
-              title="Italic"
+              title={uiText("Italic")}
               active={!rawMode && activeFormatting.italic}
               onClick={() =>
                 rawMode
@@ -361,7 +363,7 @@ export function WorkflowPromptEditor({
             </ToolbarButton>
             <span className="mx-1 h-4 w-px shrink-0 bg-gray-200" />
             <ToolbarButton
-              title="Bullet list"
+              title={uiText("Bullet list")}
               active={!rawMode && activeFormatting.bulletList}
               onClick={() =>
                 rawMode
@@ -372,7 +374,7 @@ export function WorkflowPromptEditor({
               <List className="h-4 w-4" />
             </ToolbarButton>
             <ToolbarButton
-              title="Numbered list"
+              title={uiText("Numbered list")}
               active={!rawMode && activeFormatting.orderedList}
               onClick={() =>
                 rawMode
@@ -384,7 +386,7 @@ export function WorkflowPromptEditor({
             </ToolbarButton>
             <div ref={tablePickerRef} className="relative">
               <ToolbarButton
-                title="Insert table"
+                title={uiText("Insert table")}
                 active={tablePickerOpen}
                 onClick={() => setTablePickerOpen((open) => !open)}
               >
@@ -393,7 +395,7 @@ export function WorkflowPromptEditor({
               {tablePickerOpen && (
                 <div
                   role="dialog"
-                  aria-label="Insert table"
+                  aria-label={uiText("Insert table")}
                   className="absolute left-0 top-full z-[250] mt-1 rounded-md border border-gray-200 bg-white p-2 shadow-lg"
                 >
                   <div
@@ -411,7 +413,7 @@ export function WorkflowPromptEditor({
                         <button
                           key={`${rows}-${cols}`}
                           type="button"
-                          aria-label={`Insert ${rows} by ${cols} table`}
+                          aria-label={uiText`Insert ${rows} by ${cols} table`}
                           onMouseEnter={() => setTablePickerSize({ rows, cols })}
                           onFocus={() => setTablePickerSize({ rows, cols })}
                           onMouseDown={(event) => {
@@ -430,7 +432,7 @@ export function WorkflowPromptEditor({
                   <p className="mt-2 text-center text-[10px] text-gray-500">
                     {tablePickerSize
                       ? `${tablePickerSize.rows} x ${tablePickerSize.cols}`
-                      : "Select size"}
+                      : uiText("Select size")}
                   </p>
                 </div>
               )}
@@ -439,7 +441,7 @@ export function WorkflowPromptEditor({
         )}
         <span className="ml-auto" />
         <ToolbarButton
-          title={rawMode ? "Show rich editor" : "Show raw Markdown"}
+          title={rawMode ? uiText("Show rich editor") : uiText("Show raw Markdown")}
           active={rawMode}
           onClick={toggleRawMode}
         >
@@ -455,7 +457,7 @@ export function WorkflowPromptEditor({
             onChange={(event) => emitRaw(event.target.value)}
             readOnly={readOnly}
             spellCheck={false}
-            aria-label="Raw Markdown"
+            aria-label={uiText("Raw Markdown")}
             className="h-full min-h-full w-full resize-none bg-transparent px-4 py-3 font-mono text-xs leading-6 text-gray-800 outline-none read-only:cursor-default"
           />
         ) : (

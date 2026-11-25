@@ -95,6 +95,9 @@ describe("draftColumnPrompt", () => {
             documentName: "NDA",
         });
         const sent = completeText.mock.calls[0][0].user as string;
+        const system = completeText.mock.calls[0][0].systemPrompt as string;
+        expect(system).toContain("Simplified Chinese");
+        expect(system).toContain("unless the column explicitly requests another language");
         expect(sent).toContain("one of these tags: Yes, No");
         expect(sent).toContain("Available tags: Yes, No");
         expect(sent).toContain("Document type/name: NDA");

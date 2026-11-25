@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "./auth/useAuth";
 import { LoginPage } from "./auth/LoginPage";
@@ -76,7 +78,7 @@ export default function App(): React.ReactElement {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Spinner label="Loading…" />
+        <Spinner label={uiText("Loading…")} />
       </div>
     );
   }
@@ -88,7 +90,7 @@ export default function App(): React.ReactElement {
   if (wordChatStorage.loading || wordDocument.loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Spinner label="Opening document chats…" />
+        <Spinner label={uiText("Opening document chats…")} />
       </div>
     );
   }
@@ -96,7 +98,7 @@ export default function App(): React.ReactElement {
   if (!wordDocument.documentId) {
     return (
       <div className="flex h-full items-center justify-center p-6 text-center text-sm text-red-600">
-        {wordDocument.error ?? "Could not identify this Word document."}
+        {wordDocument.error ?? uiText("Could not identify this Word document.")}
       </div>
     );
   }

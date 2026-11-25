@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useState, type ReactNode } from "react";
 import { useReasoningDisclosure, DocFindBlockUI, DocReadBlockUI } from "@mike/ui";
 import { ChevronDown } from "lucide-react";
@@ -94,7 +96,7 @@ export function ReasoningBlock({
         className="flex items-center font-serif text-sm text-gray-500 transition-colors hover:text-gray-600"
       >
         <span className="font-medium">
-          {isStreaming ? THINKING_PHRASES[thinkingIndex] : "Thought process"}
+          {isStreaming ? THINKING_PHRASES[thinkingIndex] : uiText("Thought process")}
         </span>
         <ChevronDown
           size={10}
@@ -124,7 +126,7 @@ export function ReasoningBlock({
                   type="button"
                   onClick={() => setIsExpanded(true)}
                   className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2 text-gray-400 transition-colors hover:text-gray-600"
-                  aria-label="Expand thought process"
+                  aria-label={uiText("Expand thought process")}
                 >
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
@@ -136,7 +138,7 @@ export function ReasoningBlock({
               type="button"
               onClick={() => setIsExpanded(false)}
               className="mx-auto mt-2 flex text-gray-400 transition-colors hover:text-gray-600"
-              aria-label="Minimise thought process"
+              aria-label={uiText("Minimise thought process")}
             >
               <ChevronDown className="h-3.5 w-3.5 rotate-180" />
             </button>

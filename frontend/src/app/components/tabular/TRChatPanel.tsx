@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { nextRevealLength } from "./tabularReveal";
 
 import { useMarkdownCheckpoint } from "../assistant/message/markdownCheckpoint";
@@ -279,7 +281,7 @@ function TRAssistantMessage({
         if (event.type === "thinking") {
             return (
                 <EventBlock key={key} showConnector={showConnector} isStreaming>
-                    <span>Thinking...</span>
+                    <span>{uiText("Thinking...")}</span>
                 </EventBlock>
             );
         }
@@ -390,7 +392,7 @@ const TRMarkdown = memo(function TRMarkdown({text, citationsList, onCitationClic
                                                 cit.row_index,
                                             )
                                         }
-                                        title={`${cit.col_name} · ${cit.doc_name.replace(/\.[^.]+$/, "")}`}
+                                        title={uiText`${cit.col_name} · ${cit.doc_name.replace(/\.[^.]+$/, "")}`}
                                         className="mx-0.5 align-super"
                                     >
                                         {cit.ref}
@@ -615,7 +617,7 @@ export function TRChatPanel({
                     // Without this the chat menu just stays empty and the
                     // model/reasoning pickers silently fall back to defaults.
                     notifyError(error, {
-                        action: "load your chat history",
+                        action: uiText("load your chat history"),
                         dedupeKey: `tr-chats:${reviewId}`,
                         onRetry: loadChats,
                     });
@@ -1061,7 +1063,7 @@ export function TRChatPanel({
                 setMessages(snapshot.messages);
             }
             notifyError(error, {
-                action: "delete this chat",
+                action: uiText("delete this chat"),
                 onRetry: () => {
                     void handleDeleteChat(chatId);
                 },
@@ -1089,7 +1091,7 @@ export function TRChatPanel({
             );
             if (chatId === currentChatId) setCurrentChatTitle(previousTitle);
             notifyError(error, {
-                action: "rename this chat",
+                action: uiText("rename this chat"),
                 onRetry: () => {
                     void handleRenameChat(chatId, title);
                 },
@@ -1191,7 +1193,7 @@ export function TRChatPanel({
             const active = loaded.find((chat) => chat.id === chatId)?.active_turn;
             await recoverTurn(gen, chatId, active?.id ?? null);
         } catch (error) {
-            notifyError(error, { action: "load your chat history" });
+            notifyError(error, { action: uiText("load your chat history") });
         }
     }
 
@@ -1919,7 +1921,7 @@ export function TRChatPanel({
                                 return updated;
                             });
                             notifyError(failure, {
-                                action: "get a response",
+                                action: uiText("get a response"),
                                 operation: "tabular.chat",
                                 dedupeKey: `tr-chat-error:${cursor.chatId ?? reviewId}`,
                                 onRetry: retry,
@@ -2133,7 +2135,7 @@ export function TRChatPanel({
                 // Offer a history check instead.
                 const chatKnown = serverChatId ?? currentChatIdRef.current;
                 notifyError(uncertainDeliveryError(err), {
-                    action: "finish this answer",
+                    action: uiText("finish this answer"),
                     dedupeKey: `tr-chat-stream:${reviewId}`,
                     actions: [
                         {
@@ -2161,7 +2163,7 @@ export function TRChatPanel({
                       }
                     : args.settings.retry;
             notifyError(err, {
-                action: "finish this answer",
+                action: uiText("finish this answer"),
                 fallback: `${TURN_INTERRUPTED_MESSAGE} Anything already shown is kept.`,
                 dedupeKey: `tr-chat-stream:${reviewId}`,
                 onRetry: retry,
@@ -2262,7 +2264,7 @@ export function TRChatPanel({
                                 }}
                                 items={[
                                     {
-                                        label: "Rename",
+                                        label: uiText("Rename"),
                                         icon: Pencil,
                                         onSelect: () =>
                                             setTitleDraft(
@@ -2275,7 +2277,7 @@ export function TRChatPanel({
                                             isLoading,
                                     },
                                     {
-                                        label: "Delete",
+                                        label: uiText("Delete"),
                                         icon: Trash2,
                                         onSelect: () => {
                                             if (currentChatId)
@@ -2375,17 +2377,17 @@ export function TRChatPanel({
             </div>
             <WarningPopup
                 open={messageLoadWarning}
-                title="Chat unavailable"
-                message="This chat’s messages could not be loaded. Please try again."
+                title={uiText("Chat unavailable")}
+                message={uiText("This chat’s messages could not be loaded. Please try again.")}
                 onClose={() => setMessageLoadWarning(false)}
             />
             <ApiKeyMissingPopup
                 open={rejectedApiKey !== null}
-                title="API key rejected"
-                message={`${
+                title={uiText("API key rejected")}
+                message={uiText`${
                     rejectedApiKey?.provider
                         ? `The ${providerLabel(rejectedApiKey.provider)} API key`
-                        : "That API key"
+                        : uiText("That API key")
                 } was rejected. If it is your own key, check it in Settings; otherwise contact your administrator.`}
                 onClose={() => setRejectedApiKey(null)}
             />

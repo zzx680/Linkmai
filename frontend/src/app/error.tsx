@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import Link from "next/link";
 import { pillButtonUIClassName } from "@mike/ui";
 import { CrashScreen } from "@/app/components/shared/CrashScreen";
@@ -21,7 +23,7 @@ export default function Error({
                     href="/"
                     className={pillButtonUIClassName({ tone, size: "normal" })}
                 >
-                    Home
+                    {uiText("Home")}
                 </Link>
             )}
         />

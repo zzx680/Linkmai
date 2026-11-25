@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, ZoomIn, ZoomOut } from "lucide-react";
 import {
@@ -778,7 +780,7 @@ export function PdfView({
             await renderPDF(pdfDoc, list);
         })().catch(() => {
             if (!cancelled)
-                setPdfLoadError({ result, message: "Failed to load document." });
+                setPdfLoadError({ result, message: uiText("Failed to load document.") });
         });
         return () => {
             cancelled = true;

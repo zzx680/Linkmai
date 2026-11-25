@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { createPortal } from "react-dom";
 import { useEffect, useId, type ReactNode } from "react";
 import { Trash2 } from "lucide-react";
@@ -71,7 +73,7 @@ export function ConfirmPopup({
   const confirmBusy = confirmStatus === "loading";
   const resolvedConfirmDisabled = confirmDisabled || confirmStatus !== "idle";
   const normalizedConfirmLabel =
-    typeof confirmLabel === "string" ? confirmLabel : "Confirm";
+    typeof confirmLabel === "string" ? confirmLabel : uiText("Confirm");
   const isDangerAction = confirmVariant === "danger";
   const resolvedConfirmLabel =
     confirmStatus === "loading" ? (
@@ -87,7 +89,7 @@ export function ConfirmPopup({
       <div
         role="dialog"
         aria-labelledby={title ? titleId : undefined}
-        aria-label={title ? undefined : "Confirm action"}
+        aria-label={title ? undefined : uiText("Confirm action")}
         className={cn(
           `pointer-events-auto relative w-[min(92vw,520px)] rounded-2xl p-2.5 pl-3 text-sm ${LIQUID_GLASS_FLOAT_CLASS}`,
           className,
@@ -95,7 +97,7 @@ export function ConfirmPopup({
       >
         <CloseButton
           onClick={onCancel}
-          label="Close confirmation"
+          label={uiText("Close confirmation")}
           size="sm"
           className="absolute right-2.5 top-2.5"
         />

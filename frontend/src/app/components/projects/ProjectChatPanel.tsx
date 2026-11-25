@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     useCallback,
     useEffect,
@@ -114,7 +116,7 @@ function AssistantGreeting({ username }: { username: string }) {
                             "transform 900ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 800ms ease-in-out 300ms",
                     }}
                 >
-                    Hi, {username}
+                    {uiText("Hi,")} {username}
                 </h1>
             </div>
         </div>
@@ -571,10 +573,10 @@ export function ProjectChatPanel({
             // Without this the refusal was an unhandled rejection and the
             // panel just sat there, indistinguishable from a slow delete.
             onActionError({
-                title: "Chat not deleted",
+                title: uiText("Chat not deleted"),
                 message: userFacingApiError(
                     error,
-                    "The chat could not be deleted. Please try again.",
+                    uiText("The chat could not be deleted. Please try again."),
                 ),
             });
         } finally {
@@ -591,7 +593,7 @@ export function ProjectChatPanel({
         if (nextTitle === undefined) {
             setChatTitleEdit({
                 chatId: activeChatId,
-                title: chatTitle ?? "New Chat",
+                title: chatTitle ?? uiText("New Chat"),
             });
             return;
         }
@@ -639,10 +641,10 @@ export function ProjectChatPanel({
                 ),
             );
             onActionError({
-                title: "Chat not renamed",
+                title: uiText("Chat not renamed"),
                 message: userFacingApiError(
                     error,
-                    "The chat could not be renamed. Please try again.",
+                    uiText("The chat could not be renamed. Please try again."),
                 ),
             });
         }
@@ -694,7 +696,7 @@ export function ProjectChatPanel({
                 {chatDragOver && (
                     <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-md">
                         <p className="font-serif text-xl text-gray-900">
-                            Drop files here to add to chat
+                            {uiText("Drop files here to add to chat")}
                         </p>
                     </div>
                 )}
@@ -741,7 +743,7 @@ export function ProjectChatPanel({
                                     ...(onOpenSideChat
                                         ? [
                                               {
-                                                  label: "Open side chat",
+                                                  label: uiText("Open side chat"),
                                                   icon: MessageSquare,
                                                   onSelect: onOpenSideChat,
                                               },
@@ -750,14 +752,14 @@ export function ProjectChatPanel({
                                     ...(onCloseSideChat
                                         ? [
                                               {
-                                                  label: "Close side chat",
+                                                  label: uiText("Close side chat"),
                                                   icon: X,
                                                   onSelect: onCloseSideChat,
                                               },
                                           ]
                                         : []),
                                     {
-                                        label: "Rename",
+                                        label: uiText("Rename"),
                                         icon: Pencil,
                                         onSelect: () => void handleRenameChat(),
                                         disabled:
@@ -766,15 +768,15 @@ export function ProjectChatPanel({
                                             !canRenameChat,
                                     },
                                     {
-                                        label: "Memory",
+                                        label: uiText("Memory"),
                                         icon: Brain,
                                         onSelect: onOpenMemory,
                                         disabled: !project,
                                     },
                                     {
                                         label: deletingChat
-                                            ? "Deleting..."
-                                            : "Delete",
+                                            ? uiText("Deleting...")
+                                            : uiText("Delete"),
                                         icon: Trash2,
                                         onSelect: () => void handleDeleteChat(),
                                         disabled:
@@ -967,11 +969,11 @@ export function ProjectChatPanel({
             </div>
             <ApiKeyMissingPopup
                 open={rejectedApiKey !== null}
-                title="API key rejected"
-                message={`${
+                title={uiText("API key rejected")}
+                message={uiText`${
                     rejectedKeyProvider
                         ? `The ${providerLabel(rejectedKeyProvider)} API key`
-                        : "That API key"
+                        : uiText("That API key")
                 } was rejected. If it is your own key, check it in Settings; otherwise contact your administrator.`}
                 onClose={dismissInvalidApiKey}
             />

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { ReactNode } from "react";
 import type { Workflow } from "../shared/types";
 import { WorkflowPickerModal } from "../workflows/WorkflowPickerModal";
@@ -26,7 +28,7 @@ export function TRWorkflowModal({
             onSelect={onApply}
             workflowType="tabular"
             breadcrumbs={breadcrumbs}
-            primaryLabel="Apply"
+            primaryLabel={uiText("Apply")}
             selectingLabel="Applying..."
             selecting={applying}
             closeOnSelect={false}

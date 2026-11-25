@@ -1,5 +1,12 @@
 import "@testing-library/jest-dom/vitest";
 import { Blob as NodeBlob } from "node:buffer";
+import { setUiLocale } from "../packages/client/src/localization";
+
+// Existing behavior suites exercise the supported English interface.
+// Chinese copy and IME behavior have explicit localization regressions.
+setUiLocale("en");
+process.env.NEXT_PUBLIC_LINKMAI_SUPPORT_EMAIL = "support@example.test";
+process.env.REACT_APP_LINKMAI_SUPPORT_EMAIL = "support@example.test";
 
 // Vitest's jsdom environment always overrides `globalThis.Blob` with jsdom's
 // own Blob implementation, which never implemented `.text()`/`.arrayBuffer()`/

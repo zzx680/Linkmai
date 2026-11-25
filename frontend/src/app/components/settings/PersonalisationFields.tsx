@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Fragment, useMemo, useState, type ReactNode } from "react";
 import { ChevronDown, X } from "lucide-react";
 import {
@@ -15,6 +17,7 @@ import {
 import { OptionPill } from "@/app/components/ui/option-pill";
 import { FieldLabel } from "@/app/components/ui/form-field";
 import { cn } from "@/app/lib/utils";
+import { professionalLabel } from "@/app/lib/professionalLabels";
 import type { PersonalisationDetails } from "@/app/lib/mikeApi";
 import {
   COUNTRY_OPTIONS,
@@ -218,13 +221,13 @@ export function PersonalisationFields({
     professionalTitle: (
       <ProfileDropdown
         id="professional-title"
-        label="Title"
+        label={uiText("Professional title")}
         status={statusFor?.("professionalTitle")}
         value={form.professionalTitle}
-        placeholder="Select a title"
+        placeholder={uiText("Select a title")}
         options={PROFESSIONAL_TITLE_OPTIONS.map((title) => ({
           value: title,
-          label: title,
+          label: professionalLabel(title),
         }))}
         onChange={(value) =>
           form.setProfessionalTitle(value ? (value as ProfessionalTitle) : null)
@@ -234,10 +237,10 @@ export function PersonalisationFields({
     practiceSetting: (
       <ProfileDropdown
         id="practice-setting"
-        label="Professional setting"
+        label={uiText("Professional setting")}
         status={statusFor?.("practiceSetting")}
         value={form.practiceSetting}
-        placeholder="Select a professional setting"
+        placeholder={uiText("Select a professional setting")}
         options={PRACTICE_SETTING_OPTIONS}
         onChange={(value) =>
           form.setPracticeSetting(value ? (value as PracticeSetting) : null)
@@ -248,18 +251,18 @@ export function PersonalisationFields({
       <>
         <ProfileDropdown
           id="jurisdiction"
-          label="Jurisdiction of practice"
+          label={uiText("Jurisdiction of practice")}
           status={statusFor?.("jurisdiction")}
           value={form.jurisdictionChoice || null}
-          placeholder="Select a country"
+          placeholder={uiText("Select a country")}
           options={[
-            ...COUNTRY_OPTIONS.map((country) => ({
+            ...["China", ...COUNTRY_OPTIONS.filter((country) => country !== "China")].map((country) => ({
               value: country,
-              label: country,
+              label: professionalLabel(country),
             })),
             {
               value: OTHER_JURISDICTION_OPTION,
-              label: OTHER_JURISDICTION_OPTION,
+              label: professionalLabel(OTHER_JURISDICTION_OPTION),
             },
           ]}
           onChange={form.setJurisdictionChoice}
@@ -268,7 +271,7 @@ export function PersonalisationFields({
         {form.jurisdictionChoice === OTHER_JURISDICTION_OPTION && (
           <div className="mt-4">
             <FieldLabelRow
-              label="Other jurisdiction"
+              label={uiText("Other jurisdiction")}
               htmlFor="other-jurisdiction"
               status={statusFor?.("otherJurisdiction")}
             />
@@ -279,7 +282,7 @@ export function PersonalisationFields({
                 form.setOtherJurisdiction(event.target.value)
               }
               maxLength={100}
-              placeholder="Enter your jurisdiction"
+              placeholder={uiText("Enter your jurisdiction")}
               className={`w-full ${authInputUIClassName}`}
             />
           </div>
@@ -289,7 +292,7 @@ export function PersonalisationFields({
     practiceAreas: (
       <div>
         <FieldLabelRow
-          label="Practice areas"
+          label={uiText("Practice areas")}
           status={statusFor?.("practiceAreas")}
         />
         <Dropdown>
@@ -305,8 +308,8 @@ export function PersonalisationFields({
             >
               <span className="truncate">
                 {form.practiceAreas.length
-                  ? `${form.practiceAreas.length} selected`
-                  : "Select practice areas"}
+                  ? uiText`${form.practiceAreas.length} selected`
+                  : uiText("Select practice areas")}
               </span>
               <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
             </button>
@@ -323,7 +326,7 @@ export function PersonalisationFields({
                 onCheckedChange={() => form.toggleArea(area)}
                 onSelect={(event) => event.preventDefault()}
               >
-                {area}
+                {professionalLabel(area)}
               </DropdownCheckboxItem>
             ))}
             <DropdownCheckboxItem
@@ -333,7 +336,7 @@ export function PersonalisationFields({
               }
               onSelect={(event) => event.preventDefault()}
             >
-              Other
+              {uiText("Other")}
             </DropdownCheckboxItem>
           </DropdownContent>
         </Dropdown>
@@ -344,16 +347,16 @@ export function PersonalisationFields({
               <OptionPill
                 key={area}
                 onClick={() => form.toggleArea(area)}
-                aria-label={`Remove ${area}`}
+                aria-label={uiText`移除 ${area}`}
               >
-                {area}
+                {professionalLabel(area)}
                 <X className="h-3 w-3" />
               </OptionPill>
             ))}
             {form.otherSelected && form.otherArea.trim() && (
               <OptionPill
                 onClick={() => form.setOtherSelected(false)}
-                aria-label={`Remove ${form.otherArea.trim()}`}
+                aria-label={uiText`移除 ${form.otherArea.trim()}`}
               >
                 {form.otherArea.trim()}
                 <X className="h-3 w-3" />
@@ -365,7 +368,7 @@ export function PersonalisationFields({
         {form.otherSelected && (
           <div className="mt-4">
             <FieldLabelRow
-              label="Other practice area"
+              label={uiText("Other practice area")}
               htmlFor="other-practice-area"
               status={statusFor?.("otherPracticeArea")}
             />
@@ -374,7 +377,7 @@ export function PersonalisationFields({
               value={form.otherArea}
               onChange={(event) => form.setOtherArea(event.target.value)}
               maxLength={100}
-              placeholder="Enter your practice area"
+              placeholder={uiText("Enter your practice area")}
               className={`w-full ${authInputUIClassName}`}
             />
           </div>
@@ -454,7 +457,7 @@ function ProfileDropdown({
             }
           >
             <DropdownRadioItem value={NOT_SET_OPTION}>
-              Not set
+              {uiText("Not set")}
             </DropdownRadioItem>
             {options.map((option) => (
               <DropdownRadioItem key={option.value} value={option.value}>

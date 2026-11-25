@@ -401,6 +401,42 @@ describe("storagePublicEndpointWarnings", () => {
   });
 });
 
+describe("storagePublicEndpointWarnings for Alibaba Cloud OSS", () => {
+  const at = (frontend: string, publicEndpoint?: string) =>
+    storagePublicEndpointWarnings({
+      STORAGE_DRIVER: "oss",
+      FRONTEND_URL: frontend,
+      OSS_PUBLIC_ENDPOINT: publicEndpoint,
+      OSS_ENDPOINT: "https://oss-cn-hangzhou-internal.aliyuncs.com",
+      OSS_REGION: "cn-hangzhou",
+    } as NodeJS.ProcessEnv);
+
+  it("accepts a custom domain mapped to the bucket", () => {
+    expect(at("https://linkmai.com", "https://storage.linkmai.com")).toEqual([]);
+  });
+
+  it("requires a browser-facing endpoint", () => {
+    expect(at("https://linkmai.com")).toEqual([
+      expect.stringMatching(/OSS_PUBLIC_ENDPOINT.*custom domain/),
+    ]);
+  });
+
+  it("rejects the internal and default OSS endpoints", () => {
+    expect(at("https://linkmai.com", "https://oss-cn-hangzhou-internal.aliyuncs.com")).toEqual([
+      expect.stringMatching(/internal endpoint/),
+    ]);
+    expect(at("https://linkmai.com", "https://bucket.oss-cn-hangzhou.aliyuncs.com")).toEqual([
+      expect.stringMatching(/PublicEndpointForbidden|custom domain/),
+    ]);
+  });
+
+  it("still rejects plain http under an https frontend", () => {
+    expect(at("https://linkmai.com", "http://storage.linkmai.com")).toEqual([
+      expect.stringMatching(/mixed content/),
+    ]);
+  });
+});
+
 // MIKE-BACKEND-EC/EE: an image without util-linux booted cleanly, then every
 // text extraction and DOCX upload failed with a bare spawn ENOENT.
 describe("extractionLauncherWarnings", () => {

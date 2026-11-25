@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React from "react";
 import { EditCardUI } from "@mike/ui";
 import type { RedlineEdit } from "../../lib/redline";
@@ -41,31 +43,31 @@ const STATUS_COPY: Record<
   Exclude<EditCardStatus, "pending" | "ready" | "applying-approved">,
   { copy: string; className: string }
 > = {
-  receiving: { copy: "Receiving change…", className: "text-gray-400" },
-  validating: { copy: "Checking the document…", className: "text-gray-400" },
-  applying: { copy: "Applying to the document…", className: "text-gray-500" },
-  restoring: { copy: "Checking the document…", className: "text-gray-400" },
+  receiving: { copy: uiText("Receiving change…"), className: "text-gray-400" },
+  validating: { copy: uiText("Checking the document…"), className: "text-gray-400" },
+  applying: { copy: uiText("Applying to the document…"), className: "text-gray-500" },
+  restoring: { copy: uiText("Checking the document…"), className: "text-gray-400" },
   "view-only": {
-    copy: "Tracked change found — review it in Word.",
+    copy: uiText("Tracked change found — review it in Word."),
     className: "text-gray-500",
   },
-  applied: { copy: "Applied to the document.", className: "text-green-700" },
-  accepted: { copy: "Accepted.", className: "text-green-700" },
-  rejected: { copy: "Rejected.", className: "text-gray-500" },
+  applied: { copy: uiText("Applied to the document."), className: "text-green-700" },
+  accepted: { copy: uiText("Accepted."), className: "text-green-700" },
+  rejected: { copy: uiText("Rejected."), className: "text-gray-500" },
   skipped: {
-    copy: "Skipped — this change could not be applied.",
+    copy: uiText("Skipped — this change could not be applied."),
     className: "text-gray-500",
   },
   ambiguous: {
-    copy: "Skipped — source text appears more than once.",
+    copy: uiText("Skipped — source text appears more than once."),
     className: "text-gray-500",
   },
   unsearchable: {
-    copy: "Skipped — this passage is too long for Word’s search or spans paragraphs.",
+    copy: uiText("Skipped — this passage is too long for Word’s search or spans paragraphs."),
     className: "text-gray-500",
   },
   conflicted: {
-    copy: "Skipped — the target text already has tracked changes. Accept & apply resolves them, then applies this change.",
+    copy: uiText("Skipped — the target text already has tracked changes. Accept & apply resolves them, then applies this change."),
     className: "text-gray-500",
   },
   "already-applied": {
@@ -79,15 +81,15 @@ const STATUS_COPY: Record<
     className: "text-amber-700",
   },
   incomplete: {
-    copy: "Incomplete change — not applied.",
+    copy: uiText("Incomplete change — not applied."),
     className: "text-gray-500",
   },
   unmanaged: {
-    copy: "Applied in Word — review it from Word’s Review tab.",
+    copy: uiText("Applied in Word — review it from Word’s Review tab."),
     className: "text-amber-700",
   },
-  error: { copy: "Couldn’t apply this change.", className: "text-red-500" },
-  historical: { copy: "Historical change.", className: "text-gray-400" },
+  error: { copy: uiText("Couldn’t apply this change."), className: "text-red-500" },
+  historical: { copy: uiText("Historical change."), className: "text-gray-400" },
 };
 
 /**
@@ -142,13 +144,13 @@ export function EditCard({
   // reported how many places the passage matched.
   const ambiguousCopy =
     status === "ambiguous" && matches !== undefined && matches > 1
-      ? `Skipped — this text appears ${matches} times in the document. Tell Mike which one to change.`
+      ? uiText`Skipped — this text appears ${matches} times in the document. Tell Mike which one to change.`
       : undefined;
   // A replace-all edit names its breadth so "Applied" can't be misread as a
   // single change.
   const multiApplyCopy =
     status === "applied" && appliedMatches !== undefined && appliedMatches > 1
-      ? `Applied to the document in ${appliedMatches} places.`
+      ? uiText`Applied to the document in ${appliedMatches} places.`
       : undefined;
   // Most statuses already say something precise. These states may carry a
   // more useful message from Word or the edit-application pipeline.

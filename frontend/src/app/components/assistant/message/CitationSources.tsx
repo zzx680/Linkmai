@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { Loader2 } from "lucide-react";
 import { FileTypeIcon } from "../../shared/FileTypeIcon";
 import { LegalSourceIcon } from "../../shared/LegalSourceIcon";
@@ -151,7 +153,7 @@ export function CitationsBlock({
             <div className={`overflow-hidden ${RESPONSE_GLASS_SURFACE}`}>
                 <div className="flex items-center justify-between gap-3 bg-white/25 px-3 py-2">
                     <h3 className="text-base font-serif text-gray-900">
-                        Citations
+                        {uiText("Citations")}
                     </h3>
                     {isLoading && (
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />

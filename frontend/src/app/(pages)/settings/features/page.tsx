@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import {
   SettingsDescription,
@@ -41,20 +43,20 @@ export default function FeaturesPage() {
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <SettingsHeading id="assistant-features">Assistant</SettingsHeading>
+        <SettingsHeading id="assistant-features">{uiText("Assistant")}</SettingsHeading>
         <GlassCardUI>
           <SettingsRow>
             <div className="min-w-0 space-y-1">
-              <SettingsLabel>Quick actions</SettingsLabel>
+              <SettingsLabel>{uiText("Quick actions")}</SettingsLabel>
               <SettingsDescription>
-                Show the quick actions row on the assistant start screen.
+                {uiText("Show the quick actions row on the assistant start screen.")}
               </SettingsDescription>
             </div>
             <ToggleSwitchUI
               checked={quickActionsVisible}
               disabled={savingQuickActions}
               aria-busy={savingQuickActions}
-              aria-label="Quick actions"
+              aria-label={uiText("Quick actions")}
               onCheckedChange={(checked) => {
                 void setQuickActionsVisible(checked);
               }}
@@ -62,17 +64,16 @@ export default function FeaturesPage() {
           </SettingsRow>
           <SettingsRow>
             <div className="min-w-0 space-y-1">
-              <SettingsLabel>Response details</SettingsLabel>
+              <SettingsLabel>{uiText("Response details")}</SettingsLabel>
               <SettingsDescription>
-                Show the model, reasoning effort and token count under each
-                response and subagent.
+                {uiText("Show the model, reasoning effort and token count under each response and subagent.")}
               </SettingsDescription>
             </div>
             <ToggleSwitchUI
               checked={responseDetailsVisible}
               disabled={savingResponseDetails}
               aria-busy={savingResponseDetails}
-              aria-label="Response details"
+              aria-label={uiText("Response details")}
               onCheckedChange={(checked) => {
                 void setResponseDetailsVisible(checked);
               }}

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useState } from "react";
 import { AccessModal } from "@/app/components/modals/AccessModal";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -46,7 +48,7 @@ export function ChatAccessModal({ open, chat, onClose }: Props) {
             setAccessError(
                 userFacingApiError(
                     error,
-                    "Sharing details could not be loaded, so access cannot be changed here.",
+                    uiText("Sharing details could not be loaded, so access cannot be changed here."),
                 ),
             );
             notifyError(error, {
@@ -119,9 +121,9 @@ export function ChatAccessModal({ open, chat, onClose }: Props) {
             // the owner able to aim Remove at themselves.
             currentUserId={user?.id ?? null}
             breadcrumb={[
-                "Assistant",
-                chat.title?.trim() || "Untitled chat",
-                "Access",
+                uiText("Assistant"),
+                chat.title?.trim() || uiText("Untitled chat"),
+                uiText("Access"),
             ]}
             access={{
                 grants: access?.grants ?? [],

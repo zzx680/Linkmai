@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect } from "react";
 import {
   ModelToggleUI,
@@ -114,9 +116,9 @@ export function ModelToggle({
     }
   }, [normalizedReasoningLevel, onReasoningChange, reasoningLevel]);
   const selectedLabel = apiKeysLoading
-    ? (models.find((model) => model.id === value)?.label ?? "Select model")
+    ? (models.find((model) => model.id === value)?.label ?? uiText("Select model"))
     : (selected?.label ??
-      (availableModels.length > 0 ? "Select model" : "No Models"));
+      (availableModels.length > 0 ? uiText("Select model") : uiText("No Models")));
   // In an organization workspace the keys and model lists are its admins'
   // to set, so an empty picker says who can fix it.
   const { workspaceId } = useWorkspace();
@@ -136,7 +138,7 @@ export function ModelToggle({
       modalInput={modalInput}
       toolbar={toolbar}
       triggerClassName={triggerClassName}
-      emptyLabel="No Models"
+      emptyLabel={uiText("No Models")}
       onEmptyClick={
         onNoModelsClick ? () => onNoModelsClick(emptyReason) : undefined
       }

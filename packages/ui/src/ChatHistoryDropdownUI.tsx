@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     useEffect,
     useRef,
@@ -211,7 +213,7 @@ export function ChatHistoryDropdownUI({
                                     onClick={onRetry}
                                     className="rounded-md text-xs font-medium text-gray-700 underline-offset-2 transition-colors hover:text-gray-950 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                                 >
-                                    Retry
+                                    {uiText("Retry")}
                                 </button>
                             )}
                         </div>
@@ -256,7 +258,7 @@ export function ChatHistoryDropdownUI({
                                     {item.pending && (
                                         <Loader2
                                             role="status"
-                                            aria-label={`Opening ${item.title}`}
+                                            aria-label={uiText`Opening ${item.title}`}
                                             className="h-3.5 w-3.5 shrink-0 animate-spin text-gray-400 motion-reduce:animate-none"
                                         />
                                     )}
@@ -264,7 +266,7 @@ export function ChatHistoryDropdownUI({
                             ))}
                             {loadingMore && (
                                 <p role="status" className={STATUS_TEXT_CLASS}>
-                                    Loading more chats…
+                                    {uiText("Loading more chats…")}
                                 </p>
                             )}
                             {footer && (

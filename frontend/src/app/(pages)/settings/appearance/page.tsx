@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
 import { userFacingApiError } from "@/app/lib/userFacingError";
@@ -28,7 +30,7 @@ export default function AppearancePage() {
       setDarkModeError(
         userFacingApiError(
           toggleError,
-          "Could not update the appearance setting.",
+          uiText("Could not update the appearance setting."),
         ),
       );
     } finally {
@@ -38,13 +40,13 @@ export default function AppearancePage() {
 
   return (
     <section className="space-y-3">
-      <SettingsHeading id="appearance">Appearance</SettingsHeading>
+      <SettingsHeading id="appearance">{uiText("Appearance")}</SettingsHeading>
       <GlassCardUI>
         <SettingsRow>
           <div className="min-w-0 space-y-1">
-            <SettingsLabel>Dark mode</SettingsLabel>
+            <SettingsLabel>{uiText("Dark mode")}</SettingsLabel>
             <SettingsDescription>
-              Use a darker color palette throughout Mike.
+              {uiText("Use a darker color palette throughout Mike.")}
             </SettingsDescription>
             {darkModeError && (
               <p role="alert" className="text-xs text-red-600">
@@ -56,7 +58,7 @@ export default function AppearancePage() {
             checked={profile.darkMode === true}
             disabled={savingDarkMode}
             aria-busy={savingDarkMode}
-            aria-label="Dark mode"
+            aria-label={uiText("Dark mode")}
             onCheckedChange={(checked) => void handleDarkModeToggle(checked)}
           />
         </SettingsRow>

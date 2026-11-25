@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState, type ReactNode } from "react";
 
 import { ByokProviderModal } from "@/app/components/settings/ByokProviderModal";
@@ -28,21 +30,20 @@ const PROVIDER_SECTIONS = [
     {
         id: "active",
         active: true,
-        title: "Saved Providers",
+        title: uiText("Saved Providers"),
         empty: "No saved providers yet. Add an API key to one of the providers below.",
     },
     {
         id: "available",
         active: false,
-        title: "Available Providers",
+        title: uiText("Available Providers"),
         empty: "Every provider has a key saved.",
     },
 ] as const;
 
 const DEFAULT_INTRO = (
     <SettingsDescription>
-        Your keys are used in your Personal workspace only. In an organization,
-        models run on the keys its admins set up.
+        {uiText("Your keys are used in your Personal workspace only. In an organization, models run on the keys its admins set up.")}
     </SettingsDescription>
 );
 
@@ -74,13 +75,13 @@ export function PersonalProviderKeys({
         setToggleError(null);
         try {
             const saved = await updateApiKeyEnabled(provider, enabled);
-            if (!saved) setToggleError("The provider could not be updated. Please try again.");
+            if (!saved) setToggleError(uiText("The provider could not be updated. Please try again."));
         } catch (error) {
             if (isMfaRequiredError(error)) setPendingToggle({ provider, enabled });
             else {
                 // The message is fixed; the report keeps the fault's identity.
                 reportFault(error, { operation: "settings.keys" });
-                setToggleError("The provider could not be updated. Please try again.");
+                setToggleError(uiText("The provider could not be updated. Please try again."));
             }
         } finally {
             setBusyProvider(null);
@@ -123,11 +124,11 @@ export function PersonalProviderKeys({
                             tone="blue"
                             size="sm"
                             disabled={blocked}
-                            aria-label={`Add ${field.name}`}
+                            aria-label={uiText`Add ${field.name}`}
                             aria-haspopup="dialog"
                             onClick={open}
                         >
-                            Add
+                            {uiText("Add")}
                         </PillButtonUI>
                     )
                 }
@@ -196,7 +197,7 @@ export function PersonalProviderKeys({
             />
             <WarningPopup
                 open={toggleError !== null}
-                title="Provider update failed"
+                title={uiText("Provider update failed")}
                 message={toggleError}
                 onClose={() => setToggleError(null)}
             />

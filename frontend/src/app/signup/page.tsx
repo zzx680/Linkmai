@@ -1,5 +1,9 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
+import { PolicyNotice } from "@/app/components/auth/PolicyNotice";
+
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signup } from "@/app/lib/authApi";
@@ -30,7 +34,7 @@ import {
 function localSignupError(message: string): UserFacingError {
     return describeError(
         new UserVisibleError(message, { kind: "validation" }),
-        { action: "create your account" },
+        { action: uiText("create your account") },
     );
 }
 
@@ -41,9 +45,9 @@ function localSignupError(message: string): UserFacingError {
  * API's `signup_email_not_configured` refusal.
  */
 const SIGNUP_CLOSED_MESSAGE =
-    "Sign-up isn't open on this Mike deployment yet, because it can't send " +
-    "confirmation emails. Ask the person who set it up to configure email, or " +
-    "log in if you already have an account.";
+    uiText("当前灵迈服务暂未开放注册，因为尚未配置") +
+    uiText("验证邮件，请联系管理员配置邮件服务，或") +
+    uiText("使用已有账户登录。");
 
 /**
  * The shared auth table with this screen's deltas. Anything not listed
@@ -62,9 +66,9 @@ const SIGNUP_ERROR_MESSAGES = authMessages({
 /** Classify a signup failure into text a person can act on. */
 function describeSignupError(error: unknown): UserFacingError {
     const described = reportFault(error, {
-        action: "create your account",
+        action: uiText("create your account"),
         codeMessages: SIGNUP_ERROR_MESSAGES,
-        fallback: "Unable to create your account right now. Try again.",
+        fallback: uiText("暂时无法创建账户，请重试。"),
         operation: "auth.signup",
     });
     return described.kind === "rate_limited"
@@ -186,10 +190,10 @@ function SignupContent() {
                 <div className="w-full max-w-md">
                     <div className={authGlassCardUIClassName}>
                         <h1 className="font-serif text-2xl font-medium text-gray-950">
-                            Account created!
+                            {uiText("账户已创建")}
                         </h1>
                         <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                            Redirecting you to finish setting up your account...
+                            {uiText("正在跳转以完成账户设置…")}
                         </p>
                         <Link
                             href="/onboarding/profile"
@@ -199,7 +203,7 @@ function SignupContent() {
                                 className: "mt-6",
                             })}
                         >
-                            Continue
+                            {uiText("继续")}
                         </Link>
                     </div>
                 </div>
@@ -216,14 +220,9 @@ function SignupContent() {
                 <div className="w-full max-w-md">
                     <div className={authGlassCardUIClassName}>
                         <h1 className="font-serif text-2xl font-medium text-gray-950">
-                            Sign-up isn&apos;t open yet
+                            {uiText("暂未开放注册")}
                         </h1>
-                        <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                            This Mike deployment can&apos;t send confirmation
-                            emails yet. Ask the person who set it up to
-                            configure email, or log in if you already have an
-                            account.
-                        </p>
+                        <p className="mt-3 text-sm leading-relaxed text-gray-600">{uiText("当前灵迈服务尚未配置验证邮件，请联系管理员配置邮件服务，或使用已有账户登录。")}</p>
                         <Link
                             href="/login"
                             className={pillButtonUIClassName({
@@ -232,7 +231,7 @@ function SignupContent() {
                                 className: "mt-6",
                             })}
                         >
-                            Log in
+                            {uiText("Log in")}
                         </Link>
                     </div>
                 </div>
@@ -249,13 +248,13 @@ function SignupContent() {
             <div className="w-full max-w-md">
                 <div className={cn(authGlassCardUIClassName, "mb-4")}>
                     <h2 className="mb-6 text-left text-2xl font-medium font-serif text-gray-950">
-                        Sign Up
+                        {uiText("Sign Up")}
                     </h2>
 
                     <form onSubmit={handleSignup} className="space-y-4">
                         <div>
                             <FieldLabel htmlFor="email">
-                                Email
+                                {uiText("邮箱")}
                             </FieldLabel>
                             <InputUI
                                 id="email"
@@ -269,14 +268,14 @@ function SignupContent() {
 
                         <div>
                             <FieldLabel htmlFor="password">
-                                Password
+                                {uiText("密码")}
                             </FieldLabel>
                             <InputUI
                                 id="password"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder={`Min. ${MIN_PASSWORD_LENGTH} Characters`}
+                                placeholder={uiText`Min. ${MIN_PASSWORD_LENGTH} Characters`}
                                 required
                                 className={`w-full ${authInputUIClassName}`}
                             />
@@ -284,7 +283,7 @@ function SignupContent() {
 
                         <div>
                             <FieldLabel htmlFor="confirmPassword">
-                                Confirm Password
+                                {uiText("Confirm Password")}
                             </FieldLabel>
                             <InputUI
                                 id="confirmPassword"
@@ -299,26 +298,7 @@ function SignupContent() {
                         </div>
 
                         <div className="space-y-3 pt-2">
-                            <div className="text-center text-xs text-gray-500">
-                                By signing up, you agree to our{" "}
-                                <Link
-                                    href="https://mikeoss.com/terms"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                >
-                                    Terms of Use
-                                </Link>{" "}
-                                and{" "}
-                                <Link
-                                    href="https://mikeoss.com/privacy"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                >
-                                    Privacy Policy
-                                </Link>
-                            </div>
+                            <PolicyNotice />
                             <PillButtonUI
                                 type="submit"
                                 tone="black"
@@ -326,7 +306,7 @@ function SignupContent() {
                                 disabled={loading}
                                 className="w-full"
                             >
-                                {loading ? "Creating account..." : "Sign up"}
+                                {loading ? uiText("正在创建账户…") : uiText("Sign up")}
                             </PillButtonUI>
                             {showGoogle && (
                                 <>
@@ -342,12 +322,12 @@ function SignupContent() {
                     </form>
                 </div>
                 <div className="text-center text-sm text-gray-500">
-                    Have an account?{" "}
+                    {uiText("已有账户？")}{" "}
                     <Link
                         href="/login"
                         className="font-medium transition-colors hover:text-gray-950"
                     >
-                        Log in
+                        {uiText("Log in")}
                     </Link>
                 </div>
             </div>
@@ -365,7 +345,7 @@ function SignupContent() {
                             )}
                             className={noticeActionClassName()}
                         >
-                            Contact support
+                            {uiText("联系支持")}
                         </a>
                     ) : undefined
                 }

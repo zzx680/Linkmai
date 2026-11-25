@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { ReactNode } from "react";
 import { Modal } from "@/app/components/modals/Modal";
 import { ApiKeyField, type ApiKeyFieldSetting } from "./ApiKeyField";
@@ -44,7 +46,7 @@ function keySetting(
 ): ApiKeyFieldSetting {
   if (provider === "bedrock") {
     return {
-      label: "AWS region",
+      label: uiText("AWS region"),
       placeholder: "us-east-1",
       savedValue: settings?.bedrock?.region ?? null,
       normalize: normalizeAwsRegion,
@@ -54,7 +56,7 @@ function keySetting(
   }
   if (provider === "azure-foundry") {
     return {
-      label: "Azure AI Foundry resource name or endpoint",
+      label: uiText("Azure AI Foundry resource name or endpoint"),
       placeholder:
         "contoso-foundry or https://contoso-foundry.services.ai.azure.com",
       savedValue: settings?.["azure-foundry"]?.endpoint ?? null,
@@ -65,7 +67,7 @@ function keySetting(
   }
   if (provider === "vertex") {
     return {
-      label: "Vertex AI location",
+      label: uiText("Vertex AI location"),
       placeholder: "us-central1 or global",
       savedValue: settings?.vertex?.location ?? null,
       normalize: normalizeVertexLocation,
@@ -75,7 +77,7 @@ function keySetting(
   }
   if (provider === "custom") {
     return {
-      label: "Base URL",
+      label: uiText("Base URL"),
       placeholder: "https://llm.example.com/v1",
       savedValue: settings?.custom?.baseUrl ?? null,
       normalize: normalizeCustomBaseUrl,
@@ -84,7 +86,7 @@ function keySetting(
     };
   }
   return {
-    label: "Azure OpenAI resource name or endpoint",
+    label: uiText("Azure OpenAI resource name or endpoint"),
     placeholder: "contoso-openai or https://contoso-openai.openai.azure.com",
     savedValue: settings?.azure?.endpoint ?? null,
     normalize: normalizeAzureEndpoint,
@@ -182,18 +184,23 @@ export function ByokProviderModal({ provider, enabledToggle, store, onClose }: {
         <Modal
           open
           onClose={onClose}
-          breadcrumbs={[store?.breadcrumb ?? "Model Providers", provider.name]}
+          breadcrumbs={[store?.breadcrumb ?? uiText("Model Providers"), provider.name]}
           // Sized for the model list from the start, so the dialog does not
           // grow the moment a key is saved.
           size={routerSlug && (!store || store.routerModels) ? "md" : "sm"}
           className="h-auto max-h-[calc(100vh-2rem)]"
           primaryAction={{ ...saveAction, variant: "blue" }}
-          secondaryAction={removeAction ? { ...removeAction, label: "Clear", variant: "danger" } : undefined}
+          secondaryAction={removeAction ? { ...removeAction, label: uiText("Clear"), variant: "danger" } : undefined}
         >
           <div data-modal-scroll="vertical" className="min-h-0 min-w-0 space-y-6 overflow-y-auto pb-4">
+            {provider.provider === "custom" && (
+              <p className="text-sm leading-6 text-gray-500">
+                可用于支持 OpenAI 兼容协议的服务商或企业模型网关。请填写服务商提供的 API 基础地址和密钥，再按实际账户权限添加模型；模型能力与费用由对应服务商决定。
+              </p>
+            )}
             {enabledToggle && (
               <div className="flex items-center justify-between gap-3">
-                <p className="min-w-0 text-sm font-medium text-gray-700">Enabled</p>
+                <p className="min-w-0 text-sm font-medium text-gray-700">{uiText("Enabled")}</p>
                 <div className="shrink-0">{enabledToggle}</div>
               </div>
             )}

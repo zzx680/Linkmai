@@ -1,5 +1,9 @@
 "use client";
 
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { UserAvatar } from "@/app/components/ui/user-avatar";
 
 import {
@@ -107,21 +111,21 @@ const ROLE_FILTER_OPTIONS: TableFilterOption<OrgRole>[] = [
 type RosterTab = "all" | OrgRole | "departed";
 
 const ROSTER_TABS: { id: RosterTab; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "owner", label: "Owners" },
-  { id: "admin", label: "Admins" },
-  { id: "member", label: "Members" },
+  { id: "all", label: uiText("All") },
+  { id: "owner", label: uiText("Owners") },
+  { id: "admin", label: uiText("Admins") },
+  { id: "member", label: uiText("Members") },
 ];
 const OWNER_TABS: { id: RosterTab; label: string }[] = [
   ...ROSTER_TABS,
-  { id: "departed", label: "Departed" },
+  { id: "departed", label: uiText("Departed") },
 ];
 
 function formatDate(value?: string | null) {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(uiDateLocale(), {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -223,7 +227,7 @@ export function OrganizationMembers({
     } catch (error) {
       console.error("Failed to load organization", error);
       setLoadError(
-        userFacingApiError(error, "Could not load this organization."),
+        userFacingApiError(error, uiText("Could not load this organization.")),
       );
     } finally {
       setLoading(false);
@@ -270,7 +274,7 @@ export function OrganizationMembers({
     setActionError(
       userFacingApiError(
         failure.reason,
-        "This organization's people could not be refreshed. Reload to see the current list.",
+        uiText("This organization's people could not be refreshed. Reload to see the current list."),
       ),
     );
   }, [refreshInvitations, refreshMembers]);
@@ -351,7 +355,7 @@ export function OrganizationMembers({
         void refreshOrganizations();
       }
     } catch (error) {
-      setActionError(userFacingApiError(error, "Could not change that role."));
+      setActionError(userFacingApiError(error, uiText("Could not change that role.")));
     } finally {
       setBusyMemberId(null);
     }
@@ -365,7 +369,7 @@ export function OrganizationMembers({
     if (!member) return;
     if (!result.removedUserIds.includes(member.user_id)) {
       setActionError(
-        userFacingApiError(result.error, "Could not remove that member."),
+        userFacingApiError(result.error, uiText("Could not remove that member.")),
       );
       return;
     }
@@ -388,7 +392,7 @@ export function OrganizationMembers({
       selectedMemberIdSet.has(member.id),
     );
     if (selectedMembers.some((member) => member.user_id === user?.id)) {
-      setActionError("Use Leave organization to remove yourself.");
+      setActionError(uiText("Use Leave organization to remove yourself."));
       return;
     }
     if (
@@ -397,7 +401,7 @@ export function OrganizationMembers({
       )
     ) {
       setActionError(
-        "Only an organization owner can remove admins and other owners.",
+        uiText("Only an organization owner can remove admins and other owners."),
       );
       return;
     }
@@ -421,7 +425,7 @@ export function OrganizationMembers({
       setActionError(
         userFacingApiError(
           result.error,
-          "Could not remove all selected members.",
+          uiText("Could not remove all selected members."),
         ),
       );
     }
@@ -449,10 +453,10 @@ export function OrganizationMembers({
       >
         <Trash2 className="h-3.5 w-3.5" />
         {appliesToSelection
-          ? "Remove all selected"
+          ? uiText("Remove all selected")
           : member?.user_id === user?.id
-            ? "Leave organization"
-            : "Remove member"}
+            ? uiText("Leave organization")
+            : uiText("Remove member")}
       </DropdownItem>
     );
   }
@@ -468,11 +472,11 @@ export function OrganizationMembers({
         loading={loading}
         breadcrumbs={[
           {
-            label: "Organization",
+            label: uiText("Organization"),
             onClick: () => router.push(`/organizations/${orgId}/settings`),
-            title: "Back to Organization",
+            title: uiText("Back to Organization"),
           },
-          { label: "Members", cursor: "text" },
+          { label: uiText("Members"), cursor: "text" },
         ]}
         actions={[
           {
@@ -485,13 +489,13 @@ export function OrganizationMembers({
               setSelectedMemberIds([]);
             },
             placeholder:
-              tab === "departed" ? "Search departed members…" : "Search members…",
+              tab === "departed" ? uiText("Search departed members…") : uiText("Search members…"),
           },
           {
             type: "new",
             title: isAdmin
-              ? "Add member"
-              : "Only organization admins can add members",
+              ? uiText("Add member")
+              : uiText("Only organization admins can add members"),
             disabled: !isAdmin,
             onClick: () => {
               setInviteOpen(true);
@@ -579,15 +583,15 @@ export function OrganizationMembers({
         open={pendingSelfRoleChange !== null}
         title={
           pendingSelfRoleChange?.role === "admin"
-            ? "Step down to admin?"
-            : "Give up owner access?"
+            ? uiText("Step down to admin?")
+            : uiText("Give up owner access?")
         }
         message={
           pendingSelfRoleChange?.role === "admin"
-            ? "You will stay an admin, but can no longer delete this organization or appoint and remove its admins and owners."
-            : "You will lose owner access to this organization and can no longer manage its people, settings or invitations."
+            ? uiText("You will stay an admin, but can no longer delete this organization or appoint and remove its admins and owners.")
+            : uiText("You will lose owner access to this organization and can no longer manage its people, settings or invitations.")
         }
-        confirmLabel="Continue"
+        confirmLabel={uiText("Continue")}
         confirmStatus={busyMemberId ? "loading" : "idle"}
         onCancel={() => {
           if (busyMemberId) return;
@@ -618,7 +622,7 @@ export function OrganizationMembers({
       ) : null}
       <WarningPopup
         open={actionError !== null}
-        title="Organization action failed"
+        title={uiText("Organization action failed")}
         message={actionError}
         onClose={() => setActionError(null)}
       />
@@ -765,13 +769,13 @@ function PeopleTable({
                 }}
                 onChange={toggleAllVisible}
                 className={TABLE_CHECKBOX_CLASS}
-                aria-label="Select all people"
+                aria-label={uiText("Select all people")}
               />
             )}
             {/* How many people the open tab and the search come to, drawn
                 or not. Plain text beside the column's name. */}
             <span className="mr-1">
-              Name
+              {uiText("Name")}
               {!loading && !error ? (
                 <>
                   {" "}
@@ -783,7 +787,7 @@ function PeopleTable({
             </span>
             {!loading ? (
               <TableSortFilter
-                label="Sort by name"
+                label={uiText("Sort by name")}
                 value={sort?.key === "name" ? sort.direction : null}
                 allLabel="Default order"
                 align="right"
@@ -792,10 +796,10 @@ function PeopleTable({
             ) : null}
           </TableStickyCell>
           <TableHeaderCell className="ml-auto w-64">
-            <span className="mr-1">Email</span>
+            <span className="mr-1">{uiText("Email")}</span>
             {!loading ? (
               <TableSortFilter
-                label="Sort by email"
+                label={uiText("Sort by email")}
                 value={sort?.key === "email" ? sort.direction : null}
                 allLabel="Default order"
                 onChange={(direction) => setSortFor("email", direction)}
@@ -803,13 +807,13 @@ function PeopleTable({
             ) : null}
           </TableHeaderCell>
           <TableHeaderCell className="w-32">
-            <span className="mr-1">Role</span>
+            <span className="mr-1">{uiText("Role")}</span>
           </TableHeaderCell>
           <TableHeaderCell className="w-36">
-            <span className="mr-1">Added</span>
+            <span className="mr-1">{uiText("Added")}</span>
             {!loading ? (
               <TableSortFilter
-                label="Sort by date added"
+                label={uiText("Sort by date added")}
                 value={sort?.key === "added" ? sort.direction : null}
                 allLabel="Default order"
                 onChange={(direction) => setSortFor("added", direction)}
@@ -828,15 +832,15 @@ function PeopleTable({
         <TableEmptyState>
           <EmptyState
             icon={<OrganizationSkeuoIcon />}
-            title="People"
-            description="This organization has no members."
+            title={uiText("People")}
+            description={uiText("This organization has no members.")}
           />
         </TableEmptyState>
       ) : visibleMembers.length === 0 ? (
         <TableEmptyState>
           <p className="text-sm text-gray-400">
             {search.trim()
-              ? "No people match this search."
+              ? uiText("No people match this search.")
               : `This organization has no ${
                   roleFilter === "owner"
                     ? "owners"
@@ -879,7 +883,7 @@ function PeopleTable({
                   </span>
                   {member.user_id === currentUserId ? (
                     <span className="ml-1 text-[10px] text-gray-400">
-                      (You)
+                      {uiText("(You)")}
                     </span>
                   ) : null}
                 </TablePrimaryCell>
@@ -901,13 +905,13 @@ function PeopleTable({
                 <TableCell className="flex w-10 justify-end overflow-visible">
                   {canRemove ? (
                     <HeaderActionsMenu
-                      title={`Actions for ${label}`}
+                      title={uiText`Actions for ${label}`}
                       items={[
                         {
                           label:
                             member.user_id === currentUserId
-                              ? "Leave organization"
-                              : "Remove member",
+                              ? uiText("Leave organization")
+                              : uiText("Remove member"),
                           icon: Trash2,
                           variant: "danger",
                           onSelect: () => onRemove(member),
@@ -1034,7 +1038,7 @@ function ErrorState({
     <TableEmptyState>
       <EmptyState
         icon={<OrganizationSkeuoIcon />}
-        title="Organization"
+        title={uiText("Organization")}
         description={error}
         tone="error"
         action={
@@ -1044,7 +1048,7 @@ function ErrorState({
             className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
           >
             <Loader2 className="h-3.5 w-3.5" />
-            Try again
+            {uiText("Try again")}
           </button>
         }
       />

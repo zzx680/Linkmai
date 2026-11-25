@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { SkeletonLine } from "@/app/components/shared/TablePrimitive";
 import { TableToolbar } from "@/app/components/shared/TableToolbar";
 import { EDITOR_SURFACE_CLASS } from "@/app/components/ui/liquid-surface";
@@ -29,7 +31,7 @@ export function PlaybookPageSkeleton() {
     <div
       role="status"
       aria-busy="true"
-      aria-label="Loading playbook"
+      aria-label={uiText("Loading playbook")}
       className="flex min-h-0 flex-1 flex-col"
     >
       <div className="shrink-0">

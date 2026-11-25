@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEditor, EditorContent, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
@@ -458,7 +460,7 @@ export function MarkdownEditor({
         <div
           className="flex shrink-0 items-center gap-0.5 overflow-x-auto bg-app-surface px-2 py-1.5"
           role="toolbar"
-          aria-label="Markdown formatting"
+          aria-label={uiText("Markdown formatting")}
         >
           <AppToolbarButton
             disabled={suspended}
@@ -468,7 +470,7 @@ export function MarkdownEditor({
                 : editor.chain().focus().toggleHeading({ level: 1 }).run()
             }
             active={!rawMode && activeFormatting.heading1}
-            title="Heading 1"
+            title={uiText("Heading 1")}
           >
             <Heading1 className="h-4 w-4" />
           </AppToolbarButton>
@@ -480,7 +482,7 @@ export function MarkdownEditor({
                 : editor.chain().focus().toggleHeading({ level: 2 }).run()
             }
             active={!rawMode && activeFormatting.heading2}
-            title="Heading 2"
+            title={uiText("Heading 2")}
           >
             <Heading2 className="h-4 w-4" />
           </AppToolbarButton>
@@ -492,7 +494,7 @@ export function MarkdownEditor({
                 : editor.chain().focus().toggleHeading({ level: 3 }).run()
             }
             active={!rawMode && activeFormatting.heading3}
-            title="Heading 3"
+            title={uiText("Heading 3")}
           >
             <Heading3 className="h-4 w-4" />
           </AppToolbarButton>
@@ -505,7 +507,7 @@ export function MarkdownEditor({
                 : editor.chain().focus().toggleBold().run()
             }
             active={!rawMode && activeFormatting.bold}
-            title="Bold"
+            title={uiText("Bold")}
           >
             <Bold className="h-4 w-4" />
           </AppToolbarButton>
@@ -517,7 +519,7 @@ export function MarkdownEditor({
                 : editor.chain().focus().toggleItalic().run()
             }
             active={!rawMode && activeFormatting.italic}
-            title="Italic"
+            title={uiText("Italic")}
           >
             <Italic className="h-4 w-4" />
           </AppToolbarButton>
@@ -530,7 +532,7 @@ export function MarkdownEditor({
                 : editor.chain().focus().toggleBulletList().run()
             }
             active={!rawMode && activeFormatting.bulletList}
-            title="Bullet list"
+            title={uiText("Bullet list")}
           >
             <List className="h-4 w-4" />
           </AppToolbarButton>
@@ -542,7 +544,7 @@ export function MarkdownEditor({
                 : editor.chain().focus().toggleOrderedList().run()
             }
             active={!rawMode && activeFormatting.orderedList}
-            title="Numbered list"
+            title={uiText("Numbered list")}
           >
             <ListOrdered className="h-4 w-4" />
           </AppToolbarButton>
@@ -560,8 +562,8 @@ export function MarkdownEditor({
                   <button
                     type="button"
                     disabled={suspended}
-                    title="Insert table"
-                    aria-label="Insert table"
+                    title={uiText("Insert table")}
+                    aria-label={uiText("Insert table")}
                     aria-pressed={tablePickerOpen}
                     className={cn(
                       "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-white hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -575,7 +577,7 @@ export function MarkdownEditor({
                 </DropdownTrigger>
                 <DropdownContent
                   align="start"
-                  aria-label="Insert table"
+                  aria-label={uiText("Insert table")}
                   className="w-max p-2"
                   onCloseAutoFocus={(event) => event.preventDefault()}
                 >
@@ -604,7 +606,7 @@ export function MarkdownEditor({
                               return (
                                 <DropdownItem
                                   key={`${rows}-${cols}`}
-                                  aria-label={`Insert ${rows} by ${cols} table`}
+                                  aria-label={uiText`Insert ${rows} by ${cols} table`}
                                   selected={selected}
                                   onPointerMove={() =>
                                     setTablePickerSize({
@@ -633,7 +635,7 @@ export function MarkdownEditor({
                     <div className="text-center text-[11px] font-medium text-gray-500">
                       {tablePickerSize
                         ? `${tablePickerSize.rows} x ${tablePickerSize.cols}`
-                        : "Select table size"}
+                        : uiText("Select table size")}
                     </div>
                   </div>
                 </DropdownContent>
@@ -643,14 +645,14 @@ export function MarkdownEditor({
           <div className="ml-auto" />
           {rawMode && rawModeRequired ? (
             <span className="whitespace-nowrap px-1 text-[11px] text-gray-500">
-              Raw view preserves this Markdown
+              {uiText("Raw view preserves this Markdown")}
             </span>
           ) : null}
           <AppToolbarButton
             disabled={suspended}
             onClick={handleRawToggle}
             active={rawMode}
-            title={rawMode ? "Show rich editor" : "Show raw Markdown"}
+            title={rawMode ? uiText("Show rich editor") : uiText("Show raw Markdown")}
           >
             <Code2 className="h-4 w-4" />
           </AppToolbarButton>
@@ -658,13 +660,13 @@ export function MarkdownEditor({
       )}
       {readOnly && (
         <div className="flex h-9 shrink-0 items-center justify-between bg-app-surface px-5">
-          <span className="text-xs font-medium text-gray-500">Read-only</span>
+          <span className="text-xs font-medium text-gray-500">{uiText("Read-only")}</span>
           {editor && (
             <AppToolbarButton
               disabled={suspended}
               onClick={handleRawToggle}
               active={rawMode}
-              title={rawMode ? "Show rich editor" : "Show raw Markdown"}
+              title={rawMode ? uiText("Show rich editor") : uiText("Show raw Markdown")}
             >
               <Code2 className="h-4 w-4" />
             </AppToolbarButton>

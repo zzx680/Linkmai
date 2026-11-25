@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
@@ -72,7 +74,7 @@ export function OrganizationsOverview() {
       // two halves of one screen answered the same kind of failure
       // differently — and the more useful answer was the one discarded.
       setLoadError(
-        userFacingApiError(orgsResult.reason, "Could not load organizations."),
+        userFacingApiError(orgsResult.reason, uiText("Could not load organizations.")),
       );
       setOrgs([]);
     }
@@ -85,7 +87,7 @@ export function OrganizationsOverview() {
       setInvitationsError(
         userFacingApiError(
           invitationsResult.reason,
-          "Could not load your invitations.",
+          uiText("Could not load your invitations."),
         ),
       );
     }
@@ -103,7 +105,7 @@ export function OrganizationsOverview() {
       else await declineOrgInvitation(invitation.id);
     } catch (error) {
       setInvitationError(
-        userFacingApiError(error, "Could not answer that invitation."),
+        userFacingApiError(error, uiText("Could not answer that invitation.")),
       );
     } finally {
       setAnsweringId(null);
@@ -138,18 +140,18 @@ export function OrganizationsOverview() {
       <section aria-labelledby="my-organizations-heading">
         <div className="mb-4 flex items-center justify-between gap-3">
           <SettingsHeading id="my-organizations-heading">
-            Organizations
+            {uiText("Organizations")}
           </SettingsHeading>
           <PillButtonUI
             tone="white"
             size="xs"
             onClick={() => setCreateOpen(true)}
-            aria-label="New organization"
+            aria-label={uiText("New organization")}
             aria-haspopup="dialog"
             className={`h-7 ${LIQUID_GLASS_SUBTLE_CLASS}`}
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-            New
+            {uiText("New")}
           </PillButtonUI>
         </div>
         {loading ? (
@@ -173,14 +175,13 @@ export function OrganizationsOverview() {
                 <SettingsDescription>{loadError}</SettingsDescription>
               </div>
               <PillButtonUI tone="white" size="sm" onClick={() => void load()}>
-                Try again
+                {uiText("Try again")}
               </PillButtonUI>
             </div>
           </GlassCardUI>
         ) : listedOrgs.length === 0 ? (
           <SettingsDescription>
-            No organizations yet. Create one to share projects and
-            workflows with your team.
+            {uiText("No organizations yet. Create one to share projects and workflows with your team.")}
           </SettingsDescription>
         ) : (
           <div className={CARD_GRID_CLASS}>
@@ -203,12 +204,12 @@ export function OrganizationsOverview() {
                       <PillButtonUI
                         tone="blue"
                         size="sm"
-                        aria-label={`Manage ${org.name}`}
+                        aria-label={uiText`Manage ${org.name}`}
                         onClick={() =>
                           router.push(organizationSettingsHref(org.id))
                         }
                       >
-                        Manage
+                        {uiText("Manage")}
                       </PillButtonUI>
                     ) : (
                       <PillButtonUI
@@ -217,7 +218,7 @@ export function OrganizationsOverview() {
                         aria-label={`Switch to ${org.name}`}
                         onClick={() => setWorkspace(org.id)}
                       >
-                        Switch
+                        {uiText("Switch")}
                       </PillButtonUI>
                     )
                   }
@@ -234,7 +235,7 @@ export function OrganizationsOverview() {
         <section aria-labelledby="my-invitations-heading">
           <div className="mb-4">
             <SettingsHeading id="my-invitations-heading">
-              Invitations
+              {uiText("Invitations")}
             </SettingsHeading>
           </div>
           {invitationsError ? (
@@ -251,7 +252,7 @@ export function OrganizationsOverview() {
                   size="sm"
                   onClick={() => void load()}
                 >
-                  Try again
+                  {uiText("Try again")}
                 </PillButtonUI>
               </div>
             </GlassCardUI>
@@ -276,17 +277,17 @@ export function OrganizationsOverview() {
                           aria-label={`Decline ${name}`}
                           onClick={() => void answer(invitation, false)}
                         >
-                          Decline
+                          {uiText("Decline")}
                         </PillButtonUI>
                         <PillButtonUI
                           tone="blue"
                           size="sm"
                           disabled={answering}
                           loading={answering}
-                          aria-label={`Accept ${name}`}
+                          aria-label={uiText`Accept ${name}`}
                           onClick={() => void answer(invitation, true)}
                         >
-                          Accept
+                          {uiText("Accept")}
                         </PillButtonUI>
                       </span>
                     }
@@ -319,7 +320,7 @@ export function OrganizationsOverview() {
       />
       <WarningPopup
         open={invitationError !== null}
-        title="Invitation not updated"
+        title={uiText("Invitation not updated")}
         message={invitationError}
         onClose={() => setInvitationError(null)}
       />

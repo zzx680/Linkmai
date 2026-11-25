@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 /**
  * Saving a Word chat message to device-only storage.
  *
@@ -15,7 +17,7 @@ import type { WordChatStorageMode } from "./wordChatTypes";
 
 /** What the user sees. The storage layer's own text is never shown. */
 export const LOCAL_SAVE_FAILED_MESSAGE =
-  "This message wasn't saved on this device, and device-only chats have no copy on the server. Try again.";
+  uiText("This message wasn't saved on this device, and device-only chats have no copy on the server. Try again.");
 
 export type LocalSaveNotifier = typeof notifyError;
 
@@ -44,7 +46,7 @@ export async function saveWordMessageOrNotify(args: {
         cause: error,
       }),
       {
-        action: "save this conversation on this device",
+        action: uiText("save this conversation on this device"),
         dedupeKey: `local-word-chat-save:${args.chatId}`,
         page: "Assistant",
         onRetry: () => saveWordMessageOrNotify(args),

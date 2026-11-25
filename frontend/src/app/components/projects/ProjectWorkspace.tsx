@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     createContext,
     type ReactNode,
@@ -468,7 +470,7 @@ export function ProjectWorkspaceProvider({
     }) {
         if (!canDo("access.manage")) {
             denyUnlessLoading({
-                action: "edit project details",
+                action: uiText("edit project details"),
                 requiredRole: "owner",
             });
             return;
@@ -665,9 +667,9 @@ export function ProjectWorkspaceProvider({
 
                     <ConfirmPopup
                         open={deleteProjectConfirmOpen}
-                        title="Delete project?"
-                        message="This will permanently delete the project and its related documents, chats, and tabular reviews."
-                        confirmLabel="Delete"
+                        title={uiText("Delete project?")}
+                        message={uiText("This will permanently delete the project and its related documents, chats, and tabular reviews.")}
+                        confirmLabel={uiText("Delete")}
                         confirmVariant="danger"
                         confirmStatus={
                             deleteProjectStatus === "deleting"
@@ -676,7 +678,7 @@ export function ProjectWorkspaceProvider({
                                   ? "complete"
                                   : "idle"
                         }
-                        cancelLabel="Cancel"
+                        cancelLabel={uiText("Cancel")}
                         onCancel={() => {
                             if (deleteProjectStatus === "deleting") return;
                             setDeleteProjectConfirmOpen(false);
@@ -697,12 +699,12 @@ export function ProjectWorkspaceProvider({
                             // them out of their own project.
                             currentUserId={user?.id ?? null}
                             breadcrumb={[
-                                "Projects",
+                                uiText("Projects"),
                                 project.name +
                                     (project.cm_number
                                         ? ` (${project.cm_number})`
                                         : ""),
-                                "Access",
+                                uiText("Access"),
                             ]}
                             access={{
                                 grants: grants ?? [],
@@ -748,9 +750,9 @@ export function ProjectSectionToolbar({
                 backAction
                     ? []
                     : [
-                          { id: "documents", label: "Documents" },
-                          { id: "assistant", label: "Chats" },
-                          { id: "reviews", label: "Tabular Reviews" },
+                          { id: "documents", label: uiText("Documents") },
+                          { id: "assistant", label: uiText("Chats") },
+                          { id: "reviews", label: uiText("Tabular Reviews") },
                       ]
             }
             active={activeSection}
@@ -767,7 +769,7 @@ export function ProjectSectionToolbar({
                 backAction ? (
                     <TabPillButtonUI onClick={backAction} className="pl-2">
                         <ChevronLeft className="h-3.5 w-3.5" />
-                        Back
+                        {uiText("Back")}
                     </TabPillButtonUI>
                 ) : undefined
             }

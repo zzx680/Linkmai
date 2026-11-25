@@ -63,7 +63,7 @@ describe("PersonalisationPage", () => {
       container.querySelectorAll('[data-slot="settings-row"]'),
     ).toHaveLength(8);
 
-    await user.click(screen.getByRole("button", { name: "Title" }));
+    await user.click(screen.getByRole("button", { name: "Professional title" }));
     await user.click(
       screen.getByRole("menuitemradio", { name: "General Counsel" }),
     );
@@ -112,7 +112,7 @@ describe("PersonalisationPage", () => {
       screen.getByText("Enter your other practice area"),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Title" }));
+    await user.click(screen.getByRole("button", { name: "Professional title" }));
     await user.click(screen.getByRole("menuitemradio", { name: "Partner" }));
     await waitFor(() =>
       expect(updatePersonalisation).toHaveBeenCalledWith({
@@ -132,7 +132,7 @@ describe("PersonalisationPage", () => {
     const user = userEvent.setup();
     render(<PersonalisationPage />);
 
-    await user.click(screen.getByRole("button", { name: "Title" }));
+    await user.click(screen.getByRole("button", { name: "Professional title" }));
     await user.click(screen.getByRole("menuitemradio", { name: "Partner" }));
     await waitFor(() => expect(updatePersonalisation).toHaveBeenCalled());
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -146,7 +146,7 @@ describe("PersonalisationPage", () => {
     const { unmount } = render(<PersonalisationPage />);
 
     // Title edit is pending (still inside the debounce window)...
-    await user.click(screen.getByRole("button", { name: "Title" }));
+    await user.click(screen.getByRole("button", { name: "Professional title" }));
     await user.click(screen.getByRole("menuitemradio", { name: "Partner" }));
     // ...when the user ticks "Other" and leaves it empty.
     await user.click(screen.getByRole("button", { name: "Practice areas" }));
@@ -168,7 +168,7 @@ describe("PersonalisationPage", () => {
     const user = userEvent.setup();
     const { unmount } = render(<PersonalisationPage />);
 
-    await user.click(screen.getByRole("button", { name: "Title" }));
+    await user.click(screen.getByRole("button", { name: "Professional title" }));
     await user.click(screen.getByRole("menuitemradio", { name: "Partner" }));
     expect(updatePersonalisation).not.toHaveBeenCalled();
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
@@ -62,16 +64,16 @@ export function NewPlaybookModal({
       onClose={() => {
         if (!creating) onClose();
       }}
-      breadcrumbs={["Playbooks", "New playbook"]}
+      breadcrumbs={[uiText("Playbooks"), uiText("New playbook")]}
       primaryAction={{
-        label: creating ? "Creating…" : "Create",
+        label: creating ? uiText("Creating…") : uiText("Create"),
         icon: creating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : undefined,
         onClick: () => void create(),
         disabled: !trimmed.name || creating,
       }}
-      cancelAction={{ label: "Cancel", onClick: onClose, disabled: creating }}
+      cancelAction={{ label: uiText("Cancel"), onClick: onClose, disabled: creating }}
     >
       <form
         data-modal-scroll="vertical"

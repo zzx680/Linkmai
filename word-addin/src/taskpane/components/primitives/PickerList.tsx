@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useMemo } from "react";
 import { Search } from "lucide-react";
 import { Spinner } from "../../../shared/ui/spinner";
@@ -81,7 +83,7 @@ export function PickerList({
           <p className="py-8 text-center text-sm text-destructive">{error}</p>
         ) : filtered.length === 0 ? (
           <p className="py-8 text-center text-sm text-gray-400">
-            {search ? "No matches found" : emptyMessage}
+            {search ? uiText("No matches found") : emptyMessage}
           </p>
         ) : (
           <div className="space-y-px">

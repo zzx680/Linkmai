@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { Check, EyeOff, User } from "lucide-react";
 import { openSourceWorkflow } from "@/app/lib/mikeApi";
@@ -118,7 +120,7 @@ export function OpenSourceWorkflowModal({
             setError(
                 userFacingApiError(
                     err,
-                    "Failed to submit workflow for review.",
+                    uiText("Failed to submit workflow for review."),
                 ),
             );
         }
@@ -133,12 +135,12 @@ export function OpenSourceWorkflowModal({
                 resetModalState();
             }}
             breadcrumbs={[
-                "Workflows",
+                uiText("Workflows"),
                 submitted
-                    ? "Submitted"
+                    ? uiText("Submitted")
                     : pending
-                      ? "Update open-source submission"
-                      : "Open source",
+                      ? uiText("Update open-source submission")
+                      : uiText("Open source"),
             ]}
             primaryAction={
                 submitted
@@ -146,11 +148,11 @@ export function OpenSourceWorkflowModal({
                     : {
                           label: loading
                               ? pending
-                                  ? "Updating..."
-                                  : "Submitting..."
+                                  ? uiText("Updating...")
+                                  : uiText("Submitting...")
                               : pending
-                                ? "Update submission"
-                                : "Submit for review",
+                                ? uiText("Update submission")
+                                : uiText("Submit for review"),
                           onClick: () => void handleSubmit(),
                           disabled: loading || needsConsent,
                       }
@@ -162,14 +164,13 @@ export function OpenSourceWorkflowModal({
                         <Check className="h-6 w-6" />
                     </div>
                     <h3 className="text-2xl font-serif text-gray-950">
-                        Workflow submitted
+                        {uiText("Workflow submitted")}
                     </h3>
                     <p className="mt-3 max-w-sm text-xs leading-6 text-gray-600">
-                        Your workflow snapshot has been submitted for review.
-                        You&apos;ll be notified by email if it is accepted.
+                        {uiText("Your workflow snapshot has been submitted for review. You&apos;ll be notified by email if it is accepted.")}
                     </p>
                     <p className="mt-6 text-xs font-medium text-gray-500">
-                        Closing in {closeCountdown}
+                        {uiText("Closing in")} {closeCountdown}
                     </p>
                 </div>
             ) : (
@@ -194,14 +195,13 @@ export function OpenSourceWorkflowModal({
                     </p>
                     {pending && (
                         <p className={`rounded-xl px-3 py-2 text-xs leading-5 text-gray-600 ${LIQUID_GLASS_FLAT_CLASS}`}>
-                            You already have a pending submission. This will
-                            replace that pending snapshot.
+                            {uiText("You already have a pending submission. This will replace that pending snapshot.")}
                         </p>
                     )}
 
                     <div className="space-y-2 pt-2">
                         <FieldLabel as="p">
-                            Contributor attribution
+                            {uiText("Contributor attribution")}
                         </FieldLabel>
                         <ModalSegmentedToggle
                             value={contributorMode}
@@ -210,12 +210,12 @@ export function OpenSourceWorkflowModal({
                             options={[
                                 {
                                     value: "anonymous",
-                                    label: "Anonymous",
+                                    label: uiText("Anonymous"),
                                     icon: EyeOff,
                                 },
                                 {
                                     value: "named",
-                                    label: "Disclose details",
+                                    label: uiText("Disclose details"),
                                     icon: User,
                                 },
                             ]}
@@ -224,7 +224,7 @@ export function OpenSourceWorkflowModal({
                             <div className="grid gap-x-4 gap-y-5 pt-4 sm:grid-cols-2">
                                 <div>
                                     <FieldLabel htmlFor="open-source-contributor-name">
-                                        Full Name
+                                        {uiText("Full Name")}
                                     </FieldLabel>
                                     <FormTextInput
                                         id="open-source-contributor-name"
@@ -234,13 +234,13 @@ export function OpenSourceWorkflowModal({
                                                 event.target.value,
                                             )
                                         }
-                                        placeholder="Jane Doe"
+                                        placeholder={uiText("Jane Doe")}
                                         disabled={loading}
                                     />
                                 </div>
                                 <div>
                                     <FieldLabel htmlFor="open-source-contributor-organisation">
-                                        Organisation
+                                        {uiText("Organisation")}
                                     </FieldLabel>
                                     <FormTextInput
                                         id="open-source-contributor-organisation"
@@ -256,7 +256,7 @@ export function OpenSourceWorkflowModal({
                                 </div>
                                 <div>
                                     <FieldLabel htmlFor="open-source-contributor-role">
-                                        Role
+                                        {uiText("Role")}
                                     </FieldLabel>
                                     <FormTextInput
                                         id="open-source-contributor-role"
@@ -266,7 +266,7 @@ export function OpenSourceWorkflowModal({
                                                 event.target.value,
                                             )
                                         }
-                                        placeholder="Senior Associate"
+                                        placeholder={uiText("Senior Associate")}
                                         disabled={loading}
                                     />
                                 </div>

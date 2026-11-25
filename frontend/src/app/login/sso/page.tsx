@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,9 +50,9 @@ export default function SsoLoginPage() {
             window.location.assign(url);
         } catch (caught) {
             const described = reportFault(caught, {
-                action: "start single sign-on",
+                action: uiText("start single sign-on"),
                 codeMessages: SSO_ERROR_MESSAGES,
-                fallback: "Unable to start single sign-on. Try again.",
+                fallback: uiText("Unable to start single sign-on. Try again."),
                 operation: "auth.signin",
             });
             setError(
@@ -58,7 +60,7 @@ export default function SsoLoginPage() {
                     ? {
                           ...described,
                           message:
-                              "Too many attempts. Wait a moment and try again.",
+                              uiText("Too many attempts. Wait a moment and try again."),
                       }
                     : described,
             );
@@ -80,14 +82,14 @@ export default function SsoLoginPage() {
                 <div className={authGlassCardUIClassName}>
                     <div className="mb-6">
                         <h1 className="font-serif text-2xl font-medium text-gray-950">
-                            SSO Login
+                            {uiText("SSO Login")}
                         </h1>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <FieldLabel htmlFor="sso-email">
-                                Email
+                                {uiText("Email")}
                             </FieldLabel>
                             <InputUI
                                 id="sso-email"
@@ -119,7 +121,7 @@ export default function SsoLoginPage() {
                                         disabled={loading}
                                         className="ml-2 underline underline-offset-2 disabled:no-underline disabled:opacity-60"
                                     >
-                                        Retry
+                                        {uiText("Retry")}
                                     </button>
                                 )}
                                 {error.supportable && (
@@ -130,7 +132,7 @@ export default function SsoLoginPage() {
                                         )}
                                         className="ml-2 underline underline-offset-2"
                                     >
-                                        Contact support
+                                        {uiText("Contact support")}
                                     </a>
                                 )}
                             </div>
@@ -151,7 +153,7 @@ export default function SsoLoginPage() {
                                         className="h-4 w-4 animate-spin"
                                     />
                                 )}
-                                {loading ? "Continuing…" : "Continue"}
+                                {loading ? uiText("Continuing…") : uiText("Continue")}
                             </PillButtonUI>
                         </div>
                     </form>
@@ -162,7 +164,7 @@ export default function SsoLoginPage() {
                         href="/login"
                         className="font-medium transition-colors hover:text-gray-950"
                     >
-                        Back to login
+                        {uiText("Back to login")}
                     </Link>
                 </div>
             </div>

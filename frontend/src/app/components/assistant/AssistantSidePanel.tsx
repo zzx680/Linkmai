@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     useCallback,
     useEffect,
@@ -343,7 +345,7 @@ export function AssistantSidePanel({
             />
 
             <DocumentTabBar
-                label="Assistant documents"
+                label={uiText("Assistant documents")}
                 idPrefix="assistant-document"
                 activeTabId={active?.id ?? null}
                 onActivate={onActivateTab}
@@ -384,7 +386,7 @@ export function AssistantSidePanel({
                             className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                         >
                             <BookOpenText aria-hidden="true" className="h-4 w-4" />
-                            Open Documents
+                            {uiText("Open Documents")}
                         </button>
                     </div>
                 ) : null}

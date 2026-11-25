@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import type { AuditEvent, OrgPrivateContentKind } from "@/app/lib/mikeApi";
 
 export interface AuditPrivateAccess {
@@ -27,69 +29,69 @@ export function auditPrivateAccess(
 
 export const ACTION_LABELS: Record<string, string> = {
   "org.private_content.permission_changed":
-    "Private content permission changed",
-  "org.private_content.opened": "Private content accessed",
-  "org.private_content.closed": "Private content access ended",
-  "org.api_key.saved": "Provider key saved",
-  "org.api_key.removed": "Provider key removed",
-  "org.api_key.enabled": "Provider key enabled",
-  "org.api_key.disabled": "Provider key disabled",
-  "org.personal_api_keys.allowed": "Personal keys allowed",
-  "org.personal_api_keys.blocked": "Personal keys blocked",
-  "org.member_exports.allowed": "Member exports allowed",
-  "org.member_exports.blocked": "Member exports turned off",
-  "org.member_deletes.allowed": "Member data deletion allowed",
-  "org.member_deletes.blocked": "Member data deletion turned off",
-  "org.created": "Organization created",
-  "org.deleted": "Organization deleted",
-  "org.restored": "Organization restored",
-  "org.purged": "Organization permanently deleted",
-  "org.invite.created": "Invitation sent",
-  "org.invite.accepted": "Invitation accepted",
-  "org.invite.declined": "Invitation declined",
-  "org.invite.cancelled": "Invitation cancelled",
-  "org.invite.resent": "Invitation resent",
-  "org.member.role_changed": "Member role changed",
-  "org.logo.updated": "Logo updated",
-  "org.logo.removed": "Logo removed",
-  "org.router_models.updated": "Models updated",
-  "org.departure.item.transferred": "Departed work transferred",
-  "org.departure.item.archived": "Departed work archived",
-  "org.departure.item.recovered": "Departed work recovered",
-  "org.departure.item.deleted": "Departed work deleted",
-  "org.departure.item.expired": "Departed work expired",
-  "org.departure.member.departed": "Member departed",
-  "org.member.removed": "Member removed",
-  "org.member.left": "Member left",
-  "org.data.deleted": "Organization data deleted",
-  "chat.message": "Chat message sent",
-  "document.uploaded": "Document uploaded",
-  "document.generated": "Document generated",
-  "document.edited": "Document edited",
-  "workflow.applied": "Workflow applied",
-  "tabular.created": "Review created",
-  "tabular.generated": "Review run completed",
-  "playbook.created": "Playbook created",
-  "playbook.imported": "Playbook imported",
-  "playbook.replaced": "Playbook replaced",
-  "playbook.deleted": "Playbook deleted",
-  "playbook.run": "Playbook review run",
-  "playbook.run.deleted": "Playbook run deleted",
-  "export.chats": "Chats exported",
-  "export.account": "Account data exported",
-  "export.tabular": "Review exported",
-  "export.memory": "Memory exported",
+    uiText("Private content permission changed"),
+  "org.private_content.opened": uiText("Private content accessed"),
+  "org.private_content.closed": uiText("Private content access ended"),
+  "org.api_key.saved": uiText("Provider key saved"),
+  "org.api_key.removed": uiText("Provider key removed"),
+  "org.api_key.enabled": uiText("Provider key enabled"),
+  "org.api_key.disabled": uiText("Provider key disabled"),
+  "org.personal_api_keys.allowed": uiText("Personal keys allowed"),
+  "org.personal_api_keys.blocked": uiText("Personal keys blocked"),
+  "org.member_exports.allowed": uiText("Member exports allowed"),
+  "org.member_exports.blocked": uiText("Member exports turned off"),
+  "org.member_deletes.allowed": uiText("Member data deletion allowed"),
+  "org.member_deletes.blocked": uiText("Member data deletion turned off"),
+  "org.created": uiText("Organization created"),
+  "org.deleted": uiText("Organization deleted"),
+  "org.restored": uiText("Organization restored"),
+  "org.purged": uiText("Organization permanently deleted"),
+  "org.invite.created": uiText("Invitation sent"),
+  "org.invite.accepted": uiText("Invitation accepted"),
+  "org.invite.declined": uiText("Invitation declined"),
+  "org.invite.cancelled": uiText("Invitation cancelled"),
+  "org.invite.resent": uiText("Invitation resent"),
+  "org.member.role_changed": uiText("Member role changed"),
+  "org.logo.updated": uiText("Logo updated"),
+  "org.logo.removed": uiText("Logo removed"),
+  "org.router_models.updated": uiText("Models updated"),
+  "org.departure.item.transferred": uiText("Departed work transferred"),
+  "org.departure.item.archived": uiText("Departed work archived"),
+  "org.departure.item.recovered": uiText("Departed work recovered"),
+  "org.departure.item.deleted": uiText("Departed work deleted"),
+  "org.departure.item.expired": uiText("Departed work expired"),
+  "org.departure.member.departed": uiText("Member departed"),
+  "org.member.removed": uiText("Member removed"),
+  "org.member.left": uiText("Member left"),
+  "org.data.deleted": uiText("Organization data deleted"),
+  "chat.message": uiText("Chat message sent"),
+  "document.uploaded": uiText("Document uploaded"),
+  "document.generated": uiText("Document generated"),
+  "document.edited": uiText("Document edited"),
+  "workflow.applied": uiText("Workflow applied"),
+  "tabular.created": uiText("Review created"),
+  "tabular.generated": uiText("Review run completed"),
+  "playbook.created": uiText("Playbook created"),
+  "playbook.imported": uiText("Playbook imported"),
+  "playbook.replaced": uiText("Playbook replaced"),
+  "playbook.deleted": uiText("Playbook deleted"),
+  "playbook.run": uiText("Playbook review run"),
+  "playbook.run.deleted": uiText("Playbook run deleted"),
+  "export.chats": uiText("Chats exported"),
+  "export.account": uiText("Account data exported"),
+  "export.tabular": uiText("Review exported"),
+  "export.memory": uiText("Memory exported"),
 };
 
 export const SURFACE_LABELS: Record<string, string> = {
-  assistant: "Assistant",
-  project: "Project",
+  assistant: uiText("Assistant"),
+  project: uiText("Project"),
   word: "Word",
-  tabular: "Tabular",
-  playbooks: "Playbooks",
-  workflows: "Workflows",
-  account: "Account",
-  organization: "Organization",
+  tabular: uiText("Tabular"),
+  playbooks: uiText("Playbooks"),
+  workflows: uiText("Workflows"),
+  account: uiText("Account"),
+  organization: uiText("Organization"),
 };
 
 export function auditLabel(value: string): string {
@@ -296,26 +298,26 @@ export function auditDestination(
   if (event.review_id)
     return {
       href: `/tabular-reviews/${encodeURIComponent(event.review_id)}`,
-      label: "Open review",
+      label: uiText("Open review"),
     };
   if (event.chat_id && event.surface !== "word")
     return {
       href: event.project_id
         ? `/projects/${encodeURIComponent(event.project_id)}/assistant/chat/${encodeURIComponent(event.chat_id)}`
         : `/assistant/chat/${encodeURIComponent(event.chat_id)}`,
-      label: "Open chat",
+      label: uiText("Open chat"),
     };
   if (event.project_id)
     return {
       href: `/projects/${encodeURIComponent(event.project_id)}`,
-      label: "Open project",
+      label: uiText("Open project"),
     };
   const access = auditPrivateAccess(event);
   if (access && ["project", "chat", "tabular_review"].includes(access.kind)) {
     const target = {
-      project: { path: "/projects/", label: "Open project" },
-      chat: { path: "/assistant/chat/", label: "Open chat" },
-      tabular_review: { path: "/tabular-reviews/", label: "Open review" },
+      project: { path: "/projects/", label: uiText("Open project") },
+      chat: { path: "/assistant/chat/", label: uiText("Open chat") },
+      tabular_review: { path: "/tabular-reviews/", label: uiText("Open review") },
     }[access.kind as "project" | "chat" | "tabular_review"];
     return {
       href: `${target.path}${encodeURIComponent(access.item_id)}`,

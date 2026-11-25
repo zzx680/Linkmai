@@ -1,4 +1,6 @@
 "use client";
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 
 import {
@@ -316,7 +318,7 @@ export function useAssistantChat({
    */
   const retryTurn = async (turn: TurnSnapshot): Promise<string | null> => {
     if (!mountedRef.current) {
-      notifyInfo("Open this chat and wait for its current answer before retrying.");
+      notifyInfo(uiText("Open this chat and wait for its current answer before retrying."));
       return null;
     }
     const transcript = messagesRef.current;
@@ -331,7 +333,7 @@ export function useAssistantChat({
       // A newer turn owns the thread. Re-sending would abort a healthy
       // stream and answer a question the user has already moved past.
       notifyInfo(
-        "A newer message has replaced this one. Send it again if you still need an answer.",
+        uiText("A newer message has replaced this one. Send it again if you still need an answer."),
       );
       return null;
     }
@@ -346,7 +348,7 @@ export function useAssistantChat({
       return null;
     }
     if (hasAssistantTurn(chatIdRef.current)) {
-      notifyInfo("Wait for this chat's current answer before retrying.");
+      notifyInfo(uiText("Wait for this chat's current answer before retrying."));
       return null;
     }
     if (turn.recoveryChatId) return recoverServerTurn(turn, turn.recoveryChatId);
@@ -640,7 +642,7 @@ export function useAssistantChat({
             notifyError(
               errorFrameFailure(frameMessage, safeToDisplay, { code, requestId, reportingOwner }),
               {
-                action: "get a response",
+                action: uiText("get a response"),
                 operation: turnOperation,
                 dedupeKey: "assistant-chat",
                 onRetry: async () => {
@@ -693,7 +695,7 @@ export function useAssistantChat({
           ? new UserVisibleError(TURN_FAILED_MESSAGE, { kind: "network", retryable: true, cause: error })
           : error;
         const described = describeError(displayError, {
-          action: "get a response",
+          action: uiText("get a response"),
           fallback: TURN_FAILED_MESSAGE,
         });
         const owner = error && typeof error === "object" && "reportingOwner" in error ? error.reportingOwner : undefined;
@@ -729,7 +731,7 @@ export function useAssistantChat({
           error: uncertain ? (failure as UserVisibleError).message : described.message,
         }));
         notifyError(failure, {
-          action: "get a response",
+          action: uiText("get a response"),
           operation: turnOperation,
           fallback: TURN_FAILED_MESSAGE,
           dedupeKey: "assistant-chat",

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     useEffect,
     useRef,
@@ -44,12 +46,12 @@ export function documentContextMenuItems(
 ): HeaderActionsMenuItem[] {
     return [
         ...(actions.onOpen
-            ? [{ label: "Open", icon: FileText, onSelect: actions.onOpen }]
+            ? [{ label: uiText("Open"), icon: FileText, onSelect: actions.onOpen }]
             : []),
         ...(actions.onAddToChat
             ? [
                   {
-                      label: "Add to chat",
+                      label: uiText("Add to chat"),
                       icon: MessageSquarePlus,
                       onSelect: actions.onAddToChat,
                       disabled: actions.addToChatDisabled,
@@ -59,7 +61,7 @@ export function documentContextMenuItems(
         ...(actions.onDownload
             ? [
                   {
-                      label: "Download",
+                      label: uiText("Download"),
                       icon: Download,
                       onSelect: actions.onDownload,
                       disabled: actions.downloading,
@@ -67,12 +69,12 @@ export function documentContextMenuItems(
               ]
             : []),
         ...(actions.onRename
-            ? [{ label: "Rename", icon: Pencil, onSelect: actions.onRename }]
+            ? [{ label: uiText("Rename"), icon: Pencil, onSelect: actions.onRename }]
             : []),
         ...(actions.onDelete
             ? [
                   {
-                      label: "Delete file",
+                      label: uiText("Delete file"),
                       icon: Trash2,
                       onSelect: actions.onDelete,
                       variant: "danger" as const,
@@ -122,7 +124,7 @@ function RenameInput({
             setError(
                 userFacingApiError(
                     cause,
-                    "This file could not be renamed. Please try again.",
+                    uiText("This file could not be renamed. Please try again."),
                 ),
             );
         }
@@ -131,7 +133,7 @@ function RenameInput({
         <>
             <input
                 ref={input}
-                aria-label="File name"
+                aria-label={uiText("File name")}
                 aria-invalid={!!error}
                 className="min-w-0 flex-1 rounded-none border-0 border-b border-foreground/20 bg-transparent px-0 text-xs text-foreground outline-none focus-visible:border-foreground/40"
                 value={value}
@@ -157,7 +159,7 @@ function RenameInput({
             />
             <WarningPopup
                 open={!!error}
-                title="Rename failed"
+                title={uiText("Rename failed")}
                 message={error}
                 onClose={() => {
                     showingError.current = false;
@@ -278,7 +280,7 @@ export function DocumentTabActions({
                                     setError(
                                         userFacingApiError(
                                             cause,
-                                            "This file action could not be completed. Please try again.",
+                                            uiText("This file action could not be completed. Please try again."),
                                         ),
                                     );
                                 try {
@@ -298,7 +300,7 @@ export function DocumentTabActions({
             </DropdownContent>
             <WarningPopup
                 open={!!error}
-                title="File action failed"
+                title={uiText("File action failed")}
                 message={error}
                 onClose={() => setError(null)}
             />

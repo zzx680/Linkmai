@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -68,7 +70,7 @@ function ResetPasswordContent() {
     const isUnavailablePreview = preview === "reset-unavailable";
     const displayedReady = isUnavailablePreview || ready;
     const displayedError = isUnavailablePreview
-        ? "This password-reset link is invalid or has expired."
+        ? uiText("This password-reset link is invalid or has expired.")
         : error;
     const resetUnavailable =
         displayedReady && !!displayedError && !password && !confirmPassword;
@@ -83,7 +85,7 @@ function ResetPasswordContent() {
                 if (cancelled) return;
                 if (!session) {
                     setError(
-                        "This password-reset link is invalid or has expired.",
+                        uiText("This password-reset link is invalid or has expired."),
                     );
                 }
                 setReady(true);
@@ -94,15 +96,15 @@ function ResetPasswordContent() {
                 // not, and telling the user to request a new link then would
                 // send them round a loop that cannot work.
                 const described = describeError(caught, {
-                    action: "check your reset link",
+                    action: uiText("check your reset link"),
                     fallback:
-                        "This password-reset link is invalid or has expired.",
+                        uiText("This password-reset link is invalid or has expired."),
                 });
                 setError(
                     described.kind === "unauthenticated" ||
                         described.kind === "not_found" ||
                         described.kind === "validation"
-                        ? "This password-reset link is invalid or has expired."
+                        ? uiText("This password-reset link is invalid or has expired.")
                         : described.message,
                 );
                 setReady(true);
@@ -125,7 +127,7 @@ function ResetPasswordContent() {
             return;
         }
         if (password !== confirmPassword) {
-            setError("Passwords do not match.");
+            setError(uiText("Passwords do not match."));
             return;
         }
 
@@ -146,9 +148,9 @@ function ResetPasswordContent() {
                 return;
             }
             const described = describeError(caught, {
-                action: "update your password",
+                action: uiText("update your password"),
                 codeMessages: RESET_ERROR_MESSAGES,
-                fallback: "Unable to update your password. Try again.",
+                fallback: uiText("Unable to update your password. Try again."),
             });
             setFailure(described);
             setError(described.message);
@@ -174,20 +176,19 @@ function ResetPasswordContent() {
                         <div>
                             <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
                             <h1 className="mt-4 font-serif text-2xl font-medium text-gray-950">
-                                Verifying your reset link...
+                                {uiText("Verifying your reset link...")}
                             </h1>
                             <p className="mt-2 text-sm text-gray-500">
-                                This should only take a moment.
+                                {uiText("This should only take a moment.")}
                             </p>
                         </div>
                     ) : success ? (
                         <div>
                             <h1 className="text-2xl font-medium font-serif text-gray-950">
-                                Password updated
+                                {uiText("Password updated")}
                             </h1>
                             <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                                Your password has been changed. Log in again
-                                with your new password.
+                                {uiText("Your password has been changed. Log in again with your new password.")}
                             </p>
                             <Link
                                 href="/login"
@@ -197,13 +198,13 @@ function ResetPasswordContent() {
                                     className: "mt-6",
                                 })}
                             >
-                                Log in
+                                {uiText("Log in")}
                             </Link>
                         </div>
                     ) : resetUnavailable ? (
                         <div>
                             <h1 className="text-2xl font-medium font-serif text-gray-950">
-                                Reset link unavailable
+                                {uiText("Reset link unavailable")}
                             </h1>
                             <p className="mt-3 text-sm leading-relaxed text-gray-600">
                                 {displayedError}
@@ -216,16 +217,16 @@ function ResetPasswordContent() {
                                     className: "mt-6",
                                 })}
                             >
-                                Request another link
+                                {uiText("Request another link")}
                             </Link>
                         </div>
                     ) : (
                         <>
                             <h1 className="text-2xl font-medium font-serif text-gray-950">
-                                Choose a new password
+                                {uiText("Choose a new password")}
                             </h1>
                             <p className="mt-2 text-sm text-gray-500">
-                                Use at least {MIN_PASSWORD_LENGTH} characters.
+                                {uiText("Use at least")} {MIN_PASSWORD_LENGTH} {uiText("characters.")}
                             </p>
                             <form
                                 onSubmit={handleSubmit}
@@ -233,7 +234,7 @@ function ResetPasswordContent() {
                             >
                                 <div>
                                     <FieldLabel htmlFor="password">
-                                        New password
+                                        {uiText("New password")}
                                     </FieldLabel>
                                     <InputUI
                                         id="password"
@@ -249,7 +250,7 @@ function ResetPasswordContent() {
                                 </div>
                                 <div>
                                     <FieldLabel htmlFor="confirmPassword">
-                                        Confirm new password
+                                        {uiText("Confirm new password")}
                                     </FieldLabel>
                                     <InputUI
                                         id="confirmPassword"
@@ -279,7 +280,7 @@ function ResetPasswordContent() {
                                                 )}
                                                 className="ml-2 underline underline-offset-2"
                                             >
-                                                Contact support
+                                                {uiText("Contact support")}
                                             </a>
                                         )}
                                     </div>
@@ -294,8 +295,8 @@ function ResetPasswordContent() {
                                     className="w-full"
                                 >
                                     {loading
-                                        ? "Updating password..."
-                                        : "Update password"}
+                                        ? uiText("Updating password...")
+                                        : uiText("Update password")}
                                 </PillButtonUI>
                             </form>
                         </>

@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 export function workflowSlashCommandFromTitle(title: string): string | null {
     const titleSlug = title
         .trim()
@@ -48,11 +50,11 @@ export function WorkflowSlashCommandUI({ title }: { title: string }) {
         <p className="mt-2 min-h-5 text-xs leading-5 text-gray-500">
             {command ? (
                 <>
-                    Type{" "}
+                    {uiText("Type")}{" "}
                     <span className="text-gray-700">
                         {command}
                     </span>{" "}
-                    in chat to activate this workflow.
+                    {uiText("in chat to activate this workflow.")}
                 </>
             ) : (
                 <span aria-hidden="true">&nbsp;</span>

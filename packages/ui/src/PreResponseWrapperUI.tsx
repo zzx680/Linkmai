@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { GlassCardUI } from "./GlassCardUI";
@@ -64,7 +66,7 @@ function ActivityList({ children }: { children: ReactNode }) {
             <div
                 ref={viewportRef}
                 role="region"
-                aria-label="Assistant activity"
+                aria-label={uiText("Assistant activity")}
                 tabIndex={0}
                 className="max-h-80 overflow-y-auto overscroll-contain focus-visible:rounded-b-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
             >
@@ -119,8 +121,8 @@ export function PreResponseWrapperUI({
             ? ` · ${subagentCount} subagent${subagentCount === 1 ? "" : "s"}`
             : "";
     const label = isStreaming
-        ? "Working"
-        : `Completed in ${stepCount} ${stepWord}${subagents}`;
+        ? uiText("Working")
+        : uiText`Completed in ${stepCount} ${stepWord}${subagents}`;
 
     return (
         <GlassCardUI>

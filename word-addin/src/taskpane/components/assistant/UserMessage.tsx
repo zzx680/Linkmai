@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, FileText, Waypoints } from "lucide-react";
 import { ExcerptModalUI, ExcerptPillUI, PlaybookPillUI } from "@mike/ui";
@@ -90,7 +92,7 @@ function UserMessageImpl({
               <button
                 type="button"
                 aria-label={
-                  expanded ? "Collapse user message" : "Expand user message"
+                  expanded ? uiText("Collapse user message") : uiText("Expand user message")
                 }
                 aria-expanded={expanded}
                 onClick={() => setExpanded((current) => !current)}

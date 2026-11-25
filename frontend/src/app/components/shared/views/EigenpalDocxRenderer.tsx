@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TextButtonUI } from "@mike/ui";
 import { DocxEditor } from "@docx-editor.dev/react";
@@ -65,8 +67,8 @@ export default function DocxRenderer({ bytes, mode, toolbarVisible = true, filen
             }}>
             {fontWarning && (
                 <div role="status" className="flex shrink-0 items-start gap-2 px-3 py-2 text-xs text-muted-foreground">
-                    <span className="min-w-0 flex-1">Some document fonts could not be loaded. Text may look different.</span>
-                    <TextButtonUI onClick={() => setFontWarning(false)}>Dismiss</TextButtonUI>
+                    <span className="min-w-0 flex-1">{uiText("Some document fonts could not be loaded. Text may look different.")}</span>
+                    <TextButtonUI onClick={() => setFontWarning(false)}>{uiText("Dismiss")}</TextButtonUI>
                 </div>
             )}
             <DocxEditor

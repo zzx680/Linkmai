@@ -1,5 +1,9 @@
 "use client";
 
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -85,7 +89,7 @@ import { useIdSet } from "@/app/hooks/useIdSet";
 import { indexById } from "@/app/lib/idCollections";
 
 function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString(uiDateLocale(), {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -104,7 +108,7 @@ function getProjectCreatorLabel(
     return (
         project.owner_display_name?.trim() ||
         project.owner_email?.trim() ||
-        "Shared"
+        uiText("Shared")
     );
 }
 
@@ -114,14 +118,14 @@ type ProjectFilter = "all" | "private" | "public" | "mine" | "shared";
 type ProjectSortKey = "name" | "cm" | "files" | "chats" | "reviews" | "created";
 
 const ORGANIZATION_PROJECT_FILTERS: { id: ProjectFilter; label: string }[] = [
-    { id: "all", label: "All" },
-    { id: "private", label: "Private" },
-    { id: "public", label: "Public" },
+    { id: "all", label: uiText("All") },
+    { id: "private", label: uiText("Private") },
+    { id: "public", label: uiText("Public") },
 ];
 const PERSONAL_PROJECT_FILTERS: { id: ProjectFilter; label: string }[] = [
-    { id: "all", label: "All" },
-    { id: "mine", label: "My Projects" },
-    { id: "shared", label: "Shared with Me" },
+    { id: "all", label: uiText("All") },
+    { id: "mine", label: uiText("My Projects") },
+    { id: "shared", label: uiText("Shared with Me") },
 ];
 const PROJECT_FILTER_SCOPES: Record<ProjectFilter, ProjectScope> = {
     all: "all",
@@ -131,8 +135,8 @@ const PROJECT_FILTER_SCOPES: Record<ProjectFilter, ProjectScope> = {
     shared: "shared",
 };
 const ACCESS_FILTER_OPTIONS: TableFilterOption<"public" | "private">[] = [
-    { value: "public", label: "Public" },
-    { value: "private", label: "Private" },
+    { value: "public", label: uiText("Public") },
+    { value: "private", label: uiText("Private") },
 ];
 
 export function ProjectsOverview() {
@@ -203,7 +207,7 @@ export function ProjectsOverview() {
         sort,
     });
     const selectedIdSet = useIdSet(selectedIds);
-    const loadError = loadErrorObj ? "Could not load projects." : null;
+    const loadError = loadErrorObj ? uiText("Could not load projects.") : null;
     const effectiveLoading = loading && !previewEmptyStates;
     const visibleProjects = useMemo(
         () => (previewEmptyStates ? [] : projects),
@@ -307,7 +311,7 @@ export function ProjectsOverview() {
         sort?.key === "created" ? sort.direction : null;
     const nameFilterButton = (
         <TableSortFilter
-            label="Sort by project name"
+            label={uiText("Sort by project name")}
             value={nameSortDirection}
             align="right"
             onChange={(direction) => handleSortChange("name", direction)}
@@ -315,7 +319,7 @@ export function ProjectsOverview() {
     );
     const accessFilterButton = !isPersonalWorkspace && (
         <TableFilters
-            label="Filter by access"
+            label={uiText("Filter by access")}
             value={
                 activeFilter === "public" || activeFilter === "private"
                     ? activeFilter
@@ -332,14 +336,14 @@ export function ProjectsOverview() {
     );
     const cmFilterButton = (
         <TableSortFilter
-            label="Sort by CM"
+            label={uiText("Sort by CM")}
             value={cmSortDirection}
             onChange={(direction) => handleSortChange("cm", direction)}
         />
     );
     const practiceFilterButton = (
         <TableFilters
-            label="Filter by practice"
+            label={uiText("Filter by practice")}
             value={practiceFilter}
             allLabel="All Practices"
             options={practices.map((practice) => ({
@@ -351,7 +355,7 @@ export function ProjectsOverview() {
     );
     const ownerFilterButton = (
         <PersonFilter
-            label="Filter by creator"
+            label={uiText("Filter by creator")}
             selectedTitle={(name) => `Created by ${name}`}
             value={
                 ownerPeople.find((person) => person.user_id === ownerFilter) ??
@@ -365,28 +369,28 @@ export function ProjectsOverview() {
     );
     const filesFilterButton = (
         <TableSortFilter
-            label="Sort by files"
+            label={uiText("Sort by files")}
             value={filesSortDirection}
             onChange={(direction) => handleSortChange("files", direction)}
         />
     );
     const chatsFilterButton = (
         <TableSortFilter
-            label="Sort by chats"
+            label={uiText("Sort by chats")}
             value={chatsSortDirection}
             onChange={(direction) => handleSortChange("chats", direction)}
         />
     );
     const reviewsFilterButton = (
         <TableSortFilter
-            label="Sort by tabular reviews"
+            label={uiText("Sort by tabular reviews")}
             value={reviewsSortDirection}
             onChange={(direction) => handleSortChange("reviews", direction)}
         />
     );
     const createdFilterButton = (
         <TableSortFilter
-            label="Sort by created date"
+            label={uiText("Sort by created date")}
             value={createdSortDirection}
             onChange={(direction) => handleSortChange("created", direction)}
         />
@@ -403,7 +407,7 @@ export function ProjectsOverview() {
         // mistaken for an outsider just because they did not create it.
         if (!can(roleFrom(detailsProject), "access.manage")) {
             setOwnerOnlyAction({
-                action: "edit project details",
+                action: uiText("edit project details"),
                 contacts: detailsProject.admin_contacts,
             });
             return;
@@ -463,9 +467,9 @@ export function ProjectsOverview() {
               })`
             : "";
         notifyPartialFailure(
-            `${failedIds.length} of ${ids.length} projects couldn't be deleted${named}. They are back in the list and still selected.`,
+            uiText`${failedIds.length} of ${ids.length} projects couldn't be deleted${named}. They are back in the list and still selected.`,
             {
-                action: `delete ${failedIds.length} project${
+                action: uiText`delete ${failedIds.length} project${
                     failedIds.length === 1 ? "" : "s"
                 }`,
                 dedupeKey: "projects-bulk-delete",
@@ -553,7 +557,7 @@ export function ProjectsOverview() {
                     .map((project) => project?.admin_contacts),
             );
             setOwnerOnlyAction({
-                action: `delete ${blocked} of the selected projects — only a project owner can delete a project`,
+                action: uiText`delete ${blocked} of the selected projects — only a project owner can delete a project`,
                 contacts: blockedContacts,
             });
         }
@@ -619,17 +623,17 @@ export function ProjectsOverview() {
                         type: "search",
                         value: search,
                         onChange: setSearch,
-                        placeholder: "Search projects…",
+                        placeholder: uiText("Search projects…"),
                     },
                     {
                         type: "new",
                         onClick: () => setModalOpen(true),
-                        title: "New project",
+                        title: uiText("New project"),
                     },
                 ]}
             >
                 <h1 className={`${PAGE_HEADER_TITLE_CLASS} text-gray-900`}>
-                    Projects
+                    {uiText("Projects")}
                 </h1>
             </PageHeader>
 
@@ -666,14 +670,14 @@ export function ProjectsOverview() {
                                     }}
                                     onChange={toggleAll}
                                     className={TABLE_CHECKBOX_CLASS}
-                                    aria-label="Select all projects"
+                                    aria-label={uiText("Select all projects")}
                                 />
                             )}
-                            <span className="mr-1">Name</span>
+                            <span className="mr-1">{uiText("Name")}</span>
                             {!loading && nameFilterButton}
                         </TableStickyCell>
                         <TableHeaderCell className="ml-auto w-32">
-                            <span className="mr-1">Access</span>
+                            <span className="mr-1">{uiText("Access")}</span>
                             {!loading && accessFilterButton}
                         </TableHeaderCell>
                         <TableHeaderCell className="w-32">
@@ -684,37 +688,37 @@ export function ProjectsOverview() {
                         </TableHeaderCell>
                         <TableHeaderCell className="w-36">
                             <div className="flex items-center gap-1">
-                                <span>Practice</span>
+                                <span>{uiText("Practice")}</span>
                                 {!loading && practiceFilterButton}
                             </div>
                         </TableHeaderCell>
                         <TableHeaderCell className="w-32">
                             <div className="flex items-center gap-1">
-                                <span>Creator</span>
+                                <span>{uiText("Creator")}</span>
                                 {!loading && ownerFilterButton}
                             </div>
                         </TableHeaderCell>
                         <TableHeaderCell className="w-24">
                             <div className="flex items-center gap-1">
-                                <span>Files</span>
+                                <span>{uiText("Files")}</span>
                                 {!loading && filesFilterButton}
                             </div>
                         </TableHeaderCell>
                         <TableHeaderCell className="w-24">
                             <div className="flex items-center gap-1">
-                                <span>Chats</span>
+                                <span>{uiText("Chats")}</span>
                                 {!loading && chatsFilterButton}
                             </div>
                         </TableHeaderCell>
                         <TableHeaderCell className="w-36">
                             <div className="flex items-center gap-1">
-                                <span>Tabular Reviews</span>
+                                <span>{uiText("Tabular Reviews")}</span>
                                 {!loading && reviewsFilterButton}
                             </div>
                         </TableHeaderCell>
                         <TableHeaderCell className="w-32">
                             <div className="flex items-center gap-1">
-                                <span>Created</span>
+                                <span>{uiText("Created")}</span>
                                 {!loading && createdFilterButton}
                             </div>
                         </TableHeaderCell>
@@ -766,7 +770,7 @@ export function ProjectsOverview() {
                     <TableEmptyState>
                         <EmptyState
                             icon={<OpenProjectSvgIcon />}
-                            title="Projects"
+                            title={uiText("Projects")}
                             description={loadError}
                             tone="error"
                             action={
@@ -775,7 +779,7 @@ export function ProjectsOverview() {
                                     size="sm"
                                     onClick={retry}
                                 >
-                                    Try again
+                                    {uiText("Try again")}
                                 </PillButtonUI>
                             }
                         />
@@ -785,21 +789,21 @@ export function ProjectsOverview() {
                         {activeFilter === "public" || activeFilter === "shared" ? (
                             <p className="text-sm text-gray-400">
                                 {activeFilter === "public"
-                                    ? "No public projects"
-                                    : "No projects shared with you"}
+                                    ? uiText("No public projects")
+                                    : uiText("No projects shared with you")}
                             </p>
                         ) : (
                             <EmptyState
                                 icon={<OpenProjectSvgIcon />}
-                                title="Projects"
-                                description="Upload documents into projects and to commence chats and tabular reviews with them."
+                                title={uiText("Projects")}
+                                description={uiText("Upload documents into projects and to commence chats and tabular reviews with them.")}
                                 action={
                                     <PillButtonUI
                                         tone="black"
                                         size="sm"
                                         onClick={() => setModalOpen(true)}
                                     >
-                                        Create
+                                        {uiText("Create")}
                                     </PillButtonUI>
                                 }
                             />
@@ -1011,9 +1015,9 @@ export function ProjectsOverview() {
             />
             <ConfirmPopup
                 open={confirmDeleteAllOpen && selectedIds.length > 0}
-                title="Delete all selected projects?"
+                title={uiText("Delete all selected projects?")}
                 message={`This will permanently delete every selected project you administer, including selected projects not currently shown. Every file within those projects will also be deleted. Projects you cannot delete will be skipped. ${selectedIds.length} projects are selected.`}
-                confirmLabel="Delete"
+                confirmLabel={uiText("Delete")}
                 confirmVariant="danger"
                 onCancel={() => setConfirmDeleteAllOpen(false)}
                 onConfirm={() => void handleDeleteSelected()}

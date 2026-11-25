@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useState } from "react";
 import { KeyRound, X } from "lucide-react";
 import { getApiKeyStatus, type ApiKeyStatus } from "../../api/mikeApi";
@@ -69,15 +71,15 @@ export function ApiKeyBanner(): React.ReactElement | null {
       <div className="flex items-start gap-2">
         <KeyRound className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
         <p className="min-w-0 flex-1">
-          <span className="font-medium">No AI provider key is set up.</span>{" "}
+          <span className="font-medium">{uiText("No AI provider key is set up.")}</span>{" "}
           <span className="text-amber-800">
-            Chat and actions will fail until you add one.
+            {uiText("Chat and actions will fail until you add one.")}
           </span>
         </p>
         <button
           type="button"
           onClick={handleDismiss}
-          aria-label="Dismiss"
+          aria-label={uiText("Dismiss")}
           className="shrink-0 rounded p-0.5 text-amber-500 transition-colors hover:bg-amber-100 hover:text-amber-700"
         >
           <X className="h-3.5 w-3.5" />
@@ -88,7 +90,7 @@ export function ApiKeyBanner(): React.ReactElement | null {
         onClick={openApiKeysPage}
         className="mt-1.5 ml-[22px] rounded-md bg-amber-600 px-2 py-1 text-[11px] font-medium text-white transition-colors hover:bg-amber-700"
       >
-        Set up API keys
+        {uiText("Set up API keys")}
       </button>
     </div>
   );

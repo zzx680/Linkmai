@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Check, Loader2 } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
 import {
@@ -49,21 +51,21 @@ export function NewCustomMcpModal({
         <Modal
             open={open}
             onClose={onClose}
-            breadcrumbs={["Connectors", "New Custom Connector"]}
+            breadcrumbs={[uiText("Connectors"), uiText("New Custom Connector")]}
             size="lg"
             primaryAction={
                 step === "success" && result
                     ? {
-                          label: "View connector",
+                          label: uiText("View connector"),
                           onClick: () => onOpenConnector(result.id),
                       }
                     : {
                           label:
                               step === "working"
-                                  ? "Connecting..."
+                                  ? uiText("Connecting...")
                                   : step === "auth"
-                                    ? "Authorizing..."
-                                    : "Connect",
+                                    ? uiText("Authorizing...")
+                                    : uiText("Connect"),
                           icon:
                               step === "working" || step === "auth" ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -81,7 +83,7 @@ export function NewCustomMcpModal({
                 step === "working"
                     ? false
                     : {
-                          label: step === "success" ? "Done" : "Cancel",
+                          label: step === "success" ? uiText("Done") : uiText("Cancel"),
                           onClick: onClose,
                       }
             }
@@ -92,7 +94,7 @@ export function NewCustomMcpModal({
                 <NewCustomMcpAuth
                     message={
                         authMessage ??
-                        "Complete authorization in the popup to finish connecting this MCP server."
+                        uiText("Complete authorization in the popup to finish connecting this MCP server.")
                     }
                 />
             ) : (
@@ -123,9 +125,9 @@ function NewCustomMcpSuccess({
             <div className="flex items-start gap-3 rounded-xl border border-green-100/80 bg-green-50/80 px-3 py-3 text-green-800 shadow-[0_3px_9px_rgba(15,23,42,0.03),inset_0_1px_0_rgba(255,255,255,0.9),inset_0_-4px_9px_rgba(255,255,255,0.05)]">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
                 <p className="min-w-0 truncate text-sm font-medium">
-                    {connector.name} is connected.{" "}
+                    {connector.name} {uiText("is connected.")}{" "}
                     <span className="font-normal text-green-700">
-                        {connector.tools.length} tools discovered.
+                        {connector.tools.length} {uiText("tools discovered.")}
                     </span>
                 </p>
             </div>
@@ -147,7 +149,7 @@ function NewCustomMcpSuccess({
                                 )}
                             </div>
                             <span className="text-xs text-gray-400">
-                                {tool.enabled ? "Enabled" : "Disabled"}
+                                {tool.enabled ? uiText("Enabled") : uiText("Disabled")}
                             </span>
                         </div>
                     ))}
@@ -165,7 +167,7 @@ function NewCustomMcpAuth({ message }: { message: string }) {
             </div>
             <div className="max-w-sm space-y-1">
                 <h3 className="text-sm font-medium text-gray-700">
-                    Authentication required
+                    {uiText("Authentication required")}
                 </h3>
                 <p className="text-sm text-gray-500">{message}</p>
             </div>

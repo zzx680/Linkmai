@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { ProfilePhotoSettings } from "@/app/components/settings/ProfilePhotoSettings";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -130,7 +132,7 @@ export default function SettingsPage() {
       }
       setDeleteConfirm(false);
       notifyError(error, {
-        action: "delete your account",
+        action: uiText("delete your account"),
         // Retry re-opens the confirmation instead of deleting outright: a
         // button in a notice must never be the only thing between a stray
         // click and an irreversible account deletion.
@@ -173,16 +175,16 @@ export default function SettingsPage() {
       // The backend passes GoTrue's `code` through, so the outcome is decided
       // by that code rather than by matching English in the message.
       const described = describeError(error, {
-        action: "update your email",
+        action: uiText("update your email"),
         codeMessages: EMAIL_ERROR_MESSAGES,
-        fallback: "Unable to update your email. Try again.",
+        fallback: uiText("Unable to update your email. Try again."),
       });
 
       if (described.code && EMAIL_TAKEN_CODES.has(described.code)) {
         setEmail(user?.pendingEmail || user?.email || "");
         setEmailWarning({
-          title: "Email already registered",
-          message: "An account with this email already exists.",
+          title: uiText("Email already registered"),
+          message: uiText("An account with this email already exists."),
         });
         return;
       }
@@ -193,9 +195,9 @@ export default function SettingsPage() {
       ) {
         setEmail(user?.pendingEmail || user?.email || "");
         setEmailWarning({
-          title: "Email change unavailable",
+          title: uiText("Email change unavailable"),
           message:
-            "You can’t change your email this often. Wait a few minutes before trying again.",
+            uiText("You can’t change your email this often. Wait a few minutes before trying again."),
         });
         return;
       }
@@ -227,20 +229,20 @@ export default function SettingsPage() {
     <div className="space-y-8">
       {/* Profile Settings */}
       <section className="space-y-3">
-        <SettingsHeading id="profile">Profile</SettingsHeading>
+        <SettingsHeading id="profile">{uiText("Profile")}</SettingsHeading>
         <GlassCardUI>
           <SettingsRow layout="stacked">
             <div>
               <div className="flex items-start justify-between gap-3">
-                <FieldLabel htmlFor="display-name">Display Name</FieldLabel>
+                <FieldLabel htmlFor="display-name">{uiText("Display Name")}</FieldLabel>
                 <span
                   className="text-xs text-gray-400"
                   aria-live="polite"
                 >
                   {isSavingName
-                    ? "Saving..."
+                    ? uiText("Saving...")
                     : saved
-                      ? "Saved"
+                      ? uiText("Saved")
                       : ""}
                 </span>
               </div>
@@ -253,7 +255,7 @@ export default function SettingsPage() {
                   setSaved(false);
                 }}
                 onBlur={() => void handleSaveDisplayName()}
-                placeholder="Enter your name"
+                placeholder={uiText("Enter your name")}
               />
             </div>
           </SettingsRow>
@@ -263,12 +265,12 @@ export default function SettingsPage() {
 
       {/* Email */}
       <section className="space-y-3">
-        <SettingsHeading id="email">Email</SettingsHeading>
+        <SettingsHeading id="email">{uiText("Email")}</SettingsHeading>
         <GlassCardUI>
           <SettingsRow layout="stacked">
             <div className="space-y-2">
               <SettingsTextInput
-                aria-label="Email address"
+                aria-label={uiText("Email address")}
                 type="email"
                 value={email}
                 disabled={requiresPasswordForEmailChange}
@@ -278,18 +280,18 @@ export default function SettingsPage() {
                   setEmailWarning(null);
                   setEmailSaved(false);
                 }}
-                placeholder="Enter your email"
+                placeholder={uiText("Enter your email")}
               />
               {emailStatus ? (
                 <p className="text-xs text-gray-500">{emailStatus}</p>
               ) : user.pendingEmail ? (
                 <p className="text-xs text-gray-500">
-                  Pending confirmation: {user.pendingEmail}
+                  {uiText("Pending confirmation:")} {user.pendingEmail}
                 </p>
               ) : null}
               {emailStatus && (
                 <p className="text-xs text-gray-400">
-                  Current email: {user.email}
+                  {uiText("Current email:")} {user.email}
                 </p>
               )}
               <div className="flex justify-end">
@@ -307,12 +309,12 @@ export default function SettingsPage() {
                   className="text-xs font-medium text-gray-700 transition-colors hover:text-gray-950 disabled:cursor-not-allowed disabled:text-gray-400"
                 >
                   {requiresPasswordForEmailChange
-                    ? "Update"
+                    ? uiText("Update")
                     : isSavingEmail
-                      ? "Saving..."
+                      ? uiText("Saving...")
                       : emailSaved
-                        ? "Saved"
-                        : "Save"}
+                        ? uiText("Saved")
+                        : uiText("Save")}
                 </button>
               </div>
             </div>
@@ -322,11 +324,11 @@ export default function SettingsPage() {
 
       {/* Plan */}
       <section className="space-y-3">
-        <SettingsHeading id="usage-plan">Usage Plan</SettingsHeading>
+        <SettingsHeading id="usage-plan">{uiText("Usage Plan")}</SettingsHeading>
         <GlassCardUI>
           <SettingsRow layout="stacked">
             <p className="text-base font-medium text-gray-500 capitalize">
-              {profile?.tier || "Free"}
+              {profile?.tier || uiText("Free")}
             </p>
           </SettingsRow>
         </GlassCardUI>
@@ -334,13 +336,13 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <section className="space-y-3">
-        <SettingsHeading id="danger-zone" tone="danger">Danger Zone</SettingsHeading>
+        <SettingsHeading id="danger-zone" tone="danger">{uiText("Danger Zone")}</SettingsHeading>
         <GlassCardUI>
           <SettingsRow>
             <div className="min-w-0 space-y-1">
-              <SettingsLabel>Delete account</SettingsLabel>
+              <SettingsLabel>{uiText("Delete account")}</SettingsLabel>
               <SettingsDescription>
-                Permanently delete your account and personal workspace. Organization work follows the member removal policy.
+                {uiText("Permanently delete your account and personal workspace. Organization work follows the member removal policy.")}
               </SettingsDescription>
             </div>
             <PillButtonUI
@@ -352,19 +354,19 @@ export default function SettingsPage() {
               className="w-full shrink-0 sm:w-auto"
             >
               <Trash2 className="h-4 w-4 shrink-0" />
-              Delete account
+              {uiText("Delete account")}
             </PillButtonUI>
           </SettingsRow>
         </GlassCardUI>
       </section>
       <ConfirmPopup
         open={deleteConfirm}
-        title="Delete account?"
-        message="This permanently deletes your account and personal workspace. In each organization, shared work without another owner transfers to a remaining organization owner. Unshared private work is retained for 30 days for organization owners to recover or delete. You must appoint another owner or delete any organization you solely own first."
-        confirmLabel="Delete"
+        title={uiText("Delete account?")}
+        message={uiText("This permanently deletes your account and personal workspace. In each organization, shared work without another owner transfers to a remaining organization owner. Unshared private work is retained for 30 days for organization owners to recover or delete. You must appoint another owner or delete any organization you solely own first.")}
+        confirmLabel={uiText("Delete")}
         confirmVariant="danger"
         confirmStatus={isDeleting ? "loading" : "idle"}
-        cancelLabel="Cancel"
+        cancelLabel={uiText("Cancel")}
         onCancel={() => {
           if (isDeleting) return;
           setDeleteConfirm(false);
@@ -380,11 +382,11 @@ export default function SettingsPage() {
       <Modal
         open={googleEmailModalOpen}
         onClose={() => setGoogleEmailModalOpen(false)}
-        breadcrumbs={["Account", "Change email"]}
+        breadcrumbs={[uiText("Account"), uiText("Change email")]}
         size="sm"
         className="h-auto"
         primaryAction={{
-          label: "Go to Security",
+          label: uiText("Go to Security"),
           onClick: () => {
             setGoogleEmailModalOpen(false);
             router.push("/settings/security");
@@ -392,8 +394,7 @@ export default function SettingsPage() {
         }}
       >
         <p className="pb-5 text-sm leading-relaxed text-gray-600">
-          Your account was created with Google. To change your email, first add
-          a password in Settings &gt; Security &gt; Password.
+          {uiText("Your account was created with Google. To change your email, first add a password in Settings &gt; Security &gt; Password.")}
         </p>
       </Modal>
       <MfaVerificationPopup
@@ -404,8 +405,8 @@ export default function SettingsPage() {
           setAccountDeleteMfaOpen(false);
           void handleDeleteAccount();
         }}
-        title="Two-factor verification required"
-        message="Account deletion is sensitive. Enter a code from your authenticator app to continue."
+        title={uiText("Two-factor verification required")}
+        message={uiText("Account deletion is sensitive. Enter a code from your authenticator app to continue.")}
       />
       <MfaVerificationPopup
         open={emailMfaOpen}
@@ -415,8 +416,8 @@ export default function SettingsPage() {
           setEmailMfaOpen(false);
           void handleSaveEmail();
         }}
-        title="Two-factor verification required"
-        message="Email changes are sensitive. Enter a code from your authenticator app to continue."
+        title={uiText("Two-factor verification required")}
+        message={uiText("Email changes are sensitive. Enter a code from your authenticator app to continue.")}
       />
     </div>
   );

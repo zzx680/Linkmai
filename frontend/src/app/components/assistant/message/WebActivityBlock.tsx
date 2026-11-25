@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { useState, type ReactNode } from "react";
 import type { WebSource } from "@mike/contracts";
 import { WebSkeuoIcon } from "@/app/components/shared/WebSkeuoIcon";
@@ -135,16 +137,16 @@ export function WebSearchBlock({
 }) {
     const [open, setOpen] = useState(false);
     const query = event.query.trim();
-    const forQuery = query ? <> for &ldquo;{query}&rdquo;</> : null;
+    const forQuery = query ? <> {uiText("for &ldquo;")}{query}{uiText("&rdquo;")}</> : null;
     const error = event.error;
     const label: ReactNode = isStreaming ? (
-        <>Searching the web{forQuery}</>
+        <>{uiText("Searching the web")}{forQuery}</>
     ) : interrupted ? (
-        <>Web search stopped{forQuery}</>
+        <>{uiText("Web search stopped")}{forQuery}</>
     ) : error ? (
-        query ? <>Web search failed{forQuery}</> : "Web search unavailable"
+        query ? <>{uiText("Web search failed")}{forQuery}</> : uiText("Web search unavailable")
     ) : (
-        <>Searched the web{forQuery}</>
+        <>{uiText("Searched the web")}{forQuery}</>
     );
     const results = event.results;
 
@@ -194,12 +196,12 @@ export function WebReadBlock({
             <WebEventLabel>
                 <EventLabel>
                     {isStreaming
-                        ? "Reading"
+                        ? uiText("Reading")
                         : error
-                          ? "Read failed"
+                          ? uiText("Read failed")
                           : interrupted
-                            ? "Read stopped"
-                            : "Read"}
+                            ? uiText("Read stopped")
+                            : uiText("Read")}
                 </EventLabel>{" "}
                 {/* Only a page the server actually read is a link: the model
                     picks the URL, and it may not be one the user should open. */}

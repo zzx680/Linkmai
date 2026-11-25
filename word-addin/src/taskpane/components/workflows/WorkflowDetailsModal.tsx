@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useRef, useState } from "react";
 import { WorkflowSlashCommandUI } from "@mike/ui";
 import type { Workflow } from "../../types";
@@ -148,7 +150,7 @@ export function WorkflowDetailsModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Mike couldn't save this workflow. Try again.",
+          fallback: uiText("Mike couldn't save this workflow. Try again."),
           operation: "workflows.run",
         }).message,
       );
@@ -169,7 +171,7 @@ export function WorkflowDetailsModal({
     } catch (reason) {
       setDeleteError(
         reportFault(reason, {
-          fallback: "Mike couldn't delete this workflow. Try again.",
+          fallback: uiText("Mike couldn't delete this workflow. Try again."),
           operation: "workflows.run",
         }).message,
       );
@@ -184,12 +186,12 @@ export function WorkflowDetailsModal({
         open={open}
         onClose={onClose}
         parentLabel="Workflows"
-        title="View and Edit details"
+        title={uiText("View and Edit details")}
         primaryAction={
           readOnly
             ? undefined
             : {
-                label: saving ? "Saving…" : "Save",
+                label: saving ? uiText("Saving…") : uiText("Save"),
                 onClick: () => void handleSave(),
                 disabled: !title.trim() || saving || !hasChanges,
               }
@@ -199,13 +201,13 @@ export function WorkflowDetailsModal({
           <div className="space-y-6">
             <div>
               <ModalFieldLabel htmlFor="workflow-details-title">
-                Title
+                {uiText("Title")}
               </ModalFieldLabel>
               <ModalTextInput
                 id="workflow-details-title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Add workflow name"
+                placeholder={uiText("Add workflow name")}
                 variant="minimal"
                 disabled={readOnly}
               />
@@ -214,7 +216,7 @@ export function WorkflowDetailsModal({
 
             <div>
               <ModalFieldLabel htmlFor="workflow-details-language">
-                Language
+                {uiText("Language")}
               </ModalFieldLabel>
               <ModalSelect
                 id="workflow-details-language"
@@ -230,7 +232,7 @@ export function WorkflowDetailsModal({
                 <ModalTextInput
                   value={customLanguage}
                   onChange={(event) => setCustomLanguage(event.target.value)}
-                  placeholder="Enter language…"
+                  placeholder={uiText("Enter language…")}
                   disabled={readOnly}
                   className="mt-2"
                 />
@@ -239,7 +241,7 @@ export function WorkflowDetailsModal({
 
             <div>
               <ModalFieldLabel htmlFor="workflow-details-practice">
-                Practice area
+                {uiText("Practice area")}
               </ModalFieldLabel>
               <ModalSelect
                 id="workflow-details-practice"
@@ -255,7 +257,7 @@ export function WorkflowDetailsModal({
                 <ModalTextInput
                   value={customPractice}
                   onChange={(event) => setCustomPractice(event.target.value)}
-                  placeholder="Enter practice area…"
+                  placeholder={uiText("Enter practice area…")}
                   disabled={readOnly}
                   className="mt-2"
                 />
@@ -264,7 +266,7 @@ export function WorkflowDetailsModal({
 
             <div>
               <ModalFieldLabel htmlFor="workflow-details-jurisdiction">
-                Jurisdiction
+                {uiText("Jurisdiction")}
               </ModalFieldLabel>
               <ModalSelect
                 id="workflow-details-jurisdiction"
@@ -282,7 +284,7 @@ export function WorkflowDetailsModal({
                   onChange={(event) =>
                     setCustomJurisdiction(event.target.value)
                   }
-                  placeholder="Enter jurisdiction…"
+                  placeholder={uiText("Enter jurisdiction…")}
                   disabled={readOnly}
                   className="mt-2"
                 />
@@ -302,15 +304,15 @@ export function WorkflowDetailsModal({
         open={deleteConfirmOpen}
         onClose={() => !deleting && onDeleteConfirmOpenChange(false)}
         parentLabel="Workflows"
-        title="Delete workflow?"
+        title={uiText("Delete workflow?")}
         primaryAction={{
-          label: deleting ? "Deleting…" : "Delete",
+          label: deleting ? uiText("Deleting…") : uiText("Delete"),
           tone: "danger",
           disabled: deleting,
           onClick: () => void handleDelete(),
         }}
         secondaryAction={{
-          label: "Cancel",
+          label: uiText("Cancel"),
           disabled: deleting,
           onClick: () => onDeleteConfirmOpenChange(false),
         }}
@@ -318,8 +320,8 @@ export function WorkflowDetailsModal({
         <div className="pb-5 text-sm leading-6 text-gray-600">
           <p>
             {workflow.is_default
-              ? "Deleting this default workflow also permanently deletes its corresponding Quick Action. It will not be recreated automatically."
-              : "This workflow will be permanently deleted."}
+              ? uiText("Deleting this default workflow also permanently deletes its corresponding Quick Action. It will not be recreated automatically.")
+              : uiText("This workflow will be permanently deleted.")}
           </p>
           {deleteError && (
             <p role="alert" className="mt-3 text-red-500">

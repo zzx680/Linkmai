@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { listDocumentVersions, replaceDocumentVersionFile } from "@/app/lib/mikeApi";
 import { userFacingApiError } from "@/app/lib/userFacingError";
@@ -95,8 +97,8 @@ export function useDocxAutosave(options: Options) {
                 conflicted.current = conflict;
                 if (mounted.current) {
                     setError(conflict
-                        ? "This document changed elsewhere. Download your edits before reopening the latest version."
-                        : userFacingApiError(reason, "Changes could not be saved. Your edits are still open. Press Cmd/Ctrl+S to retry, or download a copy."));
+                        ? uiText("This document changed elsewhere. Download your edits before reopening the latest version.")
+                        : userFacingApiError(reason, uiText("Changes could not be saved. Your edits are still open. Press Cmd/Ctrl+S to retry, or download a copy.")));
                     setStatus("error");
                 }
             }

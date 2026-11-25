@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useMemo, useState } from "react";
 import { History } from "lucide-react";
 import chatIcon from "@icons/features/chat.svg";
@@ -82,7 +84,7 @@ export function ChatHistoryDropdown({
         setOpen(next);
       }}
       trigger={
-        <LiquidIconButton aria-label="Chat history" title="Chat history">
+        <LiquidIconButton aria-label={uiText("Chat history")} title={uiText("Chat history")}>
           <History
             data-testid="chat-history-trigger-icon"
             className="h-4 w-4"
@@ -104,7 +106,7 @@ export function ChatHistoryDropdown({
       onRetry={retry}
       notice={openError}
       emptyLabel={
-        search ? "No matches found" : "No chats saved for this document"
+        search ? uiText("No matches found") : uiText("No chats saved for this document")
       }
       onReachEnd={loadMore}
       loadingMore={loadingMore}

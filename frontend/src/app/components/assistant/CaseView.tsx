@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import DOMPurify from "dompurify";
 import { Loader2 } from "lucide-react";
@@ -215,7 +217,7 @@ export function CaseView({
                 {visibleLoading && (
                     <div
                         role="status"
-                        aria-label="Loading document"
+                        aria-label={uiText("Loading document")}
                         className={cn(
                             "flex h-full min-h-0 items-center justify-center p-5",
                             surfaceClassName,
@@ -239,7 +241,7 @@ export function CaseView({
                         </p>
                         {onRetry && (
                             <PillButtonUI tone="white" onClick={onRetry}>
-                                Try again
+                                {uiText("Try again")}
                             </PillButtonUI>
                         )}
                     </div>
@@ -253,7 +255,7 @@ export function CaseView({
                                 surfaceClassName,
                             )}
                         >
-                            No content was returned for this document.
+                            {uiText("No content was returned for this document.")}
                         </p>
                     )}
                 {!visibleLoading && !visibleError && activeSubdocument && (
@@ -308,7 +310,7 @@ function CaseSubdocument({
                 />
             ) : (
                 <div data-case-text-body className="whitespace-pre-wrap font-serif text-sm leading-7 text-gray-900 [&_p]:my-3">
-                    {subdocument.text || "No document text returned."}
+                    {subdocument.text || uiText("No document text returned.")}
                 </div>
             )}
         </article>

@@ -73,8 +73,9 @@ import {
     partitionSupportedDocumentFiles,
 } from "@/app/lib/documentUploadValidation";
 import { userFacingApiError } from "@/app/lib/userFacingError";
-import { serializeExcerpts, type MessageExcerpt, type NoModelsReason } from "@mike/client";
+import { isImeComposing, serializeExcerpts, type MessageExcerpt, type NoModelsReason } from "@mike/client";
 import { useConfiguredModels } from "@/app/hooks/useConfiguredModels";
+import { zhCN } from "@/app/lib/localization";
 
 export interface ChatInputHandle {
     addDoc: (doc: Document) => void;
@@ -153,10 +154,10 @@ function placeholderFor({
     chatLoading: boolean;
     isLoading: boolean;
 }): string {
-    if (canSend === null) return "Loading…";
-    if (!canSend) return "Viewing only — sending needs edit access";
-    if (!chatLoading) return "How can I help?";
-    return isLoading ? "A response is still arriving…" : "Loading this chat…";
+    if (canSend === null) return zhCN.assistant.loading;
+    if (!canSend) return zhCN.assistant.readOnly;
+    if (!chatLoading) return zhCN.assistant.placeholder;
+    return isLoading ? zhCN.assistant.receiving : zhCN.assistant.loadingChat;
 }
 
 function ChatInputForChatImpl(
@@ -390,7 +391,7 @@ function ChatInputForChatImpl(
             if (!composerOpen) {
                 if (canSend === false) {
                     setUploadWarning(
-                        "Only someone with edit access can add documents.",
+                        zhCN.assistant.uploadPermission,
                     );
                 }
                 return;
@@ -476,7 +477,7 @@ function ChatInputForChatImpl(
                         ? failedUploadMessage(error.outcomes)
                         : userFacingApiError(
                               error,
-                              "Documents could not be uploaded. Please try again.",
+                              zhCN.assistant.uploadFailed,
                           ),
                 );
             } finally {
@@ -696,6 +697,10 @@ function ChatInputForChatImpl(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        // Enter and arrow keys belong to the IME while choosing Chinese text.
+        // Safari can clear isComposing on the confirming Enter; 229 covers it.
+        if (isImeComposing(e)) return;
+
         if (slashMenuOpen && matchingWorkflows.length > 0) {
             if (e.key === "ArrowDown") {
                 e.preventDefault();
@@ -762,7 +767,7 @@ function ChatInputForChatImpl(
                                             );
                                             setWorkflowModalOpen(true);
                                         }}
-                                        aria-label={`Open workflow ${selectedWorkflow.title}`}
+                                        aria-label={`${zhCN.assistant.openWorkflow}：${selectedWorkflow.title}`}
                                         className="inline-flex min-w-0 items-center gap-1 rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                                     >
                                         <Waypoints className="h-2.5 w-2.5 shrink-0" />
@@ -772,6 +777,7 @@ function ChatInputForChatImpl(
                                     </button>
                                     <button
                                         type="button"
+                                        aria-label={zhCN.assistant.removeWorkflow}
                                         onClick={() =>
                                             setSelectedWorkflow(null)
                                         }
@@ -816,7 +822,7 @@ function ChatInputForChatImpl(
                                 <DocumentPill
                                     key={upload.clientId}
                                     filename={upload.filename}
-                                    status="Uploading"
+                                    status={zhCN.assistant.uploading}
                                     loading
                                 />
                             ))}
@@ -927,7 +933,7 @@ function ChatInputForChatImpl(
                             <button
                                 type="button"
                                 aria-label={
-                                    isLoading ? "Stop response" : "Send message"
+                                    isLoading ? zhCN.assistant.stop : zhCN.assistant.send
                                 }
                                 className={cn(
                                     COMPOSER_SEND_BUTTON_CLASS,
@@ -963,7 +969,7 @@ function ChatInputForChatImpl(
                 accept={SUPPORTED_DOCUMENT_ACCEPT}
                 multiple
                 hidden
-                aria-label="Upload Documents"
+                aria-label={zhCN.assistant.uploadDocuments}
                 disabled={!composerOpen}
                 onChange={(event) => {
                     const files = Array.from(event.currentTarget.files ?? []);
@@ -987,8 +993,8 @@ function ChatInputForChatImpl(
                 uploadStateId={`assistant-chat:${projectId ?? "standalone"}`}
                 breadcrumb={
                     selectedWorkflow
-                        ? ["Assistant", selectedWorkflow.title, "Add Documents"]
-                        : ["Assistant", "Add Documents"]
+                        ? [zhCN.navigation.assistant, selectedWorkflow.title, zhCN.assistant.addDocuments]
+                        : [zhCN.navigation.assistant, zhCN.assistant.addDocuments]
                 }
             />
             <AssistantWorkflowModal
@@ -1011,13 +1017,13 @@ function ChatInputForChatImpl(
                 onSelect={(playbook) =>
                     setSelectedPlaybook({
                         id: playbook.id,
-                        title: playbook.name || "Untitled playbook",
+                        title: playbook.name || zhCN.assistant.untitledPlaybook,
                     })
                 }
                 breadcrumbs={
                     projectName
-                        ? ["Projects", projectName, "Assistant", "Add playbook"]
-                        : ["Assistant", "Add playbook"]
+                        ? [zhCN.navigation.projects, projectName, zhCN.navigation.assistant, zhCN.assistant.addPlaybook]
+                        : [zhCN.navigation.assistant, zhCN.assistant.addPlaybook]
                 }
                 initialPlaybookId={playbookModalInitialId}
             />
@@ -1032,8 +1038,8 @@ function ChatInputForChatImpl(
             <WarningPopup
                 open={modelRequiredWarning}
                 onClose={() => setModelRequiredWarning(false)}
-                title="Select a model"
-                message="Choose a model before sending your message."
+                title={zhCN.assistant.selectModel}
+                message={zhCN.assistant.selectModelHint}
             />
             <UploadOverlay
                 open={isDraggingFiles}

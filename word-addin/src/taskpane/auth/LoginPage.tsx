@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+
+import { uiText } from "@mike/client";
+import React, { useEffect, useState } from "react";
+import { getSignInOptions } from "../api/client";
 import { useAuth } from "./useAuth";
 import {
   InputUI,
@@ -25,6 +28,15 @@ export function LoginPage(): React.ReactElement {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleEnabled, setGoogleEnabled] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSignInOptions().then(options => {
+      if (!cancelled) setGoogleEnabled(options.google === true);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -51,7 +63,7 @@ export function LoginPage(): React.ReactElement {
             className={`${authGlassCardUIClassName} mb-4`}
           >
             <h1 className="mb-6 text-left font-serif text-2xl font-medium text-gray-950">
-              Log In
+              {uiText("Log In")}
             </h1>
 
             <form
@@ -64,7 +76,7 @@ export function LoginPage(): React.ReactElement {
                   htmlFor="email"
                   className="mb-2 block text-sm font-medium text-gray-700"
                 >
-                  Email
+                  {uiText("Email")}
                 </Label>
                 <InputUI
                   id="email"
@@ -83,7 +95,7 @@ export function LoginPage(): React.ReactElement {
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Password
+                    {uiText("Password")}
                   </Label>
                   <a
                     href={`${WEB_APP_URL}/forgot-password`}
@@ -94,7 +106,7 @@ export function LoginPage(): React.ReactElement {
                     }
                     className="text-xs font-medium text-gray-500 transition-colors hover:text-gray-950"
                   >
-                    Forgot password?
+                    {uiText("Forgot password?")}
                   </a>
                 </div>
                 <InputUI
@@ -125,9 +137,10 @@ export function LoginPage(): React.ReactElement {
                   disabled={loading}
                   className="w-full"
                 >
-                  {loading ? "Logging in..." : "Log in"}
+                  {loading ? uiText("Logging in...") : uiText("Log in")}
                 </PillButton>
               </div>
+              {googleEnabled && <>
               <AuthDivider />
               <PillButton
                 type="button"
@@ -139,12 +152,13 @@ export function LoginPage(): React.ReactElement {
                 onClick={() => void handleGoogleLogin()}
               >
                 <GoogleIconUI className="h-4 w-4" />
-                {googleLoading ? "Continuing…" : "Continue with Google"}
+                {googleLoading ? uiText("Continuing…") : uiText("Continue with Google")}
               </PillButton>
+              </>}
             </form>
           </div>
           <div className="text-center text-sm text-gray-500">
-            Don&apos;t have an account?{" "}
+            {uiText("Don&apos;t have an account?")}{" "}
             <a
               href={`${WEB_APP_URL}/signup`}
               target="_blank"
@@ -152,7 +166,7 @@ export function LoginPage(): React.ReactElement {
               onClick={(event) => openWebAuthPage(event, "/signup")}
               className="font-medium transition-colors hover:text-gray-950"
             >
-              Sign up
+              {uiText("Sign up")}
             </a>
           </div>
         </div>

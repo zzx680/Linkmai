@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useMemo } from "react";
 import type { Workflow } from "../../types";
 import { PickerList } from "../primitives/PickerList";
@@ -41,8 +43,8 @@ export function WorkflowList({
       {...listProps}
       items={items}
       emptyMessage={emptyMessage}
-      searchPlaceholder="Search workflows..."
-      loadingLabel="Loading workflows…"
+      searchPlaceholder={uiText("Search workflows...")}
+      loadingLabel={uiText("Loading workflows…")}
       onSelect={(id) => {
         const workflow = workflows.find((item) => item.id === id);
         if (workflow) onSelect(workflow);

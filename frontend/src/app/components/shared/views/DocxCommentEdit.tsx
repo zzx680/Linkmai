@@ -1,4 +1,6 @@
 "use client";
+
+import { uiText } from "@mike/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -73,7 +75,7 @@ export function DocxCommentEdit({
             }}
         >
             <label htmlFor={id} className="sr-only">
-                Edit comment
+                {uiText("Edit comment")}
             </label>
             <textarea
                 id={id}
@@ -92,14 +94,14 @@ export function DocxCommentEdit({
                 </p>
             )}
             <div className="flex justify-end gap-2">
-                <TextButtonUI onClick={onClose}>Cancel</TextButtonUI>
+                <TextButtonUI onClick={onClose}>{uiText("Cancel")}</TextButtonUI>
                 <PillButtonUI
                     type="submit"
                     size="xs"
                     tone="black"
                     disabled={disabled}
                 >
-                    Save
+                    {uiText("Save")}
                 </PillButtonUI>
             </div>
         </form>

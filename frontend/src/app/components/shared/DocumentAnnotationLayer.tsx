@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import type { ReactNode } from "react";
 
 /** Shared panel header above the viewer toolbar. The annotation (citation
@@ -24,7 +26,7 @@ export function DocumentAnnotationLayer({
             >
                 {title}
                 {annotation && (
-                    <div role="region" aria-label="Document annotation">
+                    <div role="region" aria-label={uiText("Document annotation")}>
                         {annotation}
                     </div>
                 )}

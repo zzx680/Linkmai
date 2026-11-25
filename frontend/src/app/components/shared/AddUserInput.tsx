@@ -1,5 +1,9 @@
 "use client";
 
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { Loader2, UserPlus } from "lucide-react";
 import {
@@ -63,7 +67,7 @@ export function AddUserInput({
         const email = trimmedEmail;
         if (!email || busy || checking) return;
         if (!EMAIL_RE.test(email)) {
-            setError("Enter a valid email.");
+            setError(uiText("Enter a valid email."));
             return;
         }
 
@@ -90,7 +94,7 @@ export function AddUserInput({
             setError(
                 userFacingApiError(
                     err,
-                    "Could not add this user. Try again.",
+                    uiText("Could not add this user. Try again."),
                 ),
             );
         } finally {
@@ -99,7 +103,8 @@ export function AddUserInput({
     }
 
     function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-        if (event.key === "Enter" || event.key === ",") {
+        if (isImeComposing(event)) return;
+        if (event.key === "Enter" || (event.key === "," || event.key === "，")) {
             event.preventDefault();
             void commitUser();
         }
@@ -155,7 +160,7 @@ export function AddUserInput({
                         {(busy || checking) && (
                             <Loader2 className="h-3 w-3 animate-spin" />
                         )}
-                        Add
+                        {uiText("Add")}
                     </button>
                 ) : showAddButton ? (
                     <PillButtonUI
@@ -169,7 +174,7 @@ export function AddUserInput({
                         title={submitLabel}
                         className="shrink-0"
                     >
-                        Add
+                        {uiText("Add")}
                     </PillButtonUI>
                 ) : null}
             </div>

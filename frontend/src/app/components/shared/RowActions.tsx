@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
     Check,
@@ -142,7 +144,7 @@ export function RowActionMenuItems({
             {onDeselect && (
                 <DropdownItem onSelect={run(onDeselect)}>
                     <X className="h-3.5 w-3.5" />
-                    Deselect rows
+                    {uiText("Deselect rows")}
                 </DropdownItem>
             )}
             {onView && (
@@ -198,19 +200,19 @@ export function RowActionMenuItems({
             {onUpdateCmNumber && (
                 <DropdownItem onSelect={run(onUpdateCmNumber)}>
                     <Hash className="h-3.5 w-3.5" />
-                    Edit CM No.
+                    {uiText("Edit CM No.")}
                 </DropdownItem>
             )}
             {onDownload && (
                 <DropdownItem onSelect={run(onDownload)}>
                     <Download className="h-3.5 w-3.5" />
-                    Download
+                    {uiText("Download")}
                 </DropdownItem>
             )}
             {onShowAllVersions && (
                 <DropdownItem onSelect={run(onShowAllVersions)}>
                     <History className="h-3.5 w-3.5" />
-                    Show all versions
+                    {uiText("Show all versions")}
                 </DropdownItem>
             )}
             {onUploadNewVersion && (
@@ -222,25 +224,25 @@ export function RowActionMenuItems({
             {onRemoveFromFolder && (
                 <DropdownItem onSelect={run(onRemoveFromFolder)}>
                     <FolderMinus className="h-3.5 w-3.5" />
-                    Remove from subfolder
+                    {uiText("Remove from subfolder")}
                 </DropdownItem>
             )}
             {onClearResults && (
                 <DropdownItem disabled={clearResultsDisabled} onSelect={run(onClearResults)}>
                     <Eraser className="h-3.5 w-3.5" />
-                    Clear results
+                    {uiText("Clear results")}
                 </DropdownItem>
             )}
             {onUnhide && (
                 <DropdownItem onSelect={run(onUnhide)}>
                     <Eye className="h-3.5 w-3.5" />
-                    Activate
+                    {uiText("Activate")}
                 </DropdownItem>
             )}
             {onHide && (
                 <DropdownItem onSelect={run(onHide)}>
                     <EyeOff className="h-3.5 w-3.5" />
-                    Deactivate
+                    {uiText("Deactivate")}
                 </DropdownItem>
             )}
             {onDelete && (

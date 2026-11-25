@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 /**
  * What the pane may honestly offer after a Word turn failed.
  *
@@ -25,7 +27,7 @@ export type FailedTurnRecovery =
 
 /** Shown instead of the classified error when the turn's fate is unknown. */
 export const TURN_OUTCOME_UNKNOWN_MESSAGE =
-  "The answer may still be running. Check chat history and the document before sending the request again.";
+  uiText("The answer may still be running. Check chat history and the document before sending the request again.");
 
 export function failedTurnRecovery(args: {
   /** This run started by POSTing a new turn (not by resuming one). */

@@ -1,7 +1,9 @@
+
+import { uiText } from "@mike/client";
 export const SUPPORTED_DOCUMENT_ACCEPT =
     ".pdf,.docx,.doc,.xlsx,.xlsm,.xls,.pptx,.ppt";
 export const UNSUPPORTED_DOCUMENT_WARNING_MESSAGE =
-    "Unsupported file type. Only PDF, Word, Excel, and PowerPoint files can be uploaded.";
+    uiText("Unsupported file type. Only PDF, Word, Excel, and PowerPoint files can be uploaded.");
 
 const SUPPORTED_DOCUMENT_EXTENSIONS = new Set([
     "pdf",

@@ -8,6 +8,8 @@
 // package directly in Node for the add-in's end-to-end tests.
 
 // Failure classification and presentation
+export * from "./localization";
+export * from "./keyboardInput";
 export * from "./userError";
 export * from "./toastStore";
 export * from "./errorNotifier";

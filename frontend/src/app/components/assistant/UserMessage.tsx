@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { ClipboardCheck, Waypoints } from "lucide-react";
@@ -64,7 +66,7 @@ export function UserMessage({
                                     <button
                                         type="button"
                                         onClick={() => onWorkflowClick(workflow)}
-                                        aria-label={`Open workflow ${workflow.title}`}
+                                        aria-label={uiText`Open workflow ${workflow.title}`}
                                         className="inline-flex min-w-0 items-center gap-1 rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                                     >
                                         <Waypoints className="h-2.5 w-2.5 shrink-0" />
@@ -85,7 +87,7 @@ export function UserMessage({
                         {playbook && (
                             <Link
                                 href={playbookPath(playbook.id)}
-                                aria-label={`Open playbook ${playbook.title}`}
+                                aria-label={uiText`Open playbook ${playbook.title}`}
                                 className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700 bg-slate-700 py-0.5 pl-2 pr-2.5 text-xs text-white shadow transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                             >
                                 <ClipboardCheck className="h-2.5 w-2.5 shrink-0" />
@@ -114,7 +116,7 @@ export function UserMessage({
                                         key={i}
                                         type="button"
                                         onClick={() => onFileClick(f)}
-                                        aria-label={`Open ${f.filename}`}
+                                        aria-label={uiText`Open ${f.filename}`}
                                         className={`${className} cursor-pointer transition-colors hover:bg-white/80`}
                                     >
                                         {fileContent}

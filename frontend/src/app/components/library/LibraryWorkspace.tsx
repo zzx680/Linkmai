@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     createContext,
     type Dispatch,
@@ -90,8 +92,8 @@ type LibraryWorkspaceContextValue = {
 };
 
 const LIBRARY_TABS: { id: LibraryKind; label: string }[] = [
-    { id: "files", label: "Documents" },
-    { id: "templates", label: "Templates" },
+    { id: "files", label: uiText("Documents") },
+    { id: "templates", label: uiText("Templates") },
 ];
 
 const EMPTY_COLLECTION: LibraryViewCollection = {
@@ -271,7 +273,7 @@ export function LibraryWorkspaceProvider({
                 // is indistinguishable from "you have no files", so the user
                 // has to be told which one it is.
                 notifyError(error, {
-                    action: `load your ${kind}`,
+                    action: uiText`load your ${kind}`,
                     dedupeKey: `library:${kind}`,
                     onRetry: () => retryRef.current?.loadLibrary(kind),
                 });
@@ -347,7 +349,7 @@ export function LibraryWorkspaceProvider({
                     }));
                 } catch (error) {
                     notifyError(error, {
-                        action: "open the folder",
+                        action: uiText("open the folder"),
                         dedupeKey: `library-folder:${kind}:${folderId}`,
                         onRetry: () =>
                             retryRef.current?.loadFolderChildren(
@@ -432,7 +434,7 @@ export function LibraryWorkspaceProvider({
                     }));
                 } catch (error) {
                     notifyError(error, {
-                        action: `load more ${kind}`,
+                        action: uiText`load more ${kind}`,
                         dedupeKey: `library-more:${kind}:${levelKey}`,
                         onRetry: () =>
                             retryRef.current?.loadMoreDocuments(kind, parentId),
@@ -578,7 +580,7 @@ export function LibraryCollectionPage({
     const search = searchByKind[kind];
     const collectionRootPath = kind === "files" ? "/library" : "/library/templates";
   const debouncedSearch = useDebouncedValue(search, 250);
-    const title = kind === "files" ? "Documents" : "Templates";
+    const title = kind === "files" ? uiText("Documents") : uiText("Templates");
     const [selectionActions, setSelectionActions] = useState<DocTableSelectionActions | null>(null);
   const [documentTypeOptions, setDocumentTypeOptions] = useState<string[]>([]);
   const [tableQuery, setTableQuery] = useState<DocTableQuery>({
@@ -660,7 +662,7 @@ export function LibraryCollectionPage({
                 // The user asked for a folder and landed at the root
                 // instead; say why, and let Retry navigate back into it.
                 notifyError(error, {
-                    action: "open the folder",
+                    action: uiText("open the folder"),
                     dedupeKey: `library-route:${kind}:${folderId}`,
                     onRetry: () =>
                         router.push(
@@ -703,7 +705,7 @@ export function LibraryCollectionPage({
         );
     }, [collectionRootPath, folderId, router]);
     const presetsEmptyStateAction = useMemo(
-        () => ({ label: "Presets", onClick: openPresets }),
+        () => ({ label: uiText("Presets"), onClick: openPresets }),
         [openPresets],
     );
 
@@ -1009,7 +1011,7 @@ export function LibraryCollectionPage({
             <PageHeader
                 breadcrumbs={[
                     {
-                        label: "Library",
+                        label: uiText("Library"),
                         onClick: () => router.push("/library"),
                     },
                     {
@@ -1031,10 +1033,10 @@ export function LibraryCollectionPage({
                                 type: "custom",
                                 render: (
                                     <HeaderActionsMenu
-                                        title="More actions"
+                                        title={uiText("More actions")}
                                         items={[
                                             {
-                                                label: "Add preset templates",
+                                                label: uiText("Add preset templates"),
                                                 icon: BookOpen,
                                                 onSelect: openPresets,
                                             },
@@ -1074,7 +1076,7 @@ export function LibraryCollectionPage({
                         folderBackAction ? (
                             <TabPillButtonUI onClick={folderBackAction} className="pl-2">
                                 <ChevronLeft className="h-3.5 w-3.5" />
-                                Back
+                                {uiText("Back")}
                             </TabPillButtonUI>
                         ) : undefined
                     }
@@ -1088,7 +1090,7 @@ export function LibraryCollectionPage({
                                 disabled={!createFolderAction || loading}
                             >
                                 <Plus className="h-3.5 w-3.5" />
-                                <span className="hidden sm:inline">Folder</span>
+                                <span className="hidden sm:inline">{uiText("Folder")}</span>
                             </TabPillButtonUI>
                         </>
                     }

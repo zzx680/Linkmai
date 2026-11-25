@@ -214,9 +214,11 @@ const LOOPBACK_HOST = /^(?:localhost|127(?:\.\d{1,3}){3}|\[::1\])$/i;
 /**
  * Why browsers on the deployment's public origin cannot PUT to the storage
  * URLs this backend signs, or [] when nothing is visibly wrong. Uploads go
- * straight from the browser to `R2_PUBLIC_ENDPOINT_URL` (falling back to
- * `R2_ENDPOINT_URL`), so a value only this server can reach fails every
- * upload with a bare "Failed to fetch" and nothing at boot says why
+ * straight from the browser to the configured public endpoint:
+ * `R2_PUBLIC_ENDPOINT_URL` (falling back to `R2_ENDPOINT_URL`) for the S3
+ * driver, or `OSS_PUBLIC_ENDPOINT` for Alibaba Cloud OSS. A value only this
+ * server can reach fails every upload with a bare "Failed to fetch" and
+ * nothing at boot says why
  * (MIKE-FRONTEND-28, 3D, 2Z). A warning, not a boot failure: a reverse
  * proxy may legitimately make an unusual value work.
  *
@@ -227,10 +229,24 @@ export function storagePublicEndpointWarnings(
   env: NodeJS.ProcessEnv = process.env,
 ): string[] {
   const frontendRaw = env.FRONTEND_URL?.trim();
-  const endpointRaw =
-    env.R2_PUBLIC_ENDPOINT_URL?.trim() || env.R2_ENDPOINT_URL?.trim();
-  if (!frontendRaw || !endpointRaw) return [];
+  const ossDriver = env.STORAGE_DRIVER?.trim() === "oss";
+  const endpointRaw = ossDriver
+    ? env.OSS_PUBLIC_ENDPOINT?.trim()
+    : env.R2_PUBLIC_ENDPOINT_URL?.trim() || env.R2_ENDPOINT_URL?.trim();
+  if (!frontendRaw) return [];
   let frontend: URL;
+  if (!endpointRaw) {
+    if (!ossDriver) return [];
+    try {
+      frontend = new URL(frontendRaw);
+    } catch {
+      return [];
+    }
+    if (LOOPBACK_HOST.test(frontend.hostname)) return [];
+    return [
+      "STORAGE_DRIVER=oss needs OSS_PUBLIC_ENDPOINT set to the bucket's browser-facing custom domain (for example https://storage.example.com); without it the browser is handed URLs on the server-only OSS endpoint.",
+    ];
+  }
   let endpoint: URL;
   try {
     frontend = new URL(frontendRaw);
@@ -239,24 +255,42 @@ export function storagePublicEndpointWarnings(
     return [];
   }
   if (LOOPBACK_HOST.test(frontend.hostname)) return [];
-  const name = env.R2_PUBLIC_ENDPOINT_URL?.trim()
-    ? "R2_PUBLIC_ENDPOINT_URL"
-    : "R2_ENDPOINT_URL";
+  const name = ossDriver
+    ? "OSS_PUBLIC_ENDPOINT"
+    : env.R2_PUBLIC_ENDPOINT_URL?.trim()
+      ? "R2_PUBLIC_ENDPOINT_URL"
+      : "R2_ENDPOINT_URL";
+  const suggestion = ossDriver
+    ? "Set OSS_PUBLIC_ENDPOINT to the bucket's custom domain (deploy/README.md)."
+    : "Set R2_PUBLIC_ENDPOINT_URL to the storage URL browsers can reach (docs/deployment.md).";
+  if (ossDriver && endpoint.hostname.includes("-internal.")) {
+    return [
+      `${name} points at an OSS internal endpoint that browsers cannot reach. ${suggestion}`,
+    ];
+  }
+  // A bucket's default public endpoint is rejected for new mainland-China
+  // buckets since 2025-03-20; a custom domain mapped to the bucket is the
+  // supported path there.
+  if (ossDriver && /(^|\.)aliyuncs\.com$/i.test(endpoint.hostname)) {
+    return [
+      `${name} uses an OSS default endpoint; mainland buckets created after 2025-03-20 may reject it with PublicEndpointForbidden. ${suggestion}`,
+    ];
+  }
   if (LOOPBACK_HOST.test(endpoint.hostname)) {
     return [
-      `${name} points at loopback while FRONTEND_URL does not: browsers will try to upload to their own machine. Set R2_PUBLIC_ENDPOINT_URL to the storage URL browsers can reach (docs/deployment.md).`,
+      `${name} points at loopback while FRONTEND_URL does not: browsers will try to upload to their own machine. ${suggestion}`,
     ];
   }
   // A bare single-label host (`storage`, `minio`) is a container/service
   // name that resolves only inside the server's network.
   if (!endpoint.hostname.includes(".") && !endpoint.hostname.startsWith("[")) {
     return [
-      `${name} is an internal service name that browsers cannot resolve. Set R2_PUBLIC_ENDPOINT_URL to the storage URL browsers can reach (docs/deployment.md).`,
+      `${name} is an internal service name that browsers cannot resolve. ${suggestion}`,
     ];
   }
   if (frontend.protocol === "https:" && endpoint.protocol === "http:") {
     return [
-      `${name} uses http under an https FRONTEND_URL: browsers block the upload as mixed content. Serve storage over https (docs/deployment.md).`,
+      `${name} uses http under an https FRONTEND_URL: browsers block the upload as mixed content. Serve storage over https. ${suggestion}`,
     ];
   }
   return [];

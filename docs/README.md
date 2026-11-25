@@ -6,11 +6,16 @@
   registration, Ollama, and first-run setup
 - [Manual and production deployment](deployment.md) — managed infrastructure,
   environment variables, database upgrades, and deployment safety
+- [阿里云 ECS + RDS + OSS 部署](../deploy/README.md) — 灵迈 LinkMai 的域名、
+  证书、RDS 初始化、OSS 自定义域、Word 加载项与生产 compose
 - [Troubleshooting](troubleshooting.md) — common local and production problems
 - [Safe local testing](safe-local-testing.md) — disposable resources, synthetic
   documents, and secret handling
 
 ## Features and clients
+
+- [灵迈产品设计建议稿](linkmai-product-design.md) — 独立开源产品定位、合同交付闭环、信息架构与社区路线
+- [灵迈中国市场本土化](china-localization.md) — 产品定位、共享中文文案、品牌配置、输入法与法律适用范围
 
 - [Organization offboarding](organization-offboarding.md) — member removal,
   account deletion, shared-work transfer and owner-only recovery

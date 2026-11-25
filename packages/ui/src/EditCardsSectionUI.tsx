@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Children, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -40,7 +42,7 @@ export function EditCardsSectionUI({
                 <button
                     type="button"
                     onClick={() => setIsOpen((value) => !value)}
-                    aria-label={isOpen ? "Collapse edits" : "Expand edits"}
+                    aria-label={isOpen ? uiText("Collapse edits") : uiText("Expand edits")}
                     aria-expanded={isOpen}
                     className="shrink-0 text-gray-500 transition-colors hover:text-gray-700"
                 >

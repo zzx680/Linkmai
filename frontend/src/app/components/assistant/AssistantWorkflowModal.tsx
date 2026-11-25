@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { Workflow } from "../shared/types";
 import { WorkflowPickerModal } from "../workflows/WorkflowPickerModal";
 
@@ -36,7 +38,7 @@ export function AssistantWorkflowModal({
             onSelect={onSelect}
             workflowType="assistant"
             breadcrumbs={breadcrumbs}
-            primaryLabel="Use"
+            primaryLabel={uiText("Use")}
             initialWorkflowId={initialWorkflowId}
         />
     );

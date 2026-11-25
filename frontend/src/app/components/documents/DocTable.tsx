@@ -1,5 +1,9 @@
 "use client";
 
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { useDocumentConversionPolling } from "@/app/hooks/useDocumentConversionPolling";
 import { indexFolderDirectory } from "../shared/folderDirectoryIndex";
 import {
@@ -186,11 +190,11 @@ export interface DocTableQuery {
 }
 
 const SORT_KEY_LABELS: Record<DocumentSortKey, string> = {
-    name: "Name",
-    size: "Size",
-    version: "Version",
-    created: "Created",
-    updated: "Updated",
+    name: uiText("Name"),
+    size: uiText("Size"),
+    version: uiText("Version"),
+    created: uiText("Created"),
+    updated: uiText("Updated"),
 };
 
 interface DocTableOperations {
@@ -336,27 +340,27 @@ function ProjectTableLoadingHeader({ showCreator }: { showCreator: boolean }) {
                 widthClassName={DOC_NAME_COL_W}
             >
                 <div className="mr-3 h-2.5 w-2.5 rounded bg-gray-100 animate-pulse" />
-                <span className="mr-1">Name</span>
+                <span className="mr-1">{uiText("Name")}</span>
             </TableStickyCell>
             <TableHeaderCell className="ml-auto flex w-20 items-center gap-1">
-                <span>Type</span>
+                <span>{uiText("Type")}</span>
             </TableHeaderCell>
             <TableHeaderCell className="flex w-24 items-center gap-1">
-                <span>Size</span>
+                <span>{uiText("Size")}</span>
             </TableHeaderCell>
             <TableHeaderCell className="flex w-20 items-center gap-1">
-                <span>Version</span>
+                <span>{uiText("Version")}</span>
             </TableHeaderCell>
             {showCreator && (
                 <TableHeaderCell className="flex w-32 items-center gap-1">
-                    <span>Creator</span>
+                    <span>{uiText("Creator")}</span>
                 </TableHeaderCell>
             )}
             <TableHeaderCell className="flex w-32 items-center gap-1">
-                <span>Created</span>
+                <span>{uiText("Created")}</span>
             </TableHeaderCell>
             <TableHeaderCell className="flex w-32 items-center gap-1">
-                <span>Updated</span>
+                <span>{uiText("Updated")}</span>
             </TableHeaderCell>
             <TableHeaderCell className="w-8" />
         </TableHeaderRow>
@@ -407,8 +411,8 @@ function ProjectTableLoading({ showCreator }: { showCreator: boolean }) {
 
 function UploadingTrailingLabel() {
     return (
-        <span role="status" aria-label="Uploading">
-            <span aria-hidden="true">Uploading</span>
+        <span role="status" aria-label={uiText("Uploading")}>
+            <span aria-hidden="true">{uiText("Uploading")}</span>
             <span aria-hidden="true" className="uploading-ellipsis">
                 <span className="uploading-ellipsis-one">.</span>
                 <span className="uploading-ellipsis-two">..</span>
@@ -500,7 +504,7 @@ export function DocTable({
         return (
             <div className="w-32 shrink-0 text-xs text-gray-500">
                 <CreatorLabel
-                    label={mine ? "Me" : row.owner_display_name?.trim() || "Shared"}
+                    label={mine ? uiText("Me") : row.owner_display_name?.trim() || uiText("Shared")}
                     photo={mine ? ownProfile?.profilePhoto ?? row.owner_profile_photo : row.owner_profile_photo}
                     name={mine ? ownProfile?.displayName ?? row.owner_display_name : row.owner_display_name}
                 />
@@ -680,9 +684,9 @@ export function DocTable({
             // find is one we know nothing about, and the one thing we must
             // not do with an unknown is wave it through.
             setOwnerOnlyAction({
-                title: "Document unavailable",
+                title: uiText("Document unavailable"),
                 message:
-                    "That document is not loaded, so its versions cannot be changed. Reload and try again.",
+                    uiText("That document is not loaded, so its versions cannot be changed. Reload and try again."),
             });
             return false;
         }
@@ -700,7 +704,7 @@ export function DocTable({
             // account exists, so naming that tier sent people to somebody who
             // could not help. And no "ask …" line, for the same reason.
             setOwnerOnlyAction({
-                title: "Uploader only",
+                title: uiText("Uploader only"),
                 message: `Only the person who uploaded this document can ${action}.`,
             });
             return false;
@@ -720,7 +724,7 @@ export function DocTable({
             await uploadDocumentVersion(doc.id, file, filename);
         } catch (e) {
             notifyError(e, {
-                action: "upload the new version",
+                action: uiText("upload the new version"),
                 supportNote: `Document ${doc.filename}`,
                 onRetry: () => {
                     void submitNewVersion(doc, file, filename);
@@ -760,7 +764,7 @@ export function DocTable({
         if (replaced) {
             setViewingDocVersion({
                 id: replaced.id,
-                label: replaced.filename?.trim() || "Version",
+                label: replaced.filename?.trim() || uiText("Version"),
             });
         }
     }
@@ -835,13 +839,13 @@ export function DocTable({
                 nextVersion
                     ? {
                           id: nextVersion.id,
-                          label: nextVersion.filename?.trim() || "Version",
+                          label: nextVersion.filename?.trim() || uiText("Version"),
                       }
                     : null,
             );
         } catch (e) {
             notifyError(e, {
-                action: "delete this version",
+                action: uiText("delete this version"),
                 onRetry: () => {
                     void handleDeleteVersion(docId, versionId);
                 },
@@ -1292,7 +1296,7 @@ export function DocTable({
             // is the retry; a Retry action here would race it.
             notifyError(err, {
                 action: "delete the folder",
-                fallback: "This folder could not be deleted. Please try again.",
+                fallback: uiText("This folder could not be deleted. Please try again."),
                 supportNote: `Folder ${pending.folder.name}`,
             });
         }
@@ -1460,7 +1464,7 @@ export function DocTable({
             notifyError(
                 e instanceof MikeApiError && e.status === 404
                     ? new UserVisibleError(
-                          "This document has no file yet, so it can't be renamed.",
+                          uiText("This document has no file yet, so it can't be renamed."),
                           { kind: "not_found", cause: e },
                       )
                     : e,
@@ -1470,7 +1474,7 @@ export function DocTable({
                 {
                     action: "rename the document",
                     fallback:
-                        "This document could not be renamed. Please try again.",
+                        uiText("This document could not be renamed. Please try again."),
                 },
             );
         }
@@ -1518,9 +1522,9 @@ export function DocTable({
             // the row reappear with no explanation.
             void handleRemoveDoc(doc.id).catch((error) => {
                 notifyError(error, {
-                    action: "delete the document",
+                    action: uiText("delete the document"),
                     fallback:
-                        "This file could not be deleted. Please try again.",
+                        uiText("This file could not be deleted. Please try again."),
                     supportNote: `Document ${doc.filename}`,
                     // Through the same entry point, so a failed retry is
                     // reported again and a document that has gained versions
@@ -1549,8 +1553,8 @@ export function DocTable({
             setPendingDeleteStatus("idle");
             // The confirm dialog stays open, so its own button is the retry.
             notifyError(err, {
-                action: "delete the document",
-                fallback: "This file could not be deleted. Please try again.",
+                action: uiText("delete the document"),
+                fallback: uiText("This file could not be deleted. Please try again."),
                 supportNote: `Document ${pending.filename}`,
             });
         }
@@ -1618,7 +1622,7 @@ export function DocTable({
     /** The refusal for a delete: the uploader rule, and nobody to ask. */
     function refuseDocumentDelete(action: string) {
         setOwnerOnlyAction({
-            title: "Uploader only",
+            title: uiText("Uploader only"),
             message: `Only the person who uploaded this document can ${action}.`,
         });
     }
@@ -1674,7 +1678,7 @@ export function DocTable({
                     `You can upload up to ${MAX_DOCUMENTS_PER_DIRECTORY_UPLOAD} supported documents at a time. Nothing was uploaded.`,
                     { kind: "validation" },
                 ),
-                { action: "upload these files" },
+                { action: uiText("upload these files") },
             );
             return;
         }
@@ -1937,9 +1941,9 @@ export function DocTable({
                       })
                     : err,
                 {
-                    action: "upload these files",
+                    action: uiText("upload these files"),
                     fallback:
-                        "This folder could not be uploaded. Please try again.",
+                        uiText("This folder could not be uploaded. Please try again."),
                     onRetry:
                         retryEntries.length > 0
                             ? () => {
@@ -1981,7 +1985,7 @@ export function DocTable({
         } catch (error) {
             notifyError(
                 new UserVisibleError(
-                    "This folder could not be read. Try selecting it with Upload folder instead.",
+                    uiText("This folder could not be read. Try selecting it with Upload folder instead."),
                     { kind: "unknown", cause: error },
                 ),
                 { action: "read the dropped folder" },
@@ -2064,8 +2068,8 @@ export function DocTable({
             } catch (err) {
                 const remaining = supported.slice(landed);
                 notifyError(err, {
-                    action: "upload the new version",
-                    fallback: "This version could not be uploaded. Try again.",
+                    action: uiText("upload the new version"),
+                    fallback: uiText("This version could not be uploaded. Try again."),
                     supportNote: `Document ${doc.filename}`,
                     onRetry: () => {
                         void handleDropDocumentVersions(doc, remaining);
@@ -2106,7 +2110,7 @@ export function DocTable({
                 notifyError(err, {
                     action: "save this document as a new version",
                     fallback:
-                        "This document could not be saved as a new version.",
+                        uiText("This document could not be saved as a new version."),
                     supportNote: `${sourceDoc.filename} onto ${targetDoc.filename}`,
                     onRetry: () => {
                         void saveExistingDocumentAsNewVersion(targetDoc, sourceDoc);
@@ -2244,7 +2248,7 @@ export function DocTable({
                         <input
                             type="checkbox"
                             disabled
-                            aria-label="Select files in new folder"
+                            aria-label={uiText("Select files in new folder")}
                             className={`${TABLE_CHECKBOX_CLASS} cursor-default opacity-40`}
                         />
                         <span className="mr-2 flex h-4 w-4 shrink-0 items-center justify-center">
@@ -2254,10 +2258,11 @@ export function DocTable({
                         <input
                             autoFocus
                             className="flex-1 min-w-0 text-xs text-gray-800 bg-transparent outline-none border-b border-gray-300"
-                            placeholder="Folder name"
+                            placeholder={uiText("Folder name")}
                             value={newFolderName}
                             onChange={(e) => setNewFolderName(e.target.value)}
                             onKeyDown={(e) => {
+                                if (isImeComposing(e)) return;
                                 if (e.key === "Enter") void handleCreateFolder(parentId);
                                 if (e.key === "Escape") {
                                     setCreatingFolderIn(undefined);
@@ -2328,11 +2333,11 @@ export function DocTable({
                 </div>
                 <div className="ml-auto w-20 shrink-0 text-xs text-gray-300 lowercase truncate">
                     {entryKind === "folder"
-                        ? "folder"
+                        ? uiText("folder")
                         : fileType ??
                           (filename.includes(".")
                               ? filename.split(".").pop()
-                              : "file")}
+                              : uiText("file"))}
                 </div>
                 <div className="w-24 shrink-0 text-xs text-gray-300">{statusLabel}</div>
                 <div className="w-20 shrink-0 text-xs text-gray-300">—</div>
@@ -2844,7 +2849,7 @@ export function DocTable({
                                                                 )
                                                             }
                                                             onClick={(e) => e.stopPropagation()}
-                                                            aria-label={`Select ${doc.filename}`}
+                                                            aria-label={uiText`Select ${doc.filename}`}
                                                             className={TABLE_CHECKBOX_CLASS}
                                                         />
                                                     )}
@@ -2873,6 +2878,7 @@ export function DocTable({
                                                             }}
                                                             onChange={(e) => setRenameDocumentValue(e.target.value)}
                                                             onKeyDown={(e) => {
+                                                                if (isImeComposing(e)) return;
                                                                 if (e.key === "Enter")
                                                                     void submitDocumentRename(doc.id);
                                                                 if (e.key === "Escape") {
@@ -3176,8 +3182,8 @@ export function DocTable({
                                             type="button"
                                             aria-label={
                                                 isExpanded
-                                                    ? `Collapse ${folder.name}`
-                                                    : `Expand ${folder.name}`
+                                                    ? uiText`Collapse ${folder.name}`
+                                                    : uiText`Expand ${folder.name}`
                                             }
                                             onClick={(event) => {
                                                 event.stopPropagation();
@@ -3205,6 +3211,7 @@ export function DocTable({
                                                 }}
                                                 onChange={(e) => setRenameFolderValue(e.target.value)}
                                                 onKeyDown={(e) => {
+                                                    if (isImeComposing(e)) return;
                                                     if (e.key === "Enter") void handleRenameFolder(folder.id);
                                                     if (e.key === "Escape") setRenamingFolderId(null);
                                                 }}
@@ -3350,7 +3357,7 @@ export function DocTable({
             notifyError(error, {
                 action: "download the selected files",
                 fallback:
-                    "The selected files and folders could not be downloaded.",
+                    uiText("The selected files and folders could not be downloaded."),
                 onRetry: () => {
                     void handleDownloadSelectedDocs();
                 },
@@ -3430,7 +3437,7 @@ export function DocTable({
                 ? ` out of ${one ? "its folder" : "their folders"}`
                 : "";
         notifyPartialFailure(
-            `${failedIds.length} ${one ? "document" : "documents"} could not be moved${where}${
+            `${failedIds.length} ${one ? uiText("document") : uiText("documents")} could not be moved${where}${
                     failedNames.length > 0 ? `: ${failedNames.join(", ")}` : ""
                 }.`,
             {
@@ -3526,13 +3533,13 @@ export function DocTable({
                 .filter((doc) => failedIdSet.has(doc.id))
                 .map((doc) => doc.filename);
             notifyPartialFailure(
-                `${failedCount} ${failedCount === 1 ? "document" : "documents"} could not be deleted${
+                uiText`${failedCount} ${failedCount === 1 ? "document" : "documents"} could not be deleted${
                         failedNames.length > 0
                             ? `: ${failedNames.join(", ")}`
                             : ""
                     }. They are still in the list.`,
                 {
-                    action: `delete ${failedCount === 1 ? "the document" : "those documents"}`,
+                    action: uiText`delete ${failedCount === 1 ? "the document" : "those documents"}`,
                     // Only the rows that survived, so a retry cannot delete
                     // anything twice.
                     dedupeKey: "bulk-delete-documents",
@@ -3623,13 +3630,13 @@ export function DocTable({
                 .filter((folder) => failedFolderRootIds.includes(folder.id))
                 .map((folder) => folder.name);
             notifyPartialFailure(
-                `${failedFolderRootIds.length} ${failedFolderRootIds.length === 1 ? "folder" : "folders"} could not be deleted${
+                uiText`${failedFolderRootIds.length} ${failedFolderRootIds.length === 1 ? "folder" : "folders"} could not be deleted${
                         failedFolderNames.length > 0
                             ? `: ${failedFolderNames.join(", ")}`
                             : ""
                     }. ${failedFolderRootIds.length === 1 ? "It is" : "They are"} still in the list and stay selected.`,
                 {
-                    action: `delete ${failedFolderRootIds.length === 1 ? "the folder" : "those folders"}`,
+                    action: uiText`delete ${failedFolderRootIds.length === 1 ? "the folder" : "those folders"}`,
                     dedupeKey: "bulk-delete-folders",
                     // Retrying is the Delete button on the still-selected rows;
                     // re-running this handler here would also re-delete the
@@ -3837,10 +3844,10 @@ export function DocTable({
     const updatedSortDirection = effectiveSort?.key === "updated" ? effectiveSort.direction : null;
     const resetSortLabel = defaultSort
         ? `Default (${SORT_KEY_LABELS[defaultSort.key]})`
-        : "Default Order";
+        : uiText("Default Order");
     const nameFilterButton = enableHeaderFilters ? (
         <TableSortFilter
-            label="Sort by name"
+            label={uiText("Sort by name")}
             value={nameSortDirection}
             allLabel={resetSortLabel}
             align="right"
@@ -3849,7 +3856,7 @@ export function DocTable({
     ) : null;
     const typeFilterButton = enableHeaderFilters ? (
         <TableFilters
-            label="Filter by file type"
+            label={uiText("Filter by file type")}
             value={typeFilter}
             allLabel="All Types"
             widthClassName="w-40"
@@ -3881,7 +3888,7 @@ export function DocTable({
     );
     const creatorFilterButton = enableHeaderFilters && showCreator ? (
         <PersonFilter
-            label="Filter by creator"
+            label={uiText("Filter by creator")}
             selectedTitle={(name) => `Created by ${name}`}
             value={
                 creatorPeople.find(
@@ -3896,7 +3903,7 @@ export function DocTable({
     ) : null;
     const sizeFilterButton = enableHeaderFilters ? (
         <TableSortFilter
-            label="Sort by size"
+            label={uiText("Sort by size")}
             value={sizeSortDirection}
             allLabel={resetSortLabel}
             onChange={(direction) => handleSortChange("size", direction)}
@@ -3904,7 +3911,7 @@ export function DocTable({
     ) : null;
     const versionFilterButton = enableHeaderFilters ? (
         <TableSortFilter
-            label="Sort by version"
+            label={uiText("Sort by version")}
             value={versionSortDirection}
             allLabel={resetSortLabel}
             onChange={(direction) => handleSortChange("version", direction)}
@@ -3912,7 +3919,7 @@ export function DocTable({
     ) : null;
     const createdFilterButton = enableHeaderFilters ? (
         <TableSortFilter
-            label="Sort by created date"
+            label={uiText("Sort by created date")}
             value={createdSortDirection}
             allLabel={resetSortLabel}
             onChange={(direction) => handleSortChange("created", direction)}
@@ -3920,7 +3927,7 @@ export function DocTable({
     ) : null;
     const updatedFilterButton = enableHeaderFilters ? (
         <TableSortFilter
-            label="Sort by updated date"
+            label={uiText("Sort by updated date")}
             value={updatedSortDirection}
             allLabel={resetSortLabel}
             onChange={(direction) => handleSortChange("updated", direction)}
@@ -4060,7 +4067,7 @@ export function DocTable({
             notifyError(error, {
                 action: "select every matching file",
                 fallback:
-                    "All matching files could not be selected. Please try again.",
+                    uiText("All matching files could not be selected. Please try again."),
                 // Through the ref: the search, filter and sort this reads
                 // may have changed while the request was in flight.
                 onRetry: () => retryToggleAllDocumentsRef.current?.(),
@@ -4268,13 +4275,11 @@ export function DocTable({
     const pendingVersionDropMessage = pendingVersionDrop ? (
         <div className="space-y-2">
             <p>
-                You are about to save{" "}
-                <span className="font-medium text-gray-950">{pendingVersionDrop.sourceDoc.filename}</span> as a new
-                version of <span className="font-medium text-gray-950">{pendingVersionDrop.targetDoc.filename}</span>.
+                {uiText("You are about to save")}{" "}
+                <span className="font-medium text-gray-950">{pendingVersionDrop.sourceDoc.filename}</span> {uiText("as a new version of")} <span className="font-medium text-gray-950">{pendingVersionDrop.targetDoc.filename}</span>.
             </p>
             <p>
-                <span className="font-medium text-gray-950">{pendingVersionDrop.sourceDoc.filename}</span> will no
-                longer exist as a separate document
+                <span className="font-medium text-gray-950">{pendingVersionDrop.sourceDoc.filename}</span> {uiText("will no longer exist as a separate document")}
                 {(currentVersionNumber(pendingVersionDrop.sourceDoc) ?? 1) > 1
                     ? " and its older versions will be deleted"
                     : ""}
@@ -4288,29 +4293,27 @@ export function DocTable({
     const pendingDeleteDocMessage = pendingDeleteDoc ? (
         <div className="space-y-2">
             <p>
-                <span className="font-medium text-gray-950">{pendingDeleteDoc.filename}</span> has{" "}
-                {pendingDeleteDocVersionCount} {pendingDeleteDocVersionCount === 1 ? "version" : "versions"}. Deleting
-                this document will delete all of its versions.
+                <span className="font-medium text-gray-950">{pendingDeleteDoc.filename}</span> {uiText("has")}{" "}
+                {pendingDeleteDocVersionCount} {pendingDeleteDocVersionCount === 1 ? "version" : "versions"}{uiText(". Deleting this document will delete all of its versions.")}
             </p>
         </div>
     ) : undefined;
     const pendingDeleteFolderMessage = pendingDeleteFolder ? (
         <div className="space-y-2">
             <p>
-                This will permanently delete{" "}
+                {uiText("This will permanently delete")}{" "}
                 <span className="font-medium text-gray-950">
                     {pendingDeleteFolder.folderIds.length}{" "}
-                    {pendingDeleteFolder.folderIds.length === 1 ? "folder" : "folders"}
+                    {pendingDeleteFolder.folderIds.length === 1 ? uiText("folder") : uiText("folders")}
                 </span>
-                , including <span className="font-medium text-gray-950">{pendingDeleteFolder.folder.name}</span>
-                {pendingDeleteFolder.folderIds.length > 1 ? " and its nested subfolders" : ""}.
+                {uiText(", including")} <span className="font-medium text-gray-950">{pendingDeleteFolder.folder.name}</span>
+                {pendingDeleteFolder.folderIds.length > 1 ? uiText(" and its nested subfolders") : ""}.
             </p>
             {pendingDeleteFolder.documentCount > 0 && (
                 <p>
                     {pendingDeleteFolder.documentCount}{" "}
-                    {pendingDeleteFolder.documentCount === 1 ? "document" : "documents"} in the deleted{" "}
-                    {pendingDeleteFolder.folderIds.length === 1 ? "folder" : "folders"} will also be permanently
-                    deleted.
+                    {pendingDeleteFolder.documentCount === 1 ? uiText("document") : uiText("documents")} in the deleted{" "}
+                    {pendingDeleteFolder.folderIds.length === 1 ? uiText("folder") : uiText("folders")} {uiText("will also be permanently deleted.")}
                 </p>
             )}
         </div>
@@ -4367,7 +4370,7 @@ export function DocTable({
             />
             <UploadOverlay
                 open={isDraggingCollectionFiles}
-                label="Drop files or folders here to upload"
+                label={uiText("Drop files or folders here to upload")}
                 warning={documentUploadWarning}
                 onWarningClose={() => setDocumentUploadWarning(null)}
             />
@@ -4378,24 +4381,24 @@ export function DocTable({
             />
             <ConfirmPopup
                 open={!!folderUploadConflict}
-                title="Folder already exists"
+                title={uiText("Folder already exists")}
                 message={
                     folderUploadConflict
                         ? `A folder named “${folderUploadConflict.folderName}” already exists. This folder will be uploaded as “${folderUploadConflict.suggestedName}”.`
                         : undefined
                 }
-                confirmLabel="Continue"
-                cancelLabel="Cancel"
+                confirmLabel={uiText("Continue")}
+                cancelLabel={uiText("Cancel")}
                 onCancel={() => finishFolderUploadConflict("cancel")}
                 onConfirm={() => finishFolderUploadConflict("rename")}
             />
             <ConfirmPopup
                 open={confirmDeleteAllOpen && !!selectionActions}
-                title="Delete selected items?"
+                title={uiText("Delete selected items?")}
                 message={
                     <div className="space-y-2">
                         <p>
-                            This will permanently delete{" "}
+                            {uiText("This will permanently delete")}{" "}
                             <span className="font-medium text-gray-950">
                                 {selectedDeleteSummary}
                             </span>
@@ -4403,28 +4406,26 @@ export function DocTable({
                         </p>
                         {selectedFolderIds.size > 0 && (
                             <p>
-                                All nested folders and files contained in the
-                                selected folders will also be deleted.
+                                {uiText("All nested folders and files contained in the selected folders will also be deleted.")}
                             </p>
                         )}
                         <p>
-                            Files owned by others will be skipped. This action
-                            cannot be undone.
+                            {uiText("Files owned by others will be skipped. This action cannot be undone.")}
                         </p>
                     </div>
                 }
-                confirmLabel="Delete"
+                confirmLabel={uiText("Delete")}
                 confirmVariant="danger"
-                cancelLabel="Cancel"
+                cancelLabel={uiText("Cancel")}
                 onCancel={() => setConfirmDeleteAllOpen(false)}
                 onConfirm={() => void handleDeleteSelectedItems()}
             />
             <ConfirmPopup
                 open={!!pendingVersionDrop}
-                title="Save as new version?"
+                title={uiText("Save as new version?")}
                 message={pendingVersionDropMessage}
-                confirmLabel="Confirm"
-                cancelLabel="Cancel"
+                confirmLabel={uiText("Confirm")}
+                cancelLabel={uiText("Cancel")}
                 onCancel={() => setPendingVersionDrop(null)}
                 onConfirm={() => {
                     const pending = pendingVersionDrop;
@@ -4435,9 +4436,9 @@ export function DocTable({
             />
             <ConfirmPopup
                 open={!!pendingDeleteDoc}
-                title="Delete document?"
+                title={uiText("Delete document?")}
                 message={pendingDeleteDocMessage}
-                confirmLabel="Delete"
+                confirmLabel={uiText("Delete")}
                 confirmVariant="danger"
                 confirmStatus={
                     pendingDeleteStatus === "deleting"
@@ -4446,7 +4447,7 @@ export function DocTable({
                           ? "complete"
                           : "idle"
                 }
-                cancelLabel="Cancel"
+                cancelLabel={uiText("Cancel")}
                 onCancel={() => {
                     if (pendingDeleteStatus === "deleting") return;
                     setPendingDeleteDoc(null);
@@ -4456,9 +4457,9 @@ export function DocTable({
             />
             <ConfirmPopup
                 open={!!pendingDeleteFolder}
-                title="Delete folder?"
+                title={uiText("Delete folder?")}
                 message={pendingDeleteFolderMessage}
-                confirmLabel="Delete"
+                confirmLabel={uiText("Delete")}
                 confirmVariant="danger"
                 confirmStatus={
                     pendingDeleteFolderStatus === "deleting"
@@ -4467,7 +4468,7 @@ export function DocTable({
                           ? "complete"
                           : "idle"
                 }
-                cancelLabel="Cancel"
+                cancelLabel={uiText("Cancel")}
                 onCancel={() => {
                     if (pendingDeleteFolderStatus === "deleting") return;
                     setPendingDeleteFolder(null);
@@ -4510,35 +4511,35 @@ export function DocTable({
                                     }}
                                     onChange={() => void handleToggleAllDocuments()}
                                     className={TABLE_CHECKBOX_CLASS}
-                                    aria-label="Select all files and folders"
+                                    aria-label={uiText("Select all files and folders")}
                                 />
-                                <span className="mr-1">Name</span>
+                                <span className="mr-1">{uiText("Name")}</span>
                                 {nameFilterButton}
                             </TableStickyCell>
                             <TableHeaderCell className="ml-auto flex w-20 items-center gap-1">
-                                <span>Type</span>
+                                <span>{uiText("Type")}</span>
                                 {typeFilterButton}
                             </TableHeaderCell>
                             <TableHeaderCell className="flex w-24 items-center gap-1">
-                                <span>Size</span>
+                                <span>{uiText("Size")}</span>
                                 {sizeFilterButton}
                             </TableHeaderCell>
                             <TableHeaderCell className="flex w-20 items-center gap-1">
-                                <span>Version</span>
+                                <span>{uiText("Version")}</span>
                                 {versionFilterButton}
                             </TableHeaderCell>
                             {showCreator && (
                                 <TableHeaderCell className="flex w-32 items-center gap-1">
-                                    <span>Creator</span>
+                                    <span>{uiText("Creator")}</span>
                                     {creatorFilterButton}
                                 </TableHeaderCell>
                             )}
                             <TableHeaderCell className="flex w-32 items-center gap-1">
-                                <span>Created</span>
+                                <span>{uiText("Created")}</span>
                                 {createdFilterButton}
                             </TableHeaderCell>
                             <TableHeaderCell className="flex w-32 items-center gap-1">
-                                <span>Updated</span>
+                                <span>{uiText("Updated")}</span>
                                 {updatedFilterButton}
                             </TableHeaderCell>
                             <TableHeaderCell className="w-8" />
@@ -4583,7 +4584,7 @@ export function DocTable({
                             {viewedFolderIsEmpty ? (
                                 <div className="flex flex-1 items-center justify-center py-24 text-center">
                                     <p className="text-sm text-gray-400">
-                                        Empty folder
+                                        {uiText("Empty folder")}
                                     </p>
                                 </div>
                             ) : docs.length === 0 &&
@@ -4592,7 +4593,7 @@ export function DocTable({
                             !hasVisibleCollectionUpload ? (
                                 serverQueryActive ? (
                                     <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
-                                        <p className="text-sm text-gray-400">No matches found</p>
+                                        <p className="text-sm text-gray-400">{uiText("No matches found")}</p>
                                     </div>
                                 ) : (
                                     <div
@@ -4603,7 +4604,7 @@ export function DocTable({
                                             <EmptyState
                                                 icon={<LibrarySkeuoIcon />}
                                                 title={emptyStateTitle}
-                                                description="Upload documents or drop files and folders here"
+                                                description={uiText("Upload documents or drop files and folders here")}
                                                 action={
                                                     <div className="flex flex-wrap items-center gap-2">
                                                         <PillButtonUI
@@ -4630,14 +4631,14 @@ export function DocTable({
                                                                     "content.edit",
                                                                 )
                                                                     ? undefined
-                                                                    : "Only an editor can add documents"
+                                                                    : uiText("Only an editor can add documents")
                                                             }
                                                             onClick={(event) => {
                                                                 event.stopPropagation();
                                                                 openAddDocuments();
                                                             }}
                                                         >
-                                                            Upload
+                                                            {uiText("Upload")}
                                                         </PillButtonUI>
                                                         {emptyStateSecondaryAction && (
                                                             <PillButtonUI
@@ -4787,7 +4788,7 @@ export function DocTable({
                                                                                 )
                                                                             }
                                                                             onClick={(e) => e.stopPropagation()}
-                                                                            aria-label={`Select ${docName}`}
+                                                                            aria-label={uiText`Select ${docName}`}
                                                                             className={TABLE_CHECKBOX_CLASS}
                                                                         />
                                                                     )}
@@ -4818,6 +4819,7 @@ export function DocTable({
                                                                                 setRenameDocumentValue(e.target.value)
                                                                             }
                                                                             onKeyDown={(e) => {
+                                                                                if (isImeComposing(e)) return;
                                                                                 if (e.key === "Enter")
                                                                                     void submitDocumentRename(doc.id);
                                                                                 if (e.key === "Escape") {

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/app/components/auth/OnboardingShell";
@@ -64,8 +66,8 @@ function ProfileDetailsForm({
         } catch (submitError) {
             setError(
                 describeError(submitError, {
-                    action: "save your details",
-                    fallback: "Unable to save your details. Try again.",
+                    action: uiText("save your details"),
+                    fallback: uiText("Unable to save your details. Try again."),
                 }).message,
             );
         } finally {
@@ -75,14 +77,14 @@ function ProfileDetailsForm({
 
     return (
         <OnboardingShell
-            step="Step 1 of 4"
-            title="Tell us about you"
-            description="Add the details we should use across Mike."
+            step={uiText("Step 1 of 4")}
+            title={uiText("Tell us about you")}
+            description={uiText("Add the details we should use across Mike.")}
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <FieldLabel htmlFor="name">
-                        Name
+                        {uiText("Name")}
                     </FieldLabel>
                     <InputUI
                         id="name"
@@ -96,7 +98,7 @@ function ProfileDetailsForm({
 
                 <div>
                     <FieldLabel htmlFor="organisation">
-                        Organisation
+                        {uiText("Organisation")}
                     </FieldLabel>
                     <InputUI
                         id="organisation"
@@ -127,7 +129,7 @@ function ProfileDetailsForm({
                         disabled={submitting}
                         className="w-full"
                     >
-                        {submitting ? "Saving..." : "Continue"}
+                        {submitting ? uiText("Saving...") : uiText("Continue")}
                     </PillButtonUI>
                 </div>
             </form>

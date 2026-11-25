@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Modal } from "@/app/components/modals/Modal";
@@ -102,7 +104,7 @@ export function MemberDepartureDialog({
           const name = member.display_name?.trim();
           return {
             value: member.user_id,
-            label: name || member.email || "Unnamed member",
+            label: name || member.email || uiText("Unnamed member"),
             suffix: name && member.email ? `(${member.email})` : undefined,
           };
         }),
@@ -186,22 +188,22 @@ export function MemberDepartureDialog({
       onClose={() => {
         if (!working) onCancel();
       }}
-      breadcrumbs={["Organization", "Members", leaving ? "Leave" : "Remove"]}
+      breadcrumbs={[uiText("Organization"), uiText("Members"), leaving ? uiText("Leave") : uiText("Remove")]}
       size="sm"
       className="h-auto max-h-[calc(100vh-2rem)]"
       cancelAction={{
-        label: "Cancel",
+        label: uiText("Cancel"),
         disabled: working,
         onClick: onCancel,
       }}
       primaryAction={{
         label: working
           ? leaving
-            ? "Leaving..."
-            : "Removing..."
+            ? uiText("Leaving...")
+            : uiText("Removing...")
           : leaving
-            ? "Leave"
-            : "Remove",
+            ? uiText("Leave")
+            : uiText("Remove"),
         variant: "danger",
         disabled: !canConfirm,
         onClick: () => void confirm(),
@@ -215,12 +217,12 @@ export function MemberDepartureDialog({
 
         {loadFailed ? (
           <p role="alert" className="text-sm text-red-600">
-            Could not check what would be transferred or archived. Close this and try again.
+            {uiText("Could not check what would be transferred or archived. Close this and try again.")}
           </p>
         ) : !ready ? (
           <div
             role="status"
-            aria-label="Checking what would be transferred or archived"
+            aria-label={uiText("Checking what would be transferred or archived")}
             className="space-y-5"
           >
             <div className="space-y-2">
@@ -246,10 +248,10 @@ export function MemberDepartureDialog({
                   id="member-departure-transfer"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Transfer ownership
+                  {uiText("Transfer ownership")}
                 </h2>
                 <p className="text-sm text-gray-500">
-                  {owedSummary} {owed === 1 ? "needs" : "need"} a new owner. Shared and public work will transfer together.
+                  {owedSummary} {owed === 1 ? "needs" : "need"} {uiText("a new owner. Shared and public work will transfer together.")}
                 </p>
                 {titles.length === 0 ? null : titles.length === 1 ? (
                   <p className="text-xs text-gray-500 [overflow-wrap:anywhere]">
@@ -263,7 +265,7 @@ export function MemberDepartureDialog({
                           "list-none px-0 [&::-webkit-details-marker]:hidden",
                       })}
                     >
-                      View items
+                      {uiText("View items")}
                       <ChevronDown className="h-3.5 w-3.5 transition-transform group-open/items:rotate-180" />
                     </summary>
                     <ul className="mt-2 space-y-1 text-xs text-gray-500">
@@ -281,17 +283,17 @@ export function MemberDepartureDialog({
                 {candidates.length > 0 ? (
                   <ModalSelect
                     id="member-departure-successor"
-                    aria-label="Hand over to"
+                    aria-label={uiText("Hand over to")}
                     value={selectedSuccessor}
                     onChange={setSuccessor}
                     options={candidates}
-                    placeholder="Choose a member"
+                    placeholder={uiText("Choose a member")}
                     disabled={working}
                     wrapLabels
                   />
                 ) : (
                   <p role="alert" className="text-sm text-red-600">
-                    There is no other member to hand this to.
+                    {uiText("There is no other member to hand this to.")}
                   </p>
                 )}
               </section>
@@ -306,13 +308,13 @@ export function MemberDepartureDialog({
                   id="member-departure-private-activity"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Private work retained for 30 days
+                  {uiText("Private work retained for 30 days")}
                 </h2>
                 <p className="text-sm text-gray-500">
-                  {archivedSummary} will be archived for 30 days.
+                  {archivedSummary} {uiText("will be archived for 30 days.")}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Only organization owners can recover, reassign or delete this work. Anything not recovered within 30 days will be permanently deleted, including its contents.
+                  {uiText("Only organization owners can recover, reassign or delete this work. Anything not recovered within 30 days will be permanently deleted, including its contents.")}
                 </p>
               </section>
             ) : null}

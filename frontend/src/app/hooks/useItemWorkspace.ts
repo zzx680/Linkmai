@@ -7,6 +7,8 @@ import {
     useWorkspace,
 } from "@/app/contexts/WorkspaceContext";
 import { showToast } from "@mike/client";
+import { uiText } from "@mike/client";
+import { zhCN } from "@/app/lib/localization";
 
 /** One notice for a switch, however many things on the page ask for it. */
 const WORKSPACE_SWITCH_TOAST_KEY = "workspace-switch";
@@ -21,7 +23,7 @@ const WORKSPACE_SWITCH_TOAST_MS = 2500;
 export function notifyWorkspaceSwitched(name: string, reason?: string): void {
     showToast({
         tone: "info",
-        title: `Switched to ${name}`,
+        title: uiText`Switched to ${name}`,
         message: reason,
         durationMs: WORKSPACE_SWITCH_TOAST_MS,
         dedupeKey: WORKSPACE_SWITCH_TOAST_KEY,
@@ -62,7 +64,7 @@ export function useItemWorkspace(
             settledFor.current = itemId;
             return;
         }
-        let name = PERSONAL_WORKSPACE_LABEL;
+        let name: string = PERSONAL_WORKSPACE_LABEL;
         if (orgId) {
             // Which organizations are theirs is not known yet: ask again
             // once it is.
@@ -80,7 +82,7 @@ export function useItemWorkspace(
         setWorkspace(target);
         notifyWorkspaceSwitched(
             name,
-            "What you opened belongs to this workspace.",
+            zhCN.navigation.itemWorkspace,
         );
     }, [itemId, orgId, workspaceId, organizations, setWorkspace]);
 }

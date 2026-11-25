@@ -1,5 +1,9 @@
 "use client";
 
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import {
     useEffect,
     useState,
@@ -220,8 +224,8 @@ export function TableFilters<T extends string>({
 }
 
 const SORT_OPTIONS: TableFilterOption<TableSortDirection>[] = [
-    { value: "asc", label: "Ascending" },
-    { value: "desc", label: "Descending" },
+    { value: "asc", label: uiText("Ascending") },
+    { value: "desc", label: uiText("Descending") },
 ];
 
 /** Ascending/descending sort menu for a column header. */
@@ -487,6 +491,7 @@ export function TablePrimaryCell({
                     value={editValue ?? ""}
                     onChange={(e) => onEditValueChange?.(e.target.value)}
                     onKeyDown={(e) => {
+                        if (isImeComposing(e)) return;
                         if (e.key === "Enter") onEditCommit?.();
                         if (e.key === "Escape") onEditCancel?.();
                     }}
@@ -523,7 +528,7 @@ export function TablePrimaryCell({
                         aria-label={
                             checkboxTitle ??
                             (typeof label === "string"
-                                ? `Select ${label}`
+                                ? uiText`Select ${label}`
                                 : undefined)
                         }
                     />

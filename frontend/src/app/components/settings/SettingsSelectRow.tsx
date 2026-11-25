@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { ChevronDown } from "lucide-react";
 import {
   authInputUIClassName,
@@ -73,7 +75,7 @@ export function SettingsSelectRow({
               authInputUIClassName,
             )}
           >
-            <span className="truncate">{selected?.label ?? "Loading..."}</span>
+            <span className="truncate">{selected?.label ?? uiText("Loading...")}</span>
             <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
           </button>
         </DropdownTrigger>

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { EditCardUI } from "@mike/ui";
 import { resolveDocumentEdit } from "@/app/lib/mikeApi";
@@ -219,8 +221,8 @@ export function EditCard({
                 versionId: annotation.version_id ?? null,
                 message:
                     verb === "accept"
-                        ? "Couldn't save accept — reverted."
-                        : "Couldn't save reject — reverted.",
+                        ? uiText("Couldn't save accept — reverted.")
+                        : uiText("Couldn't save reject — reverted."),
             });
         } finally {
             setBusyAction(null);

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { Modal } from "./Modal";
 import { FieldLabel, FormTextInput } from "../ui/form-field";
@@ -41,9 +43,9 @@ function RenameModalForm({
             size="sm"
             className="h-auto"
             breadcrumbs={breadcrumbs}
-            cancelAction={{ label: "Cancel", onClick: onClose, disabled: saving }}
+            cancelAction={{ label: uiText("Cancel"), onClick: onClose, disabled: saving }}
             primaryAction={{
-                label: saving ? "Saving..." : "Save",
+                label: saving ? uiText("Saving...") : uiText("Save"),
                 type: "submit",
                 form: formId,
                 disabled: !trimmed || saving,

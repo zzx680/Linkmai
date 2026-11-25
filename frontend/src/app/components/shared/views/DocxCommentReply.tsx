@@ -1,4 +1,6 @@
 "use client";
+
+import { uiText } from "@mike/client";
 // Render reads the mutable editor facade (snapshot, review items); React
 // Compiler would cache those reads per editor instance and go stale.
 "use no memo";
@@ -45,11 +47,11 @@ export function DocxCommentReply({
             if (result.ok) onClose();
             else
                 setError(
-                    "Your reply could not be added. Your draft is kept; please try again.",
+                    uiText("Your reply could not be added. Your draft is kept; please try again."),
                 );
         } catch {
             setError(
-                "Your reply could not be added. Your draft is kept; please try again.",
+                uiText("Your reply could not be added. Your draft is kept; please try again."),
             );
         }
     };
@@ -73,7 +75,7 @@ export function DocxCommentReply({
             }}
         >
             <label htmlFor={id} className="block font-medium">
-                Reply to comment
+                {uiText("Reply to comment")}
             </label>
             <textarea
                 id={id}
@@ -85,7 +87,7 @@ export function DocxCommentReply({
                     FORM_CONTROL_GLASS_CLASS,
                     "keyboard-focus-ring min-h-24 resize-y py-2 text-xs",
                 )}
-                placeholder="Write a reply…"
+                placeholder={uiText("Write a reply…")}
             />
             {error && (
                 <p role="alert" className="text-destructive">
@@ -93,14 +95,14 @@ export function DocxCommentReply({
                 </p>
             )}
             <div className="flex justify-end gap-2">
-                <TextButtonUI onClick={onClose}>Cancel</TextButtonUI>
+                <TextButtonUI onClick={onClose}>{uiText("Cancel")}</TextButtonUI>
                 <PillButtonUI
                     type="submit"
                     size="xs"
                     tone="black"
                     disabled={disabled}
                 >
-                    Reply
+                    {uiText("Reply")}
                 </PillButtonUI>
             </div>
         </form>

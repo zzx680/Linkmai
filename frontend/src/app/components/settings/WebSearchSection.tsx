@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { ApiKeyField } from "@/app/components/settings/ApiKeyField";
 import { GlassCardUI, PillButtonUI, ToggleSwitchUI } from "@mike/ui";
@@ -31,18 +33,18 @@ const SEARCH_SERVICES: Record<
 > = {
   brave: {
     label: "Brave Search",
-    description: "Mike searches with Brave Search. Works with any model.",
-    keyLabel: "Brave Search API Key",
+    description: uiText("Mike searches with Brave Search. Works with any model."),
+    keyLabel: uiText("Brave Search API Key"),
   },
   tavily: {
     label: "Tavily",
-    description: "Tavily searches and reads pages. Works with any model.",
-    keyLabel: "Tavily API Key",
+    description: uiText("Tavily searches and reads pages. Works with any model."),
+    keyLabel: uiText("Tavily API Key"),
   },
   deepseek: {
-    label: "DeepSeek Search",
-    description: "DeepSeek searches and reads pages. Works with any model.",
-    keyLabel: "DeepSeek API Key",
+    label: uiText("DeepSeek Search"),
+    description: uiText("DeepSeek searches and reads pages. Works with any model."),
+    keyLabel: uiText("DeepSeek API Key"),
   },
 };
 
@@ -64,26 +66,26 @@ const PROVIDER_FAMILIES: Array<{
 }> = [
   {
     family: "claude",
-    label: "Claude models",
+    label: uiText("Claude models"),
     provider: {
-      label: "Anthropic Search",
-      description: "Anthropic runs the search. Billed to your Claude API key.",
+      label: uiText("Anthropic Search"),
+      description: uiText("Anthropic runs the search. Billed to your Claude API key."),
     },
   },
   {
     family: "openai",
-    label: "OpenAI models",
+    label: uiText("OpenAI models"),
     provider: {
-      label: "OpenAI Search",
-      description: "OpenAI runs the search. Billed to your OpenAI API key.",
+      label: uiText("OpenAI Search"),
+      description: uiText("OpenAI runs the search. Billed to your OpenAI API key."),
     },
   },
 ];
 
 const OFF_OPTION = {
   value: "off",
-  label: "Off",
-  description: "These models won't search the web.",
+  label: uiText("Off"),
+  description: uiText("These models won't search the web."),
 };
 
 function saveAction(field: Field, next: WebSearchSettings[Field]): string {
@@ -173,7 +175,7 @@ export function WebSearchSection() {
     ...providerFamilies,
     {
       family: "other",
-      label: providerFamilies.length > 0 ? "Other models" : "All models",
+      label: providerFamilies.length > 0 ? uiText("Other models") : uiText("All models"),
       options: [...SEARCH_SERVICE_OPTIONS, OFF_OPTION],
     },
   ];
@@ -186,12 +188,12 @@ export function WebSearchSection() {
 
   return (
     <section className="space-y-3" aria-labelledby="web-search-heading">
-      <SettingsHeading id="web-search-heading">Web Search</SettingsHeading>
+      <SettingsHeading id="web-search-heading">{uiText("Web Search")}</SettingsHeading>
       <GlassCardUI>
         {loadError ? (
           <SettingsRow>
             <p className="text-sm text-red-600" role="alert">
-              Could not load your web search settings.
+              {uiText("Could not load your web search settings.")}
             </p>
             <PillButtonUI
               tone="white"
@@ -201,17 +203,16 @@ export function WebSearchSection() {
                 setLoadVersion((current) => current + 1);
               }}
             >
-              Retry
+              {uiText("Retry")}
             </PillButtonUI>
           </SettingsRow>
         ) : (
           <>
             <SettingsRow>
               <div className="min-w-0 space-y-1">
-                <SettingsLabel>Enable web search</SettingsLabel>
+                <SettingsLabel>{uiText("Enable web search")}</SettingsLabel>
                 <SettingsDescription>
-                  Let Mike search the web and read pages when an answer needs
-                  current or public information.
+                  {uiText("Let Mike search the web and read pages when an answer needs current or public information.")}
                 </SettingsDescription>
               </div>
               {settings ? (
@@ -219,7 +220,7 @@ export function WebSearchSection() {
                   checked={settings.enabled}
                   disabled={saving}
                   aria-busy={saving}
-                  aria-label="Enable web search"
+                  aria-label={uiText("Enable web search")}
                   onCheckedChange={(enabled) => void toggleWebSearch(enabled)}
                 />
               ) : (

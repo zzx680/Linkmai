@@ -1,5 +1,11 @@
 "use client";
 
+import { isImeComposing } from "@mike/client";
+
+import { uiDateLocale } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { useRef, useState } from "react";
 import {
     Brain,
@@ -47,7 +53,7 @@ export function formatBytes(bytes: number): string {
 }
 
 export function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString(uiDateLocale(), {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -202,7 +208,7 @@ export function DocVersionHistory({
                     className={`sticky left-0 z-[60] ${DOC_NAME_COL_W} bg-gray-50/80 py-2 pl-3 pr-2`}
                     style={treeNameCellStyle(depth)}
                 >
-                    <div>No version history.</div>
+                    <div>{uiText("No version history.")}</div>
                 </div>
             </div>
         );
@@ -222,14 +228,14 @@ export function DocVersionHistory({
                     v.version_number >= 1
                         ? `${v.version_number}`
                         : v.source === "upload"
-                          ? "Original"
+                          ? uiText("Original")
                           : "—";
                 const displayLabel = v.filename?.trim() || numberLabel;
                 const downloadFilename = v.filename?.trim() || filename;
                 const dt = new Date(v.created_at);
                 const dateLabel = Number.isNaN(dt.valueOf())
                     ? ""
-                    : dt.toLocaleString(undefined, {
+                    : dt.toLocaleString(uiDateLocale(), {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
@@ -285,6 +291,7 @@ export function DocVersionHistory({
                                             setEditingValue(e.target.value)
                                         }
                                         onKeyDown={(e) => {
+                                            if (isImeComposing(e)) return;
                                             if (e.key === "Enter") {
                                                 e.preventDefault();
                                                 void commit(v.id);
@@ -306,7 +313,7 @@ export function DocVersionHistory({
                                     >
                                         {isDeleted && (
                                             <span className="font-medium text-gray-500">
-                                                [Deleted]{" "}
+                                                {uiText("[Deleted]")}{" "}
                                             </span>
                                         )}
                                         {displayLabel}
@@ -459,8 +466,8 @@ export function ProjectPageHeader({
                     onClick: onNewChat,
                     disabled: !roleKnown,
                     icon: <Plus className="h-4 w-4" />,
-                    label: <span className="hidden sm:inline">Chat</span>,
-                    title: "Create chat",
+                    label: <span className="hidden sm:inline">{uiText("Chat")}</span>,
+                    title: uiText("Create chat"),
                 }
               : activeSection === "reviews"
                 ? {
@@ -471,8 +478,8 @@ export function ProjectPageHeader({
                     ) : (
                         <Plus className="h-4 w-4" />
                     ),
-                    label: <span className="hidden sm:inline">Review</span>,
-                    title: "Create review",
+                    label: <span className="hidden sm:inline">{uiText("Review")}</span>,
+                    title: uiText("Create review"),
                   }
                 : null;
 
@@ -480,16 +487,16 @@ export function ProjectPageHeader({
         <PageHeader
             breadcrumbs={[
                 {
-                    label: "Projects",
+                    label: uiText("Projects"),
                     onClick: onBackToProjects,
-                    title: "Back to Projects",
+                    title: uiText("Back to Projects"),
                 },
                 {
                     ...(project
                         ? {
                               label: project.name,
                               onClick: onProjectRoot,
-                              title: "Back to project documents",
+                              title: uiText("Back to project documents"),
                           }
                         : {
                               loading: true,
@@ -497,9 +504,9 @@ export function ProjectPageHeader({
                           }),
                 },
                 ...(activeSection === "assistant"
-                    ? [{ label: "Chats" }]
+                    ? [{ label: uiText("Chats") }]
                     : activeSection === "reviews"
-                      ? [{ label: "Tabular Reviews" }]
+                      ? [{ label: uiText("Tabular Reviews") }]
                       : (documentFolderBreadcrumbs ?? [])),
             ]}
             actionGroups={[
@@ -508,12 +515,12 @@ export function ProjectPageHeader({
                         type: "search",
                         value: search,
                         onChange: onSearchChange,
-                        placeholder: "Search…",
+                        placeholder: uiText("Search…"),
                     },
                     {
                         onClick: onOpenAccess,
                         iconOnly: true,
-                        title: "Access",
+                        title: uiText("Access"),
                         icon: <Users className="h-4 w-4" />,
                     },
                     {
@@ -523,14 +530,14 @@ export function ProjectPageHeader({
                                 items={[
                                     {
                                         label: canManageProject
-                                            ? "Edit details"
-                                            : "View details",
+                                            ? uiText("Edit details")
+                                            : uiText("View details"),
                                         icon: Pencil,
                                         onSelect: onOpenDetails,
                                         disabled: !roleKnown,
                                     },
                                     {
-                                        label: "Memory",
+                                        label: uiText("Memory"),
                                         icon: Brain,
                                         onSelect: onOpenMemory,
                                         disabled: !roleKnown,
@@ -540,7 +547,7 @@ export function ProjectPageHeader({
                                         // refusal can name someone who can
                                         // lift it; disabled only while the
                                         // role itself is still unknown.
-                                        label: "Delete",
+                                        label: uiText("Delete"),
                                         icon: Trash2,
                                         onSelect: onDeleteProject,
                                         variant: "danger",

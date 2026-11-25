@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 import { createRedlineStreamProjector } from "../lib/redline";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -328,7 +330,7 @@ export function useWordAssistantChat({
             console.error("Failed to read the current Word document", error);
             if (requestIsCurrent()) {
               setRequestError(
-                "Mike couldn't read this Word document. Try again.",
+                uiText("Mike couldn't read this Word document. Try again."),
               );
             }
             return;
@@ -1017,8 +1019,8 @@ export function useWordAssistantChat({
           // a stream failure carries provider and stack wording. The toast
           // carries what the bubble cannot: the actions on the failure.
           const failureCopy = {
-            action: "get a response",
-            fallback: "Mike couldn't finish that answer. Try again.",
+            action: uiText("get a response"),
+            fallback: uiText("Mike couldn't finish that answer. Try again."),
           };
           const recovery = failedTurnRecovery({
             wasSend: input.kind === "send",
@@ -1061,8 +1063,8 @@ export function useWordAssistantChat({
                       generation === sessionGenerationRef.current;
                     notifyInfo(
                       sameChat
-                        ? "A newer message was sent after this one, so Retry no longer applies to it."
-                        : "This chat has changed. Open the original chat to check its answer.",
+                        ? uiText("A newer message was sent after this one, so Retry no longer applies to it.")
+                        : uiText("This chat has changed. Open the original chat to check its answer."),
                     );
                     return;
                   }

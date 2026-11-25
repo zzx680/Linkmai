@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, Ellipsis, ListTree } from "lucide-react";
@@ -45,7 +47,7 @@ export function DocxNavigationMenu({ toolbar, open, onToggle }: {
             }}
         >
             <ListTree aria-hidden="true" className="h-4 w-4" />
-            Navigation pane
+            {uiText("Navigation pane")}
             {open && <Check aria-hidden="true" className="ml-auto h-4 w-4" />}
         </DropdownButton>,
         menu.panel,
@@ -55,14 +57,14 @@ export function DocxNavigationMenu({ toolbar, open, onToggle }: {
         <span data-toolbar-fixed="" className="ml-auto flex flex-none items-center">
             <Dropdown>
                 <DropdownTrigger asChild>
-                    <TextButtonUI size="icon-xs" aria-label="More" title="More" className="h-6">
+                    <TextButtonUI size="icon-xs" aria-label={uiText("More")} title={uiText("More")} className="h-6">
                         <Ellipsis aria-hidden="true" className="h-4 w-4" />
                     </TextButtonUI>
                 </DropdownTrigger>
                 <DropdownContent align="end">
                     <DropdownCheckboxItem checked={open} onCheckedChange={onToggle}>
                         <ListTree aria-hidden="true" className="h-4 w-4" />
-                        Navigation pane
+                        {uiText("Navigation pane")}
                     </DropdownCheckboxItem>
                 </DropdownContent>
             </Dropdown>

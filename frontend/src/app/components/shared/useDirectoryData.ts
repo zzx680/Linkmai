@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getProjectDirectoryLevel,
@@ -227,7 +229,7 @@ export function useDirectoryData(
                 // so say so instead of passing an empty shelf off as the
                 // truth.
                 notifyError(error, {
-                    action: `load your ${tab}`,
+                    action: uiText`load your ${tab}`,
                     dedupeKey: `directory:${tab}`,
                     onRetry: () => retryRef.current?.loadTab(tab),
                 });
@@ -290,7 +292,7 @@ export function useDirectoryData(
           // A folder that stays empty after the spinner looks like an empty
           // folder, so the failure has to be said out loud.
           notifyError(error, {
-            action: "open the folder",
+            action: uiText("open the folder"),
             dedupeKey: `directory-folder:${tab}:${folderId}`,
             onRetry: () =>
               retryRef.current?.loadFolderChildren(tab, folderId),
@@ -356,7 +358,7 @@ export function useDirectoryData(
           }));
         } catch (error) {
           notifyError(error, {
-            action: `load more ${tab}`,
+            action: uiText`load more ${tab}`,
             dedupeKey: `directory-more:${tab}:${levelKey}`,
             onRetry: () =>
               retryRef.current?.loadMoreLibraryDocuments(tab, parentId),
@@ -400,7 +402,7 @@ export function useDirectoryData(
       setProjectsHasMore(rows.length > DIRECTORY_PAGE_SIZE);
     } catch (error) {
       notifyError(error, {
-        action: "load more projects",
+        action: uiText("load more projects"),
         dedupeKey: "directory-more-projects",
         onRetry: () => retryRef.current?.loadMoreProjects(),
       });

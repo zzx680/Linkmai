@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthApiError, login, signup } from "@/app/lib/authApi";
@@ -51,14 +53,14 @@ const LOGIN_ERROR_MESSAGES = authMessages({
 });
 
 /** The title `notifyError` gives the same warning away from this page. */
-const SESSION_WARNING_TITLE = "Couldn't check your session";
+const SESSION_WARNING_TITLE = uiText("Couldn't check your session");
 
 /** Classify a login failure into text a person can act on. */
 function describeLoginError(error: unknown): UserFacingError {
     const described = reportFault(error, {
-        action: "log in",
+        action: uiText("log in"),
         codeMessages: LOGIN_ERROR_MESSAGES,
-        fallback: "Unable to log in right now. Try again.",
+        fallback: uiText("Unable to log in right now. Try again."),
         operation: "auth.signin",
     });
     // A 429 without a GoTrue code still means "you tried too often".
@@ -173,8 +175,8 @@ export default function LoginPage() {
             // session error look permanent; say so instead.
             setSessionError(
                 reportFault(caught, {
-                    action: "restore your session",
-                    fallback: "Unable to restore your session. Try again.",
+                    action: uiText("restore your session"),
+                    fallback: uiText("Unable to restore your session. Try again."),
                     operation: "auth.session",
                 }),
             );
@@ -227,9 +229,9 @@ export default function LoginPage() {
         } catch (error: unknown) {
             setError(
                 reportFault(error, {
-                    action: "open your local workspace",
+                    action: uiText("open your local workspace"),
                     codeMessages: LOGIN_ERROR_MESSAGES,
-                    fallback: "Unable to continue as guest right now. Please try again.",
+                    fallback: uiText("Unable to continue as guest right now. Please try again."),
                     operation: "auth.signin",
                 }),
             );
@@ -245,7 +247,7 @@ export default function LoginPage() {
     const retryAction = error
         ? error.retryable && loginMode
             ? {
-                  label: "Retry",
+                  label: uiText("Retry"),
                   onClick: () =>
                       void (loginMode === "guest"
                           ? handleGuestLogin()
@@ -255,7 +257,7 @@ export default function LoginPage() {
             : undefined
         : sessionWarningOpen
           ? {
-                label: retryingSession ? "Retrying..." : "Retry",
+                label: retryingSession ? uiText("Retrying...") : uiText("Retry"),
                 onClick: () => void handleRetrySession(),
                 disabled: retryingSession,
             }
@@ -270,14 +272,12 @@ export default function LoginPage() {
                 {/* Login Form */}
                 <div className={cn(authGlassCardUIClassName, "mb-4")}>
                     <h2 className="mb-6 text-left text-2xl font-medium font-serif text-gray-950">
-                        {guest ? "Your workspace on this Mac" : "Log In"}
+                        {guest ? uiText("Your workspace on this Mac") : uiText("Log In")}
                     </h2>
                     {guest && (
                         <div className="mb-6 space-y-3">
                             <p className="text-sm text-muted-foreground">
-                                Start without an account. Your work is saved on
-                                this Mac. You can add your practice details
-                                later in Settings.
+                                {uiText("Start without an account. Your work is saved on this Mac. You can add your practice details later in Settings.")}
                             </p>
                             <PillButtonUI
                                 type="button"
@@ -288,8 +288,8 @@ export default function LoginPage() {
                                 disabled={loading}
                             >
                                 {loading
-                                    ? "Opening workspace…"
-                                    : "Continue on this Mac"}
+                                    ? uiText("Opening workspace…")
+                                    : uiText("Continue on this Mac")}
                             </PillButtonUI>
                         </div>
                     )}
@@ -298,11 +298,11 @@ export default function LoginPage() {
                             hidden={!guest}
                             className="mb-4 cursor-pointer text-sm text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring"
                         >
-                            Use a separate local account
+                            {uiText("Use a separate local account")}
                         </summary>
                         <form onSubmit={handleLogin} className="space-y-4">
                             <div>
-                                <FieldLabel htmlFor="email">Email</FieldLabel>
+                                <FieldLabel htmlFor="email">{uiText("Email")}</FieldLabel>
                                 <InputUI
                                     id="email"
                                     type="email"
@@ -316,13 +316,13 @@ export default function LoginPage() {
                             <div>
                                 <div className="flex items-start justify-between gap-3">
                                     <FieldLabel htmlFor="password">
-                                        Password
+                                        {uiText("Password")}
                                     </FieldLabel>
                                     <Link
                                         href="/forgot-password"
                                         className="text-xs font-medium text-gray-500 transition-colors hover:text-gray-950"
                                     >
-                                        Forgot password?
+                                        {uiText("Forgot password?")}
                                     </Link>
                                 </div>
                                 <InputUI
@@ -345,7 +345,7 @@ export default function LoginPage() {
                                     disabled={loading}
                                     className="w-full"
                                 >
-                                    {loading ? "Logging in..." : "Log in"}
+                                    {loading ? uiText("Logging in...") : uiText("Log in")}
                                 </PillButtonUI>
                             </div>
                             {!guest && (showGoogle || showSso) && (
@@ -370,12 +370,12 @@ export default function LoginPage() {
                     </details>
                 </div>
                 <div className="text-center text-sm text-gray-500">
-                    Don&apos;t have an account?{" "}
+                    {uiText("Don&apos;t have an account?")}{" "}
                     <Link
                         href="/signup"
                         className="font-medium transition-colors hover:text-gray-950"
                     >
-                        Sign up
+                        {uiText("Sign up")}
                     </Link>
                 </div>
             </div>
@@ -398,7 +398,7 @@ export default function LoginPage() {
                                 retryAction ? "secondary" : "primary",
                             )}
                         >
-                            Contact support
+                            {uiText("Contact support")}
                         </a>
                     ) : undefined
                 }

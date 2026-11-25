@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 import {
     markErrorHandled,
@@ -105,7 +107,7 @@ async function authRequest<T>(
             (code && reportedUpstreamMessage(code)) ??
                 (response.status < 500 && typeof body.detail === "string"
                     ? body.detail
-                    : "Authentication could not be completed."),
+                    : uiText("Authentication could not be completed.")),
             requestId,
             body.reporting_owner === BACKEND_REPORTING_OWNER ? BACKEND_REPORTING_OWNER : undefined,
         );

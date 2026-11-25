@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useRouter } from "next/navigation";
 import { OrganizationSkeuoIcon } from "@/app/components/shared/AppSidebarSkeuoIcons";
 import { EmptyState } from "@/app/components/ui/empty-state";
@@ -25,15 +27,15 @@ export function OrganizationProvidersSettings() {
     return (
       <EmptyState
         icon={<OrganizationSkeuoIcon />}
-        title="Bring Your Own Keys"
-        description="Only this organization's owners and admins can manage its keys."
+        title={uiText("Bring Your Own Keys")}
+        description={uiText("Only this organization's owners and admins can manage its keys.")}
         action={
           <PillButtonUI
             tone="white"
             size="sm"
             onClick={() => router.push(organizationSettingsHref(orgId))}
           >
-            Back to General
+            {uiText("Back to General")}
           </PillButtonUI>
         }
       />

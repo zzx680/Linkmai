@@ -1,5 +1,9 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
+import { PolicyNotice } from "@/app/components/auth/PolicyNotice";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -42,15 +46,15 @@ const SETUP_ERROR_MESSAGES = authMessages({
 
 function localSetupError(message: string): UserFacingError {
     return describeError(new UserVisibleError(message, { kind: "validation" }), {
-        action: "create the first account",
+        action: uiText("创建首个账户"),
     });
 }
 
 function describeSetupError(error: unknown): UserFacingError {
     const described = reportFault(error, {
-        action: "create the first account",
+        action: uiText("创建首个账户"),
         codeMessages: SETUP_ERROR_MESSAGES,
-        fallback: "Unable to create the account right now. Try again.",
+        fallback: uiText("暂时无法创建账户，请重试。"),
         operation: "auth.setup",
     });
     return described.kind === "rate_limited"
@@ -126,16 +130,13 @@ export default function SetupPage() {
             <div className="w-full max-w-md">
                 <div className={cn(authGlassCardUIClassName, "mb-4")}>
                     <h1 className="text-left text-2xl font-medium font-serif text-gray-950">
-                        Set up Mike
+                        {uiText("设置灵迈 LinkMai")}
                     </h1>
-                    <p className="mt-2 mb-6 text-sm leading-relaxed text-gray-600">
-                        Your deployment is ready. Create the first account to
-                        start using it.
-                    </p>
+                    <p className="mt-3 text-sm leading-relaxed text-gray-600">{uiText("服务已准备就绪，创建首个账户即可开始使用。")}</p>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <FieldLabel htmlFor="email">Email</FieldLabel>
+                            <FieldLabel htmlFor="email">{uiText("邮箱")}</FieldLabel>
                             <InputUI
                                 id="email"
                                 type="email"
@@ -148,14 +149,14 @@ export default function SetupPage() {
                         </div>
 
                         <div>
-                            <FieldLabel htmlFor="password">Password</FieldLabel>
+                            <FieldLabel htmlFor="password">{uiText("密码")}</FieldLabel>
                             <InputUI
                                 id="password"
                                 type="password"
                                 autoComplete="new-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder={`Min. ${MIN_PASSWORD_LENGTH} Characters`}
+                                placeholder={uiText`Min. ${MIN_PASSWORD_LENGTH} Characters`}
                                 required
                                 className={`w-full ${authInputUIClassName}`}
                             />
@@ -163,7 +164,7 @@ export default function SetupPage() {
 
                         <div>
                             <FieldLabel htmlFor="confirmPassword">
-                                Confirm Password
+                                {uiText("Confirm Password")}
                             </FieldLabel>
                             <InputUI
                                 id="confirmPassword"
@@ -177,26 +178,7 @@ export default function SetupPage() {
                         </div>
 
                         <div className="space-y-3 pt-2">
-                            <div className="text-center text-xs text-gray-500">
-                                By creating an account, you agree to our{" "}
-                                <Link
-                                    href="https://mikeoss.com/terms"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                >
-                                    Terms of Use
-                                </Link>{" "}
-                                and{" "}
-                                <Link
-                                    href="https://mikeoss.com/privacy"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                >
-                                    Privacy Policy
-                                </Link>
-                            </div>
+                            <PolicyNotice />
                             <PillButtonUI
                                 type="submit"
                                 tone="black"
@@ -204,7 +186,7 @@ export default function SetupPage() {
                                 disabled={loading || alreadySetUp}
                                 className="w-full"
                             >
-                                {loading ? "Creating account..." : "Create account"}
+                                {loading ? uiText("正在创建账户…") : uiText("创建账户")}
                             </PillButtonUI>
                         </div>
                     </form>
@@ -215,7 +197,7 @@ export default function SetupPage() {
                             href="/login"
                             className="font-medium transition-colors hover:text-gray-950"
                         >
-                            Log in
+                            {uiText("Log in")}
                         </Link>
                     </div>
                 )}
@@ -231,7 +213,7 @@ export default function SetupPage() {
                             href={supportMailtoFor(error, "Failed to set up Mike.")}
                             className={noticeActionClassName()}
                         >
-                            Contact support
+                            {uiText("联系支持")}
                         </a>
                     ) : undefined
                 }

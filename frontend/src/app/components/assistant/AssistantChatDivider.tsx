@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/app/lib/utils";
 
@@ -65,7 +67,7 @@ export function AssistantChatDivider({
         <div
             role="separator"
             aria-orientation="vertical"
-            aria-label="Resize chats"
+            aria-label={uiText("Resize chats")}
             tabIndex={0}
             onMouseDown={(event) => {
                 event.preventDefault();

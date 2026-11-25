@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { ArrowUp, Copy, MessageSquare, TextQuote } from "lucide-react";
@@ -276,15 +278,15 @@ function AnnotationBubble({
                     ref={inputRef}
                     value={note}
                     onChange={(event) => setNote(event.target.value)}
-                    aria-label="Note about the selected text"
+                    aria-label={uiText("Note about the selected text")}
                     // Sits on the surface's glass with no fill of its own.
                     data-dropdown-input="flush"
-                    placeholder="Add a note about this passage"
+                    placeholder={uiText("Add a note about this passage")}
                     className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
                 />
                 <button
                     type="submit"
-                    aria-label="Add annotation to chat"
+                    aria-label={uiText("Add annotation to chat")}
                     disabled={!trimmed}
                     className={`${COMPOSER_SEND_BUTTON_CLASS} h-7 w-7 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60`}
                 >
@@ -395,7 +397,7 @@ export function ResponseSelectionMenuUI({
                     point={menu.point}
                     followPoint
                     onClose={() => setMenu(null)}
-                    aria-label="Selected text"
+                    aria-label={uiText("Selected text")}
                     className="w-44"
                 >
                     <DropdownItem
@@ -406,7 +408,7 @@ export function ResponseSelectionMenuUI({
                         }}
                     >
                         <Copy aria-hidden="true" className="h-3.5 w-3.5" />
-                        Copy
+                        {uiText("Copy")}
                     </DropdownItem>
                     {canAsk && (
                         <>
@@ -419,14 +421,14 @@ export function ResponseSelectionMenuUI({
                                     aria-hidden="true"
                                     className="h-3.5 w-3.5"
                                 />
-                                Ask
+                                {uiText("Ask")}
                             </DropdownItem>
                             <DropdownItem onSelect={() => setAnnotating(menu)}>
                                 <TextQuote
                                     aria-hidden="true"
                                     className="h-3.5 w-3.5"
                                 />
-                                Annotate and ask
+                                {uiText("Annotate and ask")}
                             </DropdownItem>
                             {onAskInSideChat && (
                                 <DropdownItem
@@ -449,7 +451,7 @@ export function ResponseSelectionMenuUI({
                                         aria-hidden="true"
                                         className="h-3.5 w-3.5"
                                     />
-                                    Ask in side chat
+                                    {uiText("Ask in side chat")}
                                 </DropdownItem>
                             )}
                         </>

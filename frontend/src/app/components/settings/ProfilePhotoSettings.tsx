@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useRef, useState } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
@@ -31,7 +33,7 @@ export function ProfilePhotoSettings() {
       setFile(null);
       setEditing(false);
     } catch (cause) {
-      setError(userFacingApiError(cause, "Could not save your profile photo. Try again."));
+      setError(userFacingApiError(cause, uiText("Could not save your profile photo. Try again.")));
     } finally {
       setSaving(null);
     }
@@ -42,13 +44,13 @@ export function ProfilePhotoSettings() {
       <div className="flex min-w-0 items-center gap-3">
         <UserAvatar photo={profile?.profilePhoto} name={profile?.displayName} email={user?.email} className="h-11 w-11 text-base" />
         <div className="min-w-0 space-y-1">
-          <SettingsLabel>Profile photo</SettingsLabel>
-          <SettingsDescription>Shown beside your name when you share or work with others.</SettingsDescription>
+          <SettingsLabel>{uiText("Profile photo")}</SettingsLabel>
+          <SettingsDescription>{uiText("Shown beside your name when you share or work with others.")}</SettingsDescription>
           {error && !editing ? <p role="alert" className="text-xs text-red-600">{error}</p> : null}
         </div>
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-3">
-        <input ref={input} type="file" accept={ORG_LOGO_ACCEPT} className="hidden" aria-label="Upload profile photo" onChange={(event) => {
+        <input ref={input} type="file" accept={ORG_LOGO_ACCEPT} className="hidden" aria-label={uiText("Upload profile photo")} onChange={(event) => {
           const picked = event.target.files?.[0];
           event.target.value = "";
           if (!picked) return;
@@ -58,7 +60,7 @@ export function ProfilePhotoSettings() {
             setFile(picked);
             setEditing(true);
           } catch (cause) {
-            setError(cause instanceof OrgLogoImageError ? cause.message : "Choose another image.");
+            setError(cause instanceof OrgLogoImageError ? cause.message : uiText("Choose another image."));
           }
         }} />
         <PillButtonUI size="sm" tone={profile?.profilePhoto ? "blue" : "white"} disabled={loading || saving !== null} onClick={() => {
@@ -66,7 +68,7 @@ export function ProfilePhotoSettings() {
           if (profile?.profilePhoto) setEditing(true);
           else input.current?.click();
         }}>
-          {profile?.profilePhoto ? "Edit" : "Upload photo"}
+          {profile?.profilePhoto ? uiText("Edit") : uiText("Upload photo")}
         </PillButtonUI>
       </div>
       {editing ? <ImageCropModal

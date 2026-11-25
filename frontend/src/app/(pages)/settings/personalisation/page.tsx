@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { CustomInstructionsSection } from "@/app/components/settings/CustomInstructionsSection";
 import { ResponseStyleSection } from "@/app/components/settings/ResponseStyleSection";
@@ -139,10 +141,9 @@ function PersonalisationForm({
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <SettingsHeading id="your-background">Your background</SettingsHeading>
+        <SettingsHeading id="your-background">{uiText("Your background")}</SettingsHeading>
         <SettingsDescription>
-          Tell Mike about your role and practice so responses can be tailored to
-          your professional context.
+          {uiText("Tell Mike about your role and practice so responses can be tailored to your professional context.")}
         </SettingsDescription>
         <GlassCardUI>
           <SettingsPersonalisationFields

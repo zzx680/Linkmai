@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useState } from "react";
 import {
   listDeletedOrganizations,
@@ -59,7 +61,7 @@ export function DeletedOrganizations({
       if (isMfaRequiredError(err)) setMfaOrg(id);
       else
         setError(
-          userFacingApiError(err, "Could not restore the organization."),
+          userFacingApiError(err, uiText("Could not restore the organization.")),
         );
       return;
     } finally {
@@ -76,18 +78,18 @@ export function DeletedOrganizations({
       className="space-y-3"
     >
       <SettingsHeading id="deleted-organizations-heading">
-        Recently deleted
+        {uiText("Recently deleted")}
       </SettingsHeading>
       <SettingsDescription>
-        Owners can restore an organization within 30 days of deletion.
+        {uiText("Owners can restore an organization within 30 days of deletion.")}
       </SettingsDescription>
       {loadError ? (
         <PillButtonUI tone="white" size="sm" onClick={() => void load()}>
-          Retry deleted organizations
+          {uiText("Retry deleted organizations")}
         </PillButtonUI>
       ) : orgs === null ? (
         <div
-          aria-label="Loading deleted organizations"
+          aria-label={uiText("Loading deleted organizations")}
           aria-busy="true"
           className="h-16 animate-pulse rounded-lg bg-gray-200"
         />
@@ -98,7 +100,7 @@ export function DeletedOrganizations({
               <div className="min-w-0 space-y-1 [overflow-wrap:anywhere]">
                 <SettingsLabel>{org.name}</SettingsLabel>
                 <SettingsDescription>
-                  Recover before {new Date(org.purge_after).toLocaleString()}.
+                  {uiText("Recover before")} {new Date(org.purge_after).toLocaleString()}.
                 </SettingsDescription>
               </div>
               <PillButtonUI
@@ -109,7 +111,7 @@ export function DeletedOrganizations({
                 aria-label={`Restore ${org.name}`}
                 onClick={() => void restore(org.id)}
               >
-                Restore
+                {uiText("Restore")}
               </PillButtonUI>
             </SettingsRow>
           ))}
@@ -126,7 +128,7 @@ export function DeletedOrganizations({
       />
       <WarningPopup
         open={error !== null}
-        title="Restore failed"
+        title={uiText("Restore failed")}
         message={error}
         onClose={() => setError(null)}
       />

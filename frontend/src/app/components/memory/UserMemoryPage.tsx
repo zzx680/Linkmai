@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useState } from "react";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
 import { useWorkspace } from "@/app/contexts/WorkspaceContext";
@@ -133,7 +135,7 @@ function WorkspaceMemory({
       setError(
         userFacingApiError(
           cause,
-          "Memory could not be turned on. Please try again.",
+          uiText("Memory could not be turned on. Please try again."),
         ),
       );
     } finally {
@@ -153,7 +155,7 @@ function WorkspaceMemory({
       setError(
         userFacingApiError(
           cause,
-          "Memory could not be turned off. Please try again.",
+          uiText("Memory could not be turned off. Please try again."),
         ),
       );
       setConfirmAction(null);
@@ -169,14 +171,14 @@ function WorkspaceMemory({
         aria-labelledby="app-memory-settings-heading"
       >
         <SettingsHeading id="app-memory-settings-heading">
-          Memory
+          {uiText("Memory")}
         </SettingsHeading>
 
         <GlassCardUI>
           {loading ? (
             <div
               className="flex items-center justify-between gap-3 p-4"
-              aria-label="Loading memory settings"
+              aria-label={uiText("Loading memory settings")}
             >
               <div className="space-y-2">
                 <div className="h-4 w-36 animate-pulse rounded bg-gray-200" />
@@ -187,13 +189,13 @@ function WorkspaceMemory({
           ) : loadError || !memory ? (
             <SettingsRow>
               <div className="space-y-1">
-                <SettingsLabel>Memory settings are unavailable</SettingsLabel>
+                <SettingsLabel>{uiText("Memory settings are unavailable")}</SettingsLabel>
                 <p className="text-sm text-red-600" role="alert">
-                  Could not load memory settings. Please try again.
+                  {uiText("Could not load memory settings. Please try again.")}
                 </p>
               </div>
               <PillButtonUI tone="white" size="sm" onClick={() => void load()}>
-                Retry
+                {uiText("Retry")}
               </PillButtonUI>
             </SettingsRow>
           ) : (
@@ -204,8 +206,8 @@ function WorkspaceMemory({
                   {organizationName
                     ? `Let Mike curate useful details after your own conversations in ${organizationName} and use them in future answers there. Only you can see it.${multipleWorkspaces ? " You have a separate memory for each workspace." : ""}`
                     : multipleWorkspaces
-                      ? "Let Mike curate useful details after your saved conversations in Personal and use them in future answers there. You have a separate memory for each workspace."
-                      : "Let Mike curate useful details after your saved conversations and use them in future answers."}
+                      ? uiText("Let Mike curate useful details after your saved conversations in Personal and use them in future answers there. You have a separate memory for each workspace.")
+                      : uiText("Let Mike curate useful details after your saved conversations and use them in future answers.")}
                 </SettingsDescription>
               </div>
               <div className="flex items-center gap-3">
@@ -252,7 +254,7 @@ function WorkspaceMemory({
         >
           <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
             <SettingsHeading id="app-memory-file-heading">
-              Memory file
+              {uiText("Memory file")}
             </SettingsHeading>
             <div className="flex flex-wrap items-center gap-3">
               <MemorySaveStatus
@@ -299,10 +301,10 @@ function WorkspaceMemory({
         title={
           organizationName
             ? `Turn off and delete your memory in ${organizationName}?`
-            : "Turn off and delete your Personal memory?"
+            : uiText("Turn off and delete your Personal memory?")
         }
-        message={`This will delete the existing memory.md file${multipleWorkspaces ? ` for ${organizationName ?? "Personal"}` : ""}${dirty ? " and your unsaved draft" : ""}, cancel pending memory updates, and stop future memory updates here until you turn it on again.${multipleWorkspaces ? " Your memory in other workspaces is not affected." : ""}`}
-        confirmLabel="Disable"
+        message={`This will delete the existing memory.md file${multipleWorkspaces ? ` for ${organizationName ?? uiText("Personal")}` : ""}${dirty ? uiText(" and your unsaved draft") : ""}, cancel pending memory updates, and stop future memory updates here until you turn it on again.${multipleWorkspaces ? " Your memory in other workspaces is not affected." : ""}`}
+        confirmLabel={uiText("Disable")}
         confirmVariant="danger"
         confirmStatus={settingsMutation ? "loading" : "idle"}
         onConfirm={() => void confirmSettingsMutation()}
@@ -341,7 +343,7 @@ function ProjectMemoryDefaultRow() {
       setError(
         userFacingApiError(
           cause,
-          "That preference could not be saved. Please try again.",
+          uiText("That preference could not be saved. Please try again."),
         ),
       );
     } finally {
@@ -352,10 +354,9 @@ function ProjectMemoryDefaultRow() {
   return (
     <SettingsRow>
       <div className="space-y-1">
-        <SettingsLabel>Project memory for new projects</SettingsLabel>
+        <SettingsLabel>{uiText("Project memory for new projects")}</SettingsLabel>
         <SettingsDescription>
-          Choose whether memory is enabled by default for projects you create.
-          Project owners can still change it for each project.
+          {uiText("Choose whether memory is enabled by default for projects you create. Project owners can still change it for each project.")}
         </SettingsDescription>
         {error ? (
           <p className="text-xs text-red-600" role="alert">
@@ -367,7 +368,7 @@ function ProjectMemoryDefaultRow() {
         checked={profile?.projectMemoryDefault !== false}
         disabled={!profile || saving}
         aria-busy={saving}
-        aria-label="Project memory for new projects"
+        aria-label={uiText("Project memory for new projects")}
         onCheckedChange={(enabled) => void handleToggle(enabled)}
       />
     </SettingsRow>
@@ -376,7 +377,7 @@ function ProjectMemoryDefaultRow() {
 
 function MemoryEditorSkeleton() {
   return (
-    <div className="space-y-3" aria-label="Loading memory editor">
+    <div className="space-y-3" aria-label={uiText("Loading memory editor")}>
       <div className="space-y-2">
         <div className="h-7 w-36 animate-pulse rounded bg-gray-200" />
         <div className="h-3 w-full max-w-xl animate-pulse rounded bg-gray-100" />

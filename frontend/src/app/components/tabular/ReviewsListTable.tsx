@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { Loader2 } from "lucide-react";
 import { can, roleFrom } from "@/app/lib/permissions";
@@ -141,7 +143,7 @@ export function ReviewsListTable({
 
     function requestReviewDetails(review: TabularReview) {
         if (!can(roleFrom(review), "content.edit")) {
-            onOwnerOnlyAction({ action: "edit tabular review details", requiredRole: "editor" }, review);
+            onOwnerOnlyAction({ action: uiText("edit tabular review details"), requiredRole: "editor" }, review);
             return;
         }
         onOpenDetails(review);
@@ -196,7 +198,7 @@ export function ReviewsListTable({
         sort?.key === "updated" ? sort.direction : null;
     const nameFilterButton = (
         <TableSortFilter
-            label="Sort by review name"
+            label={uiText("Sort by review name")}
             value={nameSortDirection}
             align="right"
             onChange={(direction) => handleSortChange("name", direction)}
@@ -204,28 +206,28 @@ export function ReviewsListTable({
     );
     const columnsFilterButton = (
         <TableSortFilter
-            label="Sort by columns"
+            label={uiText("Sort by columns")}
             value={columnsSortDirection}
             onChange={(direction) => handleSortChange("columns", direction)}
         />
     );
     const documentsFilterButton = (
         <TableSortFilter
-            label="Sort by documents"
+            label={uiText("Sort by documents")}
             value={documentsSortDirection}
             onChange={(direction) => handleSortChange("documents", direction)}
         />
     );
     const createdFilterButton = (
         <TableSortFilter
-            label="Sort by created date"
+            label={uiText("Sort by created date")}
             value={createdSortDirection}
             onChange={(direction) => handleSortChange("created", direction)}
         />
     );
     const updatedFilterButton = (
         <TableSortFilter
-            label="Sort by updated date"
+            label={uiText("Sort by updated date")}
             value={updatedSortDirection}
             onChange={(direction) => handleSortChange("updated", direction)}
         />
@@ -267,31 +269,31 @@ export function ReviewsListTable({
                                 }}
                                 onChange={onToggleAll}
                                 className={TABLE_CHECKBOX_CLASS}
-                                aria-label="Select all reviews"
+                                aria-label={uiText("Select all reviews")}
                             />
                         )}
-                        <span className="mr-1">Name</span>
+                        <span className="mr-1">{uiText("Name")}</span>
                         {!loading && nameFilterButton}
                     </TableStickyCell>
                     <TableHeaderCell className="ml-auto w-24">
                         <div className="flex items-center gap-1">
-                            <span>Columns</span>
+                            <span>{uiText("Columns")}</span>
                             {!loading && columnsFilterButton}
                         </div>
                     </TableHeaderCell>
                     <TableHeaderCell className="w-24">
                         <div className="flex items-center gap-1">
-                            <span>Documents</span>
+                            <span>{uiText("Documents")}</span>
                             {!loading && documentsFilterButton}
                         </div>
                     </TableHeaderCell>
                     {projectColumn && (
                         <TableHeaderCell className="w-52">
                             <div className="flex items-center gap-1">
-                                <span>Project</span>
+                                <span>{uiText("Project")}</span>
                                 {!loading && (
                                     <TableFilters
-                                        label="Filter by project"
+                                        label={uiText("Filter by project")}
                                         value={projectColumn.filter}
                                         allLabel="All Projects"
                                         options={projectColumn.projects.map(
@@ -309,10 +311,10 @@ export function ReviewsListTable({
                     {showCreator && (
                         <TableHeaderCell className="w-32">
                             <div className="flex items-center gap-1">
-                                <span>Creator</span>
+                                <span>{uiText("Creator")}</span>
                                 {!loading && creatorFilter && (
                                     <PersonFilter
-                                        label="Filter by creator"
+                                        label={uiText("Filter by creator")}
                                         selectedTitle={(name) =>
                                             `Created by ${name}`
                                         }
@@ -324,13 +326,13 @@ export function ReviewsListTable({
                     )}
                     <TableHeaderCell className="w-32">
                         <div className="flex items-center gap-1">
-                            <span>Created</span>
+                            <span>{uiText("Created")}</span>
                             {!loading && createdFilterButton}
                         </div>
                     </TableHeaderCell>
                     <TableHeaderCell className="w-32">
                         <div className="flex items-center gap-1">
-                            <span>Updated</span>
+                            <span>{uiText("Updated")}</span>
                             {!loading && updatedFilterButton}
                         </div>
                     </TableHeaderCell>
@@ -347,10 +349,10 @@ export function ReviewsListTable({
             ) : error ? (
                 <TableEmptyState>
                     <p className="text-lg font-medium font-serif text-gray-900">
-                        Unable to load reviews
+                        {uiText("Unable to load reviews")}
                     </p>
                     <p className="mt-1 text-xs text-gray-400">
-                        Check your connection and try again.
+                        {uiText("Check your connection and try again.")}
                     </p>
                     <PillButtonUI
                         tone="black"
@@ -358,19 +360,19 @@ export function ReviewsListTable({
                         onClick={onRetry}
                         className="mt-4"
                     >
-                        Try again
+                        {uiText("Try again")}
                     </PillButtonUI>
                 </TableEmptyState>
             ) : reviews.length === 0 ? (
                 <TableEmptyState>
                     {hasActiveFilters ? (
                         <p className="text-sm text-gray-400">
-                            No reviews found
+                            {uiText("No reviews found")}
                         </p>
                     ) : (
                         <EmptyState
                             icon={<TabularReviewSkeuoIcon />}
-                            title="Tabular Reviews"
+                            title={uiText("Tabular Reviews")}
                             description={emptyDescription}
                             action={
                                 <PillButtonUI
@@ -379,7 +381,7 @@ export function ReviewsListTable({
                                     onClick={onCreateReview}
                                     disabled={createDisabled}
                                 >
-                                    Create
+                                    {uiText("Create")}
                                 </PillButtonUI>
                             }
                         />
@@ -428,7 +430,7 @@ export function ReviewsListTable({
                                                 : [...prev, review.id],
                                         )
                                     }
-                                    label={review.title ?? "Untitled Review"}
+                                    label={review.title ?? uiText("Untitled Review")}
                                 />
                                 <TableCell className="ml-auto w-24">
                                     {review.columns_config?.length ?? 0}
@@ -453,9 +455,9 @@ export function ReviewsListTable({
                                         <CreatorLabel
                                             label={
                                                 review.is_owner
-                                                    ? "Me"
+                                                    ? uiText("Me")
                                                     : review.owner_display_name?.trim() ||
-                                                      "Shared"
+                                                      uiText("Shared")
                                             }
                                             photo={review.owner_profile_photo}
                                             name={review.owner_display_name}

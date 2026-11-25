@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { CornerDownLeft } from "lucide-react";
@@ -126,8 +128,8 @@ export function SettingsSearch({
                     setQuery(value);
                     setOpen(true);
                 }}
-                label="Search settings"
-                placeholder="Search settings"
+                label={uiText("Search settings")}
+                placeholder={uiText("Search settings")}
                 maxLength={200}
                 autoComplete="off"
                 aria-controls={showResults ? listId : undefined}
@@ -148,7 +150,7 @@ export function SettingsSearch({
             <span role="status" className="sr-only">
                 {showResults
                     ? results.length === 1
-                        ? "1 setting found"
+                        ? uiText("1 setting found")
                         : `${results.length} settings found`
                     : ""}
             </span>
@@ -168,7 +170,7 @@ export function SettingsSearch({
                     <div
                         ref={list}
                         role="group"
-                        aria-label="Settings search results"
+                        aria-label={uiText("Settings search results")}
                         className={`max-h-80 overflow-y-auto overscroll-contain ${DROPDOWN_ROWS_CLASS}`}
                         onKeyDown={(event) => {
                             if (event.key === "Escape") {
@@ -209,7 +211,7 @@ export function SettingsSearch({
                     >
                         {groups.length === 0 ? (
                             <p className="px-3 py-4 text-center text-xs text-gray-500">
-                                No settings match &ldquo;{query.trim()}&rdquo;.
+                                {uiText("No settings match &ldquo;")}{query.trim()}{uiText("&rdquo;.")}
                             </p>
                         ) : (
                             groups.map((group, groupIndex) => (

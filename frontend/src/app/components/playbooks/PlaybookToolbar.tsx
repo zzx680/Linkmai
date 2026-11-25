@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { Plus, Upload } from "lucide-react";
 import { TableToolbar } from "@/app/components/shared/TableToolbar";
 import { TabPillButtonUI } from "@mike/ui";
@@ -9,9 +11,9 @@ export const PLAYBOOK_VIEWS = ["rules", "references", "runs"] as const;
 export type PlaybookView = (typeof PLAYBOOK_VIEWS)[number];
 
 const VIEWS: { id: PlaybookView; label: string }[] = [
-  { id: "rules", label: "Rules" },
-  { id: "references", label: "References" },
-  { id: "runs", label: "Runs" },
+  { id: "rules", label: uiText("Rules") },
+  { id: "references", label: uiText("References") },
+  { id: "runs", label: uiText("Runs") },
 ];
 
 export function PlaybookToolbar({
@@ -34,13 +36,13 @@ export function PlaybookToolbar({
   onNewRun: () => void;
 }) {
   return (
-    <nav aria-label="Playbook toolbar" className="shrink-0">
+    <nav aria-label={uiText("Playbook toolbar")} className="shrink-0">
       <TableToolbar
         leading={
           <div className="flex w-full flex-wrap items-center justify-between gap-1.5">
             <div
               role="group"
-              aria-label="Playbook view"
+              aria-label={uiText("Playbook view")}
               className="flex flex-wrap items-center gap-1.5"
             >
               {VIEWS.map((entry) => (
@@ -59,13 +61,13 @@ export function PlaybookToolbar({
                 onClick={onAddRule}
               >
                 <Plus aria-hidden="true" className="h-3.5 w-3.5" />
-                New rule
+                {uiText("New rule")}
               </TabPillButtonUI>
             )}
             {view === "runs" && (
               <TabPillButtonUI disabled={disabled} onClick={onNewRun}>
                 <Plus aria-hidden="true" className="h-3.5 w-3.5" />
-                New run
+                {uiText("New run")}
               </TabPillButtonUI>
             )}
             {view === "references" && (
@@ -74,7 +76,7 @@ export function PlaybookToolbar({
                 onClick={onUpload}
               >
                 <Upload aria-hidden="true" className="h-3.5 w-3.5" />
-                Upload
+                {uiText("Upload")}
               </TabPillButtonUI>
             )}
           </div>

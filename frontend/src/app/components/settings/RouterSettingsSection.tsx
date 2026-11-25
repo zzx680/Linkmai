@@ -1,4 +1,7 @@
 "use client";
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
 
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, X } from "lucide-react";
@@ -191,7 +194,7 @@ const ROUTER_SETTINGS: readonly {
   { provider: "xai", label: "xAI", loadCatalog: getXaiModels },
   {
     provider: "custom",
-    label: "OpenAI-compatible endpoint",
+    label: uiText("OpenAI-compatible endpoint"),
     loadCatalog: getCustomEndpointModels,
     catalogScope: (settings) => settings?.custom?.baseUrl,
   },
@@ -232,7 +235,7 @@ export function RouterSettingsSection({
           settings: profile.apiKeySettings,
           save: updateRouterModels,
           description:
-            "Add the models you want to use. Saved models appear in model selectors.",
+            uiText("Add the models you want to use. Saved models appear in model selectors."),
         }
       : null);
   if (!source) return null;
@@ -245,7 +248,7 @@ export function RouterSettingsSection({
 
   return (
     <section id="routers" className="scroll-mt-6 space-y-3">
-      <FieldLabel as="p">Model Selections</FieldLabel>
+      <FieldLabel as="p">{uiText("Model Selections")}</FieldLabel>
       <SettingsDescription>{source.description}</SettingsDescription>
       <div className="space-y-4">
         {visible.map((router) => (
@@ -308,7 +311,7 @@ function RouterModelsSetting({
         if (!cancelled) {
           setCatalog([]);
           setError(
-            `${label}'s model list could not be loaded. You can still type a model ID.`,
+            uiText`${label}'s model list could not be loaded. You can still type a model ID.`,
           );
         }
       });
@@ -351,7 +354,7 @@ function RouterModelsSetting({
     setError(null);
     const ok = await onSave(next);
     setSaving(false);
-    if (!ok) setError(`${label} model preferences could not be saved.`);
+    if (!ok) setError(uiText`${label} model preferences could not be saved.`);
   };
 
   // Enter with no explicit highlight adds exactly what the user typed — and
@@ -366,7 +369,7 @@ function RouterModelsSetting({
     if (!model) {
       setError(
         candidate.length > MAX_MODEL_ID_LENGTH
-          ? `Model IDs are at most ${MAX_MODEL_ID_LENGTH} characters.`
+          ? uiText`Model IDs are at most ${MAX_MODEL_ID_LENGTH} characters.`
           : `"${candidate}" is not a model ID — pick one from the list, or type it as ${ROUTER_MODEL_ID[provider].shape}.`,
       );
       return;
@@ -471,6 +474,7 @@ function RouterModelsSetting({
                 setActiveCatalogIndex(-1);
                 return;
               }
+              if (isImeComposing(event)) return;
               if (event.key === "Enter") {
                 event.preventDefault();
                 const highlighted =
@@ -489,7 +493,7 @@ function RouterModelsSetting({
             <button
               type="button"
               disabled={saving || catalog.length === 0}
-              aria-label={`Choose ${label} model`}
+              aria-label={uiText`Choose ${label} model`}
               aria-controls={catalogId}
               aria-expanded={catalogOpen}
               aria-haspopup="listbox"
@@ -526,7 +530,7 @@ function RouterModelsSetting({
                             disagree with aria-activedescendant. */}
             {typedModelId && (
               <div className="px-3 py-2 text-xs text-gray-400">
-                Press Enter to add this model ID.
+                {uiText("Press Enter to add this model ID.")}
               </div>
             )}
             <div
@@ -575,7 +579,7 @@ function RouterModelsSetting({
             </div>
             {visibleCatalog.length === 0 && (
               <div className="px-3 py-2 text-xs text-gray-400">
-                No matching models.
+                {uiText("No matching models.")}
               </div>
             )}
           </DropdownSurface>
@@ -588,8 +592,8 @@ function RouterModelsSetting({
               key={model}
               surface="flat"
               disabled={saving}
-              aria-label={`Remove ${model}`}
-              title={`Remove ${model}`}
+              aria-label={uiText`Remove ${model}`}
+              title={uiText`Remove ${model}`}
               onClick={() =>
                 void save(selection.filter((item) => item !== model))
               }

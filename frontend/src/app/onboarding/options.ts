@@ -2,6 +2,7 @@ import type {
     PracticeSetting,
     ProfessionalTitle,
 } from "@/app/lib/mikeApi";
+import { uiText } from "@mike/client";
 
 export const COUNTRY_OPTIONS = [
     "Afghanistan",
@@ -305,22 +306,16 @@ export const PRACTICE_AREA_OPTIONS = [
 ] as const;
 
 export const PRACTICE_SETTING_OPTIONS = [
-    { value: "private_practice", label: "Private practice" },
-    { value: "in_house", label: "In-house" },
-    { value: "not_practising", label: "Not a practising attorney" },
+    { value: "private_practice", label: uiText("Private practice") },
+    { value: "in_house", label: uiText("In-house") },
+    { value: "not_practising", label: uiText("Not a practising attorney") },
 ] as const satisfies readonly { value: PracticeSetting; label: string }[];
 
 export type { PracticeSetting } from "@/app/lib/mikeApi";
 
 export const PROFESSIONAL_TITLE_OPTIONS = [
-    "Partner",
-    "Senior Associate",
-    "Associate",
-    "Law Clerk",
-    "Counsel",
-    "General Counsel",
-    "Legal Counsel",
-    "Other",
+    "Partner", "Senior Associate", "Associate", "Law Clerk", "Counsel",
+    "General Counsel", "Legal Counsel", "Other",
 ] as const satisfies readonly ProfessionalTitle[];
 
 export type { ProfessionalTitle } from "@/app/lib/mikeApi";

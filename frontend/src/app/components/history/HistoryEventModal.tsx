@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -104,9 +106,9 @@ export function HistoryEventModal({
         if (!current) return;
         setError(
           cause instanceof MikeApiError && cause.status === 403
-            ? "You do not have access to this document."
+            ? uiText("You do not have access to this document.")
             : cause instanceof MikeApiError && cause.status === 404
-              ? "This document is no longer available."
+              ? uiText("This document is no longer available.")
               : knownErrorCodeMessage(
                   cause,
                   {},
@@ -181,11 +183,11 @@ export function HistoryEventModal({
   const subjectEmail = auditSubjectEmail(event);
   const destination = auditDestination(event);
   const fields = [
-    { label: "Description", value: auditSummary(event, personal) },
+    { label: uiText("Description"), value: auditSummary(event, personal) },
     ...(!personal
       ? [
           {
-            label: "Performed by",
+            label: uiText("Performed by"),
             value: (
               <span className="flex max-w-full items-center justify-end gap-2">
                 {auditActor(event) !== "System" && (
@@ -223,22 +225,22 @@ export function HistoryEventModal({
     ),
     ...(subject.context &&
     subject.context !== (SURFACE_LABELS[event.surface ?? ""] ?? event.surface)
-      ? [{ label: "Location", value: subject.context }]
+      ? [{ label: uiText("Location"), value: subject.context }]
       : []),
-    { label: "When", value: auditTimestamp(event.created_at, true) },
-    { label: "Status", value: auditLabel(event.status) },
+    { label: uiText("When"), value: auditTimestamp(event.created_at, true) },
+    { label: uiText("Status"), value: auditLabel(event.status) },
     ...(privateAccess
-      ? [{ label: "Access", value: "Read-only · access is logged" }]
+      ? [{ label: uiText("Access"), value: "Read-only · access is logged" }]
       : []),
     ...(event.surface
       ? [
           {
-            label: "Application",
+            label: uiText("Application"),
             value: SURFACE_LABELS[event.surface] ?? auditLabel(event.surface),
           },
         ]
       : []),
-    ...(event.model ? [{ label: "Model", value: event.model }] : []),
+    ...(event.model ? [{ label: uiText("Model"), value: event.model }] : []),
   ];
 
   return (
@@ -252,15 +254,15 @@ export function HistoryEventModal({
             ? "h-[min(800px,calc(100dvh-2rem))]"
             : "h-auto max-h-[calc(100dvh-2rem)]"
         }`}
-        breadcrumbs={[title, preview ? "Document" : "Event details"]}
+        breadcrumbs={[title, preview ? uiText("Document") : uiText("Event details")]}
         primaryAction={
           preview
             ? error
-              ? { label: "Try again", onClick: retryPreview }
+              ? { label: uiText("Try again"), onClick: retryPreview }
               : undefined
             : documentId
               ? {
-                  label: busy ? "Opening…" : "Open document",
+                  label: busy ? uiText("Opening…") : uiText("Open document"),
                   onClick: openPreview,
                   disabled: busy,
                 }
@@ -268,10 +270,10 @@ export function HistoryEventModal({
         }
         secondaryAction={
           preview
-            ? { label: "Back", onClick: () => setPreview(false) }
+            ? { label: uiText("Back"), onClick: () => setPreview(false) }
             : privateAccess && hasAccess
               ? {
-                  label: "End access",
+                  label: uiText("End access"),
                   onClick: () => void endAccess(),
                   disabled: busy,
                   variant: "secondary",
@@ -295,7 +297,7 @@ export function HistoryEventModal({
                   })
                 }
               >
-                {busy ? "Opening…" : (destination?.label ?? "Open workflow")}
+                {busy ? uiText("Opening…") : (destination?.label ?? uiText("Open workflow"))}
               </PillButtonUI>
             ) : destination ? (
               <Link
@@ -324,7 +326,7 @@ export function HistoryEventModal({
             <div className="mt-4 rounded-xl bg-gray-100 p-4">
               <table
                 className="w-full table-fixed text-left"
-                aria-label="Event details"
+                aria-label={uiText("Event details")}
               >
                 <tbody className="divide-y divide-border">
                   {fields.map(({ label, value }) => (
@@ -349,12 +351,12 @@ export function HistoryEventModal({
                   aria-hidden="true"
                   className="h-3.5 w-3.5 transition-transform group-open:rotate-180"
                 />
-                Technical details
+                {uiText("Technical details")}
               </summary>
               <div className="mt-3 rounded-xl bg-gray-100 p-4">
                 <table
                   className="w-full table-fixed text-left"
-                  aria-label="Technical details"
+                  aria-label={uiText("Technical details")}
                 >
                   <tbody className="divide-y divide-border">
                     {Object.entries({
@@ -395,7 +397,7 @@ export function HistoryEventModal({
       </Modal>
       <WarningPopup
         open={Boolean(actionError)}
-        title="Access unavailable"
+        title={uiText("Access unavailable")}
         message={actionError}
         onClose={() => setActionError(null)}
       />
@@ -407,7 +409,7 @@ function DocumentLoading() {
   return (
     <div
       role="status"
-      aria-label="Loading document"
+      aria-label={uiText("Loading document")}
       className="flex-1 space-y-4 p-4"
     >
       <SkeletonLine className="w-48" />

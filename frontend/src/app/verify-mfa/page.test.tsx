@@ -128,6 +128,6 @@ describe("VerifyMfaPage", () => {
         );
         expect(
             screen.getByRole("link", { name: "Contact support" }),
-        ).toHaveAttribute("href", expect.stringContaining("support@mikeoss.com"));
+        ).toHaveAttribute("href", expect.stringContaining("support@example.test"));
     });
 });

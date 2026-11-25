@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/app/components/auth/OnboardingShell";
@@ -105,7 +107,7 @@ function stepDescription(
     if (hasUsableProvider(keys, "env")) {
         return "This deployment already provides models, so you can finish now. A key you add here replaces the deployment's for your Personal workspace.";
     }
-    return "Add an API key for at least one provider to start using Mike in your Personal workspace. You can add or change keys later in Settings.";
+    return uiText("Add an API key for at least one provider to start using Mike in your Personal workspace. You can add or change keys later in Settings.");
 }
 
 function ModelStep({ userId }: { userId: string }) {
@@ -130,8 +132,8 @@ function ModelStep({ userId }: { userId: string }) {
 
     return (
         <OnboardingShell
-            step="Step 4 of 4"
-            title="Connect a model"
+            step={uiText("Step 4 of 4")}
+            title={uiText("Connect a model")}
             description={stepDescription(profile?.apiKeys, joined)}
             width="wide"
         >
@@ -139,8 +141,8 @@ function ModelStep({ userId }: { userId: string }) {
             <WarningPopup
                 open={error}
                 onClose={() => setError(false)}
-                title="Unable to finish setup"
-                message="Please try again."
+                title={uiText("Unable to finish setup")}
+                message={uiText("Please try again.")}
             />
             <div className="flex items-center justify-between gap-3 pt-6">
                 <PillButtonUI
@@ -150,7 +152,7 @@ function ModelStep({ userId }: { userId: string }) {
                     disabled={submitting}
                     onClick={() => router.push("/onboarding/invitations")}
                 >
-                    Back
+                    {uiText("Back")}
                 </PillButtonUI>
                 <PillButtonUI
                     type="button"
@@ -159,7 +161,7 @@ function ModelStep({ userId }: { userId: string }) {
                     disabled={submitting}
                     onClick={() => void finish()}
                 >
-                    {submitting ? "Finishing..." : "Finish"}
+                    {submitting ? uiText("Finishing...") : uiText("Finish")}
                 </PillButtonUI>
             </div>
         </OnboardingShell>

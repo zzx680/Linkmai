@@ -5,12 +5,12 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xsi:type="TaskPaneApp">
 
-  <Id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</Id>
+  <Id>0698078a-064c-477d-9add-679533795315</Id>
   <Version>1.0.0.1</Version>
-  <ProviderName>MikeOSS</ProviderName>
-  <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="Mike" />
-  <Description DefaultValue="AI-powered legal assistant for Word" />
+  <ProviderName>灵迈 LinkMai</ProviderName>
+  <DefaultLocale>zh-CN</DefaultLocale>
+  <DisplayName DefaultValue="灵迈 LinkMai" />
+  <Description DefaultValue="Word 法律助手：文档分析、合同审阅与修订" />
 
   <IconUrl DefaultValue="https://localhost:3200/assets/icon-32.png" />
   <HighResolutionIconUrl DefaultValue="https://localhost:3200/assets/icon-80.png" />
@@ -87,11 +87,11 @@
         <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3200/taskpane.html" />
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GroupLabel" DefaultValue="Mike Legal AI" />
-        <bt:String id="TaskpaneButton.Label" DefaultValue="Mike" />
+        <bt:String id="GroupLabel" DefaultValue="灵迈法律 AI" />
+        <bt:String id="TaskpaneButton.Label" DefaultValue="灵迈 LinkMai" />
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the Mike AI legal assistant pane" />
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="打开灵迈 LinkMai 法律助手" />
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

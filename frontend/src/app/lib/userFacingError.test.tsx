@@ -168,7 +168,7 @@ describe("notifyError", () => {
         expect(screen.getByRole("button", { name: "Retry" })).toBeVisible();
         const support = screen.getByRole("link", { name: "Contact support" });
         expect(support.getAttribute("href")).toMatch(
-            /^mailto:support@mikeoss\.com\?/,
+            /^mailto:support@example\.test\?/,
         );
         expect(decodeURIComponent(support.getAttribute("href") ?? "")).toContain(
             "Request ID: req-9",
@@ -213,7 +213,7 @@ describe("notifyError", () => {
                         .getByRole("link", { name: "Contact support" })
                         .getAttribute("href") ?? "",
                 );
-                expect(href.startsWith("mailto:support@mikeoss.com?")).toBe(true);
+                expect(href.startsWith("mailto:support@example.test?")).toBe(true);
                 expect(href).toContain("Request ID: req-9");
                 expect(href).toContain("Error code: internal_error");
                 expect(href).toContain("HTTP status: 500");

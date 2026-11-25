@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { modelDisplayName } from "@mike/client";
 import { REASONING_LEVEL_LABELS, REASONING_LEVELS } from "@mike/ui";
 import type { AssistantEvent } from "../../shared/types";
@@ -17,7 +19,7 @@ const compactNumber = new Intl.NumberFormat(undefined, { notation: "compact" });
 function reasoningLabel(level: string | undefined): string | null {
     const known = REASONING_LEVELS.find((l) => l === level);
     if (!known) return null;
-    return known === "none" ? "No reasoning" : REASONING_LEVEL_LABELS[known];
+    return known === "none" ? uiText("No reasoning") : REASONING_LEVEL_LABELS[known];
 }
 
 function runText(run: {

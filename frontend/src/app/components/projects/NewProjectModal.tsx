@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import {
@@ -268,7 +270,7 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
                 } catch (err: unknown) {
                     grantFailures.push({
                         email: entry.email,
-                        detail: userFacingApiError(err, "the request failed"),
+                        detail: userFacingApiError(err, uiText("the request failed")),
                     });
                 }
             }
@@ -294,7 +296,7 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
                         .map((failure) => failure.email)
                         .join(", ")}: ${grantFailures[0].detail}${
                         stillPending > 0
-                            ? ` The ${stillPending} selected ${
+                            ? uiText` The ${stillPending} selected ${
                                   stillPending === 1 ? "file is" : "files are"
                               } still pending and will be attached when you try again.`
                             : ""
@@ -368,7 +370,7 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
                             ? failedUploadMessage(uploadError.outcomes)
                             : userFacingApiError(
                                   uploadError,
-                                  "The attached files could not be uploaded. Please try again.",
+                                  uiText("The attached files could not be uploaded. Please try again."),
                               );
                 }
             }
@@ -432,7 +434,7 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
 
             finishCreation({ ...stamped, document_count: attachedCount });
         } catch (err: unknown) {
-            setError(userFacingApiError(err, "Failed to create project"));
+            setError(userFacingApiError(err, uiText("Failed to create project")));
         } finally {
             setLoading(false);
         }
@@ -476,27 +478,27 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
             open={open}
             onClose={handleClose}
             breadcrumbs={[
-                "Projects",
-                "New project",
+                uiText("Projects"),
+                uiText("New project"),
                 step === "details"
-                    ? "Details"
+                    ? uiText("Details")
                     : step === "access"
                       ? orgId === PERSONAL_WORKSPACE
-                          ? "Access"
-                          : "People"
-                      : "Add Documents",
+                          ? uiText("Access")
+                          : uiText("People")
+                      : uiText("Add Documents"),
             ]}
             secondaryAction={
                 step === "documents"
                     ? {
-                          label: `Upload${pendingFiles.length > 0 ? ` (${pendingFiles.length})` : ""}`,
+                          label: uiText`Upload${pendingFiles.length > 0 ? ` (${pendingFiles.length})` : ""}`,
                           icon: <Upload className="h-3.5 w-3.5" />,
                           onClick: () => fileInputRef.current?.click(),
                           disabled: loading,
                       }
                     : step === "access"
                       ? {
-                            label: "Back",
+                            label: uiText("Back"),
                             type: "button",
                             onClick: () => setStep("details"),
                             disabled: loading,
@@ -506,7 +508,7 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
             cancelAction={
                 step === "documents"
                     ? {
-                          label: "Back",
+                          label: uiText("Back"),
                           onClick: () => setStep("access"),
                           // Back stays open once the project exists: a retry
                           // persists a changed memory choice before anything
@@ -518,7 +520,7 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
                       }
                     : step === "access"
                       ? {
-                            label: "Skip",
+                            label: uiText("Skip"),
                             type: "button",
                             onClick: () => {
                                 setSharedUsers([]);
@@ -532,24 +534,24 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
             primaryAction={
                 step === "details"
                     ? {
-                          label: "Next",
+                          label: uiText("Next"),
                           type: "button",
                           onClick: () => setStep("access"),
                           disabled: !name.trim() || loading,
                       }
                     : step === "access"
                       ? {
-                            label: "Next",
+                            label: uiText("Next"),
                             type: "button",
                             onClick: () => setStep("documents"),
                             disabled: loading,
                         }
                       : {
                             label: loading
-                                ? "Creating…"
+                                ? uiText("Creating…")
                                 : pendingProject
-                                  ? "Continue"
-                                  : "Create project",
+                                  ? uiText("Continue")
+                                  : uiText("Create project"),
                             type: "button",
                             onClick: () => void createProjectFromDocuments(),
                             disabled: !name.trim() || loading,
@@ -572,14 +574,14 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
                     <div className="space-y-6">
                         <div>
                             <FieldLabel htmlFor="new-project-name">
-                                Project name
+                                {uiText("Project name")}
                             </FieldLabel>
                             <FormTextInput
                                 id="new-project-name"
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Add project name"
+                                placeholder={uiText("Add project name")}
                                 variant="minimal"
                                 // Once the project EXISTS the retry reuses
                                 // `createdProjectRef` and never reads these
@@ -594,14 +596,14 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
 
                         <div>
                             <FieldLabel htmlFor="new-project-cm-number">
-                                CM number
+                                {uiText("CM number")}
                             </FieldLabel>
                             <FormTextInput
                                 id="new-project-cm-number"
                                 type="text"
                                 value={cmNumber}
                                 onChange={(e) => setCmNumber(e.target.value)}
-                                placeholder="Add a CM number..."
+                                placeholder={uiText("Add a CM number...")}
                                 variant="minimal"
                                 className="text-xl text-gray-600"
                                 disabled={projectExists}
@@ -610,7 +612,7 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
 
                         <div>
                             <FieldLabel htmlFor="new-project-practice">
-                                Practice
+                                {uiText("Practice")}
                             </FieldLabel>
                             <ProjectPracticeField
                                 id="new-project-practice"
@@ -641,24 +643,21 @@ export function NewProjectModal({ open, onClose, onCreated }: Props) {
                         ) : null}
                         {projectExists && (
                             <p className="text-sm text-gray-500">
-                                The project has been created, so its name, CM
-                                number and practice can no longer be changed
-                                here. Edit them from the project once this
-                                finishes.
+                                {uiText("The project has been created, so its name, CM number and practice can no longer be changed here. Edit them from the project once this finishes.")}
                             </p>
                         )}
 
                         <div>
-                            <FieldLabel as="p">Project memory</FieldLabel>
+                            <FieldLabel as="p">{uiText("Project memory")}</FieldLabel>
                             <ToggleSwitchUI
                                 checked={memoryEnabled}
                                 onCheckedChange={(enabled) => {
                                     memoryEditedRef.current = true;
                                     setMemoryEnabled(enabled);
                                 }}
-                                aria-label="Enable project memory"
+                                aria-label={uiText("Enable project memory")}
                             >
-                                {memoryEnabled ? "On" : "Off"}
+                                {memoryEnabled ? uiText("On") : uiText("Off")}
                             </ToggleSwitchUI>
                         </div>
                     </div>

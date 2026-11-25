@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -72,10 +74,10 @@ export function TableLoadMoreRow({
             >
                 {loadingMore && <Loader2 className="h-3 w-3 animate-spin" />}
                 {loadingMore
-                    ? "Loading…"
+                    ? uiText("Loading…")
                     : hasError
-                      ? "Retry loading"
-                      : "Load more"}
+                      ? uiText("Retry loading")
+                      : uiText("Load more")}
             </button>
         </div>
     );

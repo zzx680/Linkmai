@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 // Client-side mirror of backend/src/lib/permissions.ts — the project role
 // ladder and capability matrix. The server is the enforcement point; this
 // exists so the UI can hide or disable affordances the server would reject,
@@ -222,25 +224,25 @@ export function roleFromLoaded(
 // drift into describing the same role three different ways.
 
 export const PROJECT_ROLE_LABELS: Record<ProjectRole, string> = {
-    owner: "Owner",
-    editor: "Editor",
-    viewer: "Viewer",
+    owner: uiText("Owner"),
+    editor: uiText("Editor"),
+    viewer: uiText("Viewer"),
 };
 
 export const PROJECT_ROLE_DESCRIPTIONS: Record<ProjectRole, string> = {
-    owner: "Everything an editor can do, plus settings, access management and deleting the item.",
-    editor: "Edit content, upload documents, use chats and reviews, and organize documents and folders.",
-    viewer: "Read-only.",
+    owner: uiText("Everything an editor can do, plus settings, access management and deleting the item."),
+    editor: uiText("Edit content, upload documents, use chats and reviews, and organize documents and folders."),
+    viewer: uiText("Read-only."),
 };
 
 export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
-    owner: "Owner",
-    admin: "Admin",
-    member: "Member",
+    owner: uiText("Owner"),
+    admin: uiText("Admin"),
+    member: uiText("Member"),
 };
 
 export const ORG_ROLE_DESCRIPTIONS: Record<OrgRole, string> = {
-    owner: "Everything an admin can do, plus deleting the organization and appointing or removing admins and other owners.",
-    admin: "Manages the organization's members, invitations and settings and is an Owner of organization content by default.",
-    member: "Can edit organization content by default.",
+    owner: uiText("Everything an admin can do, plus deleting the organization and appointing or removing admins and other owners."),
+    admin: uiText("Manages the organization's members, invitations and settings and is an Owner of organization content by default."),
+    member: uiText("Can edit organization content by default."),
 };

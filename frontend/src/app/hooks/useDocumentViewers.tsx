@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useRef, useState } from "react";
 import { ConfirmPopup } from "@/app/components/popups/ConfirmPopup";
 import { downloadDocumentFile } from "@/app/lib/downloadDocument";
@@ -43,11 +45,11 @@ export function useDocumentViewers() {
     }, []);
     const confirmation = <ConfirmPopup
         open={!!pending}
-        title="Discard unsaved changes?"
-        message="Your changes could not be saved. Keep the document open to retry or download a copy, or discard the unsaved changes."
-        confirmLabel="Discard changes"
+        title={uiText("Discard unsaved changes?")}
+        message={uiText("Your changes could not be saved. Keep the document open to retry or download a copy, or discard the unsaved changes.")}
+        confirmLabel={uiText("Discard changes")}
         confirmVariant="danger"
-        cancelLabel="Keep editing"
+        cancelLabel={uiText("Keep editing")}
         onCancel={() => { setPending(null); busy.current = false; }}
         onConfirm={() => {
             pending?.guards.forEach((guard) => guard.discard());

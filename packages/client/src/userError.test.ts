@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
     GENERIC_FAILURE_MESSAGE,
-    SUPPORT_EMAIL,
-    UserVisibleError,
+        UserVisibleError,
     buildSupportMailto,
     describeError,
     isNetworkError,
@@ -263,16 +262,17 @@ describe("buildSupportMailto", () => {
                 requestId: "req-42",
             },
             {
+                supportEmail: "support@example.test",
                 page: "https://app.mikeoss.com/projects/1",
                 product: "web",
                 when: new Date("2026-09-17T10:00:00Z"),
             },
         );
-        expect(href.startsWith(`mailto:${SUPPORT_EMAIL}?`)).toBe(true);
+        expect(href.startsWith(`mailto:support@example.test?`)).toBe(true);
         const url = new URL(href);
         const params = new URLSearchParams(url.search);
         expect(params.get("subject")).toBe(
-            "Mike support: Couldn't save the document",
+            "灵迈技术支持：Couldn't save the document",
         );
         const body = params.get("body") ?? "";
         expect(body).toContain("Request ID: req-42");
@@ -293,7 +293,7 @@ describe("buildSupportMailto", () => {
             status: null,
             code: null,
             requestId: null,
-        });
+        }, { supportEmail: "support@example.test" });
         const body = new URLSearchParams(new URL(href).search).get("body") ?? "";
         expect(body).not.toMatch(/null|undefined/);
         expect(body).not.toContain("Request ID");
@@ -304,6 +304,7 @@ describe("buildSupportMailto", () => {
 describe("support URL privacy", () => {
     it("omits query strings, fragments, and URL credentials", () => {
         const href = buildSupportMailto(describeError(new Error("internal")), {
+            supportEmail: "support@example.test",
             page: "https://user:password@app.example/auth/callback?code=secret#access_token=hidden",
         });
         const body = new URL(href).searchParams.get("body");

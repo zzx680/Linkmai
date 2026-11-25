@@ -1,3 +1,5 @@
+
+import { uiText } from "./localization";
 /** Framework-independent notification store, usable by API clients and Node tests. */
 import type { ReactNode } from "react";
 
@@ -23,7 +25,7 @@ export function retryToastAction(
     onFailure: (error: unknown) => void,
 ): ToastAction {
     return {
-        label: "Retry",
+        label: uiText("Retry"),
         onClick: async () => {
             try {
                 await onRetry();

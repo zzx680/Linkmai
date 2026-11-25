@@ -1,5 +1,9 @@
 "use client";
 
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { indexFolderDirectory } from "../shared/folderDirectoryIndex";
 import { isProjectItemDrag } from "@/app/lib/projectDragTypes";
 import { setRowDragPreview } from "@/app/lib/rowDragPreview";
@@ -282,10 +286,11 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                             ref={newFolderInputRef}
                             autoFocus
                             className="flex-1 min-w-0 text-xs bg-transparent outline-none border-b border-gray-300 text-gray-800"
-                            placeholder="Folder name"
+                            placeholder={uiText("Folder name")}
                             value={newFolderName}
                             onChange={(e) => setNewFolderName(e.target.value)}
                             onKeyDown={(e) => {
+                                if (isImeComposing(e)) return;
                                 if (e.key === "Enter") void commitNewFolder(parentId);
                                 if (e.key === "Escape") { setCreatingIn(undefined); setNewFolderName(""); }
                             }}
@@ -361,6 +366,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                                         value={renameValue}
                                         onChange={(e) => setRenameValue(e.target.value)}
                                         onKeyDown={(e) => {
+                                            if (isImeComposing(e)) return;
                                             if (e.key === "Enter") void commitRename(folder.id);
                                             if (e.key === "Escape") setRenamingId(null);
                                         }}
@@ -425,6 +431,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                                         setRenameValue(event.target.value)
                                     }
                                     onKeyDown={(event) => {
+                                        if (isImeComposing(event)) return;
                                         if (event.key === "Enter")
                                             void commitDocRename(doc.id);
                                         if (event.key === "Escape")
@@ -502,7 +509,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                 uploadingDocuments.length === 0 &&
                 creatingIn === undefined && (
                     <li className="px-2 py-2 text-xs text-gray-400">
-                        No documents in this project.
+                        {uiText("No documents in this project.")}
                     </li>
                 )}
 
@@ -540,7 +547,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                             onSelect={() => void onDownloadFolder(contextFolder)}
                         >
                             <Download aria-hidden="true" className="h-3.5 w-3.5" />
-                            Download
+                            {uiText("Download")}
                         </DropdownItem>
                     )}
                     {onCreateFolder && !contextMenu.docId && (
@@ -556,7 +563,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                             }}
                         >
                             <SubfolderSvgIcon className="h-3.5 w-3.5 shrink-0" />
-                            New subfolder
+                            {uiText("New subfolder")}
                         </DropdownItem>
                     )}
                     {contextMenu.folderId && onRenameFolder && (
@@ -567,7 +574,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                             }}
                         >
                             <Pencil aria-hidden="true" className="h-3.5 w-3.5" />
-                            Rename
+                            {uiText("Rename")}
                         </DropdownItem>
                     )}
                     {contextMenu.folderId && onDeleteFolder && (
@@ -576,7 +583,7 @@ export const ProjectExplorer = forwardRef<ProjectExplorerHandle, Props>(function
                             onSelect={() => onDeleteFolder(contextMenu.folderId!)}
                         >
                             <Trash2 className="h-3.5 w-3.5" />
-                            Delete folder
+                            {uiText("Delete folder")}
                         </DropdownItem>
                     )}
                 </DropdownAtPoint>

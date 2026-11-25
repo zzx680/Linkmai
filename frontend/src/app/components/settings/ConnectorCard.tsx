@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { ReactNode } from "react";
 import { GlassCardUI } from "@mike/ui";
 import { SkeletonLine } from "@/app/components/shared/TablePrimitive";
@@ -73,7 +75,7 @@ export function ConnectorCard({
             className="cursor-pointer rounded-xl px-4 py-3 transition-colors hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
             role="button"
             tabIndex={0}
-            aria-label={`Manage ${name}`}
+            aria-label={uiText`Manage ${name}`}
             onClick={onOpen}
             onKeyDown={(event) => {
               if (event.target !== event.currentTarget) return;

@@ -1,5 +1,5 @@
 import { createRef } from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { listWorkflows } from "@/app/lib/mikeApi";
@@ -188,6 +188,27 @@ describe("ChatInput workflow slash commands", () => {
                 }),
             ),
         );
+    });
+
+    it("does not select a slash workflow while the Chinese IME owns the keys", async () => {
+        const onSubmit = vi.fn();
+        const user = userEvent.setup();
+        render(<ChatInput onSubmit={onSubmit} onCancel={vi.fn()} isLoading={false} />);
+        const input = screen.getByRole("combobox");
+        await user.type(input, "/cont");
+        const option = await screen.findByRole("option", {
+            name: "/contract-intake Contract Intake",
+        });
+        fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+        expect(option).toHaveAttribute("aria-selected", "true");
+        expect(input).toHaveValue("/cont");
+        expect(onSubmit).not.toHaveBeenCalled();
+        fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+        expect(input).toHaveValue("/cont");
+        await user.keyboard("{Enter}");
+        expect(input).toHaveValue("");
+        expect(screen.getByText("Contract Intake")).toBeInTheDocument();
+        expect(onSubmit).not.toHaveBeenCalled();
     });
 
     it("offers a command typed mid-message and keeps the rest of the draft", async () => {

@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useState } from "react";
 import type { Workflow } from "../../types";
 import { listWorkflows } from "../../api/mikeApi";
@@ -43,7 +45,7 @@ export function WorkflowModal({
         setWorkflows([]);
         setError(
           reportFault(reason, {
-            fallback: "Mike couldn't load your workflows. Try again.",
+            fallback: uiText("Mike couldn't load your workflows. Try again."),
             operation: "workflows.run",
           }).message
         );
@@ -62,9 +64,9 @@ export function WorkflowModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Add workflow"
+      title={uiText("Add workflow")}
       primaryAction={{
-        label: "Use",
+        label: uiText("Use"),
         disabled: !selected || !(selected.skill_md ?? "").trim(),
         onClick: () => {
           if (!selected || !(selected.skill_md ?? "").trim()) return;

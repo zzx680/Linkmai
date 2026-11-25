@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { GoogleIconUI, PillButtonUI } from "@mike/ui";
 import { startGoogleOAuth } from "@/app/lib/authApi";
@@ -10,10 +12,10 @@ import {
 
 const GOOGLE_ERROR_MESSAGES = {
     provider_disabled:
-        "Google sign-in is turned off for this workspace. Use your email and password instead.",
+        uiText("Google sign-in is turned off for this workspace. Use your email and password instead."),
     oauth_provider_not_supported:
-        "Google sign-in is turned off for this workspace. Use your email and password instead.",
-    over_request_rate_limit: "Too many attempts. Wait a moment and try again.",
+        uiText("Google sign-in is turned off for this workspace. Use your email and password instead."),
+    over_request_rate_limit: uiText("Too many attempts. Wait a moment and try again."),
 } as const;
 
 interface GoogleAuthButtonProps {
@@ -43,10 +45,10 @@ export function GoogleAuthButton({
             // never shown; the caller renders the classified text instead.
             onError(
                 describeError(error, {
-                    action: "continue with Google",
+                    action: uiText("continue with Google"),
                     codeMessages: GOOGLE_ERROR_MESSAGES,
                     fallback:
-                        "Unable to continue with Google. Try again, or log in with your email and password.",
+                        uiText("Unable to continue with Google. Try again, or log in with your email and password."),
                 }),
             );
             setLoading(false);
@@ -65,7 +67,7 @@ export function GoogleAuthButton({
             onClick={() => void handleGoogleAuth()}
         >
             <GoogleIconUI className="h-4 w-4" />
-            {loading ? "Continuing…" : "Continue with Google"}
+            {loading ? uiText("Continuing…") : uiText("Continue with Google")}
         </PillButtonUI>
     );
 }

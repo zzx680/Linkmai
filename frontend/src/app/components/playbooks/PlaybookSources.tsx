@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
   useCallback,
   useEffect,
@@ -207,12 +209,12 @@ export function PlaybookSources({
         </button>
         {removable && original && (
           <HeaderActionsMenu
-            title={`Actions for ${entry.filename}`}
+            title={uiText`Actions for ${entry.filename}`}
             // Hidden until hover only where a pointer can hover; touch keeps it.
             triggerClassName="h-6 w-6 shrink-0 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
             items={[
               {
-                label: "Remove",
+                label: uiText("Remove"),
                 variant: "danger",
                 onSelect: () => setRemoving(original),
               },
@@ -228,19 +230,19 @@ export function PlaybookSources({
       resizeLabel="Resize references panel"
       sidebar={
         <section
-          aria-label="Reference documents"
+          aria-label={uiText("Reference documents")}
           className={`flex min-h-0 min-w-0 flex-col ${EDITOR_SURFACE_CLASS}`}
         >
           <div className={`flex items-center justify-between gap-2 ${PLAYBOOK_SIDE_HEADER_CLASS}`}>
-            <h2 className={PLAYBOOK_SIDE_TITLE_CLASS}>References</h2>
+            <h2 className={PLAYBOOK_SIDE_TITLE_CLASS}>{uiText("References")}</h2>
             {canEdit && (
               <Dropdown>
                 <DropdownTrigger asChild>
                   <TextButtonUI
                     size="icon-xs"
                     className="-my-0.5 h-6"
-                    aria-label="Add reference document"
-                    title="Add reference document"
+                    aria-label={uiText("Add reference document")}
+                    title={uiText("Add reference document")}
                   >
                     <Plus aria-hidden="true" className="h-3.5 w-3.5" />
                   </TextButtonUI>
@@ -248,11 +250,11 @@ export function PlaybookSources({
                 <DropdownContent align="end" className="w-56">
                   <DropdownItem onSelect={() => fileInput.current?.click()}>
                     <Upload aria-hidden="true" className="h-4 w-4" />
-                    Upload a file
+                    {uiText("Upload a file")}
                   </DropdownItem>
                   <DropdownItem onSelect={() => setPickerOpen(true)}>
                     <Cloud aria-hidden="true" className="h-4 w-4" />
-                    Choose from documents
+                    {uiText("Choose from documents")}
                   </DropdownItem>
                 </DropdownContent>
               </Dropdown>
@@ -265,7 +267,7 @@ export function PlaybookSources({
               {supplementary === null ? (
                 <div
                   role="status"
-                  aria-label="Loading reference documents"
+                  aria-label={uiText("Loading reference documents")}
                   className="space-y-1"
                 >
                   {["w-3/4", "w-1/2"].map((width) => (
@@ -293,7 +295,7 @@ export function PlaybookSources({
                 >
                   <FileTypeIcon fileType={name} muted />
                   <span className="min-w-0 flex-1 truncate">
-                    <span className="sr-only">Adding </span>
+                    <span className="sr-only">{uiText("Adding")} </span>
                     {name}
                   </span>
                   <Loader2
@@ -306,7 +308,7 @@ export function PlaybookSources({
                 supplementary?.length === 0 &&
                 pending.length === 0 && (
                   <p className="px-2 py-1.5 text-xs text-gray-500">
-                    None yet.
+                    {uiText("None yet.")}
                   </p>
                 )}
             </div>
@@ -328,7 +330,7 @@ export function PlaybookSources({
       }
     >
       <section
-        aria-label="Reference document"
+        aria-label={uiText("Reference document")}
         className={`flex min-h-[24rem] min-w-0 flex-col overflow-hidden @[48rem]:min-h-0 ${EDITOR_SURFACE_CLASS}`}
       >
         {selected && (
@@ -369,11 +371,11 @@ export function PlaybookSources({
         ) : (
           <div className={`flex min-h-0 flex-1 items-center justify-center ${PLAYBOOK_PANE_EMPTY_CLASS}`}>
             <EmptyState
-              title="No reference documents"
+              title={uiText("No reference documents")}
               description={
                 canEdit
-                  ? "Add documents the rules can refer to, such as policies or templates."
-                  : "This playbook has no reference documents."
+                  ? uiText("Add documents the rules can refer to, such as policies or templates.")
+                  : uiText("This playbook has no reference documents.")
               }
               action={
                 canEdit && (
@@ -383,11 +385,11 @@ export function PlaybookSources({
                       onClick={() => fileInput.current?.click()}
                     >
                       <Upload aria-hidden="true" className="h-3.5 w-3.5" />
-                      Upload a file
+                      {uiText("Upload a file")}
                     </PillButtonUI>
                     <PillButtonUI tone="white" onClick={() => setPickerOpen(true)}>
                       <Cloud aria-hidden="true" className="h-3.5 w-3.5" />
-                      Choose from documents
+                      {uiText("Choose from documents")}
                     </PillButtonUI>
                   </div>
                 )
@@ -401,7 +403,7 @@ export function PlaybookSources({
         <AddDocumentsModal
           open={pickerOpen}
           onClose={() => setPickerOpen(false)}
-          breadcrumb={["Playbooks", "References"]}
+          breadcrumb={[uiText("Playbooks"), uiText("References")]}
           uploadStateId={`playbook-sources:${playbookId}`}
           onSelect={(documents) => {
             setPickerOpen(false);
@@ -419,9 +421,9 @@ export function PlaybookSources({
       )}
       <ConfirmPopup
         open={!!removing}
-        title={removing ? `Remove ${removing.filename}?` : undefined}
-        message="Reviews will no longer be able to read it. The original, if it is in your documents, is not affected."
-        confirmLabel="Remove"
+        title={removing ? uiText`Remove ${removing.filename}?` : undefined}
+        message={uiText("Reviews will no longer be able to read it. The original, if it is in your documents, is not affected.")}
+        confirmLabel={uiText("Remove")}
         confirmVariant="danger"
         confirmStatus={removeStatus}
         onConfirm={() => removing && void remove(removing)}
@@ -434,7 +436,7 @@ export function PlaybookSources({
 function rejectOtherTypes() {
   showToast({
     tone: "error",
-    title: "Some files were not added",
-    message: "References must be .docx or .pdf files.",
+    title: uiText("Some files were not added"),
+    message: uiText("References must be .docx or .pdf files."),
   });
 }

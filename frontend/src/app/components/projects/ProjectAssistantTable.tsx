@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import {
     useMemo,
     useRef,
@@ -53,7 +55,7 @@ import { useIdSet } from "@/app/hooks/useIdSet";
 
 function creatorLabel(chat: Chat, currentUserId?: string | null) {
     if (currentUserId && chat.user_id === currentUserId) return "Me";
-    return chat.creator_display_name?.trim() || "Shared";
+    return chat.creator_display_name?.trim() || uiText("Shared");
 }
 
 type ProjectChatSortKey = "name" | "created";
@@ -130,7 +132,7 @@ export function ProjectAssistantTable({
 
     function requestRenameChat(chat: Chat) {
         if (!can(roleFrom(chat), "access.manage")) {
-            onOwnerOnlyAction({ action: "rename this chat", requiredRole: "owner" });
+            onOwnerOnlyAction({ action: uiText("rename this chat"), requiredRole: "owner" });
             return;
         }
         setRenameChatValue(chat.title ?? "Untitled Chat");
@@ -225,7 +227,7 @@ export function ProjectAssistantTable({
         sort?.key === "created" ? sort.direction : null;
     const nameFilterButton = (
         <TableSortFilter
-            label="Sort by chat name"
+            label={uiText("Sort by chat name")}
             value={nameSortDirection}
             align="right"
             onChange={(direction) => handleSortChange("name", direction)}
@@ -233,7 +235,7 @@ export function ProjectAssistantTable({
     );
     const creatorFilterButton = (
         <PersonFilter
-            label="Filter by creator"
+            label={uiText("Filter by creator")}
             selectedTitle={(name) => `Created by ${name}`}
             value={
                 creatorPeople.find(
@@ -248,7 +250,7 @@ export function ProjectAssistantTable({
     );
     const createdFilterButton = (
         <TableSortFilter
-            label="Sort by created date"
+            label={uiText("Sort by created date")}
             value={createdSortDirection}
             onChange={(direction) => handleSortChange("created", direction)}
         />
@@ -288,18 +290,18 @@ export function ProjectAssistantTable({
                                 className={TABLE_CHECKBOX_CLASS}
                             />
                         )}
-                        <span className="mr-1">Chats</span>
+                        <span className="mr-1">{uiText("Chats")}</span>
                         {!loading && nameFilterButton}
                     </TableStickyCell>
                     <TableHeaderCell className="ml-auto w-32">
                         <div className="flex items-center gap-1">
-                            <span>Creator</span>
+                            <span>{uiText("Creator")}</span>
                             {!loading && creatorFilterButton}
                         </div>
                     </TableHeaderCell>
                     <TableHeaderCell className="w-32">
                         <div className="flex items-center gap-1">
-                            <span>Created</span>
+                            <span>{uiText("Created")}</span>
                             {!loading && createdFilterButton}
                         </div>
                     </TableHeaderCell>
@@ -313,8 +315,8 @@ export function ProjectAssistantTable({
                 <TableEmptyState>
                     <EmptyState
                         icon={<ChatSkeuoIcon />}
-                        title="Assistant"
-                        description="Ask questions and get answers grounded in the documents in this project."
+                        title={uiText("Assistant")}
+                        description={uiText("Ask questions and get answers grounded in the documents in this project.")}
                         action={
                             <PillButtonUI
                                 tone="black"
@@ -322,7 +324,7 @@ export function ProjectAssistantTable({
                                 onClick={onCreateChat}
                                 disabled={!canCreateChat}
                             >
-                                Create
+                                {uiText("Create")}
                             </PillButtonUI>
                         }
                     />
@@ -380,7 +382,7 @@ export function ProjectAssistantTable({
                                             : [...prev, chat.id];
                                     })
                                 }
-                                label={chat.title ?? "Untitled Chat"}
+                                label={chat.title ?? uiText("Untitled Chat")}
                                 editing={renamingChatId === chat.id}
                                 editValue={renameChatValue}
                                 onEditValueChange={setRenameChatValue}
@@ -417,9 +419,9 @@ export function ProjectAssistantTable({
         </TableScrollArea>
         <ConfirmPopup
             open={chatPendingDelete !== null}
-            title="Delete chat?"
-            message="This cannot be undone."
-            confirmLabel="Delete"
+            title={uiText("Delete chat?")}
+            message={uiText("This cannot be undone.")}
+            confirmLabel={uiText("Delete")}
             confirmVariant="danger"
             onCancel={() => setChatPendingDelete(null)}
             onConfirm={() => {

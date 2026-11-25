@@ -1,5 +1,9 @@
 "use client";
 
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Loader2, MoreHorizontal, Plus, X } from "lucide-react";
@@ -163,7 +167,8 @@ export function TREditColumnMenu({
     }
 
     function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key === "Enter" || e.key === ",") {
+        if (isImeComposing(e)) return;
+        if (e.key === "Enter" || (e.key === "," || e.key === "，")) {
             e.preventDefault();
             commitTag();
         } else if (
@@ -248,17 +253,17 @@ export function TREditColumnMenu({
                     >
                     <div className="flex items-center justify-between mb-3">
                         <p className="font-serif text-lg font-medium text-gray-900">
-                            Edit Column
+                            {uiText("Edit Column")}
                         </p>
                         <GlassIconButtonUI
                             onClick={() => setOpen(false)}
-                            aria-label="Close"
+                            aria-label={uiText("Close")}
                         >
                             <X className="h-3.5 w-3.5" />
                         </GlassIconButtonUI>
                     </div>
                     <FieldLabel htmlFor={`${menuId}-name`}>
-                        Label
+                        {uiText("Label")}
                     </FieldLabel>
                     <input
                         id={`${menuId}-name`}
@@ -271,7 +276,7 @@ export function TREditColumnMenu({
                     {/* Format */}
                     <div className="mt-3">
                         <FieldLabel htmlFor={`${menuId}-format`}>
-                            Format
+                            {uiText("Format")}
                         </FieldLabel>
                         <Dropdown>
                             <DropdownTrigger asChild>
@@ -356,7 +361,7 @@ export function TREditColumnMenu({
                                     onKeyDown={handleTagKeyDown}
                                     onBlur={commitTag}
                                     placeholder={
-                                        tags.length === 0 ? "Add tags…" : ""
+                                        tags.length === 0 ? uiText("Add tags…") : ""
                                     }
                                     className="min-w-[60px] flex-1 bg-transparent text-xs text-gray-700 placeholder-gray-300 focus:outline-none"
                                 />
@@ -368,7 +373,7 @@ export function TREditColumnMenu({
                     <div className="mt-3">
                         <div className="flex items-start justify-between">
                             <FieldLabel htmlFor={`${menuId}-prompt`}>
-                                Prompt
+                                {uiText("Prompt")}
                             </FieldLabel>
                             <button
                                 type="button"
@@ -381,7 +386,7 @@ export function TREditColumnMenu({
                                 ) : (
                                     <Plus className="h-3 w-3" />
                                 )}
-                                Auto-generate
+                                {uiText("Auto-generate")}
                             </button>
                         </div>
                         <textarea
@@ -399,7 +404,7 @@ export function TREditColumnMenu({
                             onClick={handleDelete}
                             disabled={deleting || saving}
                         >
-                            Delete
+                            {uiText("Delete")}
                         </PillButtonUI>
                         <PillButtonUI
                             tone="black"
@@ -413,7 +418,7 @@ export function TREditColumnMenu({
                                 !prompt.trim()
                             }
                         >
-                            {saving ? "Saving…" : "Save"}
+                            {saving ? uiText("Saving…") : uiText("Save")}
                         </PillButtonUI>
                     </div>
                     </div>,

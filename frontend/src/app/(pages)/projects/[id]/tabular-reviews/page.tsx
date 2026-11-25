@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { use, useCallback, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -104,7 +106,7 @@ export default function ProjectTabularReviewsPage({ params }: Props) {
         // list must refuse with the member sentence the review page uses.
         if (!can(roleFrom(review), "content.edit")) {
             setOwnerOnlyAction({
-                action: "edit tabular review details",
+                action: uiText("edit tabular review details"),
                 requiredRole: "editor",
             });
             return;
@@ -119,7 +121,7 @@ export default function ProjectTabularReviewsPage({ params }: Props) {
         if (!detailsReview) return;
         if (!can(roleFrom(detailsReview), "content.edit")) {
             setOwnerOnlyAction({
-                action: "edit tabular review details",
+                action: uiText("edit tabular review details"),
                 requiredRole: "editor",
             });
             return;
@@ -242,7 +244,7 @@ export default function ProjectTabularReviewsPage({ params }: Props) {
                 reviews={visibleReviews}
                 selectedReviewIds={selectedReviewIds}
                 createDisabled={workspace.creatingReview || docs.length === 0}
-                emptyDescription="Extract data from project documents into tables using AI."
+                emptyDescription={uiText("Extract data from project documents into tables using AI.")}
                 loading={effectiveLoading}
                 loadingMore={loadingMore}
                 hasMore={hasMore}

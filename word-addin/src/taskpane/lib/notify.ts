@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 /**
  * How the task pane tells the user something failed.
@@ -33,7 +35,7 @@ import {
   SESSION_ERROR_CODES,
   SESSION_EXPIRED_MESSAGE,
 } from "./sessionRefresh";
-import { openExternalUrl } from "./openExternalUrl";
+import { openExternalUrl, PRODUCT_SUPPORT_EMAIL, WEB_APP_URL } from "./openExternalUrl";
 import {
   isReported,
   reportError,
@@ -128,10 +130,11 @@ export function supportMailtoFor(
   options: { note?: string; page?: string } = {},
 ): string {
   return buildSupportMailto(error, {
+    supportEmail: PRODUCT_SUPPORT_EMAIL,
     page: supportPage(options.page),
     product: SUPPORT_PRODUCT,
     note: options.note,
-  });
+  }) || `${WEB_APP_URL}/support`;
 }
 
 /**
@@ -163,6 +166,17 @@ export async function handOffToSupport(
   } catch {
     // No clipboard permission in this host. The draft still carries the
     // details, and the both-refused path puts them on screen.
+  }
+
+  if (!PRODUCT_SUPPORT_EMAIL) {
+    showToast({
+      tone: "info",
+      title: "此部署尚未配置支持邮箱，请联系管理员",
+      message: copied ? "诊断信息已复制到剪贴板。" : details.split("\n").join(" · "),
+      durationMs: null,
+      dedupeKey: "support-details",
+    });
+    return;
   }
 
   // `openExternalUrl` rather than an anchor: desktop Word ignores a link out
@@ -217,7 +231,7 @@ export const notifyError = createErrorNotifier<NotifyErrorOptions>({
     actions: wantsSupport
       ? [
           {
-            label: "Contact support",
+            label: uiText("联系支持"),
             keepOpen: true,
             onClick: () =>
               handOffToSupport(described, {
@@ -238,7 +252,7 @@ export const notifyError = createErrorNotifier<NotifyErrorOptions>({
 export function notifySessionExpired(): void {
   showToast({
     tone: "error",
-    title: "Sign in required",
+    title: uiText("需要登录"),
     message: SESSION_EXPIRED_MESSAGE,
     dedupeKey: "session-expired",
   });
@@ -255,7 +269,7 @@ export function notifySessionCheckFailed(
 ): void {
   showToast({
     tone: "error",
-    title: "Connection problem",
+    title: uiText("连接异常"),
     message: SESSION_CHECK_FAILED_MESSAGE,
     // A re-check that fails outright says so again instead of becoming an
     // unhandled rejection from the click.

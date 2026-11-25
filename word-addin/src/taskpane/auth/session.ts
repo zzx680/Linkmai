@@ -1,4 +1,5 @@
 /// <reference types="office-js" />
+import { uiText } from "@mike/client";
 import { networkFailure } from "../lib/networkError";
 import { responseError } from "../api/client";
 import { reportNetworkFailure } from "../lib/errorReporting";
@@ -168,8 +169,8 @@ export function initialize(): void {
     .catch((error: unknown) => {
       _user = null;
       _error = reportFault(error, {
-        action: "sign in",
-        fallback: "Mike couldn't sign you in. Try again.",
+        action: uiText("sign in"),
+        fallback: uiText("Mike couldn't sign you in. Try again."),
         operation: "word.session",
       }).message;
     })
@@ -208,8 +209,8 @@ export async function signIn(email: string, password: string): Promise<void> {
     if (generation !== _sessionGeneration) return;
     _user = null;
     _error = reportFault(error, {
-      action: "sign in",
-      fallback: "Mike couldn't sign you in. Try again.",
+      action: uiText("sign in"),
+      fallback: uiText("Mike couldn't sign you in. Try again."),
       operation: "word.session",
       codeMessages: {
         invalid_credentials: "That email and password don't match an account.",
@@ -305,8 +306,8 @@ export async function signInWithGoogle(): Promise<void> {
                 .catch((error: unknown) => {
                   if (generation === _sessionGeneration) {
                     _error = reportFault(error, {
-                      action: "complete Google sign-in",
-                      fallback: "Mike couldn't complete Google sign-in.",
+                      action: uiText("complete Google sign-in"),
+                      fallback: uiText("Mike couldn't complete Google sign-in."),
                       operation: "word.session",
                     }).message;
                   }
@@ -337,7 +338,7 @@ export async function signInWithGoogle(): Promise<void> {
       // to a URL..."), which means nothing to a user.
       fail(
         reportFault(error, {
-          fallback: "Mike couldn't open Google sign-in. Try again.",
+          fallback: uiText("Mike couldn't open Google sign-in. Try again."),
           operation: "word.session",
         }).message,
       );
@@ -375,8 +376,8 @@ export async function signOut(): Promise<void> {
     // The pane stays signed in, so the failure is a toast whose Retry signs
     // out again, not the sign-in screen's error state.
     notifyError(error, {
-      action: "sign out",
-      fallback: "Mike couldn't sign you out. Try again.",
+      action: uiText("sign out"),
+      fallback: uiText("Mike couldn't sign you out. Try again."),
       dedupeKey: "sign-out",
       operation: "word.session",
       onRetry: signOut,

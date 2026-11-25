@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -350,7 +352,7 @@ function NewTRModalForWorkspace({
             handleClose();
         } catch (error) {
             setUploadError(
-                userFacingApiError(error, "Could not create the review."),
+                userFacingApiError(error, uiText("Could not create the review.")),
             );
         } finally {
             creatingRef.current = false;
@@ -385,7 +387,7 @@ function NewTRModalForWorkspace({
             // Without this the picker just sat there empty, and the rejection
             // went nowhere because the caller does not await it.
             notifyError(error, {
-                action: "load this project's files",
+                action: uiText("load this project's files"),
                 dedupeKey: `new-review-project:${projectId}`,
                 onRetry: () => void handleSelectProject(projectId),
             });
@@ -457,7 +459,7 @@ function NewTRModalForWorkspace({
                         ? failedUploadMessage(err.outcomes)
                         : userFacingApiError(
                               err,
-                              "The selected files could not be uploaded. Please try again.",
+                              uiText("The selected files could not be uploaded. Please try again."),
                           ),
                 ),
             );
@@ -471,8 +473,8 @@ function NewTRModalForWorkspace({
         {
             value: "",
             label: loadingWorkflows
-                ? "Loading templates..."
-                : "No template - start from scratch",
+                ? uiText("Loading templates...")
+                : uiText("No template - start from scratch"),
         },
         ...workflows.map((workflow) => ({
             value: workflow.id,
@@ -486,7 +488,7 @@ function NewTRModalForWorkspace({
                   project.name +
                   (project.cm_number ? ` (#${project.cm_number})` : ""),
           }))
-        : [{ value: "", label: "No projects found" }];
+        : [{ value: "", label: uiText("No projects found") }];
 
     // What to show in the directory depends on mode and toggle state
     const directoryDocuments = isProjectMode
@@ -521,15 +523,15 @@ function NewTRModalForWorkspace({
             breadcrumbs={[
                 ...breadcrumbs,
                 step === "details"
-                    ? "Details"
+                    ? uiText("Details")
                     : step === "access"
-                      ? "Access"
-                      : "Add Documents",
+                      ? uiText("Access")
+                      : uiText("Add Documents"),
             ]}
             secondaryAction={
                 step === "documents"
                     ? {
-                          label: uploading ? "Uploading..." : "Upload",
+                          label: uploading ? uiText("Uploading...") : uiText("Upload"),
                           icon: uploading ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
@@ -542,12 +544,12 @@ function NewTRModalForWorkspace({
                           // dropped without a word. Freeze both.
                           disabled: uploading || reviewExists,
                           title: reviewExists
-                              ? "The review has been created — add documents from the review itself."
+                              ? uiText("The review has been created — add documents from the review itself.")
                               : undefined,
                       }
                     : step === "access"
                       ? {
-                            label: "Back",
+                            label: uiText("Back"),
                             type: "button",
                             onClick: () => setStep("details"),
                             disabled: uploading,
@@ -557,16 +559,16 @@ function NewTRModalForWorkspace({
             cancelAction={
                 step === "documents"
                     ? {
-                          label: "Back",
+                          label: uiText("Back"),
                           onClick: () => setStep("access"),
                           disabled: uploading || reviewExists,
                           title: reviewExists
-                              ? "The review has been created — its details and access can be changed from the review itself."
+                              ? uiText("The review has been created — its details and access can be changed from the review itself.")
                               : undefined,
                       }
                     : step === "access"
                       ? {
-                            label: "Skip",
+                            label: uiText("Skip"),
                             type: "button",
                             onClick: () => {
                                 setDirectGrants([]);
@@ -580,7 +582,7 @@ function NewTRModalForWorkspace({
             primaryAction={
                 step === "details"
                     ? {
-                          label: "Next",
+                          label: uiText("Next"),
                           type: "button",
                           onClick: () => setStep("access"),
                           disabled:
@@ -590,7 +592,7 @@ function NewTRModalForWorkspace({
                       }
                     : step === "access"
                       ? {
-                            label: "Next",
+                            label: uiText("Next"),
                             type: "button",
                             onClick: (event) => {
                                 // The same footer node becomes the submit button
@@ -602,7 +604,7 @@ function NewTRModalForWorkspace({
                             disabled: uploading,
                         }
                       : {
-                          label: creating ? "Creating..." : "Create",
+                          label: creating ? uiText("Creating...") : uiText("Create"),
                           type: "submit",
                           form: formId,
                           name: "modalAction",
@@ -632,14 +634,14 @@ function NewTRModalForWorkspace({
                     <div className="space-y-6">
                         <div>
                             <FieldLabel htmlFor="new-tr-title">
-                                Review name
+                                {uiText("Review name")}
                             </FieldLabel>
                             <FormTextInput
                                 id="new-tr-title"
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Review name"
+                                placeholder={uiText("Review name")}
                                 variant="minimal"
                                 className="placeholder:text-gray-400"
                                 autoFocus
@@ -647,7 +649,7 @@ function NewTRModalForWorkspace({
                         </div>
 
                         <div>
-                            <FieldLabel as="p">Model</FieldLabel>
+                            <FieldLabel as="p">{uiText("Model")}</FieldLabel>
                             <ModelToggle
                                 value={selectedModel}
                                 onChange={setSelectedModel}
@@ -661,7 +663,7 @@ function NewTRModalForWorkspace({
 
                         {/* Workflow template */}
                         <div>
-                            <FieldLabel as="p">Workflow template</FieldLabel>
+                            <FieldLabel as="p">{uiText("Workflow template")}</FieldLabel>
                             <ModalSelect
                                 id="new-tr-workflow-template"
                                 value={selectedWorkflowId ?? ""}
@@ -676,7 +678,7 @@ function NewTRModalForWorkspace({
                         {/* Create under a project toggle */}
                         {!isProjectMode && (
                             <div className="space-y-3">
-                                <FieldLabel as="p">Project</FieldLabel>
+                                <FieldLabel as="p">{uiText("Project")}</FieldLabel>
                                 <ToggleSwitchUI
                                     checked={underProject}
                                     onCheckedChange={(next) => {
@@ -684,7 +686,7 @@ function NewTRModalForWorkspace({
                                         if (!next) clearProjectSelection();
                                     }}
                                 >
-                                    Create under a project
+                                    {uiText("Create under a project")}
                                 </ToggleSwitchUI>
 
                                 {underProject && (
@@ -697,7 +699,7 @@ function NewTRModalForWorkspace({
                                                 void handleSelectProject(value);
                                             }
                                         }}
-                                        placeholder="Select project..."
+                                        placeholder={uiText("Select project...")}
                                         disabled={projects.length === 0}
                                     />
                                 )}
@@ -705,13 +707,12 @@ function NewTRModalForWorkspace({
                         )}
 
                         <div>
-                            <FieldLabel as="p">Document grouping</FieldLabel>
+                            <FieldLabel as="p">{uiText("Document grouping")}</FieldLabel>
                             <ToggleSwitchUI
                                 checked={groupBySubfolder}
                                 onCheckedChange={setGroupBySubfolder}
                             >
-                                Treat documents in the same folder as one review
-                                row
+                                {uiText("Treat documents in the same folder as one review row")}
                             </ToggleSwitchUI>
                         </div>
                     </div>
@@ -741,9 +742,7 @@ function NewTRModalForWorkspace({
                     <div className="flex min-h-0 flex-1 flex-col">
                         {reviewExists && (
                             <p className="mb-3 text-sm text-gray-500">
-                                The review has been created, so its documents
-                                can no longer be changed here. Add documents
-                                from the review once access has been granted.
+                                {uiText("The review has been created, so its documents can no longer be changed here. Add documents from the review once access has been granted.")}
                             </p>
                         )}
                         {showDirectory && (

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 /**
  * Shared toast (snackbar) system for the web app and the Word add-in.
  *
@@ -120,7 +122,7 @@ export function ToastActionsUI({ toast }: { toast: ToastRecord }): ReactElement 
                         noticeActionEmphasis(0, count),
                     )}
                 >
-                    {toast.supportLabel ?? "Contact support"}
+                    {toast.supportLabel ?? uiText("Contact support")}
                 </a>
             )}
             {toast.actions?.map((action, index) => (
@@ -263,7 +265,7 @@ export function ToastViewportUI({
             // through its own role, and `aria-label` needs a role to be
             // exposed at all.
             role="region"
-            aria-label="Notifications"
+            aria-label={uiText("Notifications")}
             className={twMerge(
                 clsx(
                     "pointer-events-none fixed left-1/2 top-5 z-[260] flex w-[min(92vw,520px)] -translate-x-1/2 flex-col gap-2 px-4",

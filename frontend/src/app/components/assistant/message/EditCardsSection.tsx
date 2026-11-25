@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { useState, type ReactNode } from "react";
 import { EditCardsSectionUI, PillButtonUI } from "@mike/ui";
 import { RESPONSE_GLASS_SURFACE } from "./messageStyles";
@@ -112,8 +114,8 @@ function BulkEditActions({
                         versionId: annotation.version_id ?? null,
                         message:
                             verb === "accept"
-                                ? "Couldn't save one or more accepts."
-                                : "Couldn't save one or more rejects.",
+                                ? uiText("Couldn't save one or more accepts.")
+                                : uiText("Couldn't save one or more rejects."),
                     });
                 }
                 done++;
@@ -138,7 +140,7 @@ function BulkEditActions({
                 disabled={!!busy}
                 loading={busy === "accept"}
             >
-                {busy === "accept" ? "Accepting all..." : "Accept all"}
+                {busy === "accept" ? uiText("Accepting all...") : uiText("Accept all")}
             </PillButtonUI>
             <PillButtonUI
                 tone="white"
@@ -147,7 +149,7 @@ function BulkEditActions({
                 disabled={!!busy}
                 loading={busy === "reject"}
             >
-                {busy === "reject" ? "Rejecting all..." : "Reject all"}
+                {busy === "reject" ? uiText("Rejecting all...") : uiText("Reject all")}
             </PillButtonUI>
             {progress && (
                 <span className="text-xs font-sans text-gray-500">
@@ -164,7 +166,7 @@ function BulkEditActions({
                     disabled={!!busy}
                     className="ml-auto"
                 >
-                    View
+                    {uiText("View")}
                 </PillButtonUI>
             )}
         </div>

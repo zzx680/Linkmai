@@ -1,3 +1,5 @@
+
+import { uiText } from "./localization";
 import { settleWithConcurrency } from "./settleWithConcurrency";
 import { createSecureUuid } from "./secureUuid";
 
@@ -157,9 +159,9 @@ export function failedUploadMessage<T>(
         if (contentMessage) return contentMessage(filenames);
     }
     if (filenames.length === 1) {
-        return `${filenames[0]} could not be uploaded. Please try again.`;
+        return uiText`${filenames[0]} could not be uploaded. Please try again.`;
     }
-    return `${filenames.join(", ")} could not be uploaded. Please try again.`;
+    return uiText`${filenames.join(", ")} could not be uploaded. Please try again.`;
 }
 
 /**

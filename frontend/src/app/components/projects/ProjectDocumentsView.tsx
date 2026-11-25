@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { SelectionActionsMenu } from "@/app/components/shared/SelectionActionsMenu";
 import {
     type Dispatch,
@@ -301,7 +303,7 @@ export function ProjectDocumentsView({ projectId, folderId = null }: Props) {
                     }
                 >
                     <Plus className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Folder</span>
+                    <span className="hidden sm:inline">{uiText("Folder")}</span>
                 </TabPillButtonUI>
             )}
         </div>
@@ -310,7 +312,7 @@ export function ProjectDocumentsView({ projectId, folderId = null }: Props) {
     if (!projectLoading && !project) {
         return (
             <div className="flex h-full items-center justify-center">
-                <p className="text-gray-400">Project not found</p>
+                <p className="text-gray-400">{uiText("Project not found")}</p>
             </div>
         );
     }
@@ -333,7 +335,7 @@ export function ProjectDocumentsView({ projectId, folderId = null }: Props) {
                 loading={projectLoading}
                 search={search}
                 operations={operations}
-                emptyStateTitle="Documents"
+                emptyStateTitle={uiText("Documents")}
                 onAddDocumentsActionChange={
                     canDo("content.edit")
                         ? handleSavedFilesActionChange
@@ -379,12 +381,12 @@ export function ProjectDocumentsView({ projectId, folderId = null }: Props) {
                             onClose={onClose}
                             onSelect={onSelect}
                             breadcrumb={[
-                                "Projects",
+                                uiText("Projects"),
                                 project.name +
                                     (project.cm_number
                                         ? ` (${project.cm_number})`
                                         : ""),
-                                "Add Documents",
+                                uiText("Add Documents"),
                             ]}
                             projectId={projectId}
                         />

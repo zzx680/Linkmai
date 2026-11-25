@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { GlassCardUI, PillButtonUI } from "@mike/ui";
 import { SettingsHeading } from "@/app/components/settings/SettingsHeading";
@@ -28,14 +30,14 @@ function languageOptions(
 ): Record<ResponseLanguage, OptionCopy> {
   const options = {
     auto: {
-      label: "Automatic",
-      description: "Mike replies in the language you write in.",
+      label: uiText("Automatic"),
+      description: uiText("Mike replies in the language you write in."),
     },
   } as Record<ResponseLanguage, OptionCopy>;
   for (const [code, name] of Object.entries(names)) {
     options[code as ResponseLanguage] = {
       label: name,
-      description: `Mike replies in ${name}.`,
+      description: uiText`Mike replies in ${name}.`,
     };
   }
   return options;
@@ -50,90 +52,90 @@ const SETTINGS: {
   };
 } = {
   verbosity: {
-    label: "Verbosity",
+    label: uiText("Verbosity"),
     options: {
       concise: {
-        label: "Concise",
-        description: "Short, direct answers that lead with the conclusion.",
+        label: uiText("Concise"),
+        description: uiText("Short, direct answers that lead with the conclusion."),
       },
       balanced: {
-        label: "Balanced",
-        description: "Enough explanation to follow the reasoning.",
+        label: uiText("Balanced"),
+        description: uiText("Enough explanation to follow the reasoning."),
       },
       detailed: {
-        label: "Detailed",
-        description: "Fuller reasoning, exceptions, and practical next steps.",
+        label: uiText("Detailed"),
+        description: uiText("Fuller reasoning, exceptions, and practical next steps."),
       },
     },
   },
   formatting: {
-    label: "Headers and Lists",
+    label: uiText("Headers and Lists"),
     options: {
       balanced: {
-        label: "Balanced",
-        description: "Mike picks the layout that suits each answer.",
+        label: uiText("Balanced"),
+        description: uiText("Mike picks the layout that suits each answer."),
       },
       less: {
-        label: "Less",
-        description: "Mostly prose, with headings and lists only when needed.",
+        label: uiText("Less"),
+        description: uiText("Mostly prose, with headings and lists only when needed."),
       },
       more: {
-        label: "More",
-        description: "Headings, bullet points, and tables for easy scanning.",
+        label: uiText("More"),
+        description: uiText("Headings, bullet points, and tables for easy scanning."),
       },
     },
   },
   tone: {
-    label: "Tone",
+    label: uiText("Tone"),
     options: {
       formal: {
-        label: "Formal and Legal",
-        description: "A precise, client-ready legal register.",
+        label: uiText("Formal and Legal"),
+        description: uiText("A precise, client-ready legal register."),
       },
       balanced: {
-        label: "Balanced",
-        description: "Mike's usual professional tone.",
+        label: uiText("Balanced"),
+        description: uiText("Mike's usual professional tone."),
       },
       plain: {
-        label: "Plain and Simple",
+        label: uiText("Plain and Simple"),
         description:
-          "Short sentences and everyday words, with legal terms explained.",
+          uiText("Short sentences and everyday words, with legal terms explained."),
       },
     },
   },
   language: {
-    label: "Language",
+    label: uiText("Language"),
     options: languageOptions({
-      "en-US": "English (US)",
-      "en-GB": "English (UK)",
-      ar: "Arabic",
-      "zh-Hans": "Chinese (Simplified)",
-      "zh-Hant": "Chinese (Traditional)",
-      cs: "Czech",
-      da: "Danish",
-      nl: "Dutch",
-      fi: "Finnish",
-      fr: "French",
-      de: "German",
-      el: "Greek",
-      he: "Hebrew",
-      hi: "Hindi",
-      id: "Indonesian",
-      it: "Italian",
-      ja: "Japanese",
-      ko: "Korean",
-      ms: "Malay",
-      nb: "Norwegian",
-      pl: "Polish",
-      "pt-BR": "Portuguese (Brazil)",
-      "pt-PT": "Portuguese (Portugal)",
-      ru: "Russian",
-      es: "Spanish",
-      sv: "Swedish",
-      th: "Thai",
-      tr: "Turkish",
-      uk: "Ukrainian",
-      vi: "Vietnamese",
+      "en-US": uiText("English (US)"),
+      "en-GB": uiText("English (UK)"),
+      ar: uiText("Arabic"),
+      "zh-Hans": uiText("Chinese (Simplified)"),
+      "zh-Hant": uiText("Chinese (Traditional)"),
+      cs: uiText("Czech"),
+      da: uiText("Danish"),
+      nl: uiText("Dutch"),
+      fi: uiText("Finnish"),
+      fr: uiText("French"),
+      de: uiText("German"),
+      el: uiText("Greek"),
+      he: uiText("Hebrew"),
+      hi: uiText("Hindi"),
+      id: uiText("Indonesian"),
+      it: uiText("Italian"),
+      ja: uiText("Japanese"),
+      ko: uiText("Korean"),
+      ms: uiText("Malay"),
+      nb: uiText("Norwegian"),
+      pl: uiText("Polish"),
+      "pt-BR": uiText("Portuguese (Brazil)"),
+      "pt-PT": uiText("Portuguese (Portugal)"),
+      ru: uiText("Russian"),
+      es: uiText("Spanish"),
+      sv: uiText("Swedish"),
+      th: uiText("Thai"),
+      tr: uiText("Turkish"),
+      uk: uiText("Ukrainian"),
+      vi: uiText("Vietnamese"),
     }),
   },
 };
@@ -190,7 +192,7 @@ export function ResponseStyleSection() {
         ...current,
         [field]: userFacingApiError(
           error,
-          "This setting could not be saved. Please try again.",
+          uiText("This setting could not be saved. Please try again."),
         ),
       }));
     }
@@ -198,15 +200,15 @@ export function ResponseStyleSection() {
 
   return (
     <section className="space-y-3" aria-labelledby="response-style-heading">
-      <SettingsHeading id="response-style-heading">Response style</SettingsHeading>
+      <SettingsHeading id="response-style-heading">{uiText("Response style")}</SettingsHeading>
       <SettingsDescription>
-        Choose how Mike shapes its answers in chats.
+        {uiText("Choose how Mike shapes its answers in chats.")}
       </SettingsDescription>
       <GlassCardUI>
         {loadError ? (
           <SettingsRow>
             <p className="text-sm text-red-600" role="alert">
-              Could not load your response style.
+              {uiText("Could not load your response style.")}
             </p>
             <PillButtonUI
               tone="white"
@@ -216,7 +218,7 @@ export function ResponseStyleSection() {
                 setLoadVersion((current) => current + 1);
               }}
             >
-              Retry
+              {uiText("Retry")}
             </PillButtonUI>
           </SettingsRow>
         ) : (

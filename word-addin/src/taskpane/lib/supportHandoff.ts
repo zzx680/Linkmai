@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 /**
  * Getting a failure from the task pane to a human.
  *
@@ -13,7 +15,8 @@
  * user is told what actually happened; when both fail the block is put on
  * screen to copy by hand.
  */
-import { SUPPORT_EMAIL, supportDetailLines, type UserFacingError } from "@mike/client";
+import { supportDetailLines, type UserFacingError } from "@mike/client";
+import { PRODUCT_SUPPORT_EMAIL as SUPPORT_EMAIL } from "./openExternalUrl";
 
 export type SupportErrorFields = Pick<
   UserFacingError,
@@ -34,10 +37,10 @@ export interface SupportContext {
 
 /** Both steps worked: the draft is open and the block is on the clipboard. */
 export const SUPPORT_DRAFT_AND_CLIPBOARD_MESSAGE =
-  "Email draft opened — the details are also on your clipboard";
+  uiText("Email draft opened — the details are also on your clipboard");
 
 /** The draft opened, but the clipboard was refused. */
-export const SUPPORT_DRAFT_MESSAGE = "Email draft opened";
+export const SUPPORT_DRAFT_MESSAGE = uiText("Email draft opened");
 
 /**
  * The block the user pastes into the support form. Pure and fully
@@ -89,12 +92,12 @@ export function supportHandoffResult(args: {
   if (args.copied) {
     return {
       tone: "info",
-      message: `Email ${SUPPORT_EMAIL} — the details are on your clipboard`,
+      message: uiText`Email ${SUPPORT_EMAIL} — the details are on your clipboard`,
     };
   }
   return {
     tone: "info",
-    message: `Email ${SUPPORT_EMAIL}`,
+    message: uiText`Email ${SUPPORT_EMAIL}`,
     details: args.details,
   };
 }

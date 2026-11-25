@@ -1,4 +1,5 @@
 /// <reference types="office-js" />
+import { uiText } from "@mike/client";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { notifyError } from "./lib/notify";
@@ -24,7 +25,7 @@ initAddinErrorReporting("taskpane");
 // one broken poll can reject on every tick.
 window.addEventListener("unhandledrejection", (event) => {
   notifyError(event.reason, {
-    action: "complete that action",
+    action: uiText("complete that action"),
     dedupeKey: "unhandled",
   });
 });

@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 /**
  * Server-Sent Events framing, shared by every streaming call site.
  *
@@ -11,7 +13,7 @@
 
 /** Thrown when the caller's signal is aborted mid-stream. */
 function abortError() {
-    const error = new Error("The operation was aborted.");
+    const error = new Error(uiText("The operation was aborted."));
     error.name = "AbortError";
     return error;
 }

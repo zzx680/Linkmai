@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,11 +32,10 @@ export default function SignupCheckEmailPage() {
                     ) : (
                         <>
                             <h1 className="font-serif text-2xl font-medium text-gray-950">
-                                Check your email
+                                {uiText("Check your email")}
                             </h1>
                             <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                                We sent a confirmation link to your email
-                                address. Confirm your address before logging in.
+                                {uiText("We sent a confirmation link to your email address. Confirm your address before logging in.")}
                             </p>
                             <Link
                                 href="/login"
@@ -44,7 +45,7 @@ export default function SignupCheckEmailPage() {
                                     className: "mt-6",
                                 })}
                             >
-                                Return to login
+                                {uiText("Return to login")}
                             </Link>
                         </>
                     )}

@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
 /**
  * Error reporting for the web app: a thin, testable layer over the Sentry
@@ -344,7 +346,7 @@ export function reportNetworkFailure(
             // may reach the grouping hash. The hint still carries the error
             // so the scrubber derives failure_code (fetch_failed) from it.
             return Sentry.captureEvent(
-                { message: "API unreachable", level: "warning" },
+                { message: uiText("API unreachable"), level: "warning" },
                 { originalException: error },
             );
         });

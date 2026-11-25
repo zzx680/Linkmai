@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   isReported,
@@ -524,7 +526,7 @@ export function useWordTrackedEdits({
         }
         reportEscapedWordFailure(error, "word.edit_apply");
         const message = reportFault(error, {
-          fallback: "Word couldn't check whether this change can be applied.",
+          fallback: uiText("Word couldn't check whether this change can be applied."),
           operation: "word.edit_apply",
         }).message;
         patchEditStates(new Map(proposedDescriptors.map(({ cardKey }) => [cardKey, {
@@ -699,7 +701,7 @@ export function useWordTrackedEdits({
           replaceAll &&
           appliedCount > 0 &&
           (last.status !== "applied" || remainingAfterLast > 0)
-            ? `Applied ${appliedCount} of ${matchesFound} occurrences; the rest couldn’t be applied.`
+            ? uiText`Applied ${appliedCount} of ${matchesFound} occurrences; the rest couldn’t be applied.`
             : undefined;
 
         // Checked on the LAST pass, before the applied branch: a replace-all
@@ -822,7 +824,7 @@ export function useWordTrackedEdits({
         }
         reportEscapedWordFailure(error, "word.edit_apply");
         const message = reportFault(error, {
-          fallback: "Word couldn't apply this change.",
+          fallback: uiText("Word couldn't apply this change."),
           operation: "word.edit_apply",
         }).message;
         setEditRuntimeState(key, {
@@ -923,7 +925,7 @@ export function useWordTrackedEdits({
           }
           reportEscapedWordFailure(error, "word.edit_apply");
           const message = reportFault(error, {
-            fallback: "Word couldn't check whether this change can be applied.",
+            fallback: uiText("Word couldn't check whether this change can be applied."),
             operation: "word.edit_apply",
           }).message;
           setEditRuntimeState(key, {
@@ -1409,7 +1411,7 @@ export function useWordTrackedEdits({
           status: "error",
           busy: false,
           error: reportFault(error, {
-            fallback: "Word couldn't update the tracked change.",
+            fallback: uiText("Word couldn't update the tracked change."),
             operation: "word.edit_resolve",
           }).message,
         });
@@ -1520,7 +1522,7 @@ export function useWordTrackedEdits({
           return;
         }
         const message = reportFault(error, {
-          fallback: "Word couldn't update the tracked changes.",
+          fallback: uiText("Word couldn't update the tracked changes."),
           operation: "word.edit_resolve",
         }).message;
         patchEditStates(new Map(entries.map((entry) => [entry.key, {

@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { Modal } from "@/app/components/modals/Modal";
@@ -12,7 +14,7 @@ import {
 } from "@/app/lib/mikeApi";
 import { ApiKeyField } from "./ApiKeyField";
 
-export const COURTLISTENER_NAME = "CourtListener";
+export const COURTLISTENER_NAME = "CourtListener（美国判例）";
 
 export function CourtListenerIcon() {
   return (
@@ -135,8 +137,8 @@ export function CourtListenerTokenModal({
   return (
     <ApiKeyField
       variant="modal"
-      label="CourtListener API token"
-      keyLabel={organizationToken ? "Your API token (optional)" : "API token"}
+      label={uiText("CourtListener API token")}
+      keyLabel={organizationToken ? uiText("Your API token (optional)") : uiText("API token")}
       hasSavedKey={hasOwnToken}
       onSave={async (value) => {
         // Saving a token also turns the connector on (server-side), as
@@ -154,13 +156,13 @@ export function CourtListenerTokenModal({
         <Modal
           open
           onClose={onClose}
-          breadcrumbs={["Connectors", COURTLISTENER_NAME]}
+          breadcrumbs={[uiText("连接器"), COURTLISTENER_NAME]}
           size="sm"
           className="h-auto max-h-[calc(100vh-2rem)]"
           primaryAction={{ ...saveAction, variant: "blue" }}
           secondaryAction={
             removeAction
-              ? { ...removeAction, label: "Delete", variant: "danger" }
+              ? { ...removeAction, label: uiText("删除"), variant: "danger" }
               : undefined
           }
         >
@@ -168,15 +170,17 @@ export function CourtListenerTokenModal({
             data-modal-scroll="vertical"
             className="min-h-0 min-w-0 space-y-4 overflow-y-auto pb-4"
           >
+            <p className="text-sm leading-6 text-gray-500">
+              此连接器用于检索美国判例，不提供中国法律法规或中国裁判文书。
+            </p>
             {organizationToken && (
               <p className="text-sm break-words text-gray-500">
-                {organizationName ?? "Your organization"} provides a
-                CourtListener token, so your own token is optional.
+                {organizationName ?? uiText("Your organization")} {uiText("provides a CourtListener token, so your own token is optional.")}
               </p>
             )}
             {status?.bulkData && connector.enabled && (
               <p className="text-sm text-gray-500">
-                Bulk data installed and in use
+                {uiText("Bulk data installed and in use")}
               </p>
             )}
             {fields}

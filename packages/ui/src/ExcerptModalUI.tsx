@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import type { ReactElement } from "react";
 import { ModalUI } from "./ModalUI";
 import { TextSlabUI } from "./TextSlabUI";
@@ -20,20 +22,20 @@ export function ExcerptModalUI({
     excerpt: MessageExcerpt | null;
     onClose: () => void;
 }): ReactElement {
-    const title = excerpt ? excerptLabel(excerpt) : "Excerpt";
+    const title = excerpt ? excerptLabel(excerpt) : uiText("Excerpt");
     return (
         <ModalUI
             open={!!excerpt}
             onClose={onClose}
             size="sm"
             className="h-auto"
-            breadcrumbs={["Assistant", title]}
+            breadcrumbs={[uiText("Assistant"), title]}
             ariaLabel={title}
         >
             {excerpt && (
                 <div className="flex flex-col gap-4 pb-5">
                     <div>
-                        <p className={LABEL_CLASS}>Excerpt</p>
+                        <p className={LABEL_CLASS}>{uiText("Excerpt")}</p>
                         {/* Long passages scroll inside the slab; focusable so
                             the scroll is reachable by keyboard. */}
                         <TextSlabUI
@@ -47,7 +49,7 @@ export function ExcerptModalUI({
                     </div>
                     {excerpt.note && (
                         <div>
-                            <p className={LABEL_CLASS}>Annotation</p>
+                            <p className={LABEL_CLASS}>{uiText("Annotation")}</p>
                             <p className="break-words text-sm text-gray-900">
                                 {excerpt.note}
                             </p>

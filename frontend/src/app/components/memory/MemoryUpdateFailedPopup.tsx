@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
 import type { MemoryCurrent } from "@/app/lib/mikeApi";
@@ -75,7 +77,7 @@ export function MemoryUpdateFailedPopup({
         currentFailureId !== sessionDismissedFailureId
       }
       onClose={dismiss}
-      message="The latest automatic update failed. Existing memory is unchanged."
+      message={uiText("The latest automatic update failed. Existing memory is unchanged.")}
     />
   );
 }

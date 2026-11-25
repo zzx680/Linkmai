@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import {
@@ -451,7 +453,7 @@ export function NewWorkflowModal({
                             email: assignment.email,
                             detail: userFacingApiError(
                                 err,
-                                "the request failed",
+                                uiText("the request failed"),
                             ),
                         });
                     }
@@ -468,7 +470,7 @@ export function NewWorkflowModal({
                             .map((failure) => failure.email)
                             .join(", ")}: ${grantFailures[0]!.detail}${
                             pendingAssetIds.length > 0
-                                ? ` The ${pendingAssetIds.length} selected ${
+                                ? uiText` The ${pendingAssetIds.length} selected ${
                                       pendingAssetIds.length === 1
                                           ? "file is"
                                           : "files are"
@@ -585,7 +587,7 @@ export function NewWorkflowModal({
         ) {
             setImportedSkillMd("");
             setImportedSkillName(null);
-            setMarkdownImportError("Choose a .md or .markdown file.");
+            setMarkdownImportError(uiText("Choose a .md or .markdown file."));
             e.target.value = "";
             return;
         }
@@ -597,7 +599,7 @@ export function NewWorkflowModal({
         } catch {
             setImportedSkillMd("");
             setImportedSkillName(null);
-            setMarkdownImportError("Could not read that markdown file.");
+            setMarkdownImportError(uiText("Could not read that markdown file."));
             e.target.value = "";
         }
     }
@@ -605,13 +607,13 @@ export function NewWorkflowModal({
     const jurisdictionField = (
         <div>
             <FieldLabel htmlFor="workflow-jurisdiction">
-                Jurisdiction
+                {uiText("Jurisdiction")}
             </FieldLabel>
             <ModalSelect
                 id="workflow-jurisdiction"
                 value={jurisdiction}
                 options={jurisdictionOptions}
-                placeholder="Select jurisdiction"
+                placeholder={uiText("Select jurisdiction")}
                 disabled={viewOnly}
                 open={openDropdown === "jurisdiction"}
                 onOpenChange={(nextOpen) =>
@@ -641,8 +643,8 @@ export function NewWorkflowModal({
                     disabled={viewOnly}
                     placeholder={
                         jurisdiction === "United States"
-                            ? "Select state..."
-                            : "Select province..."
+                            ? uiText("Select state...")
+                            : uiText("Select province...")
                     }
                     open={openDropdown === "jurisdictionRegion"}
                     onOpenChange={(nextOpen) =>
@@ -667,7 +669,7 @@ export function NewWorkflowModal({
                     value={customJurisdiction}
                     disabled={viewOnly}
                     onChange={(e) => setCustomJurisdiction(e.target.value)}
-                    placeholder="Enter jurisdiction…"
+                    placeholder={uiText("Enter jurisdiction…")}
                     className="mt-2"
                 />
             )}
@@ -679,17 +681,17 @@ export function NewWorkflowModal({
             open={open}
             onClose={handleClose}
             breadcrumbs={[
-                "Workflows",
-                isEditing ? "View and Edit details" : "New workflow",
+                uiText("Workflows"),
+                isEditing ? uiText("View and Edit details") : uiText("New workflow"),
                 ...(!isEditing
                     ? [
                           step === "details"
-                              ? "Details"
+                              ? uiText("Details")
                               : step === "assets"
-                                ? "Add Assets"
+                                ? uiText("Add Assets")
                                 : orgId === PERSONAL_WORKSPACE
-                                  ? "Access"
-                                  : "People",
+                                  ? uiText("Access")
+                                  : uiText("People"),
                       ]
                     : []),
             ]}
@@ -698,14 +700,14 @@ export function NewWorkflowModal({
                     ? undefined
                     : !isEditing && step === "details"
                       ? {
-                            label: "Next",
+                            label: uiText("Next"),
                             type: "button",
                             onClick: () => setStep("access"),
                             disabled: !title.trim() || loading,
                         }
                       : !isEditing && step === "access" && type === "assistant"
                         ? {
-                              label: "Next",
+                              label: uiText("Next"),
                               type: "button",
                               onClick: () => setStep("assets"),
                               disabled: loading,
@@ -713,11 +715,11 @@ export function NewWorkflowModal({
                         : {
                               label: loading
                                   ? isEditing
-                                      ? "Saving…"
-                                      : "Creating…"
+                                      ? uiText("Saving…")
+                                      : uiText("Creating…")
                                   : isEditing
-                                    ? "Save"
-                                    : "Create workflow",
+                                    ? uiText("Save")
+                                    : uiText("Create workflow"),
                               type: isEditing ? "submit" : "button",
                               form: isEditing ? formId : undefined,
                               onClick: isEditing
@@ -732,21 +734,21 @@ export function NewWorkflowModal({
             secondaryAction={
                 !isEditing && step === "assets"
                     ? {
-                          label: "Back",
+                          label: uiText("Back"),
                           type: "button",
                           onClick: () => setStep("access"),
                           disabled: loading,
                       }
                     : !isEditing && step === "access"
                       ? {
-                            label: "Back",
+                            label: uiText("Back"),
                             type: "button",
                             onClick: () => setStep("details"),
                             disabled: loading,
                         }
                       : !isEditing && step === "details" && type === "assistant"
                         ? {
-                              label: importedSkillName ?? "Upload markdown",
+                              label: importedSkillName ?? uiText("Upload markdown"),
                               icon: <Upload className="h-3.5 w-3.5" />,
                               onClick: () => markdownInputRef.current?.click(),
                               disabled: loading,
@@ -756,7 +758,7 @@ export function NewWorkflowModal({
             cancelAction={
                 !isEditing && step === "access"
                     ? {
-                          label: "Skip",
+                          label: uiText("Skip"),
                           type: "button",
                           onClick: () => {
                               setDirectGrants([]);
@@ -805,14 +807,14 @@ export function NewWorkflowModal({
                         <div className="space-y-4">
                             <div>
                                 <FieldLabel htmlFor="workflow-title">
-                                    Title
+                                    {uiText("Title")}
                                 </FieldLabel>
                                 <FormTextInput
                                     id="workflow-title"
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="Add workflow name"
+                                    placeholder={uiText("Add workflow name")}
                                     variant="minimal"
                                     disabled={viewOnly}
                                     autoFocus={!viewOnly}
@@ -823,19 +825,19 @@ export function NewWorkflowModal({
                             {!isEditing && (
                                 <div className="grid gap-5 md:grid-cols-2">
                                     <div>
-                                        <FieldLabel as="p">Type</FieldLabel>
+                                        <FieldLabel as="p">{uiText("Type")}</FieldLabel>
                                         <ModalSegmentedToggle
                                             value={type}
                                             onChange={setType}
                                             options={[
                                                 {
                                                     value: "assistant",
-                                                    label: "Assistant",
+                                                    label: uiText("Assistant"),
                                                     icon: ChatSkeuoIcon,
                                                 },
                                                 {
                                                     value: "tabular",
-                                                    label: "Tabular",
+                                                    label: uiText("Tabular"),
                                                     icon: TabularReviewSkeuoIcon,
                                                 },
                                             ]}
@@ -849,7 +851,7 @@ export function NewWorkflowModal({
                         <div className="grid gap-5 md:grid-cols-2">
                             <div>
                                 <FieldLabel htmlFor="workflow-language">
-                                    Language
+                                    {uiText("Language")}
                                 </FieldLabel>
                                 <ModalSelect
                                     id="workflow-language"
@@ -883,7 +885,7 @@ export function NewWorkflowModal({
                                         onChange={(e) =>
                                             setCustomLanguage(e.target.value)
                                         }
-                                        placeholder="Enter language…"
+                                        placeholder={uiText("Enter language…")}
                                         className="mt-2"
                                     />
                                 )}
@@ -891,13 +893,13 @@ export function NewWorkflowModal({
 
                             <div>
                                 <FieldLabel htmlFor="workflow-practice">
-                                    Practice area
+                                    {uiText("Practice area")}
                                 </FieldLabel>
                                 <ModalSelect
                                     id="workflow-practice"
                                     value={practice}
                                     options={PRACTICE_OPTIONS}
-                                    placeholder="Select practice area"
+                                    placeholder={uiText("Select practice area")}
                                     disabled={viewOnly}
                                     open={openDropdown === "practice"}
                                     onOpenChange={(nextOpen) =>
@@ -928,7 +930,7 @@ export function NewWorkflowModal({
                                             practiceEditedRef.current = true;
                                             setCustomPractice(e.target.value);
                                         }}
-                                        placeholder="Enter practice area…"
+                                        placeholder={uiText("Enter practice area…")}
                                         className="mt-2"
                                     />
                                 )}
@@ -939,12 +941,12 @@ export function NewWorkflowModal({
 
                         {orgId !== PERSONAL_WORKSPACE && isEditing ? (
                             <div>
-                                <FieldLabel as="p">Organisation</FieldLabel>
+                                <FieldLabel as="p">{uiText("Organisation")}</FieldLabel>
                                 <p
                                     data-slot="workflow-workspace"
                                     className="break-words text-sm text-gray-700"
                                 >
-                                    {organizationName ?? "Organisation"}
+                                    {organizationName ?? uiText("Organisation")}
                                 </p>
                             </div>
                         ) : null}

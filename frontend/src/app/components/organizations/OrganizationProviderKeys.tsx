@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MfaVerificationPopup } from "@/app/components/popups/MfaVerificationPopup";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
@@ -42,8 +44,8 @@ type PendingMfa =
   | { kind: "toggle"; provider: ApiKeyProvider; enabled: boolean }
   | { kind: "models"; provider: RouterSlug; models: string[] };
 
-const LOAD_ERROR = "The organization's model providers could not be loaded.";
-const UPDATE_ERROR = "The provider could not be updated. Please try again.";
+const LOAD_ERROR = uiText("The organization's model providers could not be loaded.");
+const UPDATE_ERROR = uiText("The provider could not be updated. Please try again.");
 
 export function OrganizationProviderKeys({
   orgId,
@@ -176,7 +178,7 @@ export function OrganizationProviderKeys({
           ) : !canManage ? (
             // Read-only: say what the switch would say, as plain text.
             <span className="text-sm text-gray-500">
-              {isEnabled(field.provider) ? "On" : "Off"}
+              {isEnabled(field.provider) ? uiText("On") : uiText("Off")}
             </span>
           ) : saved ? (
             renderToggle(field, `${field.name} provider`)
@@ -185,11 +187,11 @@ export function OrganizationProviderKeys({
               tone="blue"
               size="sm"
               disabled={blocked}
-              aria-label={`Add ${field.name}`}
+              aria-label={uiText`Add ${field.name}`}
               aria-haspopup="dialog"
               onClick={open}
             >
-              Add
+              {uiText("Add")}
             </PillButtonUI>
           )
         }
@@ -202,7 +204,7 @@ export function OrganizationProviderKeys({
       <div className="space-y-3" role="alert">
         <SettingsDescription>{loadError}</SettingsDescription>
         <PillButtonUI tone="white" size="sm" onClick={() => void load()}>
-          Try again
+          {uiText("Try again")}
         </PillButtonUI>
       </div>
     );
@@ -222,19 +224,18 @@ export function OrganizationProviderKeys({
           className="space-y-3"
         >
           <SettingsHeading id="org-providers-saved">
-            Organization Providers
+            {uiText("Organization Providers")}
           </SettingsHeading>
           <SettingsDescription>
-            Members&rsquo; own keys are never used for work in this
-            organization.
+            {uiText("Members&rsquo; own keys are never used for work in this organization.")}
           </SettingsDescription>
           {loading ? (
             <span className="block h-5 w-56 max-w-full animate-pulse rounded bg-gray-200" />
           ) : savedFields.length === 0 ? (
             <SettingsDescription>
               {canManage
-                ? "No providers yet. Add an API key to one of the providers below."
-                : "This organization has not set up a model provider yet."}
+                ? uiText("No providers yet. Add an API key to one of the providers below.")
+                : uiText("This organization has not set up a model provider yet.")}
             </SettingsDescription>
           ) : (
             <div className="grid grid-cols-1 gap-3 @min-[32rem]:grid-cols-2">
@@ -252,11 +253,11 @@ export function OrganizationProviderKeys({
             className="space-y-3"
           >
             <SettingsHeading id="org-providers-available">
-              Available Providers
+              {uiText("Available Providers")}
             </SettingsHeading>
             {availableFields.length === 0 ? (
               <SettingsDescription>
-                Every provider has a key saved.
+                {uiText("Every provider has a key saved.")}
               </SettingsDescription>
             ) : (
               <div
@@ -285,7 +286,7 @@ export function OrganizationProviderKeys({
               save: saveModels,
               workspace: orgId,
               description:
-                "Add the models this organization's key may run. Members see them in model selectors.",
+                uiText("Add the models this organization's key may run. Members see them in model selectors."),
             },
           }}
           enabledToggle={
@@ -320,7 +321,7 @@ export function OrganizationProviderKeys({
       />
       <WarningPopup
         open={actionError !== null}
-        title="Provider update failed"
+        title={uiText("Provider update failed")}
         message={actionError}
         onClose={() => setActionError(null)}
       />

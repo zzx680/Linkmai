@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import type { AssistantEvent as WireAssistantEvent } from "@mike/contracts";
 // Shared TypeScript types for Mike AI legal assistant
 
@@ -542,10 +544,10 @@ export function panelDocumentFromCitation(
       .join(", ");
     return {
       document_id: `case:${citation.cluster_id}`,
-      title: title || "Case",
+      title: title || uiText("Case"),
       type: "case",
       metadata: citation.dateFiled
-        ? [{ label: "Date", value: citation.dateFiled, format: "date" }]
+        ? [{ label: uiText("Date"), value: citation.dateFiled, format: "date" }]
         : [],
       actions: [
         ...(citation.pdfUrl

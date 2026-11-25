@@ -29,7 +29,7 @@ export async function queryTabularCell(
     const suffix = formatPromptSuffix(format as never, tags);
     const fullPrompt = `${columnPrompt}${suffix} If not found, state "Not Found". Leave all reasoning and explanation in the "reasoning" field only.`;
 
-    const EXTRACTION_SYSTEM = `You are a legal document analyst. Return ONLY valid JSON:
+    const EXTRACTION_SYSTEM = `You are a legal document analyst. Write explanations in Simplified Chinese unless the column explicitly requests another language. Preserve exact source quotations, party names, amounts and currencies; keep required JSON keys and format tokens unchanged. Do not infer governing law from the language alone. Return ONLY valid JSON:
 {"summary": string, "flag": "green"|"grey"|"yellow"|"red", "reasoning": string}
 
 The "summary" and "reasoning" field values may use markdown formatting (bullets, bold, italics, etc.) — the values are still plain JSON strings (escape newlines as \\n), but the text inside will be rendered as markdown in the UI.
@@ -142,7 +142,7 @@ export async function queryTabularAllColumns(
         })
         .join("\n");
 
-    const SYSTEM = `You are a legal document analyst. Extract information for each column listed below.
+    const SYSTEM = `You are a legal document analyst. Extract information for each column listed below. Write explanations in Simplified Chinese unless the column explicitly requests another language. Preserve exact source quotations, party names, amounts and currencies; keep required JSON keys and format tokens unchanged. Do not infer governing law from the language alone.
 
 For each column, output exactly one minified JSON object on its own line (no line breaks inside the JSON), then a newline. Process columns in order and output each result as soon as you finish it.
 

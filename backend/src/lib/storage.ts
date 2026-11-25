@@ -4,8 +4,8 @@
  * The transport lives behind the StorageAdapter interface
  * (./storage/adapter.ts); the default is the S3-protocol adapter
  * (./storage/s3.ts — Cloudflare R2, RustFS, MinIO); STORAGE_DRIVER selects
- * ./storage/filesystem.ts ("fs") or ./storage/supabase.ts ("supabase")
- * instead. This module owns the
+ * ./storage/filesystem.ts ("fs"), ./storage/supabase.ts ("supabase") or
+ * ./storage/oss.ts ("oss" — Alibaba Cloud OSS) instead. This module owns the
  * policy every backend shares: not-configured degradation (reads return
  * null/empty, writes throw), error logging, StorageOperationError wrapping,
  * Content-Disposition building, and the storage-key layout.
@@ -24,6 +24,7 @@ import type {
 import { createS3StorageAdapter } from "./storage/s3";
 import { createFilesystemStorageAdapter } from "./storage/filesystem";
 import { createSupabaseStorageAdapter } from "./storage/supabase";
+import { createOssStorageAdapter } from "./storage/oss";
 import { buildContentDisposition } from "./storage/filenames";
 import { storageReadTimeoutMs } from "./storage/timeouts";
 export { BlobUploadSizeError } from "./storage/filesystem";
@@ -42,6 +43,8 @@ function createConfiguredAdapter(): StorageAdapter {
       return createFilesystemStorageAdapter();
     case "supabase":
       return createSupabaseStorageAdapter();
+    case "oss":
+      return createOssStorageAdapter();
     default:
       return createS3StorageAdapter();
   }

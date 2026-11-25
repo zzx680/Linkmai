@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -33,26 +35,26 @@ export function ProjectWorkspaceTips() {
                 aria-live="polite"
                 className="min-w-0 rounded-full bg-app-surface px-4 py-2 text-xs"
             >
-                <strong>Tip:</strong> {PROJECT_WORKSPACE_TIPS[tipIndex]}
+                <strong>{uiText("Tip:")}</strong> {PROJECT_WORKSPACE_TIPS[tipIndex]}
             </p>
             <div className="flex items-center gap-1">
                 <button
                     type="button"
-                    aria-label="Previous tip"
+                    aria-label={uiText("Previous tip")}
                     onClick={() => rotateTip(-1)}
                     className="flex h-6 w-5 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-app-surface-active/50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                 >
                     <ChevronLeft aria-hidden="true" className="h-3.5 w-3.5" />
                 </button>
                 <span
-                    aria-label={`Tip ${tipIndex + 1} of ${PROJECT_WORKSPACE_TIPS.length}`}
+                    aria-label={uiText`Tip ${tipIndex + 1} of ${PROJECT_WORKSPACE_TIPS.length}`}
                     className="min-w-8 text-center text-[10px] tabular-nums text-gray-500"
                 >
                     {tipIndex + 1}/{PROJECT_WORKSPACE_TIPS.length}
                 </span>
                 <button
                     type="button"
-                    aria-label="Next tip"
+                    aria-label={uiText("Next tip")}
                     onClick={() => rotateTip(1)}
                     className="flex h-6 w-5 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-app-surface-active/50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
                 >

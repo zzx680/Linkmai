@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, Code2, Plus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -119,7 +121,7 @@ function SkillViewer({ skill }: { skill: string }) {
             onClick={() => void copy()}
             className="flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-gray-700"
           >
-            {copied ? <Check className="h-3 w-3" /> : "Copy"}
+            {copied ? <Check className="h-3 w-3" /> : uiText("Copy")}
           </button>
           <button
             type="button"
@@ -150,7 +152,7 @@ function SkillViewer({ skill }: { skill: string }) {
               remarkPlugins={[remarkGfm]}
               components={markdownComponents}
             >
-              {markdown || "_No instructions provided._"}
+              {markdown || uiText("_No instructions provided._")}
             </ReactMarkdown>
           </div>
         )}
@@ -289,11 +291,11 @@ function WorkflowAddonPreviewDialog({
   const assets = addon.assets ?? [];
   const tabs: { id: DetailView; label: string }[] =
     addon.type === "tabular"
-      ? [{ id: "columns", label: "Columns" }]
+      ? [{ id: "columns", label: uiText("Columns") }]
       : [
           { id: "skill", label: "SKILL.md" },
           ...(assets.length > 0
-            ? [{ id: "assets" as const, label: "Assets" }]
+            ? [{ id: "assets" as const, label: uiText("Assets") }]
             : []),
         ];
 
@@ -302,14 +304,14 @@ function WorkflowAddonPreviewDialog({
       open
       onClose={onClose}
       breadcrumbs={[
-        "Workflows",
-        "Add-ons",
+        uiText("Workflows"),
+        uiText("Add-ons"),
         addon.title,
         ...(selectedAsset ? [selectedAsset.filename] : []),
       ]}
       size={selectedAsset ? "xl" : "lg"}
       primaryAction={{
-        label: importing ? "Importing…" : "Import",
+        label: importing ? uiText("Importing…") : uiText("Import"),
         icon: <Plus className="h-4 w-4" />,
         disabled: importing,
         onClick: () => void onImport(addon),
@@ -317,7 +319,7 @@ function WorkflowAddonPreviewDialog({
       secondaryAction={
         selectedAsset
           ? {
-              label: "Back",
+              label: uiText("Back"),
               icon: <ChevronLeft className="h-4 w-4" />,
               onClick: () => setSelectedAsset(null),
             }
@@ -356,19 +358,19 @@ function WorkflowAddonPreviewDialog({
           <section className="shrink-0">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
               <MetadataItem
-                label="Contributor"
+                label={uiText("Contributor")}
                 value={addon.contributors
                   .map((contributor) => contributor.name)
                   .join(", ")}
               />
-              <MetadataItem label="Language" value={addon.language || "—"} />
-              <MetadataItem label="Version" value={addon.version || "—"} />
+              <MetadataItem label={uiText("Language")} value={addon.language || "—"} />
+              <MetadataItem label={uiText("Version")} value={addon.version || "—"} />
               <MetadataItem
-                label="Practice"
+                label={uiText("Practice")}
                 value={addon.practice || "General"}
               />
               <MetadataItem
-                label="Jurisdiction"
+                label={uiText("Jurisdiction")}
                 value={addon.jurisdictions?.join(", ") || "—"}
               />
             </div>
@@ -388,7 +390,7 @@ function WorkflowAddonPreviewDialog({
                       }
                       className="ml-1 inline font-medium text-blue-600 transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                     >
-                      {descriptionExpanded ? "Show less" : "Show more"}
+                      {descriptionExpanded ? uiText("Show less") : uiText("Show more")}
                     </button>
                   )}
                 </p>
@@ -410,10 +412,10 @@ function WorkflowAddonPreviewDialog({
                   <div className="grid min-h-10 shrink-0 grid-cols-[52px_0.8fr_1.8fr] items-center border-b border-white/60 text-xs font-medium text-gray-500">
                     <div className="px-3 py-1.5">#</div>
                     <div className="border-l border-white/60 px-3 py-1.5">
-                      Column
+                      {uiText("Column")}
                     </div>
                     <div className="border-l border-white/60 px-3 py-1.5">
-                      Prompt
+                      {uiText("Prompt")}
                     </div>
                   </div>
                   <div className="min-h-0 flex-1 overflow-y-auto">
@@ -438,12 +440,12 @@ function WorkflowAddonPreviewDialog({
               ) : view === "assets" ? (
                 <div className="flex h-full min-h-0 flex-col">
                   <div className="flex min-h-10 shrink-0 items-center border-b border-white/60 px-3 py-1.5 text-xs font-medium text-gray-500">
-                    Assets
+                    {uiText("Assets")}
                   </div>
                   <div className="min-h-0 flex-1 overflow-y-auto">
                     {assets.length === 0 ? (
                       <div className="flex h-full min-h-24 items-center justify-center px-4 text-xs text-gray-400">
-                        No assets included.
+                        {uiText("No assets included.")}
                       </div>
                     ) : (
                       assets.map((file) => (

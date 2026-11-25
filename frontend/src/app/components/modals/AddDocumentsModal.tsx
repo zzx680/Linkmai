@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useWorkspaceIdentity } from "@/app/hooks/useWorkspaceIdentity";
 
 import { useEffect, useRef, useState } from "react";
@@ -142,7 +144,7 @@ function AddDocumentsModalForWorkspace({
                 setProjectDocuments([]);
                 setProjectFolders([]);
                 notifyError(error, {
-                    action: "load this project's files",
+                    action: uiText("load this project's files"),
                     dedupeKey: `add-documents-directory:${projectId}`,
                     onRetry: () => setDirectoryReloadKey((key) => key + 1),
                 });
@@ -254,7 +256,7 @@ function AddDocumentsModalForWorkspace({
             action:
                 failed.length === 1
                     ? `add ${names} to this project`
-                    : `add ${failed.length} of ${toAssign.length} files to this project`,
+                    : uiText`add ${failed.length} of ${toAssign.length} files to this project`,
             fallback: `${names} could not be added to this project. Try again.`,
             // A second Confirm, or a Retry that fails again, replaces this
             // notice: an older one's Retry would resend its own stale sets.
@@ -374,7 +376,7 @@ function AddDocumentsModalForWorkspace({
                     ? failedUploadMessage(err.outcomes)
                     : userFacingApiError(
                           err,
-                          "Documents could not be uploaded. Please try again.",
+                          uiText("Documents could not be uploaded. Please try again."),
                       ),
             );
         } finally {
@@ -433,7 +435,7 @@ function AddDocumentsModalForWorkspace({
             keepMounted={keepMounted}
             breadcrumbs={breadcrumb}
             secondaryAction={{
-                label: uploading ? "Uploading…" : "Upload",
+                label: uploading ? uiText("Uploading…") : uiText("Upload"),
                 icon: uploading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
@@ -443,7 +445,7 @@ function AddDocumentsModalForWorkspace({
                 disabled: uploading,
             }}
             primaryAction={{
-                label: uploading ? "Saving…" : "Confirm",
+                label: uploading ? uiText("Saving…") : uiText("Confirm"),
                 onClick: handleConfirm,
                 disabled: selectedDocuments.length === 0 || uploading,
             }}
@@ -468,7 +470,7 @@ function AddDocumentsModalForWorkspace({
                         type="button"
                         onClick={() => setUploadWarning(null)}
                         className="shrink-0 rounded p-0.5 text-black hover:bg-gray-100"
-                        aria-label="Dismiss warning"
+                        aria-label={uiText("Dismiss warning")}
                     >
                         <X className="h-3.5 w-3.5" />
                     </button>

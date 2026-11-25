@@ -1,0 +1,23 @@
+[
+  {
+    "AllowedOrigin": [
+      "https://linkmai.com",
+      "https://word.linkmai.com"
+    ],
+    "AllowedMethod": [
+      "GET",
+      "PUT",
+      "POST",
+      "HEAD",
+      "DELETE"
+    ],
+    "AllowedHeader": [
+      "*"
+    ],
+    "ExposeHeader": [
+      "ETag",
+      "x-oss-request-id"
+    ],
+    "MaxAgeSeconds": 3600
+  }
+]

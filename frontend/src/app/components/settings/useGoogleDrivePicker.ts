@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useState } from "react";
 import {
   createGoogleDrivePickerSession,
@@ -38,7 +40,7 @@ export function useGoogleDrivePicker(workspace?: string) {
       setMessage(
         userFacingApiError(
           error,
-          "Google Drive could not be opened. Try again.",
+          uiText("Google Drive could not be opened. Try again."),
         ),
       );
     }

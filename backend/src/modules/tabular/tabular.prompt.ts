@@ -111,7 +111,7 @@ export async function draftColumnPrompt(
         const raw = await completeText({
             model: promptModel,
             systemPrompt:
-                'You write high-quality column prompts for legal tabular review workflows. Return only valid JSON with a single field: {"prompt": string}. The prompt you write must focus solely on what to extract — never on how to format the response.',
+                'You write high-quality column prompts for legal tabular review workflows. Write the prompt in Simplified Chinese unless the column explicitly requests another language. Return only valid JSON with a single field: {"prompt": string}. The prompt you write must focus solely on what to extract — never on how to format the response.',
             user: userMessage,
             maxTokens: 512,
             apiKeys: api_keys,

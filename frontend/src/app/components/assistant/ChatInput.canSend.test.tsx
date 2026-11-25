@@ -65,6 +65,7 @@ function mockProfile() {
             vercelModels: [],
             openCodeGoModels: [],
             apiKeys: {},
+            lastSelectedChatModel: "claude-sonnet-5-5",
         },
         loading: false,
         apiKeysDegraded: false,
@@ -287,6 +288,33 @@ describe("ChatInput canSend gating", () => {
         const textarea = screen.getByRole("combobox");
 
         fireEvent.keyDown(textarea, { key: "Enter" });
+        expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        { isComposing: true, keyCode: 13 },
+        { isComposing: false, keyCode: 229 },
+    ])("keeps the IME confirmation Enter in the draft (%j)", (composition) => {
+        const onSubmit = renderInput(true);
+        const input = screen.getByRole("combobox");
+        fireEvent.change(input, { target: { value: "请审查这份合同" } });
+        fireEvent.keyDown(input, { key: "Enter", ...composition });
+
+        expect(onSubmit).not.toHaveBeenCalled();
+        expect(input).toHaveValue("请审查这份合同");
+
+        fireEvent.keyDown(input, { key: "Enter", isComposing: false, keyCode: 13 });
+        expect(onSubmit).toHaveBeenCalledWith(
+            expect.objectContaining({ content: "请审查这份合同" }),
+        );
+    });
+
+    it("keeps Shift+Enter available for multiline Chinese messages", () => {
+        const onSubmit = renderInput(true);
+        const input = screen.getByRole("combobox");
+        fireEvent.change(input, { target: { value: "请审查这份合同" } });
+        const allowed = fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
+        expect(allowed).toBe(true);
         expect(onSubmit).not.toHaveBeenCalled();
     });
 

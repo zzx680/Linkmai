@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useState } from "react";
 import { WarningPopup } from "@/app/components/popups/WarningPopup";
 
@@ -17,7 +19,7 @@ export function DocxSaveErrorPopup({ error }: { error: string | null }) {
     return (
         <WarningPopup
             open={!!error && !dismissed}
-            title="Changes not saved"
+            title={uiText("Changes not saved")}
             message={error}
             onClose={() => setDismissed(true)}
         />

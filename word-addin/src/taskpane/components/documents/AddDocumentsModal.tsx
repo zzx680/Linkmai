@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, Loader2, Search, Upload, X } from "lucide-react";
 import type { Document, LibraryFolder, Project } from "../../types";
@@ -36,9 +38,9 @@ interface AddDocumentsModalProps {
 }
 
 const TABS: { value: DirectoryTab; label: string }[] = [
-  { value: "files", label: "Files" },
-  { value: "templates", label: "Templates" },
-  { value: "projects", label: "Projects" },
+  { value: "files", label: uiText("Files") },
+  { value: "templates", label: uiText("Templates") },
+  { value: "projects", label: uiText("Projects") },
 ];
 
 const DIRECTORY_GRID_CLASS =
@@ -91,7 +93,7 @@ function DirectoryLoadMoreRow({
         className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] text-gray-500 hover:text-gray-900 disabled:opacity-60"
       >
         {loading && <Loader2 className="h-3 w-3 animate-spin" />}
-        {loading ? "Loading…" : "Load more"}
+        {loading ? uiText("Loading…") : uiText("Load more")}
       </button>
     </div>
   );
@@ -219,7 +221,7 @@ export function AddDocumentsModal({
         if (cancelled) return;
         setError(
           reportFault(reason, {
-            fallback: "Failed to load documents.",
+            fallback: uiText("Failed to load documents."),
             operation: "documents.directory",
           }).message,
         );
@@ -310,7 +312,7 @@ export function AddDocumentsModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Failed to load project documents.",
+          fallback: uiText("Failed to load project documents."),
           operation: "documents.directory",
         }).message,
       );
@@ -358,7 +360,7 @@ export function AddDocumentsModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Failed to load projects.",
+          fallback: uiText("Failed to load projects."),
           operation: "documents.directory",
         }).message,
       );
@@ -378,7 +380,7 @@ export function AddDocumentsModal({
     setWarning(
       unsupported.length === 0
         ? null
-        : "Only PDF, Word, Excel, and PowerPoint files can be uploaded.",
+        : uiText("Only PDF, Word, Excel, and PowerPoint files can be uploaded."),
     );
     if (supported.length === 0) return;
 
@@ -423,7 +425,7 @@ export function AddDocumentsModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Documents could not be uploaded. Please try again.",
+          fallback: uiText("Documents could not be uploaded. Please try again."),
           operation: "documents.upload",
         }).message,
       );
@@ -530,7 +532,7 @@ export function AddDocumentsModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Failed to load folder documents.",
+          fallback: uiText("Failed to load folder documents."),
           operation: "documents.directory",
         }).message,
       );
@@ -559,7 +561,7 @@ export function AddDocumentsModal({
     } catch (reason) {
       setError(
         reportFault(reason, {
-          fallback: "Failed to load documents.",
+          fallback: uiText("Failed to load documents."),
           operation: "documents.directory",
         }).message,
       );
@@ -628,7 +630,7 @@ export function AddDocumentsModal({
               role="checkbox"
               aria-checked={someSelected ? "mixed" : allSelected}
               aria-disabled={!treeLoaded || summary.count === 0}
-              aria-label={`Select all files in ${folder.name}`}
+              aria-label={uiText`Select all files in ${folder.name}`}
               onClick={(event) => {
                 event.stopPropagation();
                 if (!treeLoaded || summary.count === 0) return;
@@ -679,7 +681,7 @@ export function AddDocumentsModal({
                     className="py-1 text-xs text-gray-400"
                     style={{ paddingLeft: 40 + depth * 16 }}
                   >
-                    Empty
+                    {uiText("Empty")}
                   </p>
                 )}
             </div>
@@ -721,7 +723,7 @@ export function AddDocumentsModal({
               role="checkbox"
               aria-checked={someSelected ? "mixed" : allSelected}
               aria-disabled={!treeLoaded || summary.count === 0}
-              aria-label={`Select all files in ${folder.name}`}
+              aria-label={uiText`Select all files in ${folder.name}`}
               onClick={(event) => {
                 event.stopPropagation();
                 if (!treeLoaded || summary.count === 0) return;
@@ -770,7 +772,7 @@ export function AddDocumentsModal({
                     className="py-1 text-xs text-gray-400"
                     style={{ paddingLeft: 40 + depth * 16 }}
                   >
-                    Empty
+                    {uiText("Empty")}
                   </p>
                 )}
             </div>
@@ -784,9 +786,9 @@ export function AddDocumentsModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Add Documents"
+      title={uiText("Add Documents")}
       secondaryAction={{
-        label: uploadingFilenames.length > 0 ? "Uploading…" : "Upload",
+        label: uploadingFilenames.length > 0 ? uiText("Uploading…") : uiText("Upload"),
         icon:
           uploadingFilenames.length > 0 ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -797,7 +799,7 @@ export function AddDocumentsModal({
         disabled: uploadingFilenames.length > 0,
       }}
       primaryAction={{
-        label: "Confirm",
+        label: uiText("Confirm"),
         disabled:
           selectedDocuments.length === 0 || uploadingFilenames.length > 0,
         onClick: () => {
@@ -812,7 +814,7 @@ export function AddDocumentsModal({
         accept={SUPPORTED_DOCUMENT_ACCEPT}
         multiple
         className="hidden"
-        aria-label="Upload documents"
+        aria-label={uiText("Upload documents")}
         onChange={(event) => void handleUpload(event)}
       />
 
@@ -830,7 +832,7 @@ export function AddDocumentsModal({
               setError(null);
             }}
             className="shrink-0 rounded p-0.5 text-gray-600 hover:bg-gray-100"
-            aria-label="Dismiss warning"
+            aria-label={uiText("Dismiss warning")}
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -842,7 +844,7 @@ export function AddDocumentsModal({
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search..."
+          placeholder={uiText("Search...")}
           autoFocus
           className="min-w-0 flex-1 border-0 bg-transparent text-xs text-gray-800 outline-none placeholder:text-gray-400"
         />
@@ -867,7 +869,7 @@ export function AddDocumentsModal({
         </div>
         {selectedDocuments.length > 0 && (
           <span className="shrink-0 text-[11px] text-gray-400">
-            {selectedDocuments.length} selected
+            {selectedDocuments.length} {uiText("selected")}
           </span>
         )}
       </div>
@@ -876,12 +878,12 @@ export function AddDocumentsModal({
         <div data-modal-scroll="vertical" className="min-h-0 flex-1 overflow-y-auto pb-3">
           {loading ? (
             <div className="flex h-full items-center justify-center">
-              <Spinner label="Loading documents…" />
+              <Spinner label={uiText("Loading documents…")} />
             </div>
           ) : activeTab === "projects" ? (
             filteredProjects.length === 0 ? (
               <p className="py-8 text-center text-sm text-gray-400">
-                {query ? "No matches found" : "No projects yet"}
+                {query ? uiText("No matches found") : uiText("No projects yet")}
               </p>
             ) : (
               <div className="space-y-px">
@@ -919,7 +921,7 @@ export function AddDocumentsModal({
                           aria-disabled={
                             !projectSelectionReady || items.length === 0
                           }
-                          aria-label={`Select all files in ${project.name}`}
+                          aria-label={uiText`Select all files in ${project.name}`}
                           onClick={(event) => {
                             event.stopPropagation();
                             if (!projectSelectionReady || items.length === 0)
@@ -986,7 +988,7 @@ export function AddDocumentsModal({
                               rootItems.length === 0 &&
                               (index?.children.get(null) ?? []).length === 0 && (
                                 <p className="py-2 pl-9 text-xs text-gray-400">
-                                  No documents
+                                  {uiText("No documents")}
                                 </p>
                               )}
                           </div>
@@ -1035,7 +1037,7 @@ export function AddDocumentsModal({
                 libraryFolders.length === 0 &&
                 uploadingFilenames.length === 0 && (
                   <p className="py-8 text-center text-sm text-gray-400">
-                    {query ? "No matches found" : `No ${activeTab} yet`}
+                    {query ? uiText("No matches found") : uiText`No ${activeTab} yet`}
                   </p>
                 )}
             </>

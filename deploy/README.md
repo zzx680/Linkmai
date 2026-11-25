@@ -1,0 +1,412 @@
+# 灵迈 LinkMai 阿里云部署（复用现有 ECS）
+
+这套配置把 LinkMai 部署到**现有阿里云 ECS + RDS PostgreSQL + OSS**，让这台服务器只服务
+LinkMai 官网/工作台。小程序先「暂停服务」，旧 API 和旧站点停掉后，新栈直接接管
+`80/443`，不需要再买一台 ECS。
+
+```
+                         ┌──────────────────────────────┐
+   浏览器 / Word ───────▶│ edge (nginx, 80/443)          │
+                         │  apex: /auth/v1 /api /         │
+                         │  word: /                       │
+                         └───────┬───────────┬───────────┘
+                                 │           │
+                       frontend:3000     word:3200
+                                 │           │
+                                 └─────┬─────┘
+                                       ▼
+                                backend:3001 ──▶ Redis
+                                  │      │
+                                  │      └──▶ OSS (storage.linkmai.com)
+                                  ▼
+                           gateway:8000
+                           ├─ /auth/v1 → auth:9999  ──▶ RDS
+                           └─ /rest/v1 → rest:3000  ──▶ RDS
+```
+
+> 重要：这台服务器上原来跑着小程序 API 和旧官网。切换前必须先备份，再停旧服务。
+> 旧数据不要删；小程序以后要恢复时还要用。
+
+## 0. 先确认三件事
+
+| 项目 | 要求 |
+| --- | --- |
+| ECS | 建议 4 vCPU / 8 GB、100 GB 磁盘；2C4G 也能跑，但文档转换和构建会比较紧 |
+| 端口 | `80`、`443` 必须能由新 `edge` 容器占用；旧 Nginx 要先停 |
+| 备份 | 小程序数据库、上传文件、`.env`、Nginx 配置、PM2 配置都要先备份到 ECS 之外 |
+
+先跑只读检查，不要改任何东西：
+
+```bash
+cd /opt/linkmai   # 或你放代码的目录
+./deploy/scripts/preflight-reuse.sh
+```
+
+把输出里的域名、Token、数据库密码脱敏后再发出来。重点看：
+
+- `free -h`：可用内存是否 ≥ 6 GB；
+- `df -h`：根分区至少留 30 GB；
+- `ss -lntp`：80/443 被哪个进程占用；
+- `nginx -T` 过滤结果：旧站点和小程序 API 的 server_name / proxy_pass；
+- `pm2 ls` 或 `docker ps`：旧 API 怎么跑的。
+
+## 1. 小程序下架
+
+这一步只能在微信公众平台后台操作，代码和服务器都替代不了。建议按「先暂停、不注销」处理：
+
+1. 管理员扫码登录 [微信公众平台](https://mp.weixin.qq.com/)。
+2. 进入 **设置 → 基本设置 → 账号信息 → 暂停服务**。
+3. 暂停原因填「业务调整」，确认暂停。
+4. 再到 **设置 → 隐私与安全**，关闭「通过名称搜索此小程序」，避免新用户还能搜到。
+5. 观察 1–2 周，确认没有必须保留的用户/支付/数据诉求，再考虑是否「账号注销」。
+
+说明：
+
+- 「暂停服务」后用户不能再访问线上版本，但账号、代码、数据都还在，可恢复。
+- 「账号注销」不可逆，且可能影响备案/主体信息；现在不要做。
+- 暂停服务不会自动删除云上数据库和 OSS 文件，旧服务器上的数据仍要自己备份。
+
+参考：[微信开放社区：暂停服务路径](https://developers.weixin.qq.com/community/minihome/doc/000668ad6e8c40e4b1d3433316b800)、[社区讨论：暂停服务与关闭搜索](https://fuwu.weixin.qq.com/community/develop/doc/0002aa02650d1095d34085b5861400)。
+
+## 2. 备份旧服务（必须做）
+
+先找到旧 API 的数据库连接和上传目录。不要直接把密码贴到聊天里。
+
+```bash
+# 1) 旧代码、环境变量、PM2、Nginx 配置
+sudo tar czf /root/linkmai-old-config-$(date +%F).tgz \
+  /opt /srv /var/www /etc/nginx 2>/dev/null || true
+
+# 2) PM2 进程列表与日志路径
+pm2 ls > /root/pm2-list.txt 2>&1 || true
+pm2 save || true
+
+# 3) PostgreSQL 备份（把 $OLD_DATABASE_URL 换成旧 API 使用的连接串）
+pg_dump --format=custom --no-owner --no-acl \
+  --file=/root/linkmai-old-db-$(date +%F).dump "$OLD_DATABASE_URL"
+
+# 4) 上传目录（按实际路径替换）
+sudo tar czf /root/linkmai-old-uploads-$(date +%F).tgz /path/to/old/uploads
+```
+
+如果旧 API 用的是 OSS：在 OSS 控制台给旧 Bucket 开启版本控制，或把整个 Bucket 同步到另一个
+Bucket。不要在新 LinkMai 的 Bucket 上覆盖旧文件。
+
+把 `/root/*.dump`、`*.tgz` 下载到本地或另一台机器，确认能解开后再继续。
+
+## 3. 停旧服务，让出 80/443
+
+先构建好新镜像、填好配置，再停旧服务，减少停机时间。停之前确认备份已完成。
+
+按 `preflight-reuse.sh` 的结果选择命令：
+
+```bash
+# 旧 API 如果是 PM2
+pm2 stop <旧API进程名>
+pm2 save
+
+# 旧 API 如果是 systemd
+sudo systemctl stop <旧API服务名>
+
+# 旧站点如果是宿主机 Nginx
+sudo systemctl stop nginx
+sudo systemctl disable nginx   # 确认新栈稳定后再 disable
+
+# 旧站点/旧 API 如果是 Docker
+docker ps
+docker stop <旧容器名>          # 不要 docker rm -v，不要删 volume
+```
+
+确认端口已释放：
+
+```bash
+sudo ss -lntp | grep -E ':(80|443)\b' || echo "80/443 free"
+```
+
+如果还有进程占用，先查清楚它是谁，不要直接 `kill -9`。
+
+## 4. 域名与证书
+
+### DNS
+
+复用同一台 ECS 时，`@`、`www` **不需要改解析**，它们现在指向的 `114.55.96.52` 就是这台机器；
+只是把 80/443 的服务从旧 Nginx 换成新 `edge`。
+
+| 主机记录 | 类型 | 值 | 处理 |
+| --- | --- | --- | --- |
+| `@` | A | 现有 ECS EIP | 不变 |
+| `www` | A | 现有 ECS EIP | 不变，新 edge 301 到 apex |
+| `api` | A | 现有 ECS EIP | 小程序暂停后删除，或先保留但服务已停 |
+| `staging-api` | A | 现有 ECS EIP | 同上 |
+| `_dnsauth` | TXT | 阿里云证书验证值 | 保留 |
+| `word` | A | 现有 ECS EIP | 做 Word 才需要 |
+| `storage` | CNAME | `<bucket>.oss-cn-<region>.aliyuncs.com` | OSS 自定义域 |
+
+`api` / `staging-api` 不要立刻删：先暂停小程序、观察一段时间，确认没有回滚需求再删。
+删除前它们会指向一台已经停掉 API 的机器，返回 502/连接失败是预期现象。
+
+### 证书
+
+优先复用旧 Nginx 现有的 `linkmai.com`、`www.linkmai.com` 证书；没有就用阿里云免费 DV
+重新申请（不需要买付费证书）。把文件放到 `deploy/certs/`，文件名必须是：
+
+```
+linkmai.com.pem / linkmai.com.key
+www.linkmai.com.pem / www.linkmai.com.key
+word.linkmai.com.pem / word.linkmai.com.key
+```
+
+旧证书常见位置：
+
+```bash
+sudo find /etc/nginx /etc/letsencrypt -maxdepth 4 -type f \
+  \( -name '*.pem' -o -name '*.crt' -o -name '*.key' \) -print
+```
+
+如果旧证书是 `fullchain.pem` + `privkey.pem`，复制并改名即可。证书私钥权限设 `600`，
+只让 Docker 读取。详见 [certs/README.md](certs/README.md)。
+
+## 5. 准备 RDS、OSS、SMTP、模型
+
+### RDS
+
+1. PostgreSQL 17，和 ECS 同 VPC，使用**内网地址**。
+2. 创建数据库 `linkmai`。
+3. 白名单只加 ECS 的**私网 IP**。
+4. 控制台开启 SSL，连接串使用 `sslmode=require`。
+5. RDS master 账号只写进 `deploy/.env.rds`，不要写进 `.env.prod`。
+
+RDS master 不是超级用户，不能授 `BYPASSRLS`。所以 LinkMai 让 `supabase_auth_admin`
+拥有 public 表，并让 service JWT 使用这个角色；表 owner 天然绕过 RLS。
+`deploy/rds/bootstrap.sql` 会创建并授权这些角色，`db-init` 以 `supabase_auth_admin`
+执行 schema 与迁移。
+
+### OSS
+
+按 [oss/README.md](oss/README.md)：私有 Bucket、绑定 `storage.linkmai.com`、HTTPS、
+CORS、RAM 最小权限 AccessKey。关键变量：
+
+```dotenv
+OSS_REGION=cn-hangzhou
+OSS_INTERNAL=true
+OSS_ENDPOINT=https://oss-cn-hangzhou-internal.aliyuncs.com
+OSS_PUBLIC_ENDPOINT=https://storage.linkmai.com
+```
+
+`OSS_ENDPOINT` 必须是内网地址；`OSS_PUBLIC_ENDPOINT` 必须是浏览器可达的自定义域。
+误把公网 `*.aliyuncs.com` 填进去，新桶会报 `PublicEndpointForbidden`。
+
+### SMTP
+
+阿里云邮件推送 `smtpdm.aliyun.com`，优先 `587`（STARTTLS）；服务商只开 `465` 时再改。
+发信地址必须验证并配 SPF/DKIM。`linkmai.com` 已有企业邮箱 MX 时不要覆盖，可用
+`mail.linkmai.com` 作为发信子域。
+
+### 百炼 DeepSeek
+
+1. [百炼控制台](https://bailian.console.aliyun.com/) 开通服务，创建 API Key。
+2. 复制业务空间 ID（`ws-xxxx`）。
+3. 把 `.env.prod` 里的 `WORKSPACE_ID` 替换成该 ID，`DEEPSEEK_API_KEY` 填百炼 Key。
+4. 北京区域 OpenAI 兼容地址：
+
+   `https://<业务空间ID>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`
+
+默认模型：`deepseek-v4-pro`（质量优先）、`deepseek-v4.1-flash`（速度/成本优先）。
+百炼是托管 API，不需要在 ECS 上装模型。
+
+## 6. 安装依赖并生成配置
+
+```bash
+# Alibaba Cloud Linux / CentOS
+sudo dnf install -y git postgresql curl
+sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo systemctl enable --now docker
+
+# generate-secrets.mjs 需要 Node 22
+curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
+sudo dnf install -y nodejs
+
+# Ubuntu 用：
+# sudo apt update && sudo apt install -y docker.io docker-compose-v2 postgresql-client git curl
+# curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash - && sudo apt install -y nodejs
+
+sudo mkdir -p /opt/linkmai
+sudo chown "$USER" /opt/linkmai
+cd /opt/linkmai
+git clone <你的仓库地址> .
+```
+
+如果代码还在开发机工作区，先 commit/push；ECS 上 clone 不到未提交的文件。
+
+```bash
+node deploy/scripts/generate-secrets.mjs
+```
+
+脚本会生成 `deploy/.env.prod`（权限 600）和 anon/service JWT、数据库密码、Redis 密码、
+三个应用 secret。已存在时拒绝覆盖；确实要重建加 `--force`。
+
+然后填写 `deploy/.env.prod` 里的 `CHANGE_ME` / `WORKSPACE_ID`：
+
+```dotenv
+RDS_HOST=pgm-xxxx.pg.rds.aliyuncs.com
+OSS_BUCKET_NAME=linkmai-prod
+OSS_ACCESS_KEY_ID=...
+OSS_ACCESS_KEY_SECRET=...
+SMTP_USER=...
+SMTP_PASSWORD=...
+SMTP_FROM=no-reply@linkmai.com
+DEEPSEEK_API_KEY=sk-...
+```
+
+RDS master 单独放：
+
+```bash
+cp deploy/.env.rds.example deploy/.env.rds
+chmod 600 deploy/.env.rds
+# 填 RDS_MASTER_USER / RDS_MASTER_PASSWORD
+```
+
+密码含 `#`、空格、`$` 时用单引号包住。模板里的 `SMTP_SENDER_NAME` 和
+`MIKE_MODEL_CONFIG_JSON` 引号不要删。
+
+## 7. 初始化 RDS 并启动
+
+```bash
+./deploy/scripts/bootstrap-rds.sh
+./deploy/scripts/compose.sh config
+./deploy/scripts/compose.sh build
+./deploy/scripts/compose.sh up -d
+```
+
+首次启动顺序：
+
+1. `auth` 连接 RDS，创建 `auth.users` 等表；
+2. `db-init` 等 `auth.users` 出现，以 `supabase_auth_admin` 执行 `schema.sql` 和迁移；
+3. `backend` 在 `db-init` 成功后启动；
+4. `frontend`、`word` 等 backend 健康后启动；
+5. `edge` 最后启动，占用 80/443。
+
+观察：
+
+```bash
+./deploy/scripts/compose.sh ps
+./deploy/scripts/compose.sh logs -f db-init
+./deploy/scripts/compose.sh logs -f backend
+./deploy/scripts/compose.sh logs -f edge
+```
+
+`db-init` 正常结束应为 `Exited (0)`。如果反复失败，先看 SQL 错误；常见原因是 RDS 角色
+没初始化、`auth.users` 没建、或 public schema 权限不足。
+
+## 8. 验证
+
+```bash
+curl -fsS https://linkmai.com/healthz
+curl -fsS https://linkmai.com/api/health
+curl -fsS https://word.linkmai.com/healthz   # 不做 Word 可跳过
+```
+
+浏览器打开 `https://linkmai.com`，注册账号，按邮件确认。第一个用户创建组织后即为 owner；
+后续成员通过邀请加入。在设置里确认模型列表出现 `DeepSeek V4 Pro（百炼）`。
+
+再上传一个 PDF/DOCX，确认：
+
+- 浏览器直接 PUT 到 `https://storage.linkmai.com/...` 返回 200；
+- 文档能解析、能对话；
+- 下载/预览正常。
+
+## 9. 回滚
+
+切换后如果 80/443 起不来或登录异常：
+
+```bash
+./deploy/scripts/compose.sh down
+sudo systemctl start nginx        # 如果旧站点是宿主机 Nginx
+pm2 start <旧API进程名>            # 如果旧 API 是 PM2
+```
+
+旧 Nginx 配置、PM2 dump、数据库备份都还在，先恢复旧服务，再排查新栈。不要删除旧数据库
+和旧 OSS Bucket，直到确认不再回滚。
+
+## 10. Word 加载项（可选）
+
+Word 站点是 `https://word.linkmai.com`，与 backend 的 `/api` 同源，Cookie 在 Office 里是
+一方 Cookie。部署步骤：
+
+1. 确认 `https://word.linkmai.com/manifest.xml` 可访问。
+2. Microsoft 365 管理中心 → 设置 → 集成应用 → 上传自定义应用 → Office 加载项。
+3. 分配用户/组，在 Word「开始 → 加载项」打开「灵迈 LinkMai」。
+4. 首次打开跳转 `linkmai.com` 登录，再通过 auth handoff 回到任务窗格。
+
+`manifest.xml` 的 Id 已是正式 GUID `0698078a-064c-477d-9add-679533795315`。不做 Word 可以
+不发布 `word` 容器、不加 `word` DNS，也不申请 word 证书。
+
+## 11. 日常运维
+
+```bash
+./deploy/scripts/compose.sh ps
+./deploy/scripts/compose.sh logs -f --tail=200 backend
+
+# 更新代码
+git pull
+./deploy/scripts/compose.sh build
+./deploy/scripts/compose.sh run --rm db-init
+./deploy/scripts/compose.sh up -d
+
+# 进入数据库
+( set -a; . deploy/.env.prod; . deploy/.env.rds; set +a
+  PGPASSWORD="$RDS_MASTER_PASSWORD" psql "host=$RDS_HOST dbname=$RDS_DB user=$RDS_MASTER_USER sslmode=require" )
+```
+
+备份：
+
+- RDS 自动备份 ≥ 7 天；升级前手动快照。
+- OSS 开版本控制，按合规要求设生命周期。
+- Redis 是队列，不是权威数据；RDS 才是。
+- `deploy/.env.prod`、`deploy/.env.rds` 备份到密码管理器。丢失 JWT secret 会让所有会话失效；
+  丢失 `USER_API_KEYS_ENCRYPTION_SECRET` 会导致用户自带 API Key 无法解密。
+
+证书续期后 `docker compose ... exec edge nginx -s reload`，不需要重启业务容器。
+
+## 12. 排障
+
+| 现象 | 排查 |
+| --- | --- |
+| `edge` 启动报 `address already in use` | 旧 Nginx/旧容器还占着 80/443；`ss -lntp` 查进程，先停旧服务 |
+| `db-init` 报 `relation "auth.users" does not exist` | GoTrue 还没建表；看 `auth` 日志和 RDS 连接 |
+| `permission denied for schema public` | 没跑 `bootstrap-rds.sh`，或 `supabase_auth_admin` 没有 CREATE |
+| `must be owner of relation users` | schema 不是以 `supabase_auth_admin` 执行 |
+| backend 启动即退出，提示 secret 缺失 | 三个应用 secret 未生成或仍是占位符 |
+| `PublicEndpointForbidden` | `OSS_PUBLIC_ENDPOINT` 用了 `*.aliyuncs.com`，改成 `https://storage.linkmai.com` |
+| 上传 403 `SignatureDoesNotMatch` | 预签名 `Content-Type` 与浏览器实际发送不一致 |
+| 上传 CORS 失败 | OSS CORS 的 AllowedOrigin 必须是精确的 apex/word 源，不能是 `*` |
+| 登录邮件收不到 | SMTP、发信地址验证、SPF/DKIM；看 `auth` 日志 |
+| Word 打开空白 | `word.linkmai.com` 证书、manifest 的 `SourceLocation`、Office 缓存 |
+| SSE 不流式 | `edge` 的 `/api/` 必须 `proxy_buffering off` |
+| 502 | `edge` 到 upstream 不通；`compose ps` 看 frontend/word/backend 是否 healthy |
+
+## 13. 安全清单
+
+- [ ] RDS 只开内网，白名单只有 ECS 私网 IP；`5432` 不对公网。
+- [ ] OSS 私有，RAM 用户只有目标桶读写权限；AccessKey 不进 git。
+- [ ] `deploy/.env.prod`、`deploy/.env.rds` 权限 600，已加入 `.gitignore`。
+- [ ] 安全组只开 `22`（限制来源 IP）、`80`、`443`。
+- [ ] 旧小程序数据库/OSS 备份已离线保存，确认不再回滚后再清理。
+- [ ] `GOTRUE_DISABLE_SIGNUP` 按业务决定；对外服务建议邀请制。
+- [ ] 定期更新基础镜像与依赖；关注 `npm audit` 和上游安全公告。
+
+## 文件索引
+
+| 文件 | 用途 |
+| --- | --- |
+| `docker-compose.prod.yml` | 生产服务编排 |
+| `edge/nginx.conf` | TLS、域名路由、SSE |
+| `env.prod.example` | 环境变量模板 |
+| `rds/bootstrap.sql` | RDS 角色/schema 初始化 |
+| `scripts/bootstrap-rds.sh` | 执行 bootstrap.sql |
+| `scripts/generate-secrets.mjs` | 生成 `.env.prod` 与 JWT |
+| `scripts/compose.sh` | 固定 env/compose 的启动入口 |
+| `scripts/preflight-reuse.sh` | 复用旧 ECS 前的只读检查 |
+| `oss/cors.json` | OSS 跨域规则 |
+| `oss/README.md` | OSS 桶、自定义域、RAM |
+| `certs/README.md` | 证书放置与续期 |

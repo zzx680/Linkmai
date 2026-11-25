@@ -1,3 +1,5 @@
+
+import { uiText } from "@mike/client";
 import { useEffect, useSyncExternalStore } from "react";
 import { listQuickActions } from "../api/mikeApi";
 import type { QuickAction } from "../types";
@@ -37,7 +39,7 @@ function loadQuickActions(): Promise<void> {
       snapshot = [];
       emitChange();
       notifyError(error, {
-        action: "load your quick actions",
+        action: uiText("load your quick actions"),
         dedupeKey: "quick-action-store",
         operation: "quick_actions.run",
         onRetry: () => {

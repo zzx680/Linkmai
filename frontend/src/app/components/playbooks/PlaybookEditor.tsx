@@ -1,5 +1,9 @@
 "use client";
 
+import { isImeComposing } from "@mike/client";
+
+import { uiText } from "@mike/client";
+
 import {
   useEffect,
   useId,
@@ -199,13 +203,13 @@ export function PlaybookEditor({
   function openRuleActions(ruleId: string): HeaderActionsMenuItem[] {
     return [
       {
-        label: "Duplicate rule",
+        label: uiText("Duplicate rule"),
         icon: Copy,
         disabled,
         onSelect: () => duplicateRule(ruleId),
       },
       {
-        label: "Delete rule",
+        label: uiText("Delete rule"),
         icon: Trash2,
         variant: "danger",
         disabled,
@@ -228,7 +232,7 @@ export function PlaybookEditor({
         ...(target.topicId
           ? [
               {
-                label: "Move out of topic",
+                label: uiText("Move out of topic"),
                 icon: FolderOutput,
                 disabled,
                 onSelect: () => moveRule(ruleId, { topicId: null }),
@@ -242,13 +246,13 @@ export function PlaybookEditor({
       const topicId = target.topicId;
       return [
         {
-          label: "Add rule",
+          label: uiText("Add rule"),
           icon: Plus,
           disabled,
           onSelect: () => addRule(topicId),
         },
         {
-          label: "Remove topic (keep rules)",
+          label: uiText("Remove topic (keep rules)"),
           icon: FolderMinus,
           disabled,
           onSelect: () => removeTopic(topicId),
@@ -256,8 +260,8 @@ export function PlaybookEditor({
       ];
     }
     return [
-      { label: "Add rule", icon: Plus, disabled, onSelect: () => addRule() },
-      { label: "Add topic", icon: FolderPlus, disabled, onSelect: addTopic },
+      { label: uiText("Add rule"), icon: Plus, disabled, onSelect: () => addRule() },
+      { label: uiText("Add topic"), icon: FolderPlus, disabled, onSelect: addTopic },
     ];
   }
 
@@ -391,7 +395,7 @@ export function PlaybookEditor({
       durationMs: 8000,
       actions: [
         {
-          label: "Undo",
+          label: uiText("Undo"),
           onClick: () => {
             undoToasts.current.delete(toastId);
             updateRule(next.id, undo);
@@ -474,7 +478,7 @@ export function PlaybookEditor({
         <section
           ref={sidebarRef}
           tabIndex={0}
-          aria-label="Topics and rules"
+          aria-label={uiText("Topics and rules")}
           onContextMenu={(event) => openContext(event, { topicId: null })}
           onKeyDown={(event) => contextKey(event, { topicId: null })}
           onDragOver={(event) => dragOver(event, { topicId: null })}
@@ -491,10 +495,10 @@ export function PlaybookEditor({
           <div
             className={`flex items-center justify-between gap-2 ${PLAYBOOK_SIDE_HEADER_CLASS}`}
           >
-            <h2 className={PLAYBOOK_SIDE_TITLE_CLASS}>Rules</h2>
+            <h2 className={PLAYBOOK_SIDE_TITLE_CLASS}>{uiText("Rules")}</h2>
             <div className="flex h-5 items-center gap-1">
               <HeaderActionsMenu
-                title="Rules actions"
+                title={uiText("Rules actions")}
                 triggerClassName="h-6 w-6"
                 onCloseAutoFocus={(event) => {
                   if (newTopicId) event.preventDefault();
@@ -504,8 +508,8 @@ export function PlaybookEditor({
               <TextButtonUI
                 size="icon-xs"
                 className="h-6"
-                aria-label="Add rule"
-                title="Add rule"
+                aria-label={uiText("Add rule")}
+                title={uiText("Add rule")}
                 disabled={disabled}
                 onClick={() => addRule()}
               >
@@ -516,10 +520,10 @@ export function PlaybookEditor({
           <fieldset
             className={`max-h-64 min-h-0 min-w-0 space-y-1 overflow-y-auto @[48rem]:max-h-none @[48rem]:flex-1 ${PLAYBOOK_SIDE_LIST_CLASS}`}
           >
-            <legend className="sr-only">Choose a rule</legend>
+            <legend className="sr-only">{uiText("Choose a rule")}</legend>
             {rules.length === 0 && content.topics.length === 0 && (
               <p className="px-2 py-1.5 text-xs text-gray-500">
-                Add a rule to get started.
+                {uiText("Add a rule to get started.")}
               </p>
             )}
             {ungroupedRules.map((rule) => ruleButton(rule))}
@@ -539,7 +543,7 @@ export function PlaybookEditor({
                   <TextButtonUI
                     size="icon-xs"
                     className="h-7 w-3"
-                    aria-label={`${expandedTopics.has(topic.id) ? "Collapse" : "Expand"} topic ${topic.name}`}
+                    aria-label={`${expandedTopics.has(topic.id) ? uiText("Collapse") : uiText("Expand")} topic ${topic.name}`}
                     aria-expanded={expandedTopics.has(topic.id)}
                     onClick={() =>
                       setExpandedTopics((current) => {
@@ -579,7 +583,7 @@ export function PlaybookEditor({
                     className="-mx-1 h-7 min-w-0 rounded-md bg-transparent px-1 py-0 text-xs text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500/40"
                   />
                   <HeaderActionsMenu
-                    title={`Topic actions for ${topic.name || "Untitled topic"}`}
+                    title={`Topic actions for ${topic.name || uiText("Untitled topic")}`}
                     triggerClassName="h-6 w-6"
                     items={menuActions({ topicId: topic.id })}
                     onCloseAutoFocus={(event) => {
@@ -638,7 +642,7 @@ export function PlaybookEditor({
       }
     >
       <section
-        aria-label="Rule editor"
+        aria-label={uiText("Rule editor")}
         className={`@container flex min-h-0 min-w-0 flex-col overflow-hidden ${EDITOR_SURFACE_CLASS}`}
       >
         {selectedRule && (
@@ -646,20 +650,20 @@ export function PlaybookEditor({
             disabled={disabled}
             className={`min-w-0 ${PLAYBOOK_PANE_HEADER_CLASS}`}
           >
-            <legend className="sr-only">Rule name and actions</legend>
+            <legend className="sr-only">{uiText("Rule name and actions")}</legend>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <label
                   htmlFor={ruleNameId}
                   className={`mb-1 block ${PLAYBOOK_LABEL_CLASS}`}
                 >
-                  Rule
+                  {uiText("Rule")}
                 </label>
                 <textarea
                   id={ruleNameId}
                   rows={1}
                   value={selectedRule.name}
-                  placeholder="Untitled rule"
+                  placeholder={uiText("Untitled rule")}
                   onChange={(event) =>
                     replaceRule({
                       ...selectedRule,
@@ -667,13 +671,14 @@ export function PlaybookEditor({
                     })
                   }
                   onKeyDown={(event) => {
+                      if (isImeComposing(event)) return;
                     if (event.key === "Enter") event.preventDefault();
                   }}
                   className="keyboard-focus-ring block w-full min-w-0 resize-none rounded-md bg-transparent px-0 py-0.5 font-serif text-xl text-gray-900 outline-none transition-colors [field-sizing:content] [overflow-wrap:anywhere] placeholder:text-gray-400 hover:bg-app-surface-hover focus-visible:ring-2 focus-visible:ring-blue-500/40 disabled:hover:bg-transparent"
                 />
               </div>
               <HeaderActionsMenu
-                title="Rule actions"
+                title={uiText("Rule actions")}
                 triggerClassName="h-6 w-6 shrink-0"
                 items={openRuleActions(selectedRule.id)}
                 onCloseAutoFocus={(event) => {
@@ -687,7 +692,7 @@ export function PlaybookEditor({
           // Outside the disabled fieldset: readers switch sections too.
           <div
             role="group"
-            aria-label="Rule sections"
+            aria-label={uiText("Rule sections")}
             className={`flex shrink-0 flex-wrap gap-1.5 pb-2 ${PLAYBOOK_PANE_INSET_CLASS}`}
           >
             {RULE_FORM_TABS.map((tab) => (
@@ -714,7 +719,7 @@ export function PlaybookEditor({
             disabled={disabled}
             className={`min-w-0 shrink-0 ${!selectedRule ? "flex flex-1 flex-col justify-center" : ruleTab === "escalation" ? "flex flex-1 flex-col" : ""}`}
           >
-            <legend className="sr-only">Edit rule</legend>
+            <legend className="sr-only">{uiText("Edit rule")}</legend>
             {selectedRule ? (
               <PlaybookRuleForm
                 key={selectedRule.id}
@@ -725,18 +730,18 @@ export function PlaybookEditor({
               />
             ) : (
               <EmptyState
-                title="No rules yet"
+                title={uiText("No rules yet")}
                 description={
                   disabled
-                    ? "This playbook has no rules yet."
-                    : "Add a rule to start building this playbook."
+                    ? uiText("This playbook has no rules yet.")
+                    : uiText("Add a rule to start building this playbook.")
                 }
                 className="mx-auto w-fit max-w-full py-12"
                 action={
                   !disabled && (
                     <PillButtonUI tone="black" onClick={() => addRule()}>
                       <Plus aria-hidden="true" className="h-4 w-4" />
-                      Add
+                      {uiText("Add")}
                     </PillButtonUI>
                   )
                 }

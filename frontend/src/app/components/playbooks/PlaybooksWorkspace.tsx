@@ -1,5 +1,7 @@
 "use client";
 
+import { uiText } from "@mike/client";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQueryParamTab } from "@/app/hooks/useQueryParamTab";
@@ -406,7 +408,7 @@ function PlaybooksWorkspace() {
     } catch (error) {
       reportFault(error, { operation: "playbooks.save" });
       setSharesError(
-        userFacingApiError(error, "The change was saved, but this list could not be reloaded. Reopen People to see the current one."),
+        userFacingApiError(error, uiText("The change was saved, but this list could not be reloaded. Reopen People to see the current one.")),
       );
     }
   }, []);
@@ -462,7 +464,7 @@ function PlaybooksWorkspace() {
         if (!current) return;
         setAllRunsError(
           reportFault(err, {
-            action: "load the runs",
+            action: uiText("load the runs"),
             operation: "playbooks.review",
           }).message,
         );
@@ -750,7 +752,7 @@ function PlaybooksWorkspace() {
     if (attempt.status === "failed") {
       const message =
         attempt.error ??
-        "The playbook could not be imported. Please try again.";
+        uiText("The playbook could not be imported. Please try again.");
       if (followed) {
         // Back to the form, with the chosen file still there to retry.
         setFollowedImportId(null);
@@ -784,11 +786,11 @@ function PlaybooksWorkspace() {
     }
     showToast({
       tone: "success",
-      title: "New playbook ready",
+      title: uiText("New playbook ready"),
       message: `${saved.name} has been compiled. Open to view.`,
       durationMs: 10_000,
       actions: [
-        { label: "Open", tone: "blue", onClick: () => openPlaybook(saved.id) },
+        { label: uiText("Open"), tone: "blue", onClick: () => openPlaybook(saved.id) },
       ],
     });
   };
@@ -912,7 +914,7 @@ function PlaybooksWorkspace() {
     );
     setReviewError(
       supported.length < candidates.length
-        ? "Some files weren’t added. Choose PDF, DOCX, or TXT documents."
+        ? uiText("Some files weren’t added. Choose PDF, DOCX, or TXT documents.")
         : null,
     );
     setReviewDocuments((current) => {
@@ -938,7 +940,7 @@ function PlaybooksWorkspace() {
       PLAYBOOK_IMPORT_FILE.test(item.name),
     );
     if (supported) setImportSource(supported);
-    setImportError(supported ? null : "Choose a Word (.docx) or PDF playbook.");
+    setImportError(supported ? null : uiText("Choose a Word (.docx) or PDF playbook."));
   }
 
   async function review() {
@@ -1037,13 +1039,13 @@ function PlaybooksWorkspace() {
         breadcrumbs={
           linkedPlaybookLoading
             ? [
-                { label: "Playbooks", onClick: () => openPlaybook(null) },
+                { label: uiText("Playbooks"), onClick: () => openPlaybook(null) },
                 { loading: true, skeletonClassName: "w-40" },
               ]
             : selected
               ? [
                   {
-                    label: "Playbooks",
+                    label: uiText("Playbooks"),
                     onClick: () => void backToList(),
                   },
                   {
@@ -1051,7 +1053,7 @@ function PlaybooksWorkspace() {
                     title: content?.name || selected.name,
                   },
                 ]
-              : [{ label: "Playbooks" }]
+              : [{ label: uiText("Playbooks") }]
         }
         actionGroups={
           linkedPlaybookLoading
@@ -1074,10 +1076,10 @@ function PlaybooksWorkspace() {
                                 />
                               )}
                               {autosave.status === "saving"
-                                ? "Saving…"
+                                ? uiText("Saving…")
                                 : autosave.status === "error"
-                                  ? "Couldn’t save"
-                                  : "Saved"}
+                                  ? uiText("Couldn’t save")
+                                  : uiText("Saved")}
                             </span>
                           ),
                         },
@@ -1086,7 +1088,7 @@ function PlaybooksWorkspace() {
                   [
                     {
                       onClick: () => openAccess(selected),
-                      title: "Playbook people",
+                      title: uiText("Playbook people"),
                       iconOnly: true,
                       icon: <Users aria-hidden="true" className="h-4 w-4" />,
                     },
@@ -1097,7 +1099,7 @@ function PlaybooksWorkspace() {
                           <DropdownTrigger asChild>
                             <HeaderButtonUI
                               iconOnly
-                              aria-label="Playbook actions"
+                              aria-label={uiText("Playbook actions")}
                               disabled={!!busy}
                             >
                               <MoreHorizontal
@@ -1111,7 +1113,7 @@ function PlaybooksWorkspace() {
                               onSelect={() => setDetailsTargetId(selected.id)}
                             >
                               <Pencil aria-hidden="true" className="h-4 w-4" />
-                              {canEdit ? "Edit details" : "View details"}
+                              {canEdit ? uiText("Edit details") : uiText("View details")}
                             </DropdownItem>
                             {canEdit && (
                               <DropdownItem
@@ -1121,7 +1123,7 @@ function PlaybooksWorkspace() {
                                   aria-hidden="true"
                                   className="h-4 w-4"
                                 />
-                                Replace from file
+                                {uiText("Replace from file")}
                               </DropdownItem>
                             )}
                             {canManageAccess && (
@@ -1133,7 +1135,7 @@ function PlaybooksWorkspace() {
                                   aria-hidden="true"
                                   className="h-4 w-4"
                                 />
-                                Delete playbook
+                                {uiText("Delete playbook")}
                               </DropdownItem>
                             )}
                           </DropdownContent>
@@ -1152,7 +1154,7 @@ function PlaybooksWorkspace() {
                                 aria-hidden="true"
                                 className="h-3.5 w-3.5"
                               />
-                              Use
+                              {uiText("Use")}
                             </HeaderButtonUI>
                           </DropdownTrigger>
                           <DropdownContent align="end" className="w-52">
@@ -1161,7 +1163,7 @@ function PlaybooksWorkspace() {
                                 aria-hidden="true"
                                 className="h-4 w-4"
                               />
-                              Run playbook
+                              {uiText("Run playbook")}
                             </DropdownItem>
                             <DropdownItem
                               onSelect={() => void openInAssistant()}
@@ -1170,7 +1172,7 @@ function PlaybooksWorkspace() {
                                 aria-hidden="true"
                                 className="h-4 w-4"
                               />
-                              Use in assistant
+                              {uiText("Use in assistant")}
                             </DropdownItem>
                           </DropdownContent>
                         </Dropdown>
@@ -1185,7 +1187,7 @@ function PlaybooksWorkspace() {
                       value: search,
                       onChange: setSearch,
                       placeholder:
-                        tab === "runs" ? "Search runs…" : "Search playbooks…",
+                        tab === "runs" ? uiText("Search runs…") : uiText("Search playbooks…"),
                     },
                     {
                       type: "custom",
@@ -1282,16 +1284,16 @@ function PlaybooksWorkspace() {
             items={
               isOrganization
                 ? [
-                    { id: "all", label: "All" },
-                    { id: "mine", label: "Private" },
-                    { id: "shared", label: "Public" },
-                    { id: "runs", label: "Runs" },
+                    { id: "all", label: uiText("All") },
+                    { id: "mine", label: uiText("Private") },
+                    { id: "shared", label: uiText("Public") },
+                    { id: "runs", label: uiText("Runs") },
                   ]
                 : [
-                    { id: "all", label: "All" },
-                    { id: "mine", label: "My playbooks" },
-                    { id: "shared", label: "Shared with me" },
-                    { id: "runs", label: "Runs" },
+                    { id: "all", label: uiText("All") },
+                    { id: "mine", label: uiText("My playbooks") },
+                    { id: "shared", label: uiText("Shared with me") },
+                    { id: "runs", label: uiText("Runs") },
                   ]
             }
             active={tab}
@@ -1422,9 +1424,9 @@ function PlaybooksWorkspace() {
           currentUserEmail={user?.email ?? null}
           currentUserId={user?.id ?? null}
           breadcrumb={[
-            "Playbooks",
-            accessPlaybook.name || "Untitled playbook",
-            "Access",
+            uiText("Playbooks"),
+            accessPlaybook.name || uiText("Untitled playbook"),
+            uiText("Access"),
           ]}
           access={{
             grants: shares.map((share) => ({
@@ -1459,7 +1461,7 @@ function PlaybooksWorkspace() {
       <AddDocumentsModal
         open={savedFilesOpen}
         onClose={() => setSavedFilesOpen(false)}
-        breadcrumb={["Playbooks", "Add documents"]}
+        breadcrumb={[uiText("Playbooks"), uiText("Add documents")]}
         uploadStateId="playbook-review"
         onSelect={(documents) => {
           setSavedFilesOpen(false);
@@ -1470,9 +1472,9 @@ function PlaybooksWorkspace() {
         open={importPickerOpen}
         onClose={() => setImportPickerOpen(false)}
         breadcrumb={[
-          "Playbooks",
-          importTargetId ? "Replace from file" : "Import playbook",
-          "Add document",
+          uiText("Playbooks"),
+          importTargetId ? uiText("Replace from file") : uiText("Import playbook"),
+          uiText("Add document"),
         ]}
         uploadStateId="playbook-import"
         onSelect={(documents) => {
@@ -1483,13 +1485,13 @@ function PlaybooksWorkspace() {
       />
       <ConfirmPopup
         open={!!runDeleteTargets}
-        title={runDeleteTargets?.length === 1 ? "Delete run?" : "Delete runs?"}
+        title={runDeleteTargets?.length === 1 ? uiText("Delete run?") : uiText("Delete runs?")}
         message={
           runDeleteTargets?.length === 1
-            ? `The run of “${runDeleteTargets[0].documentName || "Untitled document"}” and its findings will be deleted. Tracked changes it made stay on the document.`
+            ? `The run of “${runDeleteTargets[0].documentName || uiText("Untitled document")}” and its findings will be deleted. Tracked changes it made stay on the document.`
             : `${runDeleteTargets?.length ?? 0} selected runs and their findings will be deleted. Tracked changes they made stay on their documents.`
         }
-        confirmLabel="Delete"
+        confirmLabel={uiText("Delete")}
         confirmVariant="danger"
         confirmStatus={busy === "delete-runs" ? "loading" : "idle"}
         onConfirm={() => void removeRuns()}
@@ -1500,14 +1502,14 @@ function PlaybooksWorkspace() {
       <ConfirmPopup
         open={deleteOpen}
         title={
-          deleteTargets.length === 1 ? "Delete playbook?" : "Delete playbooks?"
+          deleteTargets.length === 1 ? uiText("Delete playbook?") : uiText("Delete playbooks?")
         }
         message={
           deleteTargets.length === 1
             ? `“${deleteTargets[0].name}” and its rules will be deleted.`
             : `${deleteTargets.length} selected playbooks and their rules will be deleted.`
         }
-        confirmLabel="Delete"
+        confirmLabel={uiText("Delete")}
         confirmVariant="danger"
         confirmStatus={busy === "delete" ? "loading" : "idle"}
         onConfirm={() => void remove()}
@@ -1526,22 +1528,22 @@ function PlaybooksWorkspace() {
         size="sm"
         className="h-auto max-h-[calc(100vh-2rem)]"
         breadcrumbs={[
-          "Playbooks",
-          importTargetId ? "Replace from file" : "Import playbook",
+          uiText("Playbooks"),
+          importTargetId ? uiText("Replace from file") : uiText("Import playbook"),
         ]}
         // While compiling, the dialog shows only the progress screen, and
         // closing it leaves the import compiling.
         primaryAction={
           compiling
             ? {
-                label: "Close",
+                label: uiText("Close"),
                 variant: "primary",
                 onClick: closeImport,
                 // The upload must finish before there is an import to leave.
                 disabled: busy === "import",
               }
             : {
-                label: "Compile",
+                label: uiText("Compile"),
                 icon: <WandSparkles className="h-4 w-4" />,
                 variant: "blue",
                 disabled: !importSource || !model || !!busy,
@@ -1549,7 +1551,7 @@ function PlaybooksWorkspace() {
               }
         }
         cancelAction={
-          compiling ? false : { label: "Cancel", onClick: closeImport }
+          compiling ? false : { label: uiText("Cancel"), onClick: closeImport }
         }
       >
         {compiling ? (
@@ -1562,11 +1564,10 @@ function PlaybooksWorkspace() {
               className="h-6 w-6 animate-spin text-gray-400 motion-reduce:animate-none"
             />
             <p className="mt-4 text-sm font-medium text-gray-900">
-              Compiling your playbook
+              {uiText("Compiling your playbook")}
             </p>
             <p className="mt-1 max-w-xs text-xs text-gray-500">
-              This can take a few minutes. You can close this window and
-              we’ll let you know when it’s ready.
+              {uiText("This can take a few minutes. You can close this window and we’ll let you know when it’s ready.")}
             </p>
           </div>
         ) : (
@@ -1586,7 +1587,7 @@ function PlaybooksWorkspace() {
             {!importTargetId && (
               <div>
                 <ModalFieldLabel htmlFor="playbook-import-name">
-                  Playbook name (optional)
+                  {uiText("Playbook name (optional)")}
                 </ModalFieldLabel>
                 <ModalTextInput
                   id="playbook-import-name"
@@ -1600,7 +1601,7 @@ function PlaybooksWorkspace() {
                 id="playbook-import-document-label"
                 className="mb-2 block text-xs font-medium text-gray-700"
               >
-                Add document
+                {uiText("Add document")}
               </p>
               <PlaybookReviewDocuments
                 documents={importSource ? [importSource] : []}
@@ -1615,7 +1616,7 @@ function PlaybooksWorkspace() {
             </div>
             <div>
               <ModalFieldLabel htmlFor="playbook-import-model">
-                Compilation model
+                {uiText("Compilation model")}
               </ModalFieldLabel>
               {models.length > 0 ? (
                 <ModalSelect
@@ -1630,18 +1631,18 @@ function PlaybooksWorkspace() {
                 />
               ) : (
                 <p className="text-sm text-amber-700">
-                  No compilation model is available.{" "}
+                  {uiText("No compilation model is available.")}{" "}
                   <a href="/account/api-keys" className="underline">
-                    Configure an API key
+                    {uiText("Configure an API key")}
                   </a>{" "}
-                  or enable a local model.
+                  {uiText("or enable a local model.")}
                 </p>
               )}
             </div>
             <p className="text-xs text-gray-500">
               {importTargetId
-                ? "The compiled rules replace the current ones; completed reviews keep the rules they used. You can still edit the rules by hand afterwards."
-                : "You can edit the rules by hand once the playbook is created."}
+                ? uiText("The compiled rules replace the current ones; completed reviews keep the rules they used. You can still edit the rules by hand afterwards.")
+                : uiText("You can edit the rules by hand once the playbook is created.")}
             </p>
           </div>
         )}
@@ -1665,8 +1666,8 @@ function NewPlaybookMenu({
         <HeaderButtonUI
           iconOnly
           disabled={disabled}
-          title="New playbook"
-          aria-label="New playbook"
+          title={uiText("New playbook")}
+          aria-label={uiText("New playbook")}
         >
           <Plus aria-hidden="true" className="h-4 w-4" />
         </HeaderButtonUI>
@@ -1674,11 +1675,11 @@ function NewPlaybookMenu({
       <DropdownContent align="end">
         <DropdownItem onSelect={onImport}>
           <Upload className="h-4 w-4" />
-          Import from file
+          {uiText("Import from file")}
         </DropdownItem>
         <DropdownItem onSelect={onBlank}>
           <PenLine className="h-4 w-4" />
-          Start from scratch
+          {uiText("Start from scratch")}
         </DropdownItem>
       </DropdownContent>
     </Dropdown>

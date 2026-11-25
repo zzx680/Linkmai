@@ -1,4 +1,7 @@
+
+import { uiText } from "@mike/client";
 import { BACKEND_REPORTING_OWNER } from "@mike/client";
+import { PRODUCT_SUPPORT_EMAIL } from "./productConfig";
 import {
     MikeApiError,
     UploadBatchError,
@@ -99,10 +102,11 @@ export function supportMailtoFor(
     note?: string,
 ): string {
     return buildSupportMailto(error, {
+        supportEmail: PRODUCT_SUPPORT_EMAIL,
         page: typeof window !== "undefined" ? window.location.href : undefined,
         product: "web",
         note,
-    });
+    }) || "/support";
 }
 
 /** Screens that already are the way back in; "Sign in" would be a no-op. */
@@ -289,7 +293,7 @@ export const notifyError = createErrorNotifier<NotifyErrorOptions>({
                 described.kind === "unauthenticated" && signInHref
                     ? [
                           {
-                              label: "Sign in",
+                              label: uiText("Sign in"),
                               onClick: () => window.location.assign(signInHref),
                           },
                       ]
