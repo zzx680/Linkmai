@@ -49,7 +49,7 @@ jobs:
     # path: it runs on push to main, nightly, on manual dispatch, and on PRs
     # labelled `stress` (takes effect on the next push; see e2e.yml for why
     # there is no `labeled` trigger).
-    if: (github.repository == 'open-legal-products/mike' || github.event.repository.fork) && (github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'stress'))
+    if: (github.repository == 'zzx680/Linkmai' || github.event.repository.fork) && (github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'stress'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     defaults:
@@ -81,7 +81,7 @@ jobs:
 
   playwright:
     # Runs here and in forks; skipped in copies such as the Vercel Deploy button makes (docs/vercel.md).
-    if: github.repository == 'open-legal-products/mike' || github.event.repository.fork
+    if: github.repository == 'zzx680/Linkmai' || github.event.repository.fork
     name: Typecheck and Playwright (chromium + webkit)
     runs-on: ubuntu-latest
     timeout-minutes: 30
