@@ -2,7 +2,7 @@
 # No existing database or host ports are used. The throwaway container is removed.
 set -euo pipefail
 workspace_root="$(cd "$(dirname "$0")/../.." && pwd)"
-workspace_container="mike-google-workspace-test-$$"
+workspace_container="linkmai-google-workspace-test-$$"
 cleanup() { docker rm -f "$workspace_container" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 docker run --name "$workspace_container" -d -e POSTGRES_HOST_AUTH_METHOD=trust postgres:16-alpine >/dev/null

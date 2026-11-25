@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, it } from "vitest";
 // Opt in with LINKMAI_TEST_POSTGRES_CONTAINER=supabase_db_backend. The existing
 // application database is never touched: this suite owns a disposable DB.
 const container = process.env.LINKMAI_TEST_POSTGRES_CONTAINER;
-const database = `mike_test_private_access_${process.pid}_${Date.now()}`;
+const database = `linkmai_test_private_access_${process.pid}_${Date.now()}`;
 function sql(query: string) {
     execFileSync("docker", ["exec", "-i", container!, "psql", "-U", "postgres", "-d", database, "-v", "ON_ERROR_STOP=1", "-Xq"], {
         input: query, encoding: "utf8", timeout: 60_000, stdio: ["pipe", "pipe", "pipe"],

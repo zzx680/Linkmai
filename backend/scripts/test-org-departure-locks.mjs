@@ -6,8 +6,8 @@ import assert from "node:assert/strict";
 const container = process.env.LINKMAI_TEST_POSTGRES_CONTAINER;
 const database = process.env.LINKMAI_TEST_POSTGRES_DATABASE;
 const url = new URL(process.env.SUPABASE_TEST_DB_URL ?? "postgres://invalid");
-if (container ? !database?.startsWith("mike_sql_") : !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
-  throw new Error("Use a disposable loopback database or an explicitly named mike_sql_ test database");
+if (container ? !database?.startsWith("linkmai_sql_") : !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
+  throw new Error("Use a disposable loopback database or an explicitly named linkmai_sql_ test database");
 }
 const command = container ? "docker" : "psql";
 const args = container ? ["exec", "-i", container, "psql", "-U", "postgres", "-d", database, "-XAtq", "-v", "ON_ERROR_STOP=1"] : ["-XAtq", "-v", "ON_ERROR_STOP=1"];
@@ -62,7 +62,7 @@ try {
   held = session();
   held.write(`begin; insert into project_org_access_overrides(project_id,org_id,user_id,role) values('${shared}','${org}','${remaining}','editor');\n\\echo SHARED`);
   await held.marker("SHARED");
-  const application = `mike_departure_${randomUUID()}`;
+  const application = `linkmai_departure_${randomUUID()}`;
   const departure = query(`set application_name='${application}'; select remove_org_member('${org}','${second}','${owner}');`);
   let waiting = false;
   for (let attempt = 0; attempt < 100; attempt++) {
@@ -85,7 +85,7 @@ try {
     held.write(`begin; ${moving ? `update documents set project_id=null where id='${referenced}';` : ""}
       ${kind === "chat" ? `insert into chat_messages(chat_id,role,files) values('${chat}','user','[{"document_id":"${referenced}"}]');` : `update tabular_reviews set document_ids=jsonb_build_array('${referenced}'::text) where id='${review}';`}\n\\echo REFERENCED`);
     await held.marker("REFERENCED");
-    const application = `mike_reference_${randomUUID()}`;
+    const application = `linkmai_reference_${randomUUID()}`;
     const departure = query(`set application_name='${application}'; select remove_org_member('${org}','${actor}','${owner}');`);
     let waiting = false;
     for (let attempt = 0; attempt < 100; attempt++) {
@@ -108,7 +108,7 @@ try {
   // A document that becomes standalone while the departure waits for its row
   // lock must still fence references added by a third transaction meanwhile.
   {
-    const moving = randomUUID(), application = `mike_late_fence_${randomUUID()}`;
+    const moving = randomUUID(), application = `linkmai_late_fence_${randomUUID()}`;
     const waitingFor = async () => {
       for (let attempt = 0; attempt < 100; attempt++) {
         if (await query(`select exists(select 1 from pg_stat_activity where application_name='${application}' and wait_event_type='Lock');`) === "t") return true;

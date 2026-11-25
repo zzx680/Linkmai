@@ -8,7 +8,7 @@ import { makeExportDb, type Row } from "../../application/exports/__tests__/expo
 // Opt in with LINKMAI_TEST_POSTGRES_CONTAINER=supabase_db_backend. All writes
 // target a disposable database; the container's application DB is untouched.
 const container = process.env.LINKMAI_TEST_POSTGRES_CONTAINER;
-const database = `mike_test_retention_${process.pid}_${Date.now()}`;
+const database = `linkmai_test_retention_${process.pid}_${Date.now()}`;
 const uid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const q = (n: number) => `'${uid(n)}'`;
 const sql = (query: string): string => execFileSync("docker", [

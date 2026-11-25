@@ -10,7 +10,7 @@ const uid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0"
 const q = (n: number) => `'${uid(n)}'`;
 
 describe.skipIf(!container).each(["fresh", "upgraded"])("review activity in PostgreSQL (%s)", (mode) => {
-    const database = `mike_review_activity_${mode}_${process.pid}_${Date.now()}`;
+    const database = `linkmai_review_activity_${mode}_${process.pid}_${Date.now()}`;
     const sql = (query: string): string => execFileSync("docker", [
         "exec", "-i", container!, "psql", "-U", "postgres", "-d", database,
         "-v", "ON_ERROR_STOP=1", "-XqAt",

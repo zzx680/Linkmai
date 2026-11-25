@@ -47,7 +47,7 @@ async function loadApp() {
 }
 
 beforeEach(async () => {
-  root = await fs.mkdtemp(path.join(os.tmpdir(), "mike-blob-put-"));
+  root = await fs.mkdtemp(path.join(os.tmpdir(), "linkmai-blob-put-"));
 });
 
 afterEach(async () => {

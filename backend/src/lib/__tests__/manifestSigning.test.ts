@@ -149,7 +149,7 @@ describe("sealManifest", () => {
         const publicKey = publicKeyOf(sealed.signature!.public_key);
 
         for (const payload of [
-            payloadFor(sealed.digest.value, "mike-project-manifest-v2"),
+            payloadFor(sealed.digest.value, "linkmai-project-manifest-v2"),
             payloadFor(sealed.digest.value, ""),
             Buffer.from(sealed.digest.value, "hex"), // bare digest, no context
         ]) {

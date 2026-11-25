@@ -14,7 +14,7 @@ const APPS = ["backend", "frontend", "word-addin", "desktop"];
 beforeAll(loadSourceParser);
 /** A throwaway repository: `files` maps repo-relative paths to contents. */
 function repository(files: Record<string, string>) {
-    const root = mkdtempSync(join(tmpdir(), "mike-dependency-graph-"));
+    const root = mkdtempSync(join(tmpdir(), "linkmai-dependency-graph-"));
     for (const [path, content] of Object.entries(files)) {
         mkdirSync(dirname(join(root, path)), { recursive: true });
         writeFileSync(join(root, path), content);

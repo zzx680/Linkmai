@@ -8,7 +8,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 // Docker/Postgres container as the departure-retention suite.
 const container = process.env.LINKMAI_TEST_POSTGRES_CONTAINER;
 const pgliteModule = process.env.LINKMAI_TEST_PGLITE_MODULE;
-const database = `mike_lifecycle_${process.pid}_${Date.now()}`;
+const database = `linkmai_lifecycle_${process.pid}_${Date.now()}`;
 const uid = (n: number) =>
     `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const q = (n: number) => `'${uid(n)}'`;

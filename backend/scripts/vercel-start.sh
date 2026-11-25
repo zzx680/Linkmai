@@ -67,7 +67,7 @@ fi
 if [ -z "${STORAGE_DRIVER:-}" ] && [ -z "${R2_ENDPOINT_URL:-}" ]; then
   export STORAGE_DRIVER=supabase
 fi
-bucket="${SUPABASE_STORAGE_BUCKET:-mike}"
+bucket="${SUPABASE_STORAGE_BUCKET:-linkmai}"
 # A new deployment has no accounts: the first visitor creates one on the
 # setup screen (backend/src/modules/auth, docs/vercel.md).
 export LINKMAI_FIRST_RUN_SETUP="${LINKMAI_FIRST_RUN_SETUP:-true}"
