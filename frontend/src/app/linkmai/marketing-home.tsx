@@ -1,307 +1,345 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./marketing.module.css";
 
 const navItems = [
     { label: "产品", href: "/linkmai/product" },
     { label: "工作流", href: "/linkmai/workflows" },
-    { label: "开源", href: "https://github.com/zzx680/Linkmai" },
     { label: "部署", href: "/linkmai/deploy" },
     { label: "关于", href: "/linkmai/about" },
 ];
 
+const ecosystem = ["GitHub", "DeepSeek", "Next.js", "PostgreSQL", "Docker", "阿里云"];
+
+const features = [
+    {
+        kicker: "01 / ASSISTANT",
+        title: "助手",
+        body: "读材料、找依据、给引用。把问题问在一份案卷里，而不是散落的聊天记录里。",
+        shot: "assistant" as const,
+    },
+    {
+        kicker: "02 / PROJECTS",
+        title: "项目",
+        body: "每份合同、每个客户、每次审阅都留在同一个项目里；对话、文件和结论不脱节。",
+        shot: "projects" as const,
+    },
+    {
+        kicker: "03 / TABULAR REVIEW",
+        title: "表格审阅",
+        body: "把几十份合同摊成一张表。每个结论都能回到原文的具体页码和句子。",
+        shot: "table" as const,
+    },
+    {
+        kicker: "04 / WORKFLOWS",
+        title: "工作流",
+        body: "把重复的审阅、比对、清单和起草固化成可复用的流程，下一次直接运行。",
+        shot: "workflow" as const,
+    },
+];
+
+const principles = [
+    {
+        title: "零许可成本",
+        body: "没有按席位收费，也没有每年上涨的订阅。模型和 API 成本由你选择、你承担。",
+        image: "/mike/paintings/wheatstacks-end-of-summer.webp",
+        alt: "莫奈《干草堆》",
+    },
+    {
+        title: "数据留在边界内",
+        body: "文件、提示词和审阅记录都在你的存储里。合规、驻留和保密由你控制。",
+        image: "/mike/paintings/the-magpie.webp",
+        alt: "莫奈《喜鹊》",
+    },
+    {
+        title: "可改，可扩展",
+        body: "接入自己的文书库、检索源和引用引擎。代码在你手里，工作流可以按团队长出来。",
+        image: "/mike/paintings/bridge-villeneuve.webp",
+        alt: "莫奈《阿让特伊大桥》",
+    },
+    {
+        title: "每一行都可审计",
+        body: "提示词怎么拼、文件怎么流、结论从哪里来，都能在代码和记录里查到。",
+        image: "/mike/paintings/san-giorgio-maggiore-dusk.webp",
+        alt: "莫奈《圣乔治马焦雷的黄昏》",
+    },
+];
+
+const posts = [
+    { title: "把一份合同读成一张风险地图", date: "2026 年 11 月 18 日", kind: "产品" },
+    { title: "为什么开源法律 AI 更适合中国律所", date: "2026 年 11 月 12 日", kind: "观点" },
+    { title: "LinkMai v0.1：从案卷到交付", date: "2026 年 11 月 6 日", kind: "版本" },
+];
+
+function BrandMark() {
+    return (
+        <svg aria-hidden="true" className={styles.brandMark} viewBox="0 0 32 32">
+            <g fill="none" stroke="currentColor" strokeWidth="1.4">
+                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(0 16 16)" />
+                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(45 16 16)" />
+                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(90 16 16)" />
+                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(135 16 16)" />
+            </g>
+        </svg>
+    );
+}
+
 function Brand() {
     return (
         <Link className={styles.brand} href="/" aria-label="灵迈 LinkMai 首页">
-            <span className={styles.brandGlyph} aria-hidden="true">L</span>
+            <BrandMark />
             <span className={styles.brandName}>灵迈</span>
             <span className={styles.brandLatin}>LINKMAI</span>
         </Link>
     );
 }
 
-function SectionTag({ index, children }: { index: string; children: string }) {
+function Header() {
     return (
-        <p className={styles.sectionTag}>
-            <span>{index}</span>
-            <span>{children}</span>
-        </p>
+        <header className={styles.nav}>
+            <div className={styles.navPill}>
+                <Brand />
+            </div>
+            <div className={`${styles.navPill} ${styles.navRight}`}>
+                <nav aria-label="主导航" className={styles.navLinks}>
+                    {navItems.map((item) => (
+                        <Link href={item.href} key={item.label}>{item.label}</Link>
+                    ))}
+                </nav>
+                <Link className={styles.navLogin} href="/login">登录</Link>
+                <Link className={styles.navCta} href="/signup">开始使用</Link>
+            </div>
+            <details className={styles.menu}>
+                <summary aria-label="打开导航">
+                    <span /><span /><span />
+                </summary>
+                <div className={styles.menuPanel}>
+                    {navItems.map((item) => (
+                        <Link href={item.href} key={item.label}>{item.label}</Link>
+                    ))}
+                    <Link href="/login">登录</Link>
+                    <Link className={styles.menuCta} href="/signup">开始使用</Link>
+                </div>
+            </details>
+        </header>
+    );
+}
+
+function FeatureShot({ kind }: { kind: "assistant" | "projects" | "table" | "workflow" }) {
+    if (kind === "assistant") {
+        return (
+            <div className={styles.shot} aria-hidden="true">
+                <div className={styles.mockWindow}>
+                    <div className={styles.mockBar}><span /><span /><span /></div>
+                    <div className={styles.chatMock}>
+                        <p className={styles.mockLabel}>MATTER 024 / 股权回购</p>
+                        <div className={styles.chatBubble}>请对照第 3.2 条，找出回购触发条件里缺少的前置程序。</div>
+                        <div className={styles.chatAnswer}>
+                            <span className={styles.chatChip}>已读 4 份材料</span>
+                            <p>缺少“经董事会决议”，且未约定回购上限。建议补充，避免触发条件被单方解释。</p>
+                            <span className={styles.cite}>《公司法》第 74 条 ↗</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    if (kind === "projects") {
+        return (
+            <div className={styles.shot} aria-hidden="true">
+                <div className={styles.mockWindow}>
+                    <div className={styles.mockBar}><span /><span /><span /></div>
+                    <p className={styles.mockLabel}>PROJECTS / 股权回购</p>
+                    <div className={styles.fileRows}>
+                        {[
+                            ["股权回购协议.docx", "合同", "128 KB"],
+                            ["董事会决议.pdf", "决议", "1.2 MB"],
+                            ["投资人清单.xlsx", "清单", "86 KB"],
+                            ["尽调备忘录.md", "备忘", "42 KB"],
+                        ].map(([name, type, size]) => (
+                            <div className={styles.fileRow} key={name}>
+                                <span className={styles.fileDot} />
+                                <span>{name}</span>
+                                <span>{type}</span>
+                                <span>{size}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    if (kind === "table") {
+        return (
+            <div className={styles.shot} aria-hidden="true">
+                <div className={styles.mockWindow}>
+                    <div className={styles.mockBar}><span /><span /><span /></div>
+                    <p className={styles.mockLabel}>TABULAR REVIEW / 12 份合同</p>
+                    <div className={styles.tableMock}>
+                        <div className={styles.tableHead}><span>条款</span><span>风险</span><span>依据</span></div>
+                        {[
+                            ["回购触发", "高", "3.2"],
+                            ["优先清算", "中", "5.4"],
+                            ["竞业限制", "低", "8.1"],
+                        ].map(([a, b, c]) => (
+                            <div className={styles.tableRow} key={a}><span>{a}</span><span>{b}</span><span>p.{c}</span></div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div className={styles.shot} aria-hidden="true">
+            <div className={styles.mockWindow}>
+                <div className={styles.mockBar}><span /><span /><span /></div>
+                <p className={styles.mockLabel}>WORKFLOWS / 常用流程</p>
+                <div className={styles.flowRows}>
+                    {["合同审阅 · 回购条款", "尽调清单 · 交割条件", "条款比对 · 投资协议", "文书起草 · 董事会决议"].map((item, i) => (
+                        <div className={styles.flowRow} key={item}>
+                            <span>{String(i + 1).padStart(2, "0")}</span>
+                            <span>{item}</span>
+                            <span>运行 ↗</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 }
 
 export function MarketingHome() {
     return (
         <div className={styles.page}>
-            <header className={styles.header}>
-                <Brand />
-                <nav aria-label="主导航" className={styles.nav}>
-                    {navItems.map((item) => (
-                        <Link href={item.href} key={item.label}>{item.label}</Link>
-                    ))}
-                </nav>
-                <div className={styles.headerActions}>
-                    <Link className={styles.login} href="/login">登录</Link>
-                    <Link className={styles.headerCta} href="/signup">开始使用 <span aria-hidden="true">↗</span></Link>
-                </div>
-                <details className={styles.mobileMenu}>
-                    <summary aria-label="打开导航">菜单</summary>
-                    <div>
-                        {navItems.map((item) => (
-                            <Link href={item.href} key={item.label}>{item.label}</Link>
-                        ))}
-                        <Link href="/login">登录</Link>
-                        <Link href="/signup">开始使用</Link>
-                    </div>
-                </details>
-            </header>
-
+            <Header />
             <main>
                 <section className={styles.hero} id="top">
-                    <div className={styles.heroCopy}>
-                        <p className={styles.kicker}>LINKMAI / OPEN-SOURCE LEGAL AI</p>
-                        <h1>法律 AI，<br /><em>真正属于你。</em></h1>
-                        <p className={styles.lead}>审阅、检索、起草、交付，在同一份案卷里完成。代码开源，文件留在你的存储，模型由你决定。</p>
+                    <div className={styles.heroMedia}>
+                        <Image src="/mike/hero-bg.webp" alt="莫奈《撑阳伞的女人》" fill priority sizes="100vw" />
+                    </div>
+                    <div className={styles.heroVeil} aria-hidden="true" />
+                    <div className={styles.heroInner}>
+                        <p className={styles.eyebrow}>LINKMAI / OPEN-SOURCE LEGAL AI</p>
+                        <h1>法律 AI，<br />真正属于你。</h1>
+                        <p className={styles.heroLead}>审阅、检索、起草、交付，在同一份案卷里完成。代码开源，文件留在你的存储，模型由你决定。</p>
                         <div className={styles.heroActions}>
-                            <Link className={styles.primary} href="/signup">进入工作台 <span aria-hidden="true">↗</span></Link>
-                            <Link className={styles.secondary} href="/linkmai/product">看看它怎么工作</Link>
-                        </div>
-                        <div className={styles.heroMeta}>
-                            <span>AGPL-3.0</span>
-                            <span>可自托管</span>
-                            <span>Word / WPS</span>
-                            <span>DeepSeek</span>
+                            <Link className={styles.primary} href="/signup">开始使用</Link>
+                            <Link className={styles.secondary} href="/linkmai/deploy">部署自己的</Link>
                         </div>
                     </div>
+                    <a className={styles.scrollHint} href="#demo" aria-label="向下滚动">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                    </a>
+                </section>
 
-                    <div className={styles.workspace} aria-label="灵迈工作台示意">
-                        <div className={styles.workspaceTop}>
-                            <span>MATTER 024 / 股权回购</span>
-                            <span className={styles.saved}>已保存 09:41</span>
-                        </div>
-                        <div className={styles.workspaceGrid}>
-                            <aside className={styles.fileTree} aria-hidden="true">
-                                <p>案卷</p>
-                                <span className={styles.fileActive}>股权回购协议.docx</span>
-                                <span>董事会决议.pdf</span>
-                                <span>投资人清单.xlsx</span>
-                                <span>尽调备忘录.md</span>
-                                <p className={styles.treeLabel}>审查</p>
-                                <span>条款比对</span>
-                                <span>风险清单</span>
-                            </aside>
-                            <article className={styles.document} aria-hidden="true">
-                                <p className={styles.docKicker}>第 3 条 / 回购安排</p>
-                                <h2>股权回购协议</h2>
-                                <p>3.1 投资方持有公司 12.5% 的股权，对应注册资本人民币 125 万元。</p>
-                                <p className={styles.highlight}>3.2 若公司未能在 2027 年 6 月 30 日前完成合格上市，投资方有权要求创始股东按年化 8% 的收益率回购其持有的全部股权。</p>
-                                <p>3.3 回购价款应在投资方发出书面通知后三十日内支付完毕。</p>
-                                <span className={styles.marginNote}>关联条款 · 第 8.4 条</span>
+                <section className={styles.press} aria-label="开源技术生态">
+                    <div className={styles.pressTrack}>
+                        {ecosystem.map((name) => (
+                            <span key={name}>{name}</span>
+                        ))}
+                    </div>
+                </section>
+
+                <section className={styles.section} id="demo">
+                    <div className={styles.sectionHead}>
+                        <h2>产品演示</h2>
+                        <span className={styles.version}>v0.1</span>
+                    </div>
+                    <Link className={styles.demoFrame} href="/linkmai/product" aria-label="查看产品演示">
+                        <Image src="/mike/van-der-neer-moonlit-landscape.webp" alt="夜色中的河岸，产品演示封面" fill sizes="(max-width: 768px) 100vw, 1100px" />
+                        <span className={styles.demoShade} />
+                        <span className={styles.playButton} aria-hidden="true">▶</span>
+                        <span className={styles.demoCaption}>从一份合同开始 · 2:43</span>
+                    </Link>
+                </section>
+
+                <section className={styles.section} id="community">
+                    <h2 className={styles.displayTitle}>开源，写在每一行。</h2>
+                    <dl className={styles.metrics}>
+                        <div><dt>开源许可证</dt><dd>AGPL-3.0</dd></div>
+                        <div><dt>可自托管</dt><dd>100%</dd></div>
+                        <div><dt>核心工作流</dt><dd>04</dd></div>
+                        <div><dt>交付格式</dt><dd>Word / WPS</dd></div>
+                    </dl>
+                </section>
+
+                <section className={styles.section} id="features">
+                    <div className={styles.sectionHead}>
+                        <h2>能力</h2>
+                        <Link className={styles.allLink} href="/linkmai/product">查看全部 ↗</Link>
+                    </div>
+                    <div className={styles.featureGrid}>
+                        {features.map((feature) => (
+                            <article className={styles.featureCard} key={feature.title}>
+                                <FeatureShot kind={feature.shot} />
+                                <div className={styles.featureCopy}>
+                                    <p className={styles.kicker}>{feature.kicker}</p>
+                                    <h3>{feature.title}</h3>
+                                    <p>{feature.body}</p>
+                                </div>
                             </article>
-                            <aside className={styles.assistantPanel} aria-hidden="true">
-                                <p className={styles.panelLabel}>灵迈 / 审阅</p>
-                                <p>第 3.2 条缺少“经董事会决议”的前置程序，且未约定回购上限。建议补充，避免触发条件被单方解释。</p>
-                                <div className={styles.citation}>《公司法》第 74 条 <span>↗</span></div>
-                                <div className={styles.panelMeta}><span>高优先级</span><span>12 处建议</span></div>
-                            </aside>
-                        </div>
-                        <div className={styles.workspaceFoot}>
-                            <span>材料 4</span><span>审查 12</span><span>引用 7</span><span className={styles.footRight}>灵迈 · 本地部署</span>
-                        </div>
+                        ))}
                     </div>
                 </section>
 
-                <div className={styles.ticker} aria-label="产品特性">
-                    <span>开源可审计</span><span>文件自持</span><span>模型自选</span><span>逐条引用</span><span>Word / WPS</span><span>阿里云 / 自托管</span>
-                </div>
-
-                <section className={styles.manifesto} id="why">
-                    <SectionTag index="01">WHY LINKMAI</SectionTag>
-                    <div className={styles.manifestoGrid}>
-                        <h2>不是另一个<br /><em>更聪明的聊天框。</em></h2>
-                        <div className={styles.manifestoBody}>
-                            <p className={styles.manifestoLead}>法律工作需要的是可检查的过程：读了哪些材料、依据哪一条、改了哪一句。</p>
-                            <div className={styles.principles}>
-                                <article>
-                                    <span>01</span>
-                                    <div><h3>代码与提示词公开</h3><p>每一行代码、每一条审查指令都在仓库里。团队可以审计、修改、再分发，而不是等待供应商更新。</p></div>
-                                </article>
-                                <article>
-                                    <span>02</span>
-                                    <div><h3>文件与模型留在自己手里</h3><p>文档进入自己的对象存储，推理走自己选择的模型。敏感案卷不必经过第三方的黑箱。</p></div>
-                                </article>
-                                <article>
-                                    <span>03</span>
-                                    <div><h3>从审阅到交付，不换工具</h3><p>材料、对话、修改和导出都在同一个项目里。结论能回到原文，修订能回到 Word 与 WPS。</p></div>
-                                </article>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section className={styles.ideSection} id="product">
-                    <div className={styles.ideHeading}>
-                        <SectionTag index="02">THE WORKSPACE</SectionTag>
-                        <h2>一份案卷，<br /><em>三种视角。</em></h2>
-                        <p>左边是文件，中间是原文，右边是助手。不是把文档拖进聊天框，而是让对话发生在文档旁边。</p>
-                    </div>
-                    <div className={styles.ideFrame} aria-label="文件、原文与助手的并排界面示意">
-                        <div className={styles.ideBar}>
-                            <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
-                            <span className={styles.ideTitle}>linkmai / matters / 024</span>
-                            <span className={styles.ideBadge}>审阅中</span>
-                        </div>
-                        <div className={styles.ideGrid}>
-                            <aside className={styles.ideTree}>
-                                <p>MATTER 024</p>
-                                <span className={styles.ideActive}>股权回购协议.docx</span>
-                                <span>董事会决议.pdf</span>
-                                <span>投资人清单.xlsx</span>
-                                <span>尽调备忘录.md</span>
-                                <span>风险清单.md</span>
-                                <p>工作流</p>
-                                <span>条款比对</span>
-                                <span>先例检索</span>
-                            </aside>
-                            <article className={styles.ideDoc}>
-                                <div className={styles.docToolbar}><span>股权回购协议.docx</span><span>修订模式</span></div>
-                                <p className={styles.docKicker}>第 3 条 / 回购安排</p>
-                                <h3>股权回购协议</h3>
-                                <p>3.1 投资方持有公司 12.5% 的股权，对应注册资本人民币 125 万元。</p>
-                                <p className={styles.highlight}>3.2 若公司未能在 2027 年 6 月 30 日前完成合格上市，投资方有权要求创始股东按年化 8% 的收益率回购其持有的全部股权。</p>
-                                <p>3.3 回购价款应在投资方发出书面通知后三十日内支付完毕。</p>
-                                <p className={styles.inserted}>建议补充：回购义务以公司董事会决议为前提，且累计回购金额不超过本轮投资总额的 150%。</p>
-                                <p>3.4 因回购产生的税费由各方依法各自承担。</p>
+                <section className={styles.section} id="open-source">
+                    <h2 className={styles.centerTitle}>为什么开源？</h2>
+                    <div className={styles.principleGrid}>
+                        {principles.map((item) => (
+                            <article className={styles.principleCard} key={item.title}>
+                                <div className={styles.principleMedia}>
+                                    <Image src={item.image} alt={item.alt} fill sizes="(max-width: 768px) 100vw, 50vw" />
+                                </div>
+                                <div className={styles.principleCopy}>
+                                    <h3>{item.title}</h3>
+                                    <p>{item.body}</p>
+                                </div>
                             </article>
-                            <aside className={styles.ideChat}>
-                                <p className={styles.panelLabel}>灵迈 / 审阅</p>
-                                <div className={styles.chatBubble}>第 3.2 条缺少董事会决议前置程序，回购上限也未约定。已给出补充条款，是否接受？</div>
-                                <div className={styles.chatActions}><span>接受修订</span><span>查看依据</span></div>
-                                <div className={styles.citation}>《公司法》第 74 条 <span>↗</span></div>
-                                <div className={styles.citation}>《九民纪要》第 5 条 <span>↗</span></div>
-                                <p className={styles.ideHint}>所有结论都可回到原文核对。</p>
-                            </aside>
-                        </div>
+                        ))}
                     </div>
                 </section>
 
-                <section className={styles.capabilities}>
-                    <SectionTag index="03">WHAT IT DOES</SectionTag>
-                    <div className={styles.capabilityHead}>
-                        <h2>把重复劳动，<br /><em>交给可回看的<br />流程。</em></h2>
-                        <p>不是替律师做决定，而是把阅读、比对、引用和改写组织成一条能回看的路径。</p>
+                <section className={styles.section} id="blog">
+                    <div className={styles.sectionHead}>
+                        <h2>文章</h2>
+                        <Link className={styles.allLink} href="/linkmai/about">全部文章 ↗</Link>
                     </div>
-                    <div className={styles.bento}>
-                        <article className={styles.bentoWide}>
-                            <div>
-                                <span className={styles.bentoIndex}>A / REVIEW</span>
-                                <h3>逐条审阅，<br />把风险放到桌面上。</h3>
-                                <p>按团队标准逐条检查，标出偏离、缺失与冲突；每条建议都带着原文位置和依据。</p>
-                            </div>
-                            <div className={styles.clauseStack} aria-hidden="true">
-                                <span>3.2 回购触发条件 <b>高</b></span>
-                                <span>8.4 优先购买权 <b>中</b></span>
-                                <span>12.1 争议解决 <b>低</b></span>
-                            </div>
-                        </article>
-                        <article>
-                            <span className={styles.bentoIndex}>B / CITE</span>
-                            <h3>每一句，<br />都能回到出处。</h3>
-                            <p>引用不是装饰。点开就能看到法条、案例或原文档段落。</p>
-                        </article>
-                        <article>
-                            <span className={styles.bentoIndex}>C / DRAFT</span>
-                            <h3>起草与修订，<br />停在同一个文件里。</h3>
-                            <p>从空白页开始，或在现有合同上直接改；修订记录留在项目里。</p>
-                        </article>
-                        <article className={styles.bentoWideDark}>
-                            <div>
-                                <span className={styles.bentoIndex}>D / WORKFLOW</span>
-                                <h3>多步工作流，<br />把判断串起来。</h3>
-                                <p>读材料、查先例、比对版本、生成交付件。每一步都能暂停、检查、重跑。</p>
-                            </div>
-                            <div className={styles.workflowLine} aria-hidden="true">
-                                <span>读取</span><i /><span>检索</span><i /><span>比对</span><i /><span>交付</span>
-                            </div>
-                        </article>
+                    <div className={styles.blogRail}>
+                        {posts.map((post) => (
+                            <Link className={styles.blogCard} href="/linkmai/about" key={post.title}>
+                                <h3>{post.title}</h3>
+                                <div><span>{post.date}</span><span>{post.kind}</span></div>
+                            </Link>
+                        ))}
                     </div>
                 </section>
 
-                <section className={styles.openSource} id="open-source">
-                    <div className={styles.openSourceCopy}>
-                        <SectionTag index="04">OPEN BY DEFAULT</SectionTag>
-                        <h2>把黑箱，<br /><em>变成可以检查的<br />文本。</em></h2>
-                        <p>灵迈以 AGPL-3.0 开源。审查规则、提示词、部署脚本都可以被阅读和替换；没有“仅供演示”的隐藏分支。</p>
-                        <div className={styles.auditList}>
-                            <span>源代码与提示词公开</span>
-                            <span>自托管不依赖厂商</span>
-                            <span>数据与模型可替换</span>
-                        </div>
-                        <a className={styles.textLink} href="https://github.com/zzx680/Linkmai" rel="noreferrer" target="_blank">查看源代码 <span aria-hidden="true">↗</span></a>
-                    </div>
-                    <div className={styles.terminal} aria-label="自托管命令示例">
-                        <div className={styles.terminalTop}><span>linkmai / deploy</span><span>zsh</span></div>
-                        <pre><code>{`git clone https://github.com/zzx680/Linkmai
-cd Linkmai
-cp deploy/env.prod.example deploy/.env.prod
-./deploy/scripts/generate-secrets.mjs
-./deploy/scripts/compose.sh up -d`}</code></pre>
-                        <div className={styles.terminalFoot}><span>AGPL-3.0</span><span>Docker Compose</span><span>PostgreSQL</span></div>
-                    </div>
-                </section>
-
-                <section className={styles.deploy} id="deploy">
-                    <SectionTag index="05">DEPLOY YOUR WAY</SectionTag>
-                    <div className={styles.deployHead}>
-                        <h2>云端很快，<br /><em>自托管更稳。</em></h2>
-                        <p>同一套代码，两种运行方式。可以由我们托管，也可以放进自己的阿里云、私有云或本机。</p>
-                    </div>
-                    <div className={styles.deployColumns}>
-                        <article>
-                            <div className={styles.deployTop}><span>托管版</span><span>开箱即用</span></div>
-                            <h3>把运维交给平台，<br />团队直接开始。</h3>
-                            <ul>
-                                <li>注册即用，无需维护服务器</li>
-                                <li>自动更新与备份</li>
-                                <li>适合小团队快速验证</li>
-                            </ul>
-                            <Link className={styles.deployCta} href="/signup">开始使用 <span aria-hidden="true">↗</span></Link>
-                        </article>
-                        <article className={styles.deployDark}>
-                            <div className={styles.deployTop}><span>自托管</span><span>数据自持</span></div>
-                            <h3>把系统放进<br />自己的边界里。</h3>
-                            <ul>
-                                <li>阿里云 ECS + 本机 PostgreSQL + OSS</li>
-                                <li>支持 DeepSeek 与 OpenAI 兼容模型</li>
-                                <li>Docker Compose 一键部署，可审计</li>
-                            </ul>
-                            <Link className={styles.deployCta} href="/linkmai/deploy">阅读部署文档 <span aria-hidden="true">↗</span></Link>
-                        </article>
-                    </div>
-                </section>
-
-                <section className={styles.quote}>
-                    <p className={styles.quoteMark} aria-hidden="true">“</p>
-                    <blockquote>法律 AI 的价值，不在于替你说话，而在于让每一句话都有出处。</blockquote>
-                    <p className={styles.quoteBy}>灵迈产品原则 · 01</p>
-                </section>
-
-                <section className={styles.cta}>
-                    <div>
-                        <p className={styles.kicker}>START WITH ONE MATTER</p>
-                        <h2>把下一份合同，<br /><em>放进灵迈。</em></h2>
-                    </div>
+                <section className={styles.cta} id="get-started">
+                    <h2>从云端开始。<br />或部署属于你的版本。</h2>
                     <div className={styles.ctaActions}>
-                        <Link className={styles.primary} href="/signup">进入工作台 <span aria-hidden="true">↗</span></Link>
-                        <Link className={styles.secondary} href="/linkmai/contact">和团队聊聊</Link>
+                        <Link className={styles.primary} href="/signup">开始使用</Link>
+                        <Link className={styles.secondary} href="/linkmai/deploy">部署文档</Link>
                     </div>
                 </section>
             </main>
 
             <footer className={styles.footer}>
-                <div className={styles.footerBrand}><Brand /><p>开源法律 AI 工作台<br />为中国的法律工作而做。</p></div>
-                <div className={styles.footerCol}><p>产品</p><Link href="/linkmai/product">功能</Link><Link href="/linkmai/workflows">工作流</Link><Link href="/linkmai/deploy">部署</Link></div>
-                <div className={styles.footerCol}><p>项目</p><Link href="/linkmai/about">关于</Link><Link href="/linkmai/blog">动态</Link><a href="https://github.com/zzx680/Linkmai" rel="noreferrer" target="_blank">GitHub</a></div>
-                <div className={styles.footerCol}><p>联系</p><Link href="/linkmai/contact">联系我们</Link><a href="mailto:support@linkmai.com">support@linkmai.com</a></div>
-                <div className={styles.footerBottom}><span>© 2026 灵迈 LinkMai</span><span>AGPL-3.0 · 可自托管</span><Link href="#top">回到顶部 ↑</Link></div>
+                <div className={styles.footerMedia}>
+                    <Image src="/mike/monet-houses-of-parliament-fog.jpg" alt="莫奈《雾中的国会大厦》" fill sizes="100vw" />
+                    <span className={styles.footerShade} />
+                </div>
+                <div className={styles.footerInner}>
+                    <div className={styles.footerBrand}>
+                        <Brand />
+                        <p>开源法律 AI 工作台。<br />为把判断留在自己手里的团队。</p>
+                        <p className={styles.copyright}>© 2026 灵迈 LinkMai<br />AGPL-3.0</p>
+                    </div>
+                    <div className={styles.footerLinks}>
+                        <div><h3>产品</h3><Link href="/linkmai/product">能力</Link><Link href="/linkmai/workflows">工作流</Link><Link href="/linkmai/deploy">部署</Link></div>
+                        <div><h3>资源</h3><Link href="/linkmai/about">关于</Link><Link href="https://github.com/zzx680/Linkmai">GitHub</Link><a href="mailto:support@linkmai.com">support@linkmai.com</a></div>
+                        <div><h3>法务</h3><Link href="/linkmai/privacy">隐私</Link><Link href="/linkmai/terms">条款</Link></div>
+                    </div>
+                </div>
             </footer>
         </div>
     );
