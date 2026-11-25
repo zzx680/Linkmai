@@ -4,12 +4,6 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import styles from "./site.module.css";
 
-const homePanels = [
-    { label: "产品介绍", title: "一个项目，装下完整工作", copy: "围绕项目整理材料、对话、审查发现与交付文档，结果能回到原文核对。" },
-    { label: "服务方式", title: "云端或自托管，自选模型", copy: "团队可以维护自己的审查标准、模板与流程，并选择适合的部署方式。" },
-    { label: "使用指南", title: "从上传到交付，全程可回查", copy: "材料、修改与导出记录留在项目里，重要结论可以回到来源确认。" },
-];
-
 const featureGroups = [
     { label: "全部", title: "网站内容", description: "LinkMai 的产品与服务介绍将在此发布。" },
     { label: "产品", title: "产品介绍", description: "产品功能与使用方式待确认后更新。" },
@@ -43,108 +37,6 @@ function Placeholder({ title, text }: { title: string; text: string }) {
             <h2>{title}</h2>
             <p>{text}</p>
         </div>
-    );
-}
-
-export function HomePage() {
-    const [panel, setPanel] = useState(0);
-    return (
-        <main>
-            <section aria-labelledby="hero-title" className={styles.hero} id="top">
-                <div aria-label="莫奈《罂粟花田》（1873）" className={styles.heroArtwork} role="img" />
-                <div className={styles.heroContent}>
-                    <p className={styles.eyebrow}>灵迈 LinkMai</p>
-                    <h1 id="hero-title">让清晰的方向，<br />从这里开始。</h1>
-                    <p className={styles.heroNote}>开源法律 AI 工作台，面向中国律师、律所与企业法务</p>
-                    <div className={styles.heroActions}>
-                        <Link className={styles.primaryButton} href="/login">登录 / 进入工作台</Link>
-                        <Link className={styles.textButton} href="#product">了解产品 <span aria-hidden="true">↗</span></Link>
-                    </div>
-                </div>
-                <span aria-hidden="true" className={styles.heroIndex}>LINKMAI&nbsp; / &nbsp;01</span>
-            </section>
-
-            <section aria-label="官网栏目" className={styles.ribbon}>
-                <span>灵迈 LinkMai</span><i />
-                <span>产品介绍</span><i />
-                <span>服务与支持</span><i />
-                <span>内容动态</span><i />
-                <span>开源 · 可自托管 · 可扩展</span>
-            </section>
-
-            <section className={styles.intro} id="product">
-                <SectionLabel>01 / 灵迈官网</SectionLabel>
-                <div className={styles.introGrid}>
-                    <h2>为灵迈，<br />留一处清晰的窗口。</h2>
-                    <div className={styles.introCopy}>
-                        <p className={styles.introLead}>把材料阅读、合同审阅与文书起草，放进同一个项目。</p>
-                        <p>围绕项目整理材料，按团队标准审阅和起草文档，核对结论依据，并将修改交付到 Word。支持自托管、自选模型与专业技能扩展。</p>
-                        <Link href="/linkmai/about">了解网站栏目 <span aria-hidden="true">↗</span></Link>
-                    </div>
-                </div>
-                <div aria-hidden="true" className={styles.orbitGraphic}>
-                    <span className={styles.orbitOuter} /><span className={styles.orbitInner} />
-                    <span className={styles.orbitDot} /><span className={styles.orbitCenter}>L</span>
-                    <span className={styles.orbitCaption}>灵迈 · 开源法律 AI 工作台</span>
-                </div>
-            </section>
-
-            <section aria-labelledby="preview-title" className={styles.showcase}>
-                <div className={styles.showcaseHeading}>
-                    <SectionLabel>02 / 内容预览</SectionLabel>
-                    <h2 id="preview-title">从材料到交付，<br />保持一条清晰的线。</h2>
-                </div>
-                <div className={styles.showcasePanel}>
-                    <div className={styles.showcaseTabs} role="tablist" aria-label="内容预览栏目">
-                        {homePanels.map((item, index) => (
-                            <button
-                                aria-selected={panel === index}
-                                className={panel === index ? styles.showcaseTabSelected : styles.showcaseTab}
-                                id={`home-tab-${index}`}
-                                key={item.label}
-                                onClick={() => setPanel(index)}
-                                role="tab"
-                                type="button"
-                            >{item.label}</button>
-                        ))}
-                    </div>
-                    <div aria-labelledby={`home-tab-${panel}`} className={styles.showcaseBody} role="tabpanel">
-                        <span className={styles.showcaseIndex}>0{panel + 1}</span>
-                        <div><p className={styles.showcaseEyebrow}>LINKMAI / {homePanels[panel].label}</p><h3>{homePanels[panel].title}</h3><p>{homePanels[panel].copy}</p></div>
-                        <Link href={panel === 0 ? "/linkmai/product" : panel === 1 ? "/linkmai/workflows" : "/linkmai/faq"}>
-                            查看栏目 <span aria-hidden="true">↗</span>
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            <section className={styles.preview}>
-                <div className={styles.previewHeading}>
-                    <SectionLabel>03 / 网站栏目</SectionLabel>
-                    <h2>从这里了解灵迈</h2>
-                </div>
-                <div className={styles.previewCards}>
-                    {[
-                        ["01", "产品介绍", "了解灵迈如何组织法律工作。", "/linkmai/product"],
-                        ["02", "服务与支持", "部署方式、支持范围与常见问题。", "/linkmai/workflows"],
-                        ["03", "内容动态", "产品更新与开源进展。", "/linkmai/blog"],
-                    ].map(([number, title, text, href]) => (
-                        <Link className={styles.previewCard} href={href} key={number}>
-                            <span className={styles.cardNumber}>{number}</span><span className={styles.cardTitle}>{title}</span>
-                            <span className={styles.cardDescription}>{text}</span><span aria-hidden="true" className={styles.cardArrow}>↗</span>
-                        </Link>
-                    ))}
-                </div>
-            </section>
-
-            <section className={styles.closing}>
-                <SectionLabel>04 / 保持联系</SectionLabel>
-                <h2>灵迈，<br />稍后见。</h2>
-                <p>更多内容正在准备中。</p>
-                <Link className={styles.closingLink} href="/linkmai/contact">前往联系页面 <span aria-hidden="true">↗</span></Link>
-                <span aria-hidden="true" className={styles.closingStamp}>L<br />灵迈</span>
-            </section>
-        </main>
     );
 }
 
@@ -326,5 +218,5 @@ function ArticlePage({ slug }: { slug: string }) {
 }
 
 function NotFoundPage() {
-    return <main className={styles.interior}><Placeholder title="没有找到这个页面" text="请从网站栏目继续浏览。" /><div className={styles.interiorCta}><Link className={styles.primaryButton} href="/linkmai">返回首页</Link></div></main>;
+    return <main className={styles.interior}><Placeholder title="没有找到这个页面" text="请从网站栏目继续浏览。" /><div className={styles.interiorCta}><Link className={styles.primaryButton} href="/">返回首页</Link></div></main>;
 }

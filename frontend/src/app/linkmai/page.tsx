@@ -1,5 +1,5 @@
-import { HomePage } from "./site-pages";
+import { redirect } from "next/navigation";
 
 export default function LinkMaiHomePage() {
-    return <HomePage />;
+    redirect("/");
 }

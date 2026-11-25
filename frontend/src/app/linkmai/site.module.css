@@ -56,8 +56,6 @@
 .resourcesMenu a span { color: #8a9793; }
 
 .hero { position: relative; isolation: isolate; display: flex; min-height: min(760px, calc(100svh - 24px)); align-items: center; margin: 12px 12px 0; overflow: hidden; border-radius: 30px; background: #9bb5a8; }
-.heroArtwork { position: absolute; z-index: -1; inset: 0; background: url("/linkmai-impressionist-hero-v2.webp") center 48% / cover no-repeat; transform: scale(1.015); }
-.heroArtwork::after { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(236, 242, 232, .64) 0%, rgba(235, 242, 234, .33) 48%, rgba(28, 58, 62, .03) 100%), linear-gradient(0deg, rgba(29, 60, 62, .12), transparent 28%); content: ""; }
 .heroContent { width: min(100%, 1160px); margin: 36px auto 0; padding: 38px 4.5vw 76px; }
 .eyebrow, .heroNote, .sectionLabel, .heroIndex, .cardNumber, .showcaseEyebrow { font-size: 10px; letter-spacing: .13em; text-transform: uppercase; }
 .eyebrow { margin: 0 0 19px; font-weight: 600; }
@@ -229,8 +227,6 @@
     .headerContact { min-height: 34px; padding: 0 13px; font-size: 11px; }
     .resourcesMenu { top: 55px; right: 10px; }
     .hero { min-height: min(730px, calc(100svh - 14px)); margin: 7px 7px 0; border-radius: 22px; }
-    .heroArtwork { background-position: 48% center; }
-    .heroArtwork::after { background: linear-gradient(90deg, rgba(236, 242, 232, .66), rgba(235, 242, 234, .26) 82%), linear-gradient(0deg, rgba(29, 60, 62, .2), transparent 38%); }
     .heroContent { margin-top: 35px; padding: 35px 23px 72px; }
     .heroContent h1 { font-size: clamp(49px, 13vw, 76px); }
     .heroActions { flex-wrap: wrap; gap: 16px; }
