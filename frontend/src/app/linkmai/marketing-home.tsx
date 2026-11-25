@@ -215,7 +215,7 @@ export function MarketingHome() {
             <main>
                 <section className={styles.hero} id="top">
                     <div className={styles.heroMedia}>
-                        <Image src="/mike/hero-bridge.webp" alt="莫奈《阿让特伊的铁路桥》" fill priority sizes="100vw" />
+                        <Image src="/mike/hero-waterloo.webp" alt="莫奈《滑铁卢桥，灰调天气》" fill priority sizes="100vw" />
                     </div>
                     <div className={styles.heroVeil} aria-hidden="true" />
                     <div className={styles.heroInner}>

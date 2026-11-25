@@ -2,8 +2,8 @@
 
 The homepage uses public-domain paintings as decorative artwork.
 
-- Hero: Claude Monet, *Le Pont d'Argenteuil* (The Railway Bridge at Argenteuil), 1874, Musée d'Orsay.
-  Source: https://commons.wikimedia.org/wiki/File:Le_Pont_d%27Argenteuil_-_Claude_Monet.jpg
+- Hero: Claude Monet, *Waterloo Bridge, Gray Weather*, 1900, Art Institute of Chicago.
+  Source: https://commons.wikimedia.org/wiki/File:Monet_-_Waterloo_Bridge,_Gray_Weather,_1900.jpg
   This is a faithful photographic reproduction of a two-dimensional public-domain work.
 - Other paintings are public-domain impressionist works used as decorative backgrounds.
 
