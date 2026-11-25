@@ -1,13 +1,14 @@
-# LinkMai production stack: Alibaba Cloud ECS + RDS PostgreSQL + OSS.
+# LinkMai production stack: Alibaba Cloud ECS + local PostgreSQL + OSS.
 #
 # Run it through deploy/scripts/compose.sh, which passes --env-file .env.prod.
 # `docker compose -f deploy/docker-compose.prod.yml` alone will not see
 # .env.prod and every required variable below will fail interpolation.
 #
 # This file replaces the local Supabase stack in docker-compose.yml:
-#   - no local db / storage / mailpit / createbucket (RDS and OSS are managed)
+#   - PostgreSQL runs in this compose file on a named volume (no RDS needed)
+#   - no local storage / mailpit / createbucket (OSS and SMTP are managed)
 #   - the schema bootstrap still runs from the backend image (db-init)
-#   - auth, PostgREST and the Supabase gateway stay local to the VPC
+#   - auth, PostgREST and the Supabase gateway stay on the private network
 #   - the edge nginx terminates TLS for app and word, and proxies /api
 #   - storage is Alibaba Cloud OSS through the native adapter
 #
@@ -78,6 +79,29 @@ x-backend-env: &backend-env
   SENTRY_DISABLED: "${SENTRY_DISABLED:-true}"
 
 services:
+  # PostgreSQL with the standard Supabase roles. The image creates anon,
+  # authenticated, service_role (BYPASSRLS), supabase_auth_admin and
+  # authenticator; ./db/init-roles.sh sets the two login passwords.
+  db:
+    image: supabase/postgres:17.6.1.136
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?run deploy/scripts/generate-secrets.mjs}"
+      POSTGRES_DB: postgres
+      JWT_SECRET: "${GOTRUE_JWT_SECRET:?run deploy/scripts/generate-secrets.mjs}"
+      JWT_EXP: "3600"
+      SUPABASE_AUTH_ADMIN_PASSWORD: "${SUPABASE_AUTH_ADMIN_PASSWORD:?run deploy/scripts/generate-secrets.mjs}"
+      AUTHENTICATOR_PASSWORD: "${AUTHENTICATOR_PASSWORD:?run deploy/scripts/generate-secrets.mjs}"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init-roles.sh:/docker-entrypoint-initdb.d/zz-linkmai-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    logging: *default-logging
+
   # GoTrue owns auth.users and runs its own migrations on first start.
   auth:
     image: supabase/gotrue:v2.189.0
@@ -86,7 +110,7 @@ services:
       GOTRUE_API_PORT: "9999"
       API_EXTERNAL_URL: "${FRONTEND_URL:?}"
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: "postgres://supabase_auth_admin:${SUPABASE_AUTH_ADMIN_PASSWORD:?}@${RDS_HOST:?}:${RDS_PORT:-5432}/${RDS_DB:-linkmai}?sslmode=require"
+      GOTRUE_DB_DATABASE_URL: "postgres://supabase_auth_admin:${SUPABASE_AUTH_ADMIN_PASSWORD:?}@db:5432/postgres?sslmode=disable"
       GOTRUE_SITE_URL: "${FRONTEND_URL:?}"
       GOTRUE_URI_ALLOW_LIST: "${FRONTEND_URL:?}/**,${WORD_ADDIN_URL:?}/oauth-dialog.html"
       GOTRUE_JWT_SECRET: "${GOTRUE_JWT_SECRET:?run deploy/scripts/generate-secrets.mjs}"
@@ -94,9 +118,8 @@ services:
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
       # The service JWT below carries this role; GoTrue trusts it for admin
-      # API calls, and the role owns the public tables, so RLS is bypassed
-      # by ownership (RDS does not let us grant BYPASSRLS).
-      GOTRUE_JWT_ADMIN_ROLES: supabase_auth_admin
+      # API calls. service_role has BYPASSRLS in the Supabase image.
+      GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_PASSWORD_MIN_LENGTH: "10"
       GOTRUE_DISABLE_SIGNUP: "${GOTRUE_DISABLE_SIGNUP:-false}"
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
@@ -117,6 +140,9 @@ services:
       GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
       GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
       GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
 
@@ -124,11 +150,14 @@ services:
   rest:
     image: postgrest/postgrest:v14.12
     environment:
-      PGRST_DB_URI: "postgres://authenticator:${AUTHENTICATOR_PASSWORD:?}@${RDS_HOST:?}:${RDS_PORT:-5432}/${RDS_DB:-linkmai}?sslmode=require"
+      PGRST_DB_URI: "postgres://authenticator:${AUTHENTICATOR_PASSWORD:?}@db:5432/postgres?sslmode=disable"
       PGRST_DB_SCHEMAS: public
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: "${GOTRUE_JWT_SECRET:?}"
       PGRST_DB_MAX_ROWS: "2000"
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
 
@@ -143,18 +172,20 @@ services:
     restart: unless-stopped
     logging: *default-logging
 
-  # One-shot: load schema.sql into a fresh RDS database, then run migrations.
-  # Runs as supabase_auth_admin so it owns public tables and can create the
-  # triggers on auth.users (see deploy/rds/bootstrap.sql).
+  # One-shot: load schema.sql into the fresh local database, then run migrations.
+  # Runs as the postgres superuser so it can create the triggers on auth.users;
+  # the backend's service key uses service_role, which has BYPASSRLS.
   db-init:
     build: *backend-build
     image: "${LINKMAI_IMAGE_REPO:-linkmai}/linkmai-backend:${LINKMAI_IMAGE_TAG:-prod}"
     depends_on:
+      db:
+        condition: service_healthy
       auth:
         condition: service_started
     environment:
-      DB: "postgres://supabase_auth_admin:${SUPABASE_AUTH_ADMIN_PASSWORD:?}@${RDS_HOST:?}:${RDS_PORT:-5432}/${RDS_DB:-linkmai}?sslmode=require"
-      DATABASE_URL: "postgres://supabase_auth_admin:${SUPABASE_AUTH_ADMIN_PASSWORD:?}@${RDS_HOST:?}:${RDS_PORT:-5432}/${RDS_DB:-linkmai}?sslmode=require"
+      DB: "postgres://postgres:${POSTGRES_PASSWORD:?}@db:5432/postgres?sslmode=disable"
+      DATABASE_URL: "postgres://postgres:${POSTGRES_PASSWORD:?}@db:5432/postgres?sslmode=disable"
       MIGRATIONS_DIR: /app/migrations
       MIGRATE_SH: /app/scripts/migrate.sh
     entrypoint: ["bash", "-c"]
@@ -338,4 +369,5 @@ services:
     logging: *default-logging
 
 volumes:
+  db_data:
   redis_data:

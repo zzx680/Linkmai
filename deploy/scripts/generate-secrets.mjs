@@ -43,11 +43,11 @@ function signJwt(payload) {
 }
 
 // PostgREST and the backend read the JWT's role claim. The service key uses
-// supabase_auth_admin so it owns the public tables and bypasses RLS; see
-// deploy/rds/bootstrap.sql for why RDS cannot grant BYPASSRLS instead.
+// service_role, which has BYPASSRLS in the Supabase Postgres image. The
+// container's postgres superuser runs schema.sql/migrations.
 const anonKey = signJwt({ role: "anon", iss: "supabase", iat: now, exp: expires });
 const serviceKey = signJwt({
-  role: "supabase_auth_admin",
+  role: "service_role",
   iss: "supabase",
   iat: now,
   exp: expires,
@@ -57,6 +57,7 @@ const replacements = {
   __JWT_SECRET__: jwtSecret,
   __ANON_KEY__: anonKey,
   __SERVICE_KEY__: serviceKey,
+  __POSTGRES_PASSWORD__: password(),
   __AUTH_ADMIN_PASSWORD__: password(),
   __AUTHENTICATOR_PASSWORD__: password(),
   __REDIS_PASSWORD__: password(),
@@ -79,4 +80,4 @@ if (remaining) {
 writeFileSync(envPath, env, { mode: 0o600 });
 chmodSync(envPath, 0o600);
 console.log(`Wrote ${envPath} (mode 600).`);
-console.log("Next: fill in RDS_HOST, OSS_*, SMTP_*, DEEPSEEK_API_KEY; create deploy/.env.rds for the RDS master credentials, then run deploy/scripts/bootstrap-rds.sh.");
+console.log("Next: fill in OSS_*, SMTP_*, DEEPSEEK_API_KEY, then run deploy/scripts/compose.sh config -q.");

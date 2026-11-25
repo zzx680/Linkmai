@@ -1,6 +1,6 @@
 # 灵迈 LinkMai 阿里云部署（复用现有 ECS）
 
-这套配置把 LinkMai 部署到**现有阿里云 ECS + RDS PostgreSQL + OSS**，让这台服务器只服务
+这套配置把 LinkMai 部署到**现有阿里云 ECS + 本机 Docker PostgreSQL + OSS**，让这台服务器只服务
 LinkMai 官网/工作台。小程序先「暂停服务」，旧 API 和旧站点停掉后，新栈直接接管
 `80/443`，不需要再买一台 ECS。
 
@@ -20,8 +20,8 @@ LinkMai 官网/工作台。小程序先「暂停服务」，旧 API 和旧站点
                                   │      └──▶ OSS (storage.linkmai.com)
                                   ▼
                            gateway:8000
-                           ├─ /auth/v1 → auth:9999  ──▶ RDS
-                           └─ /rest/v1 → rest:3000  ──▶ RDS
+                           ├─ /auth/v1 → auth:9999  ──▶ db:5432
+                           └─ /rest/v1 → rest:3000  ──▶ db:5432
 ```
 
 > 重要：这台服务器上原来跑着小程序 API 和旧官网。切换前必须先备份，再停旧服务。
@@ -166,20 +166,20 @@ sudo find /etc/nginx /etc/letsencrypt -maxdepth 4 -type f \
 如果旧证书是 `fullchain.pem` + `privkey.pem`，复制并改名即可。证书私钥权限设 `600`，
 只让 Docker 读取。详见 [certs/README.md](certs/README.md)。
 
-## 5. 准备 RDS、OSS、SMTP、模型
+## 5. 准备数据库、OSS、SMTP、模型
 
-### RDS
+### 数据库（默认本机 Docker）
 
-1. PostgreSQL 17，和 ECS 同 VPC，使用**内网地址**。
-2. 创建数据库 `linkmai`。
-3. 白名单只加 ECS 的**私网 IP**。
-4. 控制台开启 SSL，连接串使用 `sslmode=require`。
-5. RDS master 账号只写进 `deploy/.env.rds`，不要写进 `.env.prod`。
+不需要买 RDS。`docker-compose.prod.yml` 内置 `supabase/postgres:17.6.1.136`，
+数据放在命名卷 `db_data`，只走 Docker 内网，`5432` 不对公网开放。
 
-RDS master 不是超级用户，不能授 `BYPASSRLS`。所以 LinkMai 让 `supabase_auth_admin`
-拥有 public 表，并让 service JWT 使用这个角色；表 owner 天然绕过 RLS。
-`deploy/rds/bootstrap.sql` 会创建并授权这些角色，`db-init` 以 `supabase_auth_admin`
-执行 schema 与迁移。
+- `db-init` 以 `postgres` 超级用户执行 `schema.sql` 和迁移；
+- service key 的 JWT role 用 `service_role`，该角色在 Supabase 镜像里自带 `BYPASSRLS`；
+- `auth` 用 `supabase_auth_admin`，`rest` 用 `authenticator`，密码由
+  `deploy/db/init-roles.sh` 在首次初始化时设置。
+
+RDS 仍可选，但当前 compose 默认不接外部数据库；要换 RDS 时再改 compose 与
+`rds/bootstrap.sql`。对这台 2C4G 机器，本地库更省事，后面可用 `pg_dump` 迁移。
 
 ### OSS
 
@@ -245,7 +245,7 @@ node deploy/scripts/generate-secrets.mjs
 然后填写 `deploy/.env.prod` 里的 `CHANGE_ME`：
 
 ```dotenv
-RDS_HOST=pgm-xxxx.pg.rds.aliyuncs.com
+POSTGRES_PASSWORD=...        # generate-secrets 已自动生成
 OSS_BUCKET_NAME=linkmai-prod
 OSS_ACCESS_KEY_ID=...
 OSS_ACCESS_KEY_SECRET=...
@@ -253,14 +253,6 @@ SMTP_USER=...
 SMTP_PASSWORD=...
 SMTP_FROM=no-reply@linkmai.com
 DEEPSEEK_API_KEY=sk-...
-```
-
-RDS master 单独放：
-
-```bash
-cp deploy/.env.rds.example deploy/.env.rds
-chmod 600 deploy/.env.rds
-# 填 RDS_MASTER_USER / RDS_MASTER_PASSWORD
 ```
 
 密码含 `#`、空格、`$` 时用单引号包住。模板里的 `SMTP_SENDER_NAME` 和
@@ -282,10 +274,9 @@ chmod 600 deploy/.env.rds
 组织密钥、或不在它所属 router 的 Model Selections 里，都会被跳过并回退，不会写进
 数据库，也不会发给服务商。上线先设 `deepseek-v4-pro` / `deepseek-flash` 这组。
 
-## 7. 初始化 RDS 并启动
+## 7. 初始化数据库并启动
 
 ```bash
-./deploy/scripts/bootstrap-rds.sh
 ./deploy/scripts/compose.sh config
 ./deploy/scripts/compose.sh build
 ./deploy/scripts/compose.sh up -d
@@ -293,11 +284,12 @@ chmod 600 deploy/.env.rds
 
 首次启动顺序：
 
-1. `auth` 连接 RDS，创建 `auth.users` 等表；
-2. `db-init` 等 `auth.users` 出现，以 `supabase_auth_admin` 执行 `schema.sql` 和迁移；
-3. `backend` 在 `db-init` 成功后启动；
-4. `frontend`、`word` 等 backend 健康后启动；
-5. `edge` 最后启动，占用 80/443。
+1. `db` 启动并完成角色初始化；
+2. `auth` 连接本机 `db`，创建 `auth.users` 等表；
+3. `db-init` 等 `auth.users` 出现，以 `postgres` 执行 `schema.sql` 和迁移；
+4. `backend` 在 `db-init` 成功后启动；
+5. `frontend`、`word` 等 backend 健康后启动；
+6. `edge` 最后启动，占用 80/443。
 
 观察：
 
@@ -308,8 +300,8 @@ chmod 600 deploy/.env.rds
 ./deploy/scripts/compose.sh logs -f edge
 ```
 
-`db-init` 正常结束应为 `Exited (0)`。如果反复失败，先看 SQL 错误；常见原因是 RDS 角色
-没初始化、`auth.users` 没建、或 public schema 权限不足。
+`db-init` 正常结束应为 `Exited (0)`。如果反复失败，先看 SQL 错误；常见原因是
+`auth.users` 没建、数据库卷是旧的、或 public schema 权限不足。
 
 ## 8. 验证
 
@@ -367,16 +359,15 @@ git pull
 ./deploy/scripts/compose.sh up -d
 
 # 进入数据库
-( set -a; . deploy/.env.prod; . deploy/.env.rds; set +a
-  PGPASSWORD="$RDS_MASTER_PASSWORD" psql "host=$RDS_HOST dbname=$RDS_DB user=$RDS_MASTER_USER sslmode=require" )
+./deploy/scripts/compose.sh exec db psql -U postgres -d postgres
 ```
 
 备份：
 
-- RDS 自动备份 ≥ 7 天；升级前手动快照。
+- 数据库在 Docker 卷 `db_data`，升级前用 `pg_dump` 备份，必要时给 ECS 打快照。
 - OSS 开版本控制，按合规要求设生命周期。
-- Redis 是队列，不是权威数据；RDS 才是。
-- `deploy/.env.prod`、`deploy/.env.rds` 备份到密码管理器。丢失 JWT secret 会让所有会话失效；
+- Redis 是队列，不是权威数据；PostgreSQL 才是。
+- `deploy/.env.prod` 备份到密码管理器。丢失 JWT secret 会让所有会话失效；
   丢失 `USER_API_KEYS_ENCRYPTION_SECRET` 会导致用户自带 API Key 无法解密。
 
 证书续期后 `docker compose ... exec edge nginx -s reload`，不需要重启业务容器。
@@ -386,9 +377,9 @@ git pull
 | 现象 | 排查 |
 | --- | --- |
 | `edge` 启动报 `address already in use` | 旧 Nginx/旧容器还占着 80/443；`ss -lntp` 查进程，先停旧服务 |
-| `db-init` 报 `relation "auth.users" does not exist` | GoTrue 还没建表；看 `auth` 日志和 RDS 连接 |
-| `permission denied for schema public` | 没跑 `bootstrap-rds.sh`，或 `supabase_auth_admin` 没有 CREATE |
-| `must be owner of relation users` | schema 不是以 `supabase_auth_admin` 执行 |
+| `db-init` 报 `relation "auth.users" does not exist` | GoTrue 还没建表；看 `auth` 日志和 `db` 健康状态 |
+| `permission denied for schema public` | `db-init` 不是以 `postgres` 执行，或数据库卷是旧的 |
+| `must be owner of relation users` | `db-init` 没有用 `postgres` 超级用户执行 |
 | backend 启动即退出，提示 secret 缺失 | 三个应用 secret 未生成或仍是占位符 |
 | `PublicEndpointForbidden` | `OSS_PUBLIC_ENDPOINT` 用了 `*.aliyuncs.com`，改成 `https://storage.linkmai.com` |
 | 上传 403 `SignatureDoesNotMatch` | 预签名 `Content-Type` 与浏览器实际发送不一致 |
@@ -400,9 +391,9 @@ git pull
 
 ## 13. 安全清单
 
-- [ ] RDS 只开内网，白名单只有 ECS 私网 IP；`5432` 不对公网。
+- [ ] 数据库只走 Docker 内网；`5432` 不对公网开放。
 - [ ] OSS 私有，RAM 用户只有目标桶读写权限；AccessKey 不进 git。
-- [ ] `deploy/.env.prod`、`deploy/.env.rds` 权限 600，已加入 `.gitignore`。
+- [ ] `deploy/.env.prod` 权限 600，已加入 `.gitignore`。
 - [ ] 安全组只开 `22`（限制来源 IP）、`80`、`443`。
 - [ ] 旧小程序数据库/OSS 备份已离线保存，确认不再回滚后再清理。
 - [ ] `GOTRUE_DISABLE_SIGNUP` 按业务决定；对外服务建议邀请制。
@@ -415,7 +406,8 @@ git pull
 | `docker-compose.prod.yml` | 生产服务编排 |
 | `edge/nginx.conf` | TLS、域名路由、SSE |
 | `env.prod.example` | 环境变量模板 |
-| `rds/bootstrap.sql` | RDS 角色/schema 初始化 |
+| `db/init-roles.sh` | 本机 PostgreSQL 角色密码初始化 |
+| `rds/bootstrap.sql` | 可选：外部 RDS 角色初始化 |
 | `scripts/bootstrap-rds.sh` | 执行 bootstrap.sql |
 | `scripts/generate-secrets.mjs` | 生成 `.env.prod` 与 JWT |
 | `scripts/compose.sh` | 固定 env/compose 的启动入口 |
