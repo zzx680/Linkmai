@@ -11,7 +11,8 @@ FROM node:22-slim AS build
 
 WORKDIR /app
 COPY word-addin/package*.json ./
-RUN npm ci
+RUN npm config set registry https://registry.npmmirror.com \
+  && npm ci
 COPY word-addin/ ./
 COPY frontend/public/icons /frontend/public/icons
 COPY packages/contracts /packages/contracts

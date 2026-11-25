@@ -5,7 +5,10 @@ FROM node:22-slim AS app
 # postgresql-client: docker-compose.yml runs db-init from this image so the
 # schema and migrations applied always belong to the same release as the code
 # (scripts/migrate.sh needs psql).
-RUN apt-get update \
+# China deployments build from Aliyun mirrors; deb.debian.org is often slow or
+# unreachable from mainland ECS hosts.
+RUN sed -i 's|http://deb.debian.org|http://mirrors.cloud.aliyuncs.com|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update \
   && apt-get install -y --no-install-recommends libreoffice util-linux postgresql-client ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
@@ -15,7 +18,8 @@ WORKDIR /app
 # image that crashes at boot (MIKE-BACKEND-3R). `docker compose build --pull`
 # refreshes the base.
 COPY backend/package*.json backend/.npmrc ./
-RUN npm ci && npm cache clean --force
+RUN npm config set registry https://registry.npmmirror.com \
+  && npm ci && npm cache clean --force
 COPY backend/ ./
 COPY packages/contracts /packages/contracts
 # The compose db-init step (schema.sql, migrations/, scripts/migrate.sh are

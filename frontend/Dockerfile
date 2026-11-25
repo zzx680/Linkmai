@@ -23,7 +23,8 @@ FROM node:22-slim AS deps
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci
+RUN npm config set registry https://registry.npmmirror.com \
+  && npm ci
 
 FROM deps AS app
 COPY frontend/ ./
