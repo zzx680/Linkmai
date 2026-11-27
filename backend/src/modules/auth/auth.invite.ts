@@ -5,7 +5,7 @@
 // Codes are read from LINKMAI_INVITE_CODES (comma separated) and never leave
 // the server; the browser only sees whether an invite route is available.
 
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { hashInviteCode, normalizeInviteCode } from "../../lib/inviteCode";
 
 export { hashInviteCode, normalizeInviteCode };
@@ -111,16 +111,54 @@ function inviteEmail(code: string): string {
   return `invite-${hashInviteCode(code).slice(0, 20)}@users.linkmai.com`;
 }
 
-async function magicLinkToken(db: Db, email: string): Promise<string> {
-  const { data, error } = await db.auth.admin.generateLink({
-    type: "magiclink",
+function invitePassword(code: string): string {
+  const secret =
+    process.env.USER_API_KEYS_ENCRYPTION_SECRET ??
+    process.env.DOWNLOAD_SIGNING_SECRET ??
+    "linkmai-invite-beta";
+  return createHmac("sha256", secret)
+    .update(`invite:${hashInviteCode(code)}`)
+    .digest("hex");
+}
+
+async function ensureInviteUser(
+  db: Db,
+  email: string,
+  password: string,
+  metadata: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await db.auth.admin.createUser({
     email,
+    password,
+    email_confirm: true,
+    user_metadata: metadata,
   });
-  const token = data?.properties?.hashed_token;
-  if (error || !token) {
-    throw new Error("Unable to mint an invite session", { cause: error });
+  if (!error) return;
+  if (!/already|exists|registered/i.test(error.message)) {
+    throw new Error("Unable to create the invite user", { cause: error });
   }
-  return token;
+
+  const { data, error: listError } = await db.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+  if (listError) {
+    throw new Error("Unable to find the invite user", { cause: listError });
+  }
+  const existing = data.users.find(
+    (user) => user.email?.toLowerCase() === email.toLowerCase(),
+  );
+  if (!existing) {
+    throw new Error("The invite user exists but could not be found");
+  }
+  const { error: updateError } = await db.auth.admin.updateUserById(existing.id, {
+    password,
+    email_confirm: true,
+    user_metadata: metadata,
+  });
+  if (updateError) {
+    throw new Error("Unable to refresh the invite user", { cause: updateError });
+  }
 }
 
 /**
@@ -134,29 +172,18 @@ export async function signInWithInviteCode(
   label: string | null = null,
 ): Promise<User> {
   const email = inviteEmail(code);
-  let token: string;
-  try {
-    token = await magicLinkToken(db, email);
-  } catch {
-    const { error } = await db.auth.admin.createUser({
-      email,
-      email_confirm: true,
-      user_metadata: {
-        invite_login: true,
-        invite_code_hash: hashInviteCode(code),
-        invite_code_label: label,
-        display_name: "灵迈内测用户",
-      },
-    });
-    if (error && !/already|exists|registered/i.test(error.message)) {
-      throw new Error("Unable to create the invite user", { cause: error });
-    }
-    token = await magicLinkToken(db, email);
-  }
+  const password = invitePassword(code);
+  const metadata = {
+    invite_login: true,
+    invite_code_hash: hashInviteCode(code),
+    invite_code_label: label,
+    display_name: "灵迈内测用户",
+  };
+  await ensureInviteUser(db, email, password, metadata);
 
-  const { data, error } = await client.auth.verifyOtp({
-    token_hash: token,
-    type: "magiclink",
+  const { data, error } = await client.auth.signInWithPassword({
+    email,
+    password,
   });
   if (error || !data.user || !data.session) {
     throw new Error("Unable to complete invite sign-in", { cause: error });
