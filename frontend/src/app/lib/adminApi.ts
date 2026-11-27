@@ -1,5 +1,7 @@
 export interface AdminInviteCode {
     id: string;
+    /** Display-only copy of the code; null for codes created before 20261127_02. */
+    code: string | null;
     label: string | null;
     active: boolean;
     max_uses: number;
@@ -58,7 +60,6 @@ export async function getAdminInviteCodes(): Promise<AdminInviteCode[]> {
 export async function createAdminInviteCode(input: {
     label: string;
     maxUses: number;
-    expiresAt: string | null;
     code?: string;
 }): Promise<{ code: string; invite: AdminInviteCode }> {
     return adminRequest("/invite-codes", {

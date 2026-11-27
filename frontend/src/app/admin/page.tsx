@@ -33,8 +33,6 @@ export default function AdminPage() {
     const [loading, setLoading] = useState(true);
     const [label, setLabel] = useState("");
     const [maxUses, setMaxUses] = useState("1");
-    const [expires, setExpires] = useState("");
-    const [createdCode, setCreatedCode] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
 
     const load = useCallback(async () => {
@@ -69,13 +67,10 @@ export default function AdminPage() {
             const result = await createAdminInviteCode({
                 label: label.trim(),
                 maxUses: Math.max(1, Number.parseInt(maxUses, 10) || 1),
-                expiresAt: expires ? new Date(expires).toISOString() : null,
             });
             setCodes((current) => [result.invite, ...current]);
-            setCreatedCode(result.code);
             setLabel("");
             setMaxUses("1");
-            setExpires("");
         } catch {
             setError("邀请码创建失败。");
         } finally {
@@ -110,10 +105,9 @@ export default function AdminPage() {
         }
     }
 
-    async function copyCode() {
-        if (!createdCode) return;
+    async function copyCode(value: string) {
         try {
-            await navigator.clipboard.writeText(createdCode);
+            await navigator.clipboard.writeText(value);
         } catch {
             // The code stays visible; copying is only a convenience.
         }
@@ -163,7 +157,7 @@ export default function AdminPage() {
                 <div className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
                     <section className="rounded-3xl bg-white p-6 ring-1 ring-stone-200">
                         <h2 className="text-lg font-medium">新建邀请码</h2>
-                        <p className="mt-1 text-xs leading-5 text-stone-500">生成六位数字邀请码，创建后只展示一次；列表只显示是否使用。</p>
+                        <p className="mt-1 text-xs leading-5 text-stone-500">生成六位数字邀请码，创建后可在右侧列表里随时查看。</p>
                         <form className="mt-5 space-y-4" onSubmit={createCode}>
                             <label className="block text-sm text-stone-600">
                                 备注
@@ -174,27 +168,16 @@ export default function AdminPage() {
                                     value={label}
                                 />
                             </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <label className="block text-sm text-stone-600">
-                                    可用次数
-                                    <input
-                                        className="mt-1 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2"
-                                        min={1}
-                                        onChange={(event) => setMaxUses(event.target.value)}
-                                        type="number"
-                                        value={maxUses}
-                                    />
-                                </label>
-                                <label className="block text-sm text-stone-600">
-                                    过期时间
-                                    <input
-                                        className="mt-1 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs"
-                                        onChange={(event) => setExpires(event.target.value)}
-                                        type="datetime-local"
-                                        value={expires}
-                                    />
-                                </label>
-                            </div>
+                            <label className="block text-sm text-stone-600">
+                                可用次数
+                                <input
+                                    className="mt-1 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2"
+                                    min={1}
+                                    onChange={(event) => setMaxUses(event.target.value)}
+                                    type="number"
+                                    value={maxUses}
+                                />
+                            </label>
                             <button
                                 className="w-full rounded-full bg-stone-900 px-4 py-2.5 text-sm text-white disabled:opacity-50"
                                 disabled={creating}
@@ -203,17 +186,6 @@ export default function AdminPage() {
                                 {creating ? "创建中…" : "生成六位邀请码"}
                             </button>
                         </form>
-                        {createdCode ? (
-                            <div className="mt-5 rounded-2xl bg-amber-50 p-4">
-                                <p className="text-xs text-amber-800">新邀请码，只显示一次</p>
-                                <div className="mt-2 flex items-center gap-2">
-                                    <code className="flex-1 break-all font-mono text-2xl font-medium tracking-[0.3em] text-amber-950">{createdCode}</code>
-                                    <button className="text-xs text-amber-800 underline" onClick={() => void copyCode()} type="button">
-                                        复制
-                                    </button>
-                                </div>
-                            </div>
-                        ) : null}
                     </section>
 
                     <section className="space-y-3">
@@ -242,6 +214,18 @@ export default function AdminPage() {
                                             {code.active ? "停用" : "启用"}
                                         </button>
                                     </div>
+                                </div>
+                                <div className="mt-3 flex flex-wrap items-center gap-3">
+                                    {code.code ? (
+                                        <>
+                                            <code className="rounded-xl bg-stone-100 px-3 py-1.5 font-mono text-lg tracking-[0.28em] text-stone-900">{code.code}</code>
+                                            <button className="text-xs text-stone-500 underline" onClick={() => void (code.code ? copyCode(code.code) : undefined)} type="button">
+                                                复制
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <span className="text-xs text-stone-400">此码创建于更新前，无法回显</span>
+                                    )}
                                 </div>
                                 {code.last_used_at ? <p className="mt-2 text-xs text-stone-400">最近使用 {formatDate(code.last_used_at)}</p> : null}
                             </article>

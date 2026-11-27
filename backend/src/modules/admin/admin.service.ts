@@ -17,6 +17,8 @@ export const inviteCodeAdminSchema = z.object({
 
 export interface AdminInviteCode {
   id: string;
+  /** Display-only copy of the code; null for codes created before 20261127_02. */
+  code: string | null;
   label: string | null;
   active: boolean;
   max_uses: number;
@@ -75,7 +77,7 @@ async function uniqueInviteCode(db: Db): Promise<string> {
 export async function listInviteCodes(db: Db): Promise<AdminInviteCode[]> {
   const { data, error } = await db
     .from("invite_codes")
-    .select("id,label,active,max_uses,uses,expires_at,created_at,last_used_at")
+    .select("id,code,label,active,max_uses,uses,expires_at,created_at,last_used_at")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw new Error("Unable to list invite codes", { cause: error });
@@ -91,11 +93,12 @@ export async function createInviteCode(
     .from("invite_codes")
     .insert({
       code_hash: hashInviteCode(code),
+      code,
       label: input.label || null,
       max_uses: input.maxUses,
       expires_at: input.expiresAt ?? null,
     })
-    .select("id,label,active,max_uses,uses,expires_at,created_at,last_used_at")
+    .select("id,code,label,active,max_uses,uses,expires_at,created_at,last_used_at")
     .single();
   if (error) throw new Error("Unable to create invite code", { cause: error });
   return { code, invite: withUsage(data as Omit<AdminInviteCode, "used">) };

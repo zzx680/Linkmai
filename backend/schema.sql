@@ -12378,6 +12378,9 @@ grant select, insert, update, delete on table public.contact_messages to service
 create table if not exists public.invite_codes (
   id uuid primary key default gen_random_uuid(),
   code_hash text not null unique,
+  -- Display value for the operator console. Redemption still goes through
+  -- code_hash; codes created before 20261127_02 have no stored value.
+  code text,
   label text,
   active boolean not null default true,
   max_uses integer not null default 1 check (max_uses > 0),
@@ -12604,5 +12607,6 @@ insert into public.schema_migrations (filename) values
   ('20261116_01_tabular_cache_revisions.sql'),
   ('20261118_01_connector_write_approval_default.sql'),
   ('20261125_01_rename_workflow_catalog.sql'),
-  ('20261127_01_invite_codes.sql')
+  ('20261127_01_invite_codes.sql'),
+  ('20261127_02_invite_code_display.sql')
 on conflict (filename) do nothing;
