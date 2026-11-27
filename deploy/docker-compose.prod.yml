@@ -54,8 +54,8 @@ x-backend-env: &backend-env
   OSS_INTERNAL: "${OSS_INTERNAL:-true}"
   OSS_ENDPOINT: "${OSS_ENDPOINT:-}"
   OSS_PUBLIC_ENDPOINT: "${OSS_PUBLIC_ENDPOINT:?set the bucket custom domain, e.g. https://storage.linkmai.com}"
-  OSS_ACCESS_KEY_ID: "${OSS_ACCESS_KEY_ID:?}"
-  OSS_ACCESS_KEY_SECRET: "${OSS_ACCESS_KEY_SECRET:?}"
+  OSS_ACCESS_KEY_ID: "${OSS_ACCESS_KEY_ID:-}"
+  OSS_ACCESS_KEY_SECRET: "${OSS_ACCESS_KEY_SECRET:-}"
 
   # Durable queues. Redis lives in this compose file and is not published.
   REDIS_URL: "redis://:${REDIS_PASSWORD:?run deploy/scripts/generate-secrets.mjs}@redis:6379"
@@ -148,8 +148,8 @@ services:
       GOTRUE_MAILER_AUTOCONFIRM: "false"
       GOTRUE_SMTP_HOST: "${SMTP_HOST:?}"
       GOTRUE_SMTP_PORT: "${SMTP_PORT:-587}"
-      GOTRUE_SMTP_USER: "${SMTP_USER:?}"
-      GOTRUE_SMTP_PASS: "${SMTP_PASSWORD:?}"
+      GOTRUE_SMTP_USER: "${SMTP_USER:-}"
+      GOTRUE_SMTP_PASS: "${SMTP_PASSWORD:-}"
       GOTRUE_SMTP_ADMIN_EMAIL: "${SMTP_FROM:?}"
       GOTRUE_SMTP_SENDER_NAME: "${SMTP_SENDER_NAME:-灵迈 LinkMai}"
       # Links resolve on the app origin; edge forwards /auth/v1 to the gateway.
@@ -244,8 +244,8 @@ services:
       OSS_INTERNAL: "${OSS_INTERNAL:-true}"
       OSS_ENDPOINT: "${OSS_ENDPOINT:-}"
       OSS_PUBLIC_ENDPOINT: "${OSS_PUBLIC_ENDPOINT:?}"
-      OSS_ACCESS_KEY_ID: "${OSS_ACCESS_KEY_ID:?}"
-      OSS_ACCESS_KEY_SECRET: "${OSS_ACCESS_KEY_SECRET:?}"
+      OSS_ACCESS_KEY_ID: "${OSS_ACCESS_KEY_ID:-}"
+      OSS_ACCESS_KEY_SECRET: "${OSS_ACCESS_KEY_SECRET:-}"
     command: ["npm", "run", "sync:workflows"]
     restart: "no"
     logging: *default-logging
@@ -265,6 +265,10 @@ services:
         condition: service_started
       redis:
         condition: service_healthy
+    # STORAGE_DRIVER=fs keeps uploaded documents on this host until an OSS/R2
+    # bucket is configured. Backend-served, so no public port is needed.
+    volumes:
+      - ./data/storage:/var/lib/linkmai/storage
     healthcheck:
       test:
         [
@@ -360,6 +364,29 @@ services:
         condition: service_started
       gateway:
         condition: service_started
+      registry:
+        condition: service_started
+    restart: unless-stopped
+    logging: *default-logging
+
+  # Image registry the release workflow pushes to and the host pulls from.
+  # Building on this 2 vCPU / 4 GiB host is what took it offline on 2026-11-25,
+  # so images are built on the CI runner and stored here. Only edge (443) is
+  # published; the registry itself stays on the compose network.
+  registry:
+    image: registry:2.8.3
+    environment:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: LinkMai Registry
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - ./registry-auth:/auth:ro
+      - registry_data:/var/lib/registry
+    # The daemon is a file server: a few tens of MiB resident while it streams
+    # layers to disk. The cap is a guarantee, not a tuning knob — no image
+    # transfer may starve sshd the way the 2026-11-25 build did.
+    mem_limit: 256m
     restart: unless-stopped
     logging: *default-logging
 
@@ -388,3 +415,4 @@ services:
 volumes:
   db_data:
   redis_data:
+  registry_data:
