@@ -71,25 +71,14 @@ const posts = [
     { title: "LinkMai v0.1：从案卷到交付", date: "2026 年 11 月 6 日", kind: "版本" },
 ];
 
-function BrandMark() {
-    return (
-        <svg aria-hidden="true" className={styles.brandMark} viewBox="0 0 32 32">
-            <g fill="none" stroke="currentColor" strokeWidth="1.4">
-                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(0 16 16)" />
-                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(45 16 16)" />
-                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(90 16 16)" />
-                <ellipse cx="16" cy="16" rx="13" ry="5.2" transform="rotate(135 16 16)" />
-            </g>
-        </svg>
-    );
-}
-
 function Brand() {
     return (
         <Link className={styles.brand} href="/" aria-label="灵迈 LinkMai 首页">
-            <BrandMark />
-            <span className={styles.brandName}>灵迈</span>
-            <span className={styles.brandLatin}>LINKMAI</span>
+            <img
+                alt=""
+                className={styles.brandLockup}
+                src="/brand/linkmai-logo.png"
+            />
         </Link>
     );
 }

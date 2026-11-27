@@ -13,22 +13,14 @@ const resources = [
     { label: "关于灵迈", href: "/linkmai/about" },
 ];
 
-function BrandMark({ className = "" }: { className?: string }) {
+function BrandLockup({ className = "" }: { className?: string }) {
     return (
-        <svg
+        <img
+            alt=""
             aria-hidden="true"
-            className={`${styles.brandMark} ${className}`}
-            fill="none"
-            viewBox="0 0 34 34"
-        >
-            <circle cx="17" cy="17" r="4.2" fill="currentColor" />
-            <path
-                d="M17 1.8v7.4M17 24.8v7.4M1.8 17h7.4m15.6 0h7.4M6.25 6.25l5.2 5.2m11.1 11.1 5.2 5.2m0-21.5-5.2 5.2m-11.1 11.1-5.2 5.2"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="1.4"
-            />
-        </svg>
+            className={`${styles.brandLockup} ${className}`}
+            src="/brand/linkmai-logo.png"
+        />
     );
 }
 
@@ -39,9 +31,7 @@ export function SiteHeader() {
     return (
         <header className={styles.header}>
             <Link aria-label="灵迈 LinkMai 首页" className={styles.brand} href="/">
-                <BrandMark />
-                <span>灵迈</span>
-                <span className={styles.brandLatin}>LinkMai</span>
+                <BrandLockup />
             </Link>
             <div className={styles.headerActions}>
                 <button
@@ -82,7 +72,7 @@ export function SiteFooter() {
     return (
         <footer className={styles.footer}>
             <Link className={styles.footerBrand} href="/">
-                <BrandMark /> 灵迈 <span>LinkMai</span>
+                <BrandLockup />
             </Link>
             <nav aria-label="页脚导航" className={styles.footerLinks}>
                 <Link href="/linkmai/product">产品</Link>

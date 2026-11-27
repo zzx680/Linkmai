@@ -43,6 +43,7 @@
 }
 
 .brandMark { width: 26px; height: 26px; flex: 0 0 auto; color: #456c6d; }
+.brandLockup { display: block; width: auto; height: 30px; flex: 0 0 auto; }
 .brandLatin { margin-left: -4px; font-size: 18px; letter-spacing: -.035em; }
 .headerActions { display: flex; align-items: center; gap: 26px; font-size: 13px; }
 .resourcesButton { display: inline-flex; align-items: center; gap: 8px; border: 0; padding: 8px 0; color: var(--ink); background: transparent; cursor: pointer; }
@@ -117,6 +118,7 @@
 .footer { display: grid; min-height: 118px; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 28px; padding: 24px max(5vw, calc((100vw - 1200px) / 2)); color: #718082; font-size: 10px; }
 .footerBrand { gap: 7px; color: var(--ink) !important; font-size: 20px; }
 .footerBrand .brandMark { width: 21px; height: 21px; }
+.footerBrand .brandLockup { height: 21px; }
 .footerBrand span { color: #758185; font-size: 15px; }
 .footer > p { margin: 0; }
 .footerLinks { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
@@ -222,6 +224,7 @@
     .header { top: 7px; right: 7px; left: 7px; min-height: 55px; padding: 11px 13px; }
     .brand { gap: 5px; font-size: 22px; }
     .brandMark { width: 23px; height: 23px; }
+    .brandLockup { height: 26px; }
     .brandLatin { font-size: 16px; }
     .headerActions { gap: 12px; font-size: 11px; }
     .resourcesButton { gap: 4px; }

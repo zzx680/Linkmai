@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         "面向法律专业人士的 AI 工作台，支持文档分析、合同审阅与法律文书起草。",
     icons: {
         icon: [
-            { url: "/icon.svg", type: "image/svg+xml" },
+            { url: "/icon.png", type: "image/png" },
             { url: "/favicon.ico" },
         ],
         apple: "/apple-touch-icon.png",

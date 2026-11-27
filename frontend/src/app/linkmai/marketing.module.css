@@ -46,6 +46,7 @@
 .navRight { gap: 20px; padding: 0 8px 0 22px; }
 .brand { display: inline-flex; align-items: center; gap: 8px; }
 .brandMark { width: 22px; height: 22px; color: currentColor; }
+.brandLockup { display: block; width: auto; height: 30px; }
 .brandName { font-family: var(--serif); font-size: 20px; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
 .brandLatin { margin-left: 1px; color: var(--muted); font-size: 8px; letter-spacing: .16em; }
 .navLinks { display: flex; align-items: center; gap: 20px; font-size: 12px; }
@@ -227,6 +228,7 @@
     .navPill:first-child { min-height: 40px; padding: 0 13px 0 10px; }
     .brandName { font-size: 18px; }
     .brandMark { width: 20px; height: 20px; }
+    .brandLockup { height: 25px; }
     .brandLatin { font-size: 7px; }
     .navRight { display: none; }
     .menu { display: block; }
