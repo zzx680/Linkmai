@@ -116,7 +116,6 @@ jobs:
             --exclude 'deploy/registry-auth/' \
             --exclude 'deploy/backups/' \
             --exclude 'deploy/data/' \
-            --exclude 'deploy/db/' \
             --exclude '*.log' \
             --exclude '.DS_Store' \
             -e "ssh -p $PROD_SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
