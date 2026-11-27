@@ -129,20 +129,22 @@ export default function LoginPage() {
                                 className={cn("w-full", authInputUIClassName)}
                             />
                         </div>
-                        <PillButtonUI
-                            type="submit"
-                            tone="black"
-                            size="normal"
-                            disabled={loading}
-                            className="w-auto self-start px-6"
-                        >
-                            <span className="inline-flex items-center gap-2">
-                                {loading ? uiText("正在进入…") : uiText("进入灵迈")}
-                                {loading ? null : (
-                                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                                )}
-                            </span>
-                        </PillButtonUI>
+                        <div className="flex justify-center">
+                            <PillButtonUI
+                                type="submit"
+                                tone="black"
+                                size="normal"
+                                disabled={loading}
+                                className="w-auto px-6"
+                            >
+                                <span className="inline-flex items-center gap-2">
+                                    {loading ? uiText("正在进入…") : uiText("进入灵迈")}
+                                    {loading ? null : (
+                                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                                    )}
+                                </span>
+                            </PillButtonUI>
+                        </div>
                     </form>
 
                     <p className="mt-6 border-t border-gray-200 pt-4 text-xs leading-5 text-gray-500">
