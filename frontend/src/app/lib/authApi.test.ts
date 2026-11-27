@@ -16,13 +16,17 @@ import {
     logout,
     requestPasswordReset,
     setupFirstAccount,
+    signInWithInviteCode,
     signup,
+    startPhoneSignIn,
     startGoogleOAuth,
     startSso,
     unenrollMfa,
     updateAuthEmail,
     updateAuthPassword,
     verifyMfa,
+    verifyPhoneSignIn,
+    wechatSignInUrl,
 } from "./authApi";
 
 const reporting = vi.hoisted(() => ({
@@ -513,4 +517,64 @@ it("does not expose an unowned auth server's internal 5xx detail", async () => {
     try {
         await expect(login("test@example.test", "test")).rejects.toMatchObject({ message: "Authentication could not be completed.", reportingOwner: undefined });
     } finally { vi.unstubAllGlobals(); }
+});
+
+describe("phone and invite sign-in", () => {
+    it("builds the WeChat navigation target with the next path encoded", () => {
+        expect(wechatSignInUrl("/projects/a b")).toBe(
+            "/api/auth/wechat/start?next=%2Fprojects%2Fa%20b",
+        );
+    });
+
+    it("starts a phone sign-in", async () => {
+        vi.stubGlobal("fetch", fetchMock);
+        fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+        await expect(startPhoneSignIn("+8613800138000")).resolves.toBeUndefined();
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/api/auth/phone/start",
+            expect.objectContaining({
+                method: "POST",
+                body: JSON.stringify({ phone: "+8613800138000" }),
+            }),
+        );
+        vi.unstubAllGlobals();
+    });
+
+    it("verifies the phone code and returns the user", async () => {
+        vi.stubGlobal("fetch", fetchMock);
+        fetchMock.mockResolvedValue(
+            new Response(JSON.stringify({ user }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            }),
+        );
+        await expect(verifyPhoneSignIn("+8613800138000", "123456")).resolves.toEqual({ user });
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/api/auth/phone/verify",
+            expect.objectContaining({
+                method: "POST",
+                body: JSON.stringify({ phone: "+8613800138000", token: "123456" }),
+            }),
+        );
+        vi.unstubAllGlobals();
+    });
+
+    it("signs in with a closed-beta invite code", async () => {
+        vi.stubGlobal("fetch", fetchMock);
+        fetchMock.mockResolvedValue(
+            new Response(JSON.stringify({ user }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            }),
+        );
+        await expect(signInWithInviteCode("365845")).resolves.toEqual({ user });
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/api/auth/invite",
+            expect.objectContaining({
+                method: "POST",
+                body: JSON.stringify({ code: "365845" }),
+            }),
+        );
+        vi.unstubAllGlobals();
+    });
 });

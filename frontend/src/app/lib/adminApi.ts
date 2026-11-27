@@ -33,7 +33,7 @@ async function adminRequest<T>(path: string, init?: RequestInit): Promise<T> {
     const response = await fetch(`/api/admin${path}`, {
         ...init,
         credentials: "include",
-        headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+        headers: { "Content-Type": "application/json", ...init?.headers },
     });
     if (!response.ok) {
         throw new AdminApiError(response.status, "Admin request failed");
