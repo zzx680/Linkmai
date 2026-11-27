@@ -21,15 +21,6 @@ const workflowItems = [
 
 const policyAnchors = ["适用范围", "信息处理", "内容与责任", "联系与更新"];
 
-function SectionLabel({ children, side = "LINKMAI" }: { children: string; side?: string }) {
-    return (
-        <div className={styles.sectionLabel}>
-            <span>{children}</span>
-            <span>{side}</span>
-        </div>
-    );
-}
-
 function Placeholder({ title, text }: { title: string; text: string }) {
     return (
         <div className={styles.placeholder}>
