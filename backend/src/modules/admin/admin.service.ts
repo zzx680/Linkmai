@@ -1,4 +1,4 @@
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { randomInt, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import type { Db } from "../../lib/supabase";
 import { hashInviteCode } from "../../lib/inviteCode";
@@ -12,7 +12,7 @@ export const inviteCodeAdminSchema = z.object({
   label: z.string().trim().max(120).optional().default(""),
   maxUses: z.number().int().min(1).max(1000).optional().default(1),
   expiresAt: z.string().datetime().nullable().optional(),
-  code: z.string().trim().min(6).max(128).optional(),
+  code: z.string().trim().regex(/^\d{6}$/, "Invite codes must be six digits").optional(),
 });
 
 export interface AdminInviteCode {
@@ -24,6 +24,7 @@ export interface AdminInviteCode {
   expires_at: string | null;
   created_at: string;
   last_used_at: string | null;
+  used: boolean;
 }
 
 function adminPassword(): string {
@@ -49,6 +50,28 @@ export function verifyAdminPassword(password: string): boolean {
   return safeEqual(password, adminPassword());
 }
 
+function withUsage(invite: Omit<AdminInviteCode, "used">): AdminInviteCode {
+  return { ...invite, used: invite.uses > 0 };
+}
+
+function randomSixDigitCode(): string {
+  return randomInt(0, 1_000_000).toString().padStart(6, "0");
+}
+
+async function uniqueInviteCode(db: Db): Promise<string> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const code = randomSixDigitCode();
+    const { data, error } = await db
+      .from("invite_codes")
+      .select("id")
+      .eq("code_hash", hashInviteCode(code))
+      .maybeSingle();
+    if (error) throw new Error("Unable to allocate invite code", { cause: error });
+    if (!data) return code;
+  }
+  throw new Error("Unable to allocate a unique invite code");
+}
+
 export async function listInviteCodes(db: Db): Promise<AdminInviteCode[]> {
   const { data, error } = await db
     .from("invite_codes")
@@ -56,14 +79,14 @@ export async function listInviteCodes(db: Db): Promise<AdminInviteCode[]> {
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw new Error("Unable to list invite codes", { cause: error });
-  return (data ?? []) as AdminInviteCode[];
+  return (data ?? []).map((row) => withUsage(row as Omit<AdminInviteCode, "used">));
 }
 
 export async function createInviteCode(
   db: Db,
   input: z.infer<typeof inviteCodeAdminSchema>,
 ): Promise<{ code: string; invite: AdminInviteCode }> {
-  const code = (input.code?.trim() || `LM-${randomBytes(6).toString("hex").toUpperCase()}`).toUpperCase();
+  const code = input.code?.trim() || await uniqueInviteCode(db);
   const { data, error } = await db
     .from("invite_codes")
     .insert({
@@ -75,7 +98,7 @@ export async function createInviteCode(
     .select("id,label,active,max_uses,uses,expires_at,created_at,last_used_at")
     .single();
   if (error) throw new Error("Unable to create invite code", { cause: error });
-  return { code, invite: data as AdminInviteCode };
+  return { code, invite: withUsage(data as Omit<AdminInviteCode, "used">) };
 }
 
 export async function setInviteCodeActive(

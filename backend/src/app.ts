@@ -202,6 +202,15 @@ const authMfaLimiter = makeLimiter({
   message: "Too many verification attempts. Please try again later.",
 });
 
+// Six-digit invite codes have a small search space. Keep the same per-IP lane
+// as password login so a bot cannot enumerate codes through the invite route.
+const authInviteLimiter = makeLimiter({
+  windowMs: minutes(envInt("RATE_LIMIT_AUTH_INVITE_WINDOW_MINUTES", 15)),
+  max: envInt("RATE_LIMIT_AUTH_INVITE_MAX", 20),
+  message: "Too many invite attempts. Please try again later.",
+  skipSuccessfulRequests: true,
+});
+
 app.disable("x-powered-by");
 app.set("trust proxy", envInt("TRUST_PROXY_HOPS", 1));
 app.use(stripApiPathPrefix(process.env.API_PATH_PREFIX));
@@ -335,6 +344,7 @@ app.use(express.json({ limit: JSON_BODY_LIMIT }));
 // Body-aware account throttling complements the per-IP login limiter. The key
 // is a one-way digest, so email addresses never enter the limiter store.
 app.post("/auth/login", authLoginAccountLimiter);
+app.post("/auth/invite", authInviteLimiter);
 
 app.use("/contact", contactRouter);
 app.use("/admin", adminRouter);

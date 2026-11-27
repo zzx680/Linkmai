@@ -163,7 +163,7 @@ export default function AdminPage() {
                 <div className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
                     <section className="rounded-3xl bg-white p-6 ring-1 ring-stone-200">
                         <h2 className="text-lg font-medium">新建邀请码</h2>
-                        <p className="mt-1 text-xs leading-5 text-stone-500">创建后只展示一次明文，之后只显示使用情况。</p>
+                        <p className="mt-1 text-xs leading-5 text-stone-500">生成六位数字邀请码，创建后只展示一次；列表只显示是否使用。</p>
                         <form className="mt-5 space-y-4" onSubmit={createCode}>
                             <label className="block text-sm text-stone-600">
                                 备注
@@ -200,14 +200,14 @@ export default function AdminPage() {
                                 disabled={creating}
                                 type="submit"
                             >
-                                {creating ? "创建中…" : "生成邀请码"}
+                                {creating ? "创建中…" : "生成六位邀请码"}
                             </button>
                         </form>
                         {createdCode ? (
                             <div className="mt-5 rounded-2xl bg-amber-50 p-4">
                                 <p className="text-xs text-amber-800">新邀请码，只显示一次</p>
                                 <div className="mt-2 flex items-center gap-2">
-                                    <code className="flex-1 break-all text-sm font-medium text-amber-950">{createdCode}</code>
+                                    <code className="flex-1 break-all font-mono text-2xl font-medium tracking-[0.3em] text-amber-950">{createdCode}</code>
                                     <button className="text-xs text-amber-800 underline" onClick={() => void copyCode()} type="button">
                                         复制
                                     </button>
@@ -226,13 +226,13 @@ export default function AdminPage() {
                                     <div>
                                         <p className="text-sm font-medium">{code.label || "未命名邀请码"}</p>
                                         <p className="mt-1 text-xs text-stone-500">
-                                            {code.uses} / {code.max_uses} 次 · 创建 {formatDate(code.created_at)}
+                                            {code.used ? `已用 ${code.uses} / ${code.max_uses} 次` : `可用 ${code.max_uses} 次`} · 创建 {formatDate(code.created_at)}
                                             {code.expires_at ? ` · 到期 ${formatDate(code.expires_at)}` : ""}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className={`rounded-full px-2.5 py-1 text-xs ${code.active ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
-                                            {code.active ? "启用" : "停用"}
+                                        <span className={`rounded-full px-2.5 py-1 text-xs ${!code.active ? "bg-stone-100 text-stone-500" : code.used ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>
+                                            {!code.active ? "已停用" : code.used ? "已使用" : "未使用"}
                                         </span>
                                         <button
                                             className="rounded-full border border-stone-300 px-3 py-1.5 text-xs text-stone-600"
