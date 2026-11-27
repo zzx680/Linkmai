@@ -99,10 +99,6 @@
     line-height: 1.04;
     text-wrap: balance;
 }
-.heroLeadLine {
-    display: inline;
-}
-
 .heroLead {
     max-width: 520px;
     margin-top: 26px !important;
@@ -248,7 +244,6 @@
     .eyebrow { margin-bottom: 16px !important; font-size: 8px !important; letter-spacing: .13em; }
     .hero h1 { font-size: clamp(42px, 12.2vw, 60px); letter-spacing: -.06em; }
     .heroLead { margin-top: 20px !important; font-size: 12px; line-height: 1.7; }
-    .heroLeadLine { display: block; }
     .heroActions { margin-top: 24px; }
     .press { padding: 28px 14px 14px; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
     .pressTrack { width: max-content; max-width: none; justify-content: flex-start; gap: 28px; }

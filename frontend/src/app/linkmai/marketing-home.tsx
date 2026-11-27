@@ -209,14 +209,11 @@ export function MarketingHome() {
                     <div className={styles.heroVeil} aria-hidden="true" />
                     <div className={styles.heroInner}>
                         <p className={styles.eyebrow}>LINKMAI / OPEN-SOURCE LEGAL AI</p>
-                        <h1>打造一家<br />前沿法律组织</h1>
-                        <p className={styles.heroLead}>
-                            <span className={styles.heroLeadLine}>全球顶尖律所与企业法务团队，</span>
-                            <span className={styles.heroLeadLine}>把最关键的工作交给灵迈。</span>
-                        </p>
+                        <h1>法律 AI，<br />真正属于你。</h1>
+                        <p className={styles.heroLead}>审阅、检索、起草、交付，在同一份案卷里完成。代码开源，文件留在你的存储，模型由你决定。</p>
                         <div className={styles.heroActions}>
-                            <Link className={styles.primary} href="/linkmai/contact">预约演示</Link>
-                            <Link className={styles.secondary} href="/signup">开始使用</Link>
+                            <Link className={styles.primary} href="/signup">开始使用</Link>
+                            <Link className={styles.secondary} href="/linkmai/deploy">部署自己的</Link>
                         </div>
                     </div>
                     <a className={styles.scrollHint} href="#demo" aria-label="向下滚动">
