@@ -4,6 +4,7 @@ import {
     SmsHookVerificationError,
     verifySendSmsHook,
 } from "../auth.sms";
+import { phoneSignInEnabled } from "../auth.service";
 
 const secret = `v1,whsec_${Buffer.from("test-webhook-key").toString("base64")}`;
 const id = "msg_123";
@@ -77,8 +78,7 @@ describe("phoneSignInEnabled", () => {
     ALIYUN_SMS_TEMPLATE_CODE: "SMS_1",
   } as NodeJS.ProcessEnv;
 
-  it("enables phone sign-in only when the hook and SMS credentials are complete", async () => {
-    const { phoneSignInEnabled } = await import("../auth.service");
+  it("enables phone sign-in only when the hook and SMS credentials are complete", () => {
     expect(phoneSignInEnabled(configured)).toBe(true);
     expect(phoneSignInEnabled({ ...configured, ALIYUN_SMS_TEMPLATE_CODE: "" })).toBe(false);
     expect(phoneSignInEnabled({ ...configured, PHONE_SIGNIN_ENABLED: "false" })).toBe(false);
