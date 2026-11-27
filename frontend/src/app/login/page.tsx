@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { ArrowRight, Ticket, X } from "lucide-react";
 import { uiText } from "@linkmai/client";
 import { authInputUIClassName, InputUI, PillButtonUI } from "@linkmai/ui";
 import { FieldLabel } from "@/app/components/ui/form-field";
@@ -107,7 +107,13 @@ export default function LoginPage() {
 
                     <form onSubmit={handleInvite} className="mt-6 space-y-4">
                         <div>
-                            <FieldLabel htmlFor="invite-code">{uiText("邀请码")}</FieldLabel>
+                            <div className="flex items-start gap-2">
+                                <Ticket
+                                    className="mt-0.5 h-4 w-4 shrink-0 text-gray-500"
+                                    aria-hidden="true"
+                                />
+                                <FieldLabel htmlFor="invite-code">{uiText("邀请码")}</FieldLabel>
+                            </div>
                             <InputUI
                                 id="invite-code"
                                 name="invite-code"
@@ -128,14 +134,19 @@ export default function LoginPage() {
                             tone="black"
                             size="normal"
                             disabled={loading}
-                            className="w-full"
+                            className="w-auto self-start px-6"
                         >
-                            {loading ? uiText("正在进入…") : uiText("进入灵迈")}
+                            <span className="inline-flex items-center gap-2">
+                                {loading ? uiText("正在进入…") : uiText("进入灵迈")}
+                                {loading ? null : (
+                                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                                )}
+                            </span>
                         </PillButtonUI>
                     </form>
 
                     <p className="mt-6 border-t border-gray-200 pt-4 text-xs leading-5 text-gray-500">
-                        {uiText("登录遇到问题，请联系")}{" "}
+                        {uiText("内测阶段，仅限受邀用户使用。遇到问题请联系")}{" "}
                         <a
                             className="font-medium text-gray-800 underline underline-offset-4"
                             href={`mailto:${LOGIN_SUPPORT_EMAIL}`}
