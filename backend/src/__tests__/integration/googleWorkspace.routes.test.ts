@@ -133,7 +133,7 @@ describe("Google Workspace routes", () => {
   it.each(["google-drive", "gmail", "google-calendar"])(
     "relays %s callbacks to the fixed frontend and rejects unauthenticated completion",
     async (provider) => {
-      vi.stubEnv("FRONTEND_URL", "https://app.mike.test");
+      vi.stubEnv("FRONTEND_URL", "https://app.linkmai.test");
       mocks.auth = false;
       const relay = await request(app)
         .get(`/user/integrations/${provider}/oauth/callback`)

@@ -40,7 +40,7 @@ describe("getSignedUrl presign endpoint split", () => {
     expect(parsed.host).toBe("localhost:9100");
     expect(parsed.host).not.toBe("storage:9000");
     // Still a real path-style presigned GET for the requested object.
-    expect(parsed.pathname).toBe("/mike/some/key");
+    expect(parsed.pathname).toBe("/linkmai/some/key");
     expect(parsed.searchParams.get("X-Amz-Signature")).toBeTruthy();
   });
 

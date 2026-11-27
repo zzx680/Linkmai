@@ -63,7 +63,7 @@ describe("Supabase storage adapter", () => {
   });
 
   it("uploads with the secret key, upsert and the declared type", async () => {
-    respond = () => json(200, { Key: "mike/documents/u/d/source.pdf" });
+    respond = () => json(200, { Key: "linkmai/documents/u/d/source.pdf" });
     await createSupabaseStorageAdapter().uploadFile(
       "documents/u/d/source.pdf",
       new Uint8Array([1, 2, 3]).buffer,
@@ -71,7 +71,7 @@ describe("Supabase storage adapter", () => {
     );
     const [call] = calls;
     expect(call.method).toBe("POST");
-    expect(call.url.pathname).toBe("/storage/v1/object/mike/documents/u/d/source.pdf");
+    expect(call.url.pathname).toBe("/storage/v1/object/linkmai/documents/u/d/source.pdf");
     expect(call.headers.get("authorization")).toBe("Bearer service-role-key");
     expect(call.headers.get("x-upsert")).toBe("true");
     expect(call.headers.get("content-type")).toBe("application/pdf");
@@ -89,7 +89,7 @@ describe("Supabase storage adapter", () => {
       contentType: "application/pdf",
     });
     await expect(adapter.headFile("absent.pdf")).resolves.toBeNull();
-    expect(calls[0].url.pathname).toBe("/storage/v1/object/info/mike/present.pdf");
+    expect(calls[0].url.pathname).toBe("/storage/v1/object/info/linkmai/present.pdf");
   });
 
   it("returns null when downloading a missing object and throws for a missing bucket", async () => {
@@ -106,11 +106,11 @@ describe("Supabase storage adapter", () => {
     const chunks: number[] = [];
     for await (const chunk of stream!) chunks.push(...chunk);
     expect(chunks).toEqual([7, 8, 9]);
-    expect(calls[0].url.pathname).toBe("/storage/v1/object/authenticated/mike/a.txt");
+    expect(calls[0].url.pathname).toBe("/storage/v1/object/authenticated/linkmai/a.txt");
   });
 
   it("signs attachment downloads with the filename and inline ones without", async () => {
-    respond = () => json(200, { signedURL: "/object/sign/mike/a.pdf?token=t" });
+    respond = () => json(200, { signedURL: "/object/sign/linkmai/a.pdf?token=t" });
     const adapter = createSupabaseStorageAdapter();
     const attachment = await adapter.getSignedUrl(
       "a.pdf",
@@ -124,14 +124,14 @@ describe("Supabase storage adapter", () => {
   });
 
   it("returns a signed upload URL for the browser", async () => {
-    respond = () => json(200, { url: "/object/upload/sign/mike/staging/x.pdf?token=up" });
+    respond = () => json(200, { url: "/object/upload/sign/linkmai/staging/x.pdf?token=up" });
     const url = await createSupabaseStorageAdapter().getSignedUploadUrl(
       "staging/x.pdf",
       "application/pdf",
       3,
       900,
     );
-    expect(url).toContain("/storage/v1/object/upload/sign/mike/staging/x.pdf");
+    expect(url).toContain("/storage/v1/object/upload/sign/linkmai/staging/x.pdf");
     expect(new URL(url!).searchParams.get("token")).toBe("up");
   });
 
@@ -156,7 +156,7 @@ describe("Supabase storage adapter", () => {
 
   it("copies without touching the target, and replaces it only when it already exists", async () => {
     const adapter = createSupabaseStorageAdapter();
-    respond = () => json(200, { Key: "mike/b" });
+    respond = () => json(200, { Key: "linkmai/b" });
     await adapter.copyFile("a", "b");
     expect(calls.map((c) => c.url.pathname)).toEqual(["/storage/v1/object/copy"]);
 
@@ -167,14 +167,14 @@ describe("Supabase storage adapter", () => {
         copies += 1;
         return copies === 1
           ? json(400, { statusCode: "409", error: "Duplicate", message: "The resource already exists" })
-          : json(200, { Key: "mike/b" });
+          : json(200, { Key: "linkmai/b" });
       }
       return json(200, [{ name: "b" }]);
     };
     await adapter.copyFile("a", "b");
     expect(calls.map((c) => c.url.pathname)).toEqual([
       "/storage/v1/object/copy",
-      "/storage/v1/object/mike",
+      "/storage/v1/object/linkmai",
       "/storage/v1/object/copy",
     ]);
   });

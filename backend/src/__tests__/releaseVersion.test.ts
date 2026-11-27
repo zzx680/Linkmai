@@ -57,7 +57,7 @@ describe("product version", () => {
 
     it("is the default image tag for every published image in docker-compose.yml", () => {
         const compose = read("docker-compose.yml");
-        const tags = [...compose.matchAll(/mike-(backend|frontend):\$\{LINKMAI_IMAGE_TAG:-([^}]+)\}/g)];
+        const tags = [...compose.matchAll(/linkmai-(backend|frontend):\$\{LINKMAI_IMAGE_TAG:-([^}]+)\}/g)];
         expect(tags.map((m) => m[1]).sort()).toEqual(["backend", "frontend"]);
         for (const [, image, tag] of tags) {
             expect(tag, `default tag of the ${image} image`).toBe(version);

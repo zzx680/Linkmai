@@ -177,7 +177,7 @@ describe("Google Workspace opt-in and OAuth", () => {
     );
     await expect(started).rejects.toBeInstanceOf(ConnectorSetupError);
     await expect(started).rejects.toThrow(
-      /Gmail needs an OAuth client.*https:\/\/mike\.test\/callback/,
+      /Gmail needs an OAuth client.*https:\/\/linkmai\.test\/callback/,
     );
   });
   it("rejects cross-provider and cancelled states before contacting Google", async () => {
