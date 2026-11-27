@@ -11,7 +11,6 @@ import {
     InputUI,
     PillButtonUI,
 } from "@linkmai/ui";
-import { SiteLogo } from "@/app/components/site-logo";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { AuthApiError, signInWithInviteCode } from "@/app/lib/authApi";
 import { PRODUCT_SUPPORT_EMAIL } from "@/app/lib/productConfig";
@@ -85,31 +84,25 @@ export default function LoginPage() {
                 aria-labelledby="login-title"
                 className="relative z-10 w-full max-w-[420px] overflow-hidden rounded-[20px] border border-white/40 bg-white shadow-[0_30px_80px_-24px_rgba(0,0,0,0.55)]"
             >
-                <div className="flex items-center justify-between px-6 pb-2 pt-5">
-                    <SiteLogo size="md" asLink />
-                    <div className="flex items-center gap-2">
-                        <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
-                            {uiText("内测中")}
-                        </span>
-                        <Link
-                            href="/"
-                            aria-label={uiText("关闭登录窗口")}
-                            className="rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
-                        >
-                            <X className="h-4 w-4" aria-hidden="true" />
-                        </Link>
-                    </div>
+                <div className="flex items-center justify-between px-6 pb-1 pt-5">
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
+                        {uiText("内测中")}
+                    </span>
+                    <Link
+                        href="/"
+                        aria-label={uiText("关闭登录窗口")}
+                        className="rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                    >
+                        <X className="h-4 w-4" aria-hidden="true" />
+                    </Link>
                 </div>
 
-                <div className="px-6 pb-8 pt-2">
+                <div className="px-6 pb-7 pt-1">
                     <h1 id="login-title" className="font-serif text-2xl text-gray-950">
                         {uiText("登录灵迈")}
                     </h1>
-                    <p className="mt-1.5 text-sm leading-6 text-gray-500">
-                        {uiText("邀请制内测阶段，输入邀请码即可进入。")}
-                    </p>
 
-                    <form onSubmit={handleInvite} className="mt-6 space-y-4">
+                    <form onSubmit={handleInvite} className="mt-7 space-y-4">
                         <div className="space-y-2">
                             <label
                                 htmlFor="invite-code"
@@ -139,11 +132,7 @@ export default function LoginPage() {
                             <p id="invite-error" role="alert" className="text-sm text-red-600">
                                 {error}
                             </p>
-                        ) : (
-                            <p id="invite-hint" className="text-xs leading-5 text-gray-500">
-                                {uiText("邀请码不区分大小写。内测阶段仅限受邀用户使用。")}
-                            </p>
-                        )}
+                        ) : null}
                         <PillButtonUI
                             type="submit"
                             tone="black"
