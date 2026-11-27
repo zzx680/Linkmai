@@ -74,10 +74,12 @@ const posts = [
 function Brand() {
     return (
         <Link className={styles.brand} href="/" aria-label="灵迈 LinkMai 首页">
-            <img
+            <Image
                 alt=""
                 className={styles.brandLockup}
+                height={193}
                 src="/brand/linkmai-logo.png"
+                width={778}
             />
         </Link>
     );
@@ -114,84 +116,156 @@ function Header() {
     );
 }
 
-function FeatureShot({ kind }: { kind: "assistant" | "projects" | "table" | "workflow" }) {
-    if (kind === "assistant") {
-        return (
-            <div className={styles.shot} aria-hidden="true">
-                <div className={styles.mockWindow}>
-                    <div className={styles.mockBar}><span /><span /><span /></div>
-                    <div className={styles.chatMock}>
-                        <p className={styles.mockLabel}>MATTER 024 / 股权回购</p>
-                        <div className={styles.chatBubble}>请对照第 3.2 条，找出回购触发条件里缺少的前置程序。</div>
-                        <div className={styles.chatAnswer}>
-                            <span className={styles.chatChip}>已读 4 份材料</span>
-                            <p>缺少“经董事会决议”，且未约定回购上限。建议补充，避免触发条件被单方解释。</p>
-                            <span className={styles.cite}>《公司法》第 74 条 ↗</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-    if (kind === "projects") {
-        return (
-            <div className={styles.shot} aria-hidden="true">
-                <div className={styles.mockWindow}>
-                    <div className={styles.mockBar}><span /><span /><span /></div>
-                    <p className={styles.mockLabel}>PROJECTS / 股权回购</p>
-                    <div className={styles.fileRows}>
-                        {[
-                            ["股权回购协议.docx", "合同", "128 KB"],
-                            ["董事会决议.pdf", "决议", "1.2 MB"],
-                            ["投资人清单.xlsx", "清单", "86 KB"],
-                            ["尽调备忘录.md", "备忘", "42 KB"],
-                        ].map(([name, type, size]) => (
-                            <div className={styles.fileRow} key={name}>
-                                <span className={styles.fileDot} />
-                                <span>{name}</span>
-                                <span>{type}</span>
-                                <span>{size}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-    if (kind === "table") {
-        return (
-            <div className={styles.shot} aria-hidden="true">
-                <div className={styles.mockWindow}>
-                    <div className={styles.mockBar}><span /><span /><span /></div>
-                    <p className={styles.mockLabel}>TABULAR REVIEW / 12 份合同</p>
-                    <div className={styles.tableMock}>
-                        <div className={styles.tableHead}><span>条款</span><span>风险</span><span>依据</span></div>
-                        {[
-                            ["回购触发", "高", "3.2"],
-                            ["优先清算", "中", "5.4"],
-                            ["竞业限制", "低", "8.1"],
-                        ].map(([a, b, c]) => (
-                            <div className={styles.tableRow} key={a}><span>{a}</span><span>{b}</span><span>p.{c}</span></div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-    }
+type ShotKind = "assistant" | "projects" | "table" | "workflow";
+
+const shotArt: Record<ShotKind, string> = {
+    assistant: "/mike/paintings/sisley-bridge-villeneuve.webp",
+    projects: "/mike/paintings/wheatstacks-end-of-summer.webp",
+    table: "/mike/paintings/san-giorgio-maggiore-dusk.webp",
+    workflow: "/mike/paintings/the-magpie.webp",
+};
+
+function FeatureShot({ kind }: { kind: ShotKind }) {
     return (
         <div className={styles.shot} aria-hidden="true">
-            <div className={styles.mockWindow}>
-                <div className={styles.mockBar}><span /><span /><span /></div>
-                <p className={styles.mockLabel}>WORKFLOWS / 常用流程</p>
-                <div className={styles.flowRows}>
-                    {["合同审阅 · 回购条款", "尽调清单 · 交割条件", "条款比对 · 投资协议", "文书起草 · 董事会决议"].map((item, i) => (
-                        <div className={styles.flowRow} key={item}>
-                            <span>{String(i + 1).padStart(2, "0")}</span>
-                            <span>{item}</span>
-                            <span>运行 ↗</span>
-                        </div>
-                    ))}
+            <Image className={styles.shotArt} src={shotArt[kind]} alt="" fill sizes="(max-width: 768px) 100vw, 560px" />
+            <span className={styles.shotVeil} />
+            {kind === "assistant" ? <AssistantPanel /> : null}
+            {kind === "projects" ? <ProjectsPanel /> : null}
+            {kind === "table" ? <TablePanel /> : null}
+            {kind === "workflow" ? <WorkflowPanel /> : null}
+        </div>
+    );
+}
+
+function AssistantPanel() {
+    return (
+        <div className={styles.panel}>
+            <div className={styles.askRow}>
+                <span className={styles.askBubble}>为这套园区准备一份 CP 检查清单。</span>
+            </div>
+            <div className={styles.askRow}>
+                <span className={styles.askPill}>＋ 生成 CP 清单</span>
+                <span className={styles.fileChip}>▤ SPV 授信协议.pdf</span>
+            </div>
+            <p className={styles.answer}>
+                已按附录 2 的条件起草清单，另标出两项仍未补齐。
+            </p>
+            <div className={styles.docRow}>
+                <span className={styles.docIcon}>W</span>
+                <span>CP 检查清单.docx</span>
+                <span>↓</span>
+            </div>
+            <div className={styles.inputBox}>
+                <small>有什么可以帮你？</small>
+                <div className={styles.inputRow}>
+                    <span>＋</span>
+                    <span className={styles.model}>DeepSeek V3 ▾</span>
+                    <span className={styles.sendDot}>→</span>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function ProjectsPanel() {
+    return (
+        <div className={styles.panel}>
+            <div className={styles.panelHead}>
+                <span>项目</span>
+                <span className={styles.crumbMuted}>› 尽调文件</span>
+                <span className={styles.headIcons}>⌕ ☺ ⋯</span>
+            </div>
+            <div className={styles.tabs}>
+                <span className={`${styles.tab} ${styles.tabOn}`}>文件</span>
+                <span className={styles.tab}>对话</span>
+                <span className={styles.tab}>表格审阅</span>
+            </div>
+            <div className={styles.fileTable}>
+                <div className={styles.fileTableHead}><span>名称</span><span>类型</span><span>大小</span></div>
+                {[
+                    ["君合 · 股权回购协议.pdf", "pdf", "248 KB"],
+                    ["星野 · 员工手册.pdf", "pdf", "1.2 MB"],
+                    ["万物 · 租赁合同（签署版）.pdf", "pdf", "612 KB"],
+                    ["青禾 · 数据合规清单.pdf", "pdf", "190 KB"],
+                    ["远山 · 尽调备忘录.pdf", "pdf", "384 KB"],
+                ].map(([name, type, size]) => (
+                    <div className={styles.fileTableRow} key={name}>
+                        <span className={styles.fileName}><span className={styles.pdfIcon}>pdf</span>{name}</span>
+                        <span>{type}</span>
+                        <span>{size}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function TablePanel() {
+    return (
+        <div className={styles.panel}>
+            <div className={styles.panelHead}>
+                <span>NDA</span>
+                <span className={styles.crumbMuted}>› 条款对比</span>
+                <span className={styles.headIcons}>⌕ ⋯</span>
+            </div>
+            <div className={styles.gridToolbar}>
+                <span className={styles.runBtn}>▷ 运行</span>
+                <span className={styles.addCol}>＋ 添加列</span>
+            </div>
+            <div className={styles.grid}>
+                <div className={styles.gridHead}>
+                    <span>文件</span><span>方向</span><span>保密范围</span><span>期限</span>
+                </div>
+                {[
+                    ["君合 · NDA.pdf", "双向", "宽泛", "3 年"],
+                    ["星野 · NDA.pdf", "单向", "较窄", "2 年"],
+                    ["万物 · NDA.pdf", "双向", "宽泛", "5 年"],
+                    ["青禾 · NDA.pdf", "单向", "中等", "3 年"],
+                    ["远山 · NDA.pdf", "双向", "宽泛", "4 年"],
+                    ["云启 · NDA.pdf", "单向", "较窄", "2 年"],
+                ].map(([file, dir, scope, term]) => (
+                    <div className={styles.gridRow} key={file}>
+                        <span>{file}</span>
+                        <span className={styles.pill} data-kind="dir">{dir}</span>
+                        <span className={styles.pill} data-kind="scope">{scope}</span>
+                        <span>{term}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function WorkflowPanel() {
+    return (
+        <div className={styles.panel}>
+            <div className={styles.panelHead}>
+                <span>工作流</span>
+                <span className={styles.headIcons}>⌕ ＋</span>
+            </div>
+            <div className={styles.tabs}>
+                <span className={`${styles.tab} ${styles.tabOn}`}>全部</span>
+                <span className={styles.tab}>助手</span>
+                <span className={styles.tab}>表格</span>
+                <span className={styles.tab}>附加</span>
+            </div>
+            <div className={styles.wfTable}>
+                <div className={styles.wfHead}><span>名称</span><span>类型</span><span>领域</span></div>
+                {[
+                    ["合同审阅 · 回购条款", "助手", "投融资", "blue"],
+                    ["尽调清单 · 交割条件", "表格", "投融资", "teal"],
+                    ["条款比对 · 投资协议", "表格", "投融资", "teal"],
+                    ["文书起草 · 董事会决议", "附加", "公司治理", "lilac"],
+                    ["合规清单 · 数据出境", "助手", "数据合规", "blue"],
+                    ["交易文件 · 先决条件", "附加", "投融资", "lilac"],
+                ].map(([name, type, field, tone]) => (
+                    <div className={styles.wfRow} key={name}>
+                        <span>{name}</span>
+                        <span className={styles.chip} data-tone={tone}>{type}</span>
+                        <span className={styles.wfField}>{field}</span>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -259,7 +333,7 @@ export function MarketingHome() {
                     </div>
                     <div className={styles.featureGrid}>
                         {features.map((feature) => (
-                            <article className={styles.featureCard} key={feature.title}>
+                            <article className={styles.featureCard} data-tone={feature.shot} key={feature.title}>
                                 <FeatureShot kind={feature.shot} />
                                 <div className={styles.featureCopy}>
                                     <p className={styles.kicker}>{feature.kicker}</p>

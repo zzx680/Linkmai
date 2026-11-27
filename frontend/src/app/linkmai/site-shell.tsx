@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -15,11 +16,13 @@ const resources = [
 
 function BrandLockup({ className = "" }: { className?: string }) {
     return (
-        <img
+        <Image
             alt=""
             aria-hidden="true"
             className={`${styles.brandLockup} ${className}`}
+            height={193}
             src="/brand/linkmai-logo.png"
+            width={778}
         />
     );
 }
