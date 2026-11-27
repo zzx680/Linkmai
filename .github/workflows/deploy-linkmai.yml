@@ -84,6 +84,11 @@ jobs:
           push: true
           build-args: |
             NPM_REGISTRY=https://registry.npmjs.org
+            REACT_APP_WEB_APP_URL=https://linkmai.com
+            WORD_ADDIN_PUBLIC_URL=https://word.linkmai.com
+            REACT_APP_LINKMAI_SUPPORT_EMAIL=support@linkmai.com
+            GIT_SHA=${{ github.sha }}
+            LINKMAI_VERSION=${{ github.run_number }}
           tags: ${{ env.IMAGE_PREFIX }}/linkmai-word-addin:${{ steps.tag.outputs.value }}
           cache-from: type=gha,scope=word-addin
           cache-to: type=gha,mode=max,scope=word-addin
