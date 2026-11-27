@@ -17,12 +17,26 @@ afterEach(() => {
 describe("readSignInProviderHint", () => {
     it("reads the providers from the API, cached rather than per request", async () => {
         fetchMock.mockResolvedValue(
-            Response.json({ google: true, sso: false, setupRequired: true, signup: false }),
+            Response.json({
+                google: true,
+                sso: false,
+                phone: true,
+                wechat: false,
+                invite: true,
+                setupRequired: true,
+                signup: false,
+            }),
         );
 
         // Only the two provider flags: a stale setup or sign-up answer
         // would redirect, so those stay with the browser's own check.
-        await expect(readSignInProviderHint()).resolves.toEqual({ google: true, sso: false });
+        await expect(readSignInProviderHint()).resolves.toEqual({
+            google: true,
+            sso: false,
+            phone: true,
+            wechat: false,
+            invite: true,
+        });
 
         const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit & { next?: unknown }];
         expect(url).toBe("https://backend.example.test/base/auth/options");

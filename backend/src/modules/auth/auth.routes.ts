@@ -27,6 +27,11 @@ import { requireAuth } from "../../middleware/auth";
 import { asyncRoute, routerErrorHandler } from "../../middleware/asyncRoute";
 import { requireTrustedOrigin } from "../../middleware/trustedOrigin";
 import {
+  sendOtpSms,
+  SmsHookVerificationError,
+  verifySendSmsHook,
+} from "./auth.sms";
+import {
   applyHandoffSession,
   buildCallbackUrl,
   challengeAndVerifyMfa,
@@ -49,10 +54,15 @@ import {
   mfaAssuranceLevel,
   passwordSchema,
   sendPasswordReset,
+  phoneStartSchema,
+  phoneSignInEnabled,
+  phoneVerifySchema,
   signInWithPassword,
   signInOptions,
   signOut,
   signUpWithPassword,
+  startPhoneSignIn,
+  verifyPhoneOtp,
   startGoogleOAuth,
   ssoRequestSchema,
   startSsoSignIn,
@@ -62,11 +72,25 @@ import {
   verificationSchema,
   verifyMfaChallenge,
   signupSchema,
+  safeNext,
 } from "./auth.service";
+import {
+  buildWechatAuthorizationUrl,
+  exchangeWechatCode,
+  signInWechatUser,
+  verifyWechatState,
+  wechatConfiguration,
+} from "./auth.wechat";
 import {
   describeAuthProviderError,
   describeAuthValidationIssues,
 } from "./auth.messages";
+import {
+  inviteCodeSchema,
+  inviteLoginEnabled,
+  isValidInviteCode,
+  signInWithInviteCode,
+} from "./auth.invite";
 
 export const authRouter = Router();
 
@@ -284,6 +308,128 @@ async function startSso(req: Request, res: Response) {
     );
   }
 }
+
+
+function frontendBase(env: NodeJS.ProcessEnv = process.env): string {
+  return (env.FRONTEND_URL ?? "").trim().replace(/\/+$/, "");
+}
+
+function wechatFailureRedirect(reason: string): string {
+  const base = frontendBase();
+  return `${base}/login?wechat_error=${encodeURIComponent(reason)}`;
+}
+
+/** Send the browser to WeChat's QR page. */
+authRouter.get("/wechat/start", asyncRoute(async (req, res) => {
+  setOperation("auth.signin");
+  if (!wechatConfiguration().enabled) {
+    return res.redirect(303, wechatFailureRedirect("not_configured"));
+  }
+  try {
+    const next = safeNext(req.query.next, "/onboarding/profile");
+    res.redirect(302, buildWechatAuthorizationUrl(next));
+  } catch (error) {
+    reportError(error, { tags: { operation: "auth.wechat.start" } });
+    res.redirect(303, wechatFailureRedirect("unavailable"));
+  }
+}));
+
+/** WeChat returns here with a code; mint the cookie session and continue. */
+authRouter.get("/wechat/callback", asyncRoute(async (req, res) => {
+  setOperation("auth.signin");
+  const code = typeof req.query.code === "string" ? req.query.code.trim() : "";
+  const state = typeof req.query.state === "string" ? req.query.state : "";
+  if (!code || !state) return res.redirect(303, wechatFailureRedirect("cancelled"));
+
+  let next = "/onboarding/profile";
+  try {
+    next = verifyWechatState(state);
+  } catch {
+    return res.redirect(303, wechatFailureRedirect("expired"));
+  }
+
+  try {
+    const config = wechatConfiguration();
+    if (!config.enabled) throw new Error("WeChat sign-in is not configured");
+    const profile = await exchangeWechatCode(code, config);
+    const client = createRequestSupabase(req, res);
+    await signInWechatUser(createServerSupabase(), client, profile);
+    return res.redirect(303, `${frontendBase()}${next}`);
+  } catch (error) {
+    reportError(error, { tags: { operation: "auth.wechat.callback" } });
+    return res.redirect(303, wechatFailureRedirect("failed"));
+  }
+}));
+
+/** Closed-beta invite code sign-in. */
+authRouter.post("/invite", asyncRoute(async (req, res) => {
+  setOperation("auth.signin");
+  if (!inviteLoginEnabled()) {
+    return res.status(503).json({
+      code: "invite_login_disabled",
+      detail: "Invite-code sign-in is not configured on this deployment.",
+    });
+  }
+  const parsed = inviteCodeSchema.safeParse(req.body);
+  if (!parsed.success) return invalidBody(res, parsed.error.issues);
+  if (!isValidInviteCode(parsed.data.code)) {
+    return res.status(401).json({
+      code: "invalid_invite_code",
+      detail: "That invite code is not valid.",
+    });
+  }
+  try {
+    const client = createRequestSupabase(req, res);
+    const user = await signInWithInviteCode(
+      createServerSupabase(),
+      client,
+      parsed.data.code,
+    );
+    res.json({ user: publicAuthUser(user) });
+  } catch (error) {
+    authError(res, error, "Invite sign-in could not be completed.");
+  }
+}));
+
+/** Send a phone OTP through GoTrue's configured SMS provider. */
+authRouter.post("/phone/start", asyncRoute(async (req, res) => {
+  setOperation("auth.signin");
+  if (!phoneSignInEnabled()) {
+    return res.status(503).json({
+      code: "phone_signin_disabled",
+      detail: "Phone sign-in is not configured on this deployment.",
+    });
+  }
+  const parsed = phoneStartSchema.safeParse(req.body);
+  if (!parsed.success) return invalidBody(res, parsed.error.issues);
+  try {
+    const client = createRequestSupabase(req, res);
+    const { error } = await startPhoneSignIn(client, parsed.data.phone);
+    if (error) return authError(res, error);
+    res.status(204).end();
+  } catch (error) {
+    authError(res, error);
+  }
+}));
+
+/** Verify the phone code and establish the cookie session. */
+authRouter.post("/phone/verify", asyncRoute(async (req, res) => {
+  setOperation("auth.signin");
+  const parsed = phoneVerifySchema.safeParse(req.body);
+  if (!parsed.success) return invalidBody(res, parsed.error.issues);
+  try {
+    const client = createRequestSupabase(req, res);
+    const { data, error } = await verifyPhoneOtp(
+      client,
+      parsed.data.phone,
+      parsed.data.token,
+    );
+    if (error || !data.user || !data.session) return authError(res, error);
+    res.json({ user: publicAuthUser(data.user) });
+  } catch (error) {
+    authError(res, error);
+  }
+}));
 
 authRouter.post("/oauth", asyncRoute(async (req, res) => {
   setOperation("auth.signin");
@@ -563,3 +709,42 @@ authRouter.delete("/mfa/factors/:factorId", requireAuth, asyncRoute(async (req, 
 }));
 
 authRouter.use(routerErrorHandler("[auth]"));
+
+/**
+ * GoTrue's Send SMS hook. Mounted directly in app.ts with a raw body parser,
+ * because the global JSON parser would discard the bytes the signature covers.
+ */
+export async function sendSmsHookRoute(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const secret = process.env.SEND_SMS_HOOK_SECRET?.trim();
+  if (!secret) {
+    res.status(503).json({
+      error: { http_code: 503, message: "SMS sign-in is not configured" },
+    });
+    return;
+  }
+  try {
+    const payload = verifySendSmsHook(
+      Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0),
+      req.headers,
+      secret,
+    );
+    await sendOtpSms(payload.user.phone!, payload.sms.otp!);
+    res.status(200).json({});
+  } catch (error) {
+    const invalid = error instanceof SmsHookVerificationError;
+    reportError(error, {
+      tags: { operation: invalid ? "auth.sms_hook.invalid" : "auth.sms_hook.send" },
+    });
+    res.status(invalid ? 401 : 502).json({
+      error: {
+        http_code: invalid ? 401 : 502,
+        message: invalid
+          ? "SMS hook signature was rejected"
+          : "Could not send the sign-in code",
+      },
+    });
+  }
+}

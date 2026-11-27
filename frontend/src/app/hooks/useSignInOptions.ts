@@ -12,6 +12,9 @@ import { useSignInProviderHint } from "@/app/contexts/SignInProviderHintContext"
 export const DEFAULT_SIGN_IN_OPTIONS: SignInOptions = {
     google: true,
     sso: true,
+    phone: true,
+    invite: true,
+    wechat: true,
     setupRequired: false,
     signup: true,
 };

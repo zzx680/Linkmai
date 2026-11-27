@@ -154,6 +154,25 @@ export async function login(email: string, password: string) {
     });
 }
 
+export async function startPhoneSignIn(phone: string) {
+    return authRequest<void>("auth.signin", "/phone/start", {
+        method: "POST",
+        body: JSON.stringify({ phone }),
+    });
+}
+
+export async function verifyPhoneSignIn(phone: string, token: string) {
+    return authRequest<{ user: AuthUser }>("auth.signin", "/phone/verify", {
+        method: "POST",
+        body: JSON.stringify({ phone, token }),
+    });
+}
+
+/** The backend's WeChat QR start, as a navigation target (not fetch). */
+export function wechatSignInUrl(next: string) {
+    return `/api/auth/wechat/start?next=${encodeURIComponent(next)}`;
+}
+
 export async function signup(email: string, password: string, next: string) {
     return authRequest<{
         user: AuthUser;
@@ -168,6 +187,12 @@ export async function signup(email: string, password: string, next: string) {
 export interface SignInOptions {
     google: boolean;
     sso: boolean;
+    /** Phone OTP; the server also needs GoTrue to have an SMS provider. */
+    phone: boolean;
+    /** WeChat QR sign-in; hidden until an Open Platform website app is configured. */
+    wechat: boolean;
+    /** Closed-beta invite code sign-in. */
+    invite: boolean;
     setupRequired: boolean;
     /** False while email sign-up cannot work on this deployment (no email configured). */
     signup: boolean;
@@ -189,6 +214,14 @@ export async function setupFirstAccount(email: string, password: string) {
     return authRequest<{ user: AuthUser }>("auth.setup", "/setup", {
         method: "POST",
         body: JSON.stringify({ email, password }),
+    });
+}
+
+/** Closed-beta invite code sign-in. */
+export async function signInWithInviteCode(code: string) {
+    return authRequest<{ user: AuthUser }>("auth.signin", "/invite", {
+        method: "POST",
+        body: JSON.stringify({ code }),
     });
 }
 

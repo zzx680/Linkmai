@@ -202,6 +202,48 @@ OSS_PUBLIC_ENDPOINT=https://storage.linkmai.com
 发信地址必须验证并配 SPF/DKIM。`linkmai.com` 已有企业邮箱 MX 时不要覆盖，可用
 `mail.linkmai.com` 作为发信子域。
 
+### 邀请码登录（当前内测）
+
+对外服务暂时只开放邀请码。`LINKMAI_INVITE_CODES` 是逗号分隔的邀请码，每个码对应
+一个固定的内测工作区；同一个码再次登录会回到同一个账号。邀请码即账号凭证，按人分发，
+不要发到公开群。
+
+1. `generate-secrets.mjs` 会生成一个 `LM-XXXXXXXXXXXX` 占位码；也可以自己改成
+   一组逗号分隔的码，例如 `LM-ALPHA-7K2P,LM-BETA-9Q4M`。
+2. 写进 `.env.prod` 的 `LINKMAI_INVITE_CODES`，重启 backend。
+3. 登录/注册页只保留微信、手机号（暂未启用）和邀请码入口；邮箱登录、邮箱注册已移除。
+4. 邀请码登录创建的账号使用内部合成邮箱 `invite-<hash>@users.linkmai.com`，不展示给用户。
+
+### 手机号与微信登录
+
+手机号验证码由 GoTrue 生成和校验，后端只负责把短信发出去：
+
+1. 在阿里云短信控制台创建签名和验证码模板（模板变量名用 `code`），给 RAM 用户
+   `dysms:SendSms` 权限。
+2. 填 `.env.prod` 的 `ALIYUN_SMS_ACCESS_KEY_ID`、`ALIYUN_SMS_ACCESS_KEY_SECRET`、
+   `ALIYUN_SMS_SIGN_NAME`、`ALIYUN_SMS_TEMPLATE_CODE`。
+3. 把 `SEND_SMS_HOOK_ENABLED` 改成 `true`；`SEND_SMS_HOOK_SECRET` 由
+   `generate-secrets.mjs` 生成，不要手改，GoTrue 与 backend 必须一致。
+4. 重新 `./deploy/scripts/compose.sh up -d auth backend`。配置齐全后，登录页的手机号
+   区块会从“即将开放”变为可用；它同时受 `PHONE_SIGNIN_ENABLED` 控制。
+
+GoTrue 调用的是公网 `SEND_SMS_HOOK_URI`（默认
+`https://linkmai.com/api/auth/hooks/send-sms`），经 edge 转发到 backend；这个端点用
+Standard Webhooks 签名校验，不依赖用户 Cookie。
+
+微信扫码登录走微信开放平台「网站应用」：
+
+1. 在 [微信开放平台](https://open.weixin.qq.com/) 创建网站应用，拿到 AppID/AppSecret；
+   授权回调域填 `linkmai.com`（不是完整路径）。
+2. 在 `.env.prod` 填 `WECHAT_APP_ID`、`WECHAT_APP_SECRET`，保持
+   `WECHAT_REDIRECT_URI=https://linkmai.com/api/auth/wechat/callback`。
+3. 重启 backend；`/auth/options` 的 `wechat` 变为 true，按钮出现。
+4. 微信用户会用内部合成邮箱 `wechat-<openid>@users.linkmai.com` 建立 Supabase 用户，
+   不经过邮件确认；不要把该地址展示给用户。
+
+没有配置短信或微信时，登录页对应区块显示“即将开放”，不会给用户一个点了必然失败的
+入口。当前内测先走邀请码；短信签名报备完成后再启用手机号。
+
 ### DeepSeek API
 
 1. 在 [DeepSeek 开放平台](https://platform.deepseek.com/) 创建 API Key。
@@ -240,7 +282,7 @@ node deploy/scripts/generate-secrets.mjs
 ```
 
 脚本会生成 `deploy/.env.prod`（权限 600）和 anon/service JWT、数据库密码、Redis 密码、
-三个应用 secret。已存在时拒绝覆盖；确实要重建加 `--force`。
+三个应用 secret、短信 hook secret 与微信 state secret。已存在时拒绝覆盖；确实要重建加 `--force`。
 
 然后填写 `deploy/.env.prod` 里的 `CHANGE_ME`：
 

@@ -182,6 +182,9 @@ export const CODE_KINDS: Readonly<Record<string, UserErrorKind>> = {
     // Input the user can correct
     validation_failed: "validation",
     invalid_request: "validation",
+    invalid_invite_code: "forbidden",
+    invite_login_disabled: "unavailable",
+    phone_signin_disabled: "unavailable",
     invalid_json: "validation",
     password_too_short: "validation",
     password_too_long: "validation",

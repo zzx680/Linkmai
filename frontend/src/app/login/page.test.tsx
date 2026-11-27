@@ -4,45 +4,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LoginPage from "./page";
 import { AuthApiError } from "@/app/lib/authApi";
 
-const {
-    login,
-    signup,
-    startGoogleOAuth,
-    refreshSession,
-    retrySession,
-    authState,
-    replace,
-    push,
-    getUserProfile,
-    completeUserOnboarding,
-} = vi.hoisted(() => ({
-    login: vi.fn(),
-    signup: vi.fn(),
-    startGoogleOAuth: vi.fn(),
+const { signInWithInviteCode, refreshSession, push, replace } = vi.hoisted(() => ({
+    signInWithInviteCode: vi.fn(),
     refreshSession: vi.fn(),
-    retrySession: vi.fn(),
-    authState: { error: null as string | null },
-    replace: vi.fn(),
     push: vi.fn(),
-    getUserProfile: vi.fn(),
-    completeUserOnboarding: vi.fn(),
+    replace: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
-    useRouter: () => ({ replace, push }),
+    useRouter: () => ({ push, replace }),
 }));
 
 vi.mock("@/app/lib/authApi", async (importOriginal) => ({
     ...(await importOriginal<typeof import("@/app/lib/authApi")>()),
-    login,
-    signup,
-    startGoogleOAuth,
-}));
-
-vi.mock("@/app/lib/linkmaiApi", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("@/app/lib/linkmaiApi")>()),
-    getUserProfile,
-    completeUserOnboarding,
+    signInWithInviteCode,
 }));
 
 vi.mock("@/app/contexts/AuthContext", () => ({
@@ -50,8 +25,6 @@ vi.mock("@/app/contexts/AuthContext", () => ({
         isAuthenticated: false,
         authLoading: false,
         refreshSession,
-        retrySession,
-        authError: authState.error,
     }),
 }));
 
@@ -59,328 +32,42 @@ vi.mock("@/app/components/site-logo", () => ({
     SiteLogo: () => <div>LinkMai</div>,
 }));
 
-const signInOptions = vi.hoisted(() => ({
-    current: {
-        options: { google: true, sso: true, setupRequired: false, signup: true },
-        loaded: true,
-        providersKnown: true,
-    },
-}));
-
-vi.mock("@/app/hooks/useSignInOptions", () => ({
-    useSignInOptions: () => signInOptions.current,
-}));
-
 describe("LoginPage", () => {
     beforeEach(() => {
-        signInOptions.current = {
-            options: { google: true, sso: true, setupRequired: false, signup: true },
-            loaded: true,
-            providersKnown: true,
-        };
-        authState.error = null;
-        retrySession.mockReset();
-        login.mockReset();
-        signup.mockReset();
-        startGoogleOAuth.mockReset();
-        delete (window as { linkmaiDesktop?: unknown }).linkmaiDesktop;
+        signInWithInviteCode.mockReset();
         refreshSession.mockReset();
-        refreshSession.mockResolvedValue(null);
-        replace.mockReset();
         push.mockReset();
-        getUserProfile
-            .mockReset()
-            .mockResolvedValue({ onboardingComplete: true });
-        completeUserOnboarding
-            .mockReset()
-            .mockResolvedValue({ onboardingComplete: true });
+        replace.mockReset();
     });
 
-    it("allows an existing account to submit a password shorter than the new minimum", async () => {
-        login.mockResolvedValue({ user: { id: "user-1" } });
-        const user = userEvent.setup();
+    it("shows the unavailable providers and signs in with an invite code", async () => {
+        signInWithInviteCode.mockResolvedValue({ user: { id: "u1" } });
+        refreshSession.mockResolvedValue(undefined);
         render(<LoginPage />);
 
-        expect(screen.getByLabelText("Password")).not.toHaveAttribute(
-            "placeholder",
-        );
+        expect(screen.getByText("微信扫码登录")).toBeVisible();
+        expect(screen.getByText("手机号登录")).toBeVisible();
+        expect(screen.getAllByText("即将开放").length).toBeGreaterThan(0);
+        expect(screen.queryByLabelText("邮箱")).not.toBeInTheDocument();
 
-        await user.type(
-            screen.getByRole("textbox", { name: "Email" }),
-            "existing@example.com",
-        );
-        await user.type(screen.getByLabelText("Password"), "oldpass");
-        await user.click(screen.getByRole("button", { name: "Log in" }));
+        await userEvent.type(screen.getByPlaceholderText("请输入邀请码"), "LINKMAI-BETA");
+        await userEvent.click(screen.getByRole("button", { name: /进入灵迈/ }));
 
-        expect(login).toHaveBeenCalledWith("existing@example.com", "oldpass");
-        expect(push).toHaveBeenCalledWith("/onboarding/profile");
-    });
-
-    it.each([
-        [
-            "a specific GoTrue code",
-            Object.assign(new Error("Invalid login credentials"), {
-                status: 400,
-                code: "invalid_credentials",
-            }),
-            "The email or password is incorrect.",
-        ],
-        [
-            "too many attempts",
-            Object.assign(new Error("Request rate limit reached"), {
-                status: 429,
-            }),
-            "Too many attempts. Wait a moment and try again.",
-        ],
-        [
-            "a dropped connection",
-            new TypeError("Failed to fetch"),
-            "LinkMai couldn't reach the server. Check your connection and try again.",
-        ],
-    ])("explains %s instead of a generic line", async (_label, thrown, shown) => {
-        login.mockRejectedValue(thrown);
-        const user = userEvent.setup();
-        render(<LoginPage />);
-
-        await user.type(
-            screen.getByRole("textbox", { name: "Email" }),
-            "person@example.com",
-        );
-        await user.type(screen.getByLabelText("Password"), "correct-horse");
-        await user.click(screen.getByRole("button", { name: "Log in" }));
-
-        expect(await screen.findByRole("alert")).toHaveTextContent(shown);
-    });
-
-    it("offers Retry for a failure that may pass on a second attempt", async () => {
-        login.mockRejectedValueOnce(new TypeError("Failed to fetch"));
-        login.mockResolvedValueOnce({ user: { id: "user-1" } });
-        const user = userEvent.setup();
-        render(<LoginPage />);
-
-        await user.type(
-            screen.getByRole("textbox", { name: "Email" }),
-            "person@example.com",
-        );
-        await user.type(screen.getByLabelText("Password"), "correct-horse");
-        await user.click(screen.getByRole("button", { name: "Log in" }));
-
-        await user.click(await screen.findByRole("button", { name: "Retry" }));
-
-        expect(login).toHaveBeenCalledTimes(2);
-        expect(push).toHaveBeenCalledWith("/onboarding/profile");
-    });
-
-    it("places Google and SSO after the primary login action", () => {
-        render(<LoginPage />);
-
-        const login = screen.getByRole("button", { name: "Log in" });
-        const google = screen.getByRole("button", {
-            name: "Continue with Google",
-        });
-        const sso = screen.getByRole("button", { name: "Continue with SSO" });
-        expect(
-            login.compareDocumentPosition(google) &
-                Node.DOCUMENT_POSITION_FOLLOWING,
-        ).toBeTruthy();
-        expect(
-            google.compareDocumentPosition(sso) &
-                Node.DOCUMENT_POSITION_FOLLOWING,
-        ).toBeTruthy();
-    });
-    it("offers only the providers the deployment has configured", () => {
-        signInOptions.current = {
-            options: { google: false, sso: false, setupRequired: false, signup: true },
-            loaded: true,
-            providersKnown: true,
-        };
-        render(<LoginPage />);
-        expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();
-        expect(screen.queryByRole("button", { name: "Continue with Google" })).toBeNull();
-        expect(screen.queryByRole("button", { name: "Continue with SSO" })).toBeNull();
-    });
-
-    it("shows no provider buttons until the deployment has said which it offers", () => {
-        signInOptions.current = {
-            options: { google: true, sso: true, setupRequired: false, signup: true },
-            loaded: false,
-            providersKnown: false,
-        };
-        render(<LoginPage />);
-        expect(screen.queryByRole("button", { name: "Continue with Google" })).toBeNull();
-        expect(screen.queryByRole("button", { name: "Continue with SSO" })).toBeNull();
-    });
-
-    it("draws the hinted provider buttons before the deployment's own answer arrives", () => {
-        // The server rendered the page with a provider hint: the buttons
-        // are in the first paint, so the card does not grow afterwards.
-        signInOptions.current = {
-            options: { google: true, sso: false, setupRequired: false, signup: true },
-            loaded: false,
-            providersKnown: true,
-        };
-        render(<LoginPage />);
-        expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
-        expect(screen.queryByRole("button", { name: "Continue with SSO" })).toBeNull();
-    });
-
-    it("sends the first visitor of a new deployment to setup", () => {
-        signInOptions.current = {
-            options: { google: false, sso: false, setupRequired: true, signup: true },
-            loaded: true,
-            providersKnown: true,
-        };
-        render(<LoginPage />);
-        expect(replace).toHaveBeenCalledWith("/setup");
-    });
-
-    it("hides the guest button outside the Mac desktop shell", async () => {
-        // window.linkmaiDesktop only exists inside the Electron shell, and only
-        // its local ("everything on this Mac") mode answers with credentials.
-        // In a browser and against LinkMai Cloud this page must be unchanged.
-        render(<LoginPage />);
-        expect(
-            screen.queryByRole("button", { name: "Continue on this Mac" }),
-        ).toBeNull();
-    });
-
-    it("signs a returning guest in with the shell's credentials", async () => {
-        (window as unknown as Record<string, unknown>).linkmaiDesktop = {
-            guestCredentials: () =>
-                Promise.resolve({
-                    email: "guest@linkmai.local",
-                    password: "per-install-secret",
-                }),
-        };
-        login.mockResolvedValue({ user: { id: "guest-1" } });
-        const user = userEvent.setup();
-        render(<LoginPage />);
-
-        const button = await screen.findByRole("button", {
-            name: "Continue on this Mac",
-        });
-        await user.click(button);
-
-        expect(login).toHaveBeenCalledWith(
-            "guest@linkmai.local",
-            "per-install-secret",
-        );
-        expect(signup).not.toHaveBeenCalled();
-        // The session lives in an httpOnly cookie, so the context must re-read
-        // it before the router leaves for a gated route.
+        expect(signInWithInviteCode).toHaveBeenCalledWith("LINKMAI-BETA");
         expect(refreshSession).toHaveBeenCalled();
-        expect(push).toHaveBeenCalledWith("/assistant");
-        expect(completeUserOnboarding).not.toHaveBeenCalled();
+        expect(push).toHaveBeenCalledWith("/onboarding/profile");
     });
 
-    it("falls back to signup the first time a guest ever clicks", async () => {
-        (window as unknown as Record<string, unknown>).linkmaiDesktop = {
-            guestCredentials: () =>
-                Promise.resolve({
-                    email: "guest@linkmai.local",
-                    password: "per-install-secret",
-                }),
-        };
-        // No such account yet: /auth/login 401s, and the local stack
-        // autoconfirms the signup that follows.
-        login.mockRejectedValue(
-            new AuthApiError(401, "invalid_credentials", "Invalid credentials"),
+    it("reports an invalid invite code without navigating", async () => {
+        signInWithInviteCode.mockRejectedValue(
+            new AuthApiError(401, "invalid_invite_code", "invalid"),
         );
-        getUserProfile.mockResolvedValue({ onboardingComplete: false });
-        signup.mockResolvedValue({
-            user: { id: "guest-1" },
-            requiresEmailConfirmation: false,
-        });
-        const user = userEvent.setup();
         render(<LoginPage />);
 
-        await user.click(
-            await screen.findByRole("button", { name: "Continue on this Mac" }),
-        );
+        await userEvent.type(screen.getByPlaceholderText("请输入邀请码"), "WRONG-CODE");
+        await userEvent.click(screen.getByRole("button", { name: /进入灵迈/ }));
 
-        expect(signup).toHaveBeenCalledWith(
-            "guest@linkmai.local",
-            "per-install-secret",
-            "/onboarding/profile",
-        );
-        expect(completeUserOnboarding).toHaveBeenCalledWith();
-        expect(push).toHaveBeenCalledWith("/assistant");
-    });
-
-    it("does not register an account after a network failure", async () => {
-        window.linkmaiDesktop = {
-            guestCredentials: async () => ({
-                email: "guest@linkmai.local",
-                password: "secret",
-            }),
-        };
-        login.mockRejectedValue(new TypeError("Failed to fetch"));
-        render(<LoginPage />);
-        await userEvent.click(
-            await screen.findByRole("button", { name: "Continue on this Mac" }),
-        );
-        expect(signup).not.toHaveBeenCalled();
+        expect(await screen.findByRole("alert")).toHaveTextContent("邀请码无效");
         expect(push).not.toHaveBeenCalled();
-        expect(screen.getByRole("alert")).toHaveTextContent(
-            "LinkMai couldn't reach the server",
-        );
-        login.mockResolvedValueOnce({ user: { id: "guest-1" } });
-        await userEvent.click(screen.getByRole("button", { name: "Retry" }));
-        expect(login).toHaveBeenLastCalledWith("guest@linkmai.local", "secret");
-        expect(signup).not.toHaveBeenCalled();
-        expect(push).toHaveBeenCalledWith("/assistant");
     });
-});
-
-
-it("retries a failed session refresh without submitting the empty login form", async () => {
-    authState.error = "Unable to check your session.";
-    retrySession.mockRejectedValueOnce(new TypeError("Failed to fetch")).mockResolvedValueOnce(null);
-    render(<LoginPage />);
-    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("LinkMai couldn't reach the server");
-    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
-    expect(retrySession).toHaveBeenCalledTimes(2);
-    expect(login).not.toHaveBeenCalled();
-});
-
-it("shows the session warning as a popup that can be dismissed", async () => {
-    authState.error = "We could not check your session. Please try again.";
-    render(<LoginPage />);
-    expect(screen.getByRole("alert")).toHaveTextContent(
-        "Couldn't check your session",
-    );
-    expect(screen.getByRole("alert")).toHaveTextContent(
-        "We could not check your session. Please try again.",
-    );
-    await userEvent.click(
-        screen.getByRole("button", { name: "Dismiss warning" }),
-    );
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-});
-
-it("shows a sign-in failure in the popup ahead of the session warning", async () => {
-    authState.error = "We could not check your session. Please try again.";
-    login.mockRejectedValue(
-        new AuthApiError(401, "invalid_credentials", "Invalid credentials"),
-    );
-    const user = userEvent.setup();
-    render(<LoginPage />);
-    await user.type(
-        screen.getByRole("textbox", { name: "Email" }),
-        "person@example.com",
-    );
-    await user.type(screen.getByLabelText("Password"), "wrong-password");
-    await user.click(screen.getByRole("button", { name: "Log in" }));
-
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("Couldn't log in");
-    expect(alert).toHaveTextContent("The email or password is incorrect.");
-    expect(screen.getAllByRole("alert")).toHaveLength(1);
-
-    // Dismissing it brings back the warning it was covering.
-    await user.click(screen.getByRole("button", { name: "Dismiss warning" }));
-    expect(screen.getByRole("alert")).toHaveTextContent(
-        "We could not check your session",
-    );
 });

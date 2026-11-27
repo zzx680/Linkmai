@@ -36,6 +36,7 @@ beforeEach(() => {
   process.env.SUPABASE_URL = "https://project.supabase.test";
   process.env.SUPABASE_PUBLISHABLE_KEY = "publishable";
   delete process.env.SSO_ENABLED;
+  delete process.env.LINKMAI_INVITE_CODES;
   resetSignInOptionsCache();
 });
 
@@ -125,6 +126,9 @@ describe("signInOptions", () => {
     await expect(signInOptions(db, fetchImpl)).resolves.toEqual({
       google: false,
       sso: false,
+      phone: false,
+      wechat: false,
+      invite: false,
       setupRequired: true,
       signup: false,
     });
@@ -146,7 +150,15 @@ describe("signInOptions", () => {
     const { db } = fakeDb({ accounts: 1 });
     await expect(
       signInOptions(db, settingsFetch({ external: { google: true } })),
-    ).resolves.toEqual({ google: true, sso: true, setupRequired: false, signup: false });
+    ).resolves.toEqual({
+      google: true,
+      sso: true,
+      phone: false,
+      wechat: false,
+      invite: false,
+      setupRequired: false,
+      signup: false,
+    });
   });
 
   it("keeps Google visible when Auth's settings cannot be read", async () => {

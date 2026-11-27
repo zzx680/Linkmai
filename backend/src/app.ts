@@ -24,7 +24,7 @@ import {
 } from "./modules/downloads/downloads.routes";
 import { sourceDocumentsRouter } from "./modules/source-documents/sourceDocuments.routes";
 import { auditRouter } from "./modules/audit/audit.routes";
-import { authRouter } from "./modules/auth/auth.routes";
+import { authRouter, sendSmsHookRoute } from "./modules/auth/auth.routes";
 import { uploadSessionsRouter } from "./modules/uploads/uploads.routes";
 import {
   projectMemoryRouter,
@@ -319,6 +319,14 @@ app.delete("/user/tabular-reviews", dataDeleteLimiter);
 // signed PUT streams its body straight to disk (see downloads.routes.ts), so
 // no body parser may consume it first — a .json upload otherwise would be.
 app.put("/download/signed/:token", blobUploadLimiter, blobUploadHandler);
+
+// Supabase Auth's Send SMS hook signs the raw request body, so it must be
+// mounted before the global JSON parser consumes those bytes.
+app.post(
+  "/auth/hooks/send-sms",
+  express.raw({ type: "application/json", limit: "64kb" }),
+  sendSmsHookRoute,
+);
 
 app.use(express.json({ limit: JSON_BODY_LIMIT }));
 

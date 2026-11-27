@@ -64,6 +64,11 @@ const replacements = {
   __DOWNLOAD_SECRET__: hex(32),
   __USER_KEYS_SECRET__: hex(32),
   __AUTH_HANDOFF_SECRET__: hex(32),
+  // GoTrue shows this as `v1,whsec_<base64>`; the backend verifies with the
+  // same value. It is a shared secret, not a JWT signing key.
+  __SEND_SMS_HOOK_SECRET__: `v1,whsec_${randomBytes(24).toString("base64")}`,
+  __INVITE_CODES__: `LM-${randomBytes(6).toString("hex").toUpperCase()}`,
+  __WECHAT_STATE_SECRET__: hex(32),
 };
 
 let env = readFileSync(templatePath, "utf8");

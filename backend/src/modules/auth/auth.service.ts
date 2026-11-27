@@ -23,6 +23,8 @@ import { consumeAuthHandoff, issueAuthHandoff } from "../../lib/authHandoff";
 import type { Db } from "../../lib/supabase";
 import { supabaseSessionConfiguration } from "../../lib/runtimeConfig";
 import { ssoConfiguration } from "../../lib/ssoConfig";
+import { wechatConfiguration } from "./auth.wechat";
+import { inviteLoginEnabled } from "./auth.invite";
 
 // ---------------------------------------------------------------------------
 // Request payload schemas
@@ -112,6 +114,24 @@ export const friendlyNameSchema = z.string().trim().min(1).max(100);
 
 export type Credentials = z.infer<typeof credentialsSchema>;
 
+/** E.164, which is what GoTrue's phone provider expects. */
+export const phoneSchema = z
+  .string()
+  .trim()
+  .regex(/^\+[1-9]\d{6,14}$/, "Enter a phone number in international format");
+
+export const phoneStartSchema = z.object({
+  phone: phoneSchema,
+});
+
+export const phoneVerifySchema = z.object({
+  phone: phoneSchema,
+  token: z.string().trim().regex(/^\d{6}$/),
+});
+
+export type PhoneStart = z.infer<typeof phoneStartSchema>;
+export type PhoneVerify = z.infer<typeof phoneVerifySchema>;
+
 // ---------------------------------------------------------------------------
 // Redirect targets
 // ---------------------------------------------------------------------------
@@ -165,6 +185,23 @@ export function signUpWithPassword(
     ...credentials,
     options: { emailRedirectTo },
   });
+}
+
+/** Send a GoTrue phone OTP; a new number creates its account on verify. */
+export function startPhoneSignIn(client: SupabaseClient, phone: string) {
+  return client.auth.signInWithOtp({
+    phone,
+    options: { shouldCreateUser: true },
+  });
+}
+
+/** Verify the SMS code and write the session cookies for this request. */
+export function verifyPhoneOtp(
+  client: SupabaseClient,
+  phone: string,
+  token: string,
+) {
+  return client.auth.verifyOtp({ phone, token, type: "sms" });
 }
 
 export function startGoogleOAuth(client: SupabaseClient, redirectTo: string) {
@@ -319,6 +356,23 @@ export function firstRunSetupEnabled(env: NodeJS.ProcessEnv = process.env): bool
  * LINKMAI_SIGNUP_EMAIL_CONFIGURED=true (docs/vercel.md). Every other install is
  * unchanged.
  */
+/**
+ * Phone OTP needs a working delivery path. GoTrue has no mainland SMS
+ * provider, so this deployment turns it on only when the Send SMS hook is
+ * enabled and has a signing secret; otherwise the button can only fail.
+ */
+export function phoneSignInEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env.PHONE_SIGNIN_ENABLED?.trim().toLowerCase() === "false") return false;
+  return (
+    env.SEND_SMS_HOOK_ENABLED?.trim().toLowerCase() === "true" &&
+    Boolean(env.SEND_SMS_HOOK_SECRET?.trim()) &&
+    Boolean(env.ALIYUN_SMS_ACCESS_KEY_ID?.trim()) &&
+    Boolean(env.ALIYUN_SMS_ACCESS_KEY_SECRET?.trim()) &&
+    Boolean(env.ALIYUN_SMS_SIGN_NAME?.trim()) &&
+    Boolean(env.ALIYUN_SMS_TEMPLATE_CODE?.trim())
+  );
+}
+
 export function emailSignupOpen(env: NodeJS.ProcessEnv = process.env): boolean {
   if (!firstRunSetupEnabled(env)) return true;
   return env.LINKMAI_SIGNUP_EMAIL_CONFIGURED?.trim().toLowerCase() === "true";
@@ -370,6 +424,12 @@ export function resetSignInOptionsCache(): void {
 export type SignInOptions = {
   google: boolean;
   sso: boolean;
+  /** Phone OTP is offered; GoTrue still needs an SMS provider configured. */
+  phone: boolean;
+  /** WeChat QR sign-in is offered only with an Open Platform website app. */
+  wechat: boolean;
+  /** Closed-beta invite code sign-in. */
+  invite: boolean;
   setupRequired: boolean;
   /** False while email sign-up cannot work (see emailSignupOpen). */
   signup: boolean;
@@ -387,6 +447,9 @@ export async function signInOptions(
   return {
     google,
     sso: ssoConfiguration().enabled,
+    phone: phoneSignInEnabled(),
+    wechat: wechatConfiguration().enabled,
+    invite: inviteLoginEnabled(),
     setupRequired,
     signup: emailSignupOpen(),
   };

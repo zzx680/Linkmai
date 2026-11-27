@@ -4,6 +4,9 @@ import { backendOrigin } from "@/app/lib/backendOrigin";
 export interface SignInProviderHint {
     google: boolean;
     sso: boolean;
+    phone: boolean;
+    wechat: boolean;
+    invite: boolean;
 }
 
 /** How long a rendered sign-in screen may keep its hint before it is re-read. */
@@ -27,11 +30,29 @@ export async function readSignInProviderHint(): Promise<SignInProviderHint | nul
             signal: AbortSignal.timeout(3_000),
         });
         if (!response.ok) return null;
-        const body = (await response.json()) as { google?: unknown; sso?: unknown };
-        if (typeof body.google !== "boolean" || typeof body.sso !== "boolean") {
+        const body = (await response.json()) as {
+            google?: unknown;
+            sso?: unknown;
+            phone?: unknown;
+            wechat?: unknown;
+            invite?: unknown;
+        };
+        if (
+            typeof body.google !== "boolean" ||
+            typeof body.sso !== "boolean" ||
+            typeof body.phone !== "boolean" ||
+            typeof body.wechat !== "boolean" ||
+            typeof body.invite !== "boolean"
+        ) {
             return null;
         }
-        return { google: body.google, sso: body.sso };
+        return {
+            google: body.google,
+            sso: body.sso,
+            phone: body.phone,
+            wechat: body.wechat,
+            invite: body.invite,
+        };
     } catch {
         // The browser's own check reports a failing API; this one stays quiet.
         return null;
