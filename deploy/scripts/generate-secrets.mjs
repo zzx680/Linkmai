@@ -68,6 +68,8 @@ const replacements = {
   // same value. It is a shared secret, not a JWT signing key.
   __SEND_SMS_HOOK_SECRET__: `v1,whsec_${randomBytes(24).toString("base64")}`,
   __INVITE_CODES__: `LM-${randomBytes(6).toString("hex").toUpperCase()}`,
+  __ADMIN_PASSWORD__: `LM-ADMIN-${randomBytes(9).toString("base64url")}`,
+  __ADMIN_SESSION_SECRET__: hex(32),
   __WECHAT_STATE_SECRET__: hex(32),
 };
 

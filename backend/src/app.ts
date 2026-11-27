@@ -25,6 +25,8 @@ import {
 import { sourceDocumentsRouter } from "./modules/source-documents/sourceDocuments.routes";
 import { auditRouter } from "./modules/audit/audit.routes";
 import { authRouter, sendSmsHookRoute } from "./modules/auth/auth.routes";
+import { contactRouter } from "./modules/contact/contact.routes";
+import { adminRouter } from "./modules/admin/admin.routes";
 import { uploadSessionsRouter } from "./modules/uploads/uploads.routes";
 import {
   projectMemoryRouter,
@@ -334,6 +336,8 @@ app.use(express.json({ limit: JSON_BODY_LIMIT }));
 // is a one-way digest, so email addresses never enter the limiter store.
 app.post("/auth/login", authLoginAccountLimiter);
 
+app.use("/contact", contactRouter);
+app.use("/admin", adminRouter);
 app.use("/auth", authRouter);
 app.use("/chat", chatRouter);
 app.use("/word-chat", wordChatRouter);

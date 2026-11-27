@@ -86,9 +86,9 @@ import {
   describeAuthValidationIssues,
 } from "./auth.messages";
 import {
+  authorizeInviteCode,
   inviteCodeSchema,
   inviteLoginEnabled,
-  isValidInviteCode,
   signInWithInviteCode,
 } from "./auth.invite";
 
@@ -364,26 +364,29 @@ authRouter.get("/wechat/callback", asyncRoute(async (req, res) => {
 /** Closed-beta invite code sign-in. */
 authRouter.post("/invite", asyncRoute(async (req, res) => {
   setOperation("auth.signin");
-  if (!inviteLoginEnabled()) {
-    return res.status(503).json({
-      code: "invite_login_disabled",
-      detail: "Invite-code sign-in is not configured on this deployment.",
-    });
-  }
   const parsed = inviteCodeSchema.safeParse(req.body);
   if (!parsed.success) return invalidBody(res, parsed.error.issues);
-  if (!isValidInviteCode(parsed.data.code)) {
-    return res.status(401).json({
-      code: "invalid_invite_code",
-      detail: "That invite code is not valid.",
-    });
-  }
   try {
+    const db = createServerSupabase();
+    const invite = await authorizeInviteCode(db, parsed.data.code);
+    if (!invite) {
+      if (!inviteLoginEnabled()) {
+        return res.status(503).json({
+          code: "invite_login_disabled",
+          detail: "Invite-code sign-in is not configured on this deployment.",
+        });
+      }
+      return res.status(401).json({
+        code: "invalid_invite_code",
+        detail: "That invite code is not valid.",
+      });
+    }
     const client = createRequestSupabase(req, res);
     const user = await signInWithInviteCode(
-      createServerSupabase(),
+      db,
       client,
       parsed.data.code,
+      invite.label,
     );
     res.json({ user: publicAuthUser(user) });
   } catch (error) {

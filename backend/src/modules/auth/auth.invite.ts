@@ -6,6 +6,9 @@
 // the server; the browser only sees whether an invite route is available.
 
 import { createHash, timingSafeEqual } from "node:crypto";
+import { hashInviteCode, normalizeInviteCode } from "../../lib/inviteCode";
+
+export { hashInviteCode, normalizeInviteCode };
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Db } from "../../lib/supabase";
@@ -25,12 +28,70 @@ export function inviteLoginEnabled(env: NodeJS.ProcessEnv = process.env): boolea
   return configuredCodes(env).length > 0;
 }
 
-export function normalizeInviteCode(code: string): string {
-  return code.trim().toUpperCase();
-}
 
 function digest(value: string): Buffer {
   return createHash("sha256").update(value).digest();
+}
+
+
+export interface InviteAuthorization {
+  label: string | null;
+  source: "database" | "environment";
+}
+
+function environmentAuthorization(code: string): InviteAuthorization | null {
+  return isValidInviteCode(code)
+    ? { label: "环境变量邀请码", source: "environment" }
+    : null;
+}
+
+/**
+ * Validate an invite code against the admin-managed table, then fall back to
+ * LINKMAI_INVITE_CODES for a fresh deployment before the first admin code is
+ * created. A successful database use consumes one seat atomically enough for
+ * a closed beta: the conditional update refuses a stale seat count.
+ */
+export async function authorizeInviteCode(
+  db: Db,
+  code: string,
+): Promise<InviteAuthorization | null> {
+  const normalized = normalizeInviteCode(code);
+  const { data, error } = await db
+    .from("invite_codes")
+    .select("id,label,active,max_uses,uses,expires_at")
+    .eq("code_hash", hashInviteCode(normalized))
+    .maybeSingle();
+  if (error) {
+    // A deployment that has not applied the migration yet can still use the
+    // environment fallback; every other database failure must stay visible.
+    if ((error as { code?: string }).code === "42P01") {
+      return environmentAuthorization(normalized);
+    }
+    throw new Error("Unable to read invite codes", { cause: error });
+  }
+  if (!data) {
+    // The environment list is only a first-boot fallback. Once an admin has
+    // created a database code, it must be the single source of truth.
+    const { count, error: countError } = await db
+      .from("invite_codes")
+      .select("id", { count: "exact", head: true });
+    if (countError) {
+      throw new Error("Unable to count invite codes", { cause: countError });
+    }
+    return (count ?? 0) === 0 ? environmentAuthorization(normalized) : null;
+  }
+  if (!data.active) return null;
+  if (data.uses >= data.max_uses) return null;
+  if (data.expires_at && Date.parse(data.expires_at) <= Date.now()) return null;
+  const { error: consumeError } = await db
+    .from("invite_codes")
+    .update({ uses: data.uses + 1, last_used_at: new Date().toISOString() })
+    .eq("id", data.id)
+    .eq("uses", data.uses);
+  if (consumeError) {
+    throw new Error("Unable to consume invite code", { cause: consumeError });
+  }
+  return { label: data.label ?? null, source: "database" };
 }
 
 /** Constant-time check across every configured code. */
@@ -47,11 +108,7 @@ export function isValidInviteCode(
 }
 
 function inviteEmail(code: string): string {
-  const hash = createHash("sha256")
-    .update(normalizeInviteCode(code))
-    .digest("hex")
-    .slice(0, 20);
-  return `invite-${hash}@users.linkmai.com`;
+  return `invite-${hashInviteCode(code).slice(0, 20)}@users.linkmai.com`;
 }
 
 async function magicLinkToken(db: Db, email: string): Promise<string> {
@@ -74,6 +131,7 @@ export async function signInWithInviteCode(
   db: Db,
   client: SupabaseClient,
   code: string,
+  label: string | null = null,
 ): Promise<User> {
   const email = inviteEmail(code);
   let token: string;
@@ -85,9 +143,8 @@ export async function signInWithInviteCode(
       email_confirm: true,
       user_metadata: {
         invite_login: true,
-        invite_code_hash: createHash("sha256")
-          .update(normalizeInviteCode(code))
-          .digest("hex"),
+        invite_code_hash: hashInviteCode(code),
+        invite_code_label: label,
         display_name: "灵迈内测用户",
       },
     });

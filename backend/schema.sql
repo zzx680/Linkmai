@@ -12350,6 +12350,51 @@ revoke all on function public.publish_playbook_review(uuid, uuid, text, jsonb, u
 grant execute on function public.publish_playbook_review(uuid, uuid, text, jsonb, uuid, uuid, text, jsonb, jsonb)
   to service_role;
 
+
+-- ---------------------------------------------------------------------------
+-- Public site: contact messages and closed-beta invite codes
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.contact_messages (
+  id uuid primary key default gen_random_uuid(),
+  name text,
+  email text not null,
+  subject text,
+  message text not null,
+  source text not null default 'landing',
+  user_agent text,
+  ip_hash text,
+  created_at timestamptz not null default now(),
+  responded_at timestamptz
+);
+
+create index if not exists idx_contact_messages_created_at
+  on public.contact_messages(created_at desc);
+
+alter table public.contact_messages enable row level security;
+revoke all privileges on table public.contact_messages from anon, authenticated;
+grant select, insert, update, delete on table public.contact_messages to service_role;
+
+create table if not exists public.invite_codes (
+  id uuid primary key default gen_random_uuid(),
+  code_hash text not null unique,
+  label text,
+  active boolean not null default true,
+  max_uses integer not null default 1 check (max_uses > 0),
+  uses integer not null default 0 check (uses >= 0),
+  expires_at timestamptz,
+  created_at timestamptz not null default now(),
+  last_used_at timestamptz,
+  constraint invite_codes_uses_within_limit check (uses <= max_uses)
+);
+
+create index if not exists idx_invite_codes_active_created_at
+  on public.invite_codes(active, created_at desc);
+
+alter table public.invite_codes enable row level security;
+revoke all privileges on table public.invite_codes from anon, authenticated;
+grant select, insert, update, delete on table public.invite_codes to service_role;
+
 insert into public.schema_migrations (filename) values
   ('20260419_tabular_chat_jsonb.sql'),
   ('20260421_01_docx_editing.sql'),
@@ -12558,5 +12603,6 @@ insert into public.schema_migrations (filename) values
   ('20261107_01_playbook_review_publication.sql'),
   ('20261116_01_tabular_cache_revisions.sql'),
   ('20261118_01_connector_write_approval_default.sql'),
-  ('20261125_01_rename_workflow_catalog.sql')
+  ('20261125_01_rename_workflow_catalog.sql'),
+  ('20261127_01_invite_codes.sql')
 on conflict (filename) do nothing;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
+import { submitContactMessage } from "@/app/lib/contactApi";
 import styles from "./site.module.css";
 
 const featureGroups = [
@@ -122,30 +123,54 @@ function DeployPage() {
 }
 
 function ContactPage() {
-    const [sent, setSent] = useState(false);
-    const [error, setError] = useState(false);
-    function submit(event: FormEvent<HTMLFormElement>) {
+    const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+    async function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        if (!data.get("name") || !data.get("email") || !data.get("message")) {
-            setError(true);
+        const form = event.currentTarget;
+        const data = new FormData(form);
+        const name = String(data.get("name") ?? "").trim();
+        const email = String(data.get("email") ?? "").trim();
+        const message = String(data.get("message") ?? "").trim();
+        if (!name || !email || !message) {
+            setStatus("error");
             return;
         }
-        setError(false);
-        setSent(true);
-        event.currentTarget.reset();
+        setStatus("sending");
+        try {
+            await submitContactMessage({
+                name,
+                email,
+                subject: String(data.get("subject") ?? "").trim(),
+                message,
+            });
+            setStatus("sent");
+            form.reset();
+        } catch {
+            setStatus("error");
+        }
     }
     return (
         <main className={`${styles.interior} ${styles.contactPage}`}>
             <div className={styles.interiorHeader}><p className={styles.eyebrow}>LINKMAI / 04</p><h1>联系灵迈</h1><p>联系渠道与服务信息待确认后更新。</p></div>
             <form className={styles.contactForm} onSubmit={submit}>
+                <input aria-hidden="true" autoComplete="off" className={styles.honeypot} name="website" tabIndex={-1} />
                 <label>姓名<input autoComplete="name" name="name" required /></label>
                 <label>邮箱<input autoComplete="email" name="email" required type="email" /></label>
                 <label className={styles.formWide}>主题<input name="subject" /></label>
                 <label className={styles.formWide}>留言<textarea name="message" required rows={6} /></label>
                 <div className={styles.formActions}>
-                    <p aria-live="polite" className={error ? styles.formError : styles.formStatus}>{error ? "请填写姓名、有效邮箱和留言。" : sent ? "这是本地交互预览，表单尚未连接到消息服务。" : "表单为本地预览，提交不会发送给任何人。"}</p>
-                    <button className={styles.primaryButton} type="submit">提交预览 <span aria-hidden="true">↗</span></button>
+                    <p aria-live="polite" className={status === "error" ? styles.formError : styles.formStatus}>
+                        {status === "error"
+                            ? "提交失败，请检查姓名、邮箱和留言后重试。"
+                            : status === "sent"
+                              ? "已收到，我们会尽快与你联系。"
+                              : status === "sending"
+                                ? "正在提交…"
+                                : "提交后会直接进入灵迈后台，由工作人员查看。"}
+                    </p>
+                    <button className={styles.primaryButton} disabled={status === "sending"} type="submit">
+                        {status === "sending" ? "提交中…" : "提交"} <span aria-hidden="true">↗</span>
+                    </button>
                 </div>
             </form>
         </main>

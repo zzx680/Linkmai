@@ -214,6 +214,17 @@ OSS_PUBLIC_ENDPOINT=https://storage.linkmai.com
 3. 登录/注册页只保留微信、手机号（暂未启用）和邀请码入口；邮箱登录、邮箱注册已移除。
 4. 邀请码登录创建的账号使用内部合成邮箱 `invite-<hash>@users.linkmai.com`，不展示给用户。
 
+管理后台地址是 `https://linkmai.com/admin`，首次使用前在 `.env.prod` 设置：
+
+```bash
+LINKMAI_ADMIN_PASSWORD=换成一个足够长的密码
+LINKMAI_ADMIN_SESSION_SECRET=从 generate-secrets 生成
+```
+
+后台用独立密码登录，可新建/停用邀请码，并查看官网「联系我们」表单的提交。
+邀请码只保存 SHA-256 哈希；新码创建时显示一次，关闭后无法再次查看。
+`LINKMAI_INVITE_CODES` 只在邀请码表为空时作为首次启动兜底；后台创建第一个码后即停用环境码。
+
 ### 手机号与微信登录
 
 手机号验证码由 GoTrue 生成和校验，后端只负责把短信发出去：
