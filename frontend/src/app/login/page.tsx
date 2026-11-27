@@ -13,8 +13,9 @@ import {
 } from "@linkmai/ui";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { AuthApiError, signInWithInviteCode } from "@/app/lib/authApi";
-import { PRODUCT_SUPPORT_EMAIL } from "@/app/lib/productConfig";
 import { cn } from "@/app/lib/utils";
+
+const LOGIN_SUPPORT_EMAIL = "hk.charlie@163.com";
 
 function inviteErrorMessage(error: unknown): string {
     if (error instanceof AuthApiError) {
@@ -150,18 +151,14 @@ export default function LoginPage() {
                     <div className="mt-6 border-t border-gray-200 pt-4">
                         <p className="text-center text-xs leading-5 text-gray-500">
                             {uiText("内测阶段，仅限受邀用户使用。")}
-                            {PRODUCT_SUPPORT_EMAIL ? (
-                                <>
-                                    {" "}
-                                    {uiText("遇到问题请联系")}{" "}
-                                    <a
-                                        className="font-medium text-gray-800 underline underline-offset-4"
-                                        href={`mailto:${PRODUCT_SUPPORT_EMAIL}`}
-                                    >
-                                        {PRODUCT_SUPPORT_EMAIL}
-                                    </a>
-                                </>
-                            ) : null}
+                            {" "}
+                            {uiText("遇到问题请联系")}{" "}
+                            <a
+                                className="font-medium text-gray-800 underline underline-offset-4"
+                                href={`mailto:${LOGIN_SUPPORT_EMAIL}`}
+                            >
+                                {LOGIN_SUPPORT_EMAIL}
+                            </a>
                         </p>
                     </div>
                 </div>
