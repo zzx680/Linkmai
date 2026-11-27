@@ -40,14 +40,15 @@ describe("LoginPage", () => {
         replace.mockReset();
     });
 
-    it("shows the unavailable providers and signs in with an invite code", async () => {
+    it("only shows the invite code form and signs in", async () => {
         signInWithInviteCode.mockResolvedValue({ user: { id: "u1" } });
         refreshSession.mockResolvedValue(undefined);
         render(<LoginPage />);
 
-        expect(screen.getByText("微信扫码登录")).toBeVisible();
-        expect(screen.getByText("手机号登录")).toBeVisible();
-        expect(screen.getAllByText("即将开放").length).toBeGreaterThan(0);
+        expect(screen.getByLabelText("邀请码")).toBeVisible();
+        expect(screen.queryByText("微信扫码登录")).not.toBeInTheDocument();
+        expect(screen.queryByText("手机号登录")).not.toBeInTheDocument();
+        expect(screen.queryByText("即将开放")).not.toBeInTheDocument();
         expect(screen.queryByLabelText("邮箱")).not.toBeInTheDocument();
 
         await userEvent.type(screen.getByPlaceholderText("请输入邀请码"), "LINKMAI-BETA");
