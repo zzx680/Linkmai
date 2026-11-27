@@ -56,6 +56,8 @@ jobs:
           file: backend/Dockerfile
           platforms: linux/amd64
           push: true
+          build-args: |
+            NPM_REGISTRY=https://registry.npmjs.org
           tags: ${{ env.IMAGE_PREFIX }}/linkmai-backend:${{ steps.tag.outputs.value }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
@@ -67,6 +69,8 @@ jobs:
           file: frontend/Dockerfile
           platforms: linux/amd64
           push: true
+          build-args: |
+            NPM_REGISTRY=https://registry.npmjs.org
           tags: ${{ env.IMAGE_PREFIX }}/linkmai-frontend:${{ steps.tag.outputs.value }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
@@ -78,6 +82,8 @@ jobs:
           file: word-addin/Dockerfile
           platforms: linux/amd64
           push: true
+          build-args: |
+            NPM_REGISTRY=https://registry.npmjs.org
           tags: ${{ env.IMAGE_PREFIX }}/linkmai-word-addin:${{ steps.tag.outputs.value }}
           cache-from: type=gha,scope=word-addin
           cache-to: type=gha,mode=max,scope=word-addin

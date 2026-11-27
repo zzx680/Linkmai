@@ -23,7 +23,10 @@ FROM node:22-slim AS deps
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm config set registry https://registry.npmmirror.com \
+# Mirror is a build argument: npmmirror is fast inside China, registry.npmjs.org
+# is faster on the CI runner. Override with --build-arg NPM_REGISTRY=...
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+RUN npm config set registry "$NPM_REGISTRY" \
   && npm ci
 
 FROM deps AS app
