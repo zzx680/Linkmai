@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Ticket, X } from "lucide-react";
+import { X } from "lucide-react";
 import { uiText } from "@linkmai/client";
 import {
+    AuthDividerUI,
     authInputUIClassName,
     InputUI,
     PillButtonUI,
 } from "@linkmai/ui";
+import { FieldLabel } from "@/app/components/ui/form-field";
 import { PhoneAuthForm } from "@/app/components/auth/PhoneAuthForm";
 import { WeChatAuthButton } from "@/app/components/auth/WeChatAuthButton";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -118,28 +120,26 @@ export default function LoginPage() {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="login-title"
-                className="relative z-10 w-full max-w-[420px] overflow-hidden rounded-[20px] border border-white/40 bg-white shadow-[0_30px_80px_-24px_rgba(0,0,0,0.55)]"
+                className="relative z-10 w-full max-w-[400px] rounded-2xl border border-white/40 bg-white shadow-[0_30px_80px_-24px_rgba(0,0,0,0.55)]"
             >
-                <div className="flex items-center justify-between px-6 pb-1 pt-5">
-                    <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
-                        {uiText("内测中")}
-                    </span>
-                    <Link
-                        href="/"
-                        aria-label={uiText("关闭登录窗口")}
-                        className="rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
-                    >
-                        <X className="h-4 w-4" aria-hidden="true" />
-                    </Link>
-                </div>
+                <Link
+                    href="/"
+                    aria-label={uiText("关闭登录窗口")}
+                    className="absolute right-4 top-4 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                </Link>
 
-                <div className="px-6 pb-7 pt-1">
-                    <h1 id="login-title" className="font-serif text-2xl text-gray-950">
+                <div className="px-7 pb-7 pt-8">
+                    <h1
+                        id="login-title"
+                        className="pr-8 font-serif text-2xl font-medium leading-tight text-gray-950"
+                    >
                         {uiText("登录灵迈")}
                     </h1>
 
                     {phoneAvailable ? (
-                        <div className="mt-7">
+                        <div className="mt-6">
                             <PhoneAuthForm
                                 purpose="login"
                                 onAuthenticated={handlePhoneAuthenticated}
@@ -150,19 +150,13 @@ export default function LoginPage() {
 
                     {wechatAvailable ? (
                         <div className="mt-5 space-y-4">
-                            {phoneAvailable ? (
-                                <div className="flex items-center gap-3">
-                                    <span className="h-px flex-1 bg-gray-200" aria-hidden="true" />
-                                    <span className="text-xs text-gray-400">{uiText("或")}</span>
-                                    <span className="h-px flex-1 bg-gray-200" aria-hidden="true" />
-                                </div>
-                            ) : null}
+                            {phoneAvailable ? <AuthDividerUI /> : null}
                             <WeChatAuthButton next={AFTER_SIGN_IN} />
                         </div>
                     ) : null}
 
                     {noProvider ? (
-                        <p className="mt-6 rounded-2xl bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-600 ring-1 ring-stone-200">
+                        <p className="mt-6 rounded-xl bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-600 ring-1 ring-stone-200">
                             {uiText("手机号与微信登录即将开放。")}
                         </p>
                     ) : null}
@@ -175,14 +169,10 @@ export default function LoginPage() {
 
                     {showInviteForm ? (
                         <form onSubmit={handleInvite} className="mt-6 space-y-4">
-                            <div className="space-y-2">
-                                <label
-                                    htmlFor="invite-code"
-                                    className="flex items-center gap-2 text-sm font-medium text-gray-900"
-                                >
-                                    <Ticket className="h-4 w-4 text-gray-500" aria-hidden="true" />
+                            <div>
+                                <FieldLabel htmlFor="invite-code">
                                     {uiText("邀请码")}
-                                </label>
+                                </FieldLabel>
                                 <InputUI
                                     id="invite-code"
                                     name="invite-code"
@@ -205,12 +195,7 @@ export default function LoginPage() {
                                 disabled={loading}
                                 className="w-full"
                             >
-                                <span className="inline-flex items-center gap-2">
-                                    {loading ? uiText("正在进入…") : uiText("进入灵迈")}
-                                    {!loading ? (
-                                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                                    ) : null}
-                                </span>
+                                {loading ? uiText("正在进入…") : uiText("进入灵迈")}
                             </PillButtonUI>
                         </form>
                     ) : null}
@@ -222,25 +207,21 @@ export default function LoginPage() {
                                 setError(null);
                                 setInviteOpen(true);
                             }}
-                            className="mt-5 block w-full text-center text-xs font-medium text-gray-500 underline underline-offset-4 transition hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                            className="mt-4 text-left text-xs font-medium text-gray-500 underline underline-offset-4 transition hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
                         >
                             {uiText("有邀请码？用邀请码进入")}
                         </button>
                     ) : null}
 
-                    <div className="mt-6 border-t border-gray-200 pt-4">
-                        <p className="text-center text-xs leading-5 text-gray-500">
-                            {uiText("内测阶段，仅限受邀用户使用。")}
-                            {" "}
-                            {uiText("遇到问题请联系")}{" "}
-                            <a
-                                className="font-medium text-gray-800 underline underline-offset-4"
-                                href={`mailto:${LOGIN_SUPPORT_EMAIL}`}
-                            >
-                                {LOGIN_SUPPORT_EMAIL}
-                            </a>
-                        </p>
-                    </div>
+                    <p className="mt-6 border-t border-gray-200 pt-4 text-xs leading-5 text-gray-500">
+                        {uiText("登录遇到问题，请联系")}{" "}
+                        <a
+                            className="font-medium text-gray-800 underline underline-offset-4"
+                            href={`mailto:${LOGIN_SUPPORT_EMAIL}`}
+                        >
+                            {LOGIN_SUPPORT_EMAIL}
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
