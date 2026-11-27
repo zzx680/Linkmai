@@ -96,7 +96,7 @@ function Header() {
                     ))}
                 </nav>
                 <Link className={styles.navLogin} href="/login">登录</Link>
-                <Link className={styles.navCta} href="/signup">开始使用</Link>
+                <Link className={styles.navCta} href="/login">开始使用</Link>
             </div>
             <details className={styles.menu}>
                 <summary aria-label="打开导航">
@@ -107,7 +107,7 @@ function Header() {
                         <Link href={item.href} key={item.label}>{item.label}</Link>
                     ))}
                     <Link href="/login">登录</Link>
-                    <Link className={styles.menuCta} href="/signup">开始使用</Link>
+                    <Link className={styles.menuCta} href="/login">开始使用</Link>
                 </div>
             </details>
         </header>
@@ -212,7 +212,7 @@ export function MarketingHome() {
                         <h1>法律 AI，<br />真正属于你。</h1>
                         <p className={styles.heroLead}>审阅、检索、起草、交付，在同一份案卷里完成。代码开源，文件留在你的存储，模型由你决定。</p>
                         <div className={styles.heroActions}>
-                            <Link className={styles.primary} href="/signup">开始使用</Link>
+                            <Link className={styles.primary} href="/login">开始使用</Link>
                             <Link className={styles.secondary} href="/linkmai/deploy">部署自己的</Link>
                         </div>
                     </div>
@@ -306,7 +306,7 @@ export function MarketingHome() {
                 <section className={styles.cta} id="get-started">
                     <h2>从云端开始。<br />或部署属于你的版本。</h2>
                     <div className={styles.ctaActions}>
-                        <Link className={styles.primary} href="/signup">开始使用</Link>
+                        <Link className={styles.primary} href="/login">开始使用</Link>
                         <Link className={styles.secondary} href="/linkmai/deploy">部署文档</Link>
                     </div>
                 </section>
