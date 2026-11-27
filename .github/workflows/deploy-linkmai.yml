@@ -139,10 +139,13 @@ jobs:
           PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
           TAG: ${{ needs.build.outputs.tag }}
         run: |
+          # The tag comes from the workflow, so the remote command can be a
+          # plain double-quoted string; a single-quoted block would need the
+          # tag escaped twice and silently breaks the ssh command line.
           ssh -p "$PROD_SSH_PORT" -i $HOME/.ssh/id_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
-            "$PROD_SSH_USER@$PROD_SSH_HOST" 'set -euo pipefail
+            "$PROD_SSH_USER@$PROD_SSH_HOST" "set -euo pipefail
               cd /opt/linkmai
-              ./deploy/scripts/release.sh '"$TAG"'
+              ./deploy/scripts/release.sh $TAG"
 
       - name: Verify public health endpoint
         run: |
