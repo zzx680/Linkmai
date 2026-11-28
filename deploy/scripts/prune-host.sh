@@ -8,9 +8,27 @@
 # a failed release can still roll back without pulling.
 set -euo pipefail
 
+DEPLOY_DIR=$(cd "$(dirname "$0")/.." && pwd)
+current=$(cat "$DEPLOY_DIR/.release-tag" 2>/dev/null || true)
+previous=$(cat "$DEPLOY_DIR/.release-tag.prev" 2>/dev/null || true)
+
 before=$(df -Pk / | awk 'NR==2 {print $4}')
 docker image prune -af --filter "until=72h" >/dev/null 2>&1 || true
 docker builder prune -af >/dev/null 2>&1 || true
+
+# Every release adds three images (~6 GiB) and each frontend layer is ~4 GiB.
+# Keep only the running tag and the one rollback target; older tags are dead
+# weight, and rmi refuses anything a container still uses.
+for repository in linkmai-backend linkmai-frontend linkmai-word-addin; do
+    docker images --format '{{.Repository}}:{{.Tag}}' "registry.linkmai.com/linkmai/$repository" |
+        while read -r ref; do
+            tag=${ref##*:}
+            if [ "$tag" = "$current" ] || [ "$tag" = "$previous" ] || [ "$tag" = "<none>" ]; then
+                continue
+            fi
+            docker rmi "$ref" >/dev/null 2>&1 || true
+        done
+done
 after=$(df -Pk / | awk 'NR==2 {print $4}')
 
 echo "free KiB: $before -> $after"
