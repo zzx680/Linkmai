@@ -44,18 +44,21 @@ import { SidebarHeading } from "@/app/components/shared/SidebarHeading";
 import { SidebarLogo } from "@/app/components/shared/SidebarLogo";
 import { SidebarProjectItem } from "@/app/components/shared/SidebarProjectItem";
 import {
-    ChatSkeuoIcon,
-    IdeSkeuoIcon,
-    FolderSkeuoIcon,
-    LibrarySkeuoIcon,
-    TabularReviewSkeuoIcon,
-    TabularReviewCompleteIcon,
-    WorkflowSkeuoIcon,
-    PlaybookSkeuoIcon,
     OrganizationSkeuoIcon,
     SettingsSkeuoIcon,
     SignOutSkeuoIcon,
+    TabularReviewCompleteIcon,
+    TabularReviewSkeuoIcon,
 } from "@/app/components/shared/AppSidebarSkeuoIcons";
+import {
+    AssistantNavIcon,
+    LibraryNavIcon,
+    ProjectsNavIcon,
+    ReviewNavIcon,
+    RulesNavIcon,
+    WorkflowNavIcon,
+    WorkspaceNavIcon,
+} from "@/app/components/shared/SidebarNavIcons";
 import { listProjectsPage } from "@/app/lib/linkmaiApi";
 import { notifyError } from "@/app/lib/userFacingError";
 import { useAssignLatest } from "@/app/hooks/useLatestRef";
@@ -79,17 +82,17 @@ import {
 const WORKSPACE_HOME = "/assistant";
 
 const NAV_ITEMS = [
-    { href: "/assistant", label: zhCN.navigation.assistant, icon: ChatSkeuoIcon },
-    { href: "/ide", label: zhCN.navigation.ide, icon: IdeSkeuoIcon },
-    { href: "/projects", label: zhCN.navigation.projects, icon: FolderSkeuoIcon },
-    { href: "/library", label: zhCN.navigation.library, icon: LibrarySkeuoIcon },
+    { href: "/assistant", label: zhCN.navigation.assistant, icon: AssistantNavIcon },
+    { href: "/ide", label: zhCN.navigation.ide, icon: WorkspaceNavIcon },
+    { href: "/projects", label: zhCN.navigation.projects, icon: ProjectsNavIcon },
+    { href: "/library", label: zhCN.navigation.library, icon: LibraryNavIcon },
     {
         href: "/tabular-reviews",
         label: zhCN.navigation.tabularReview,
-        icon: TabularReviewSkeuoIcon,
+        icon: ReviewNavIcon,
     },
-    { href: "/workflows", label: zhCN.navigation.workflows, icon: WorkflowSkeuoIcon },
-    { href: "/playbooks", label: zhCN.navigation.playbooks, icon: PlaybookSkeuoIcon },
+    { href: "/workflows", label: zhCN.navigation.workflows, icon: WorkflowNavIcon },
+    { href: "/playbooks", label: zhCN.navigation.playbooks, icon: RulesNavIcon },
 ];
 
 const RECENT_PROJECT_PAGE_SIZE = 10;
