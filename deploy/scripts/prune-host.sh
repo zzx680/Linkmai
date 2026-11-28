@@ -19,8 +19,11 @@ docker builder prune -af >/dev/null 2>&1 || true
 # Every release adds three images (~6 GiB) and each frontend layer is ~4 GiB.
 # Keep only the running tag and the one rollback target; older tags are dead
 # weight, and rmi refuses anything a container still uses.
+repo=$(sed -n 's/^LINKMAI_IMAGE_REPO=//p' "$DEPLOY_DIR/.env.prod" 2>/dev/null | tail -1)
+repo=${repo:-registry.linkmai.com/linkmai}
+
 for repository in linkmai-backend linkmai-frontend linkmai-word-addin; do
-    docker images --format '{{.Repository}}:{{.Tag}}' "registry.linkmai.com/linkmai/$repository" |
+    docker images --format '{{.Repository}}:{{.Tag}}' "$repo/$repository" |
         while read -r ref; do
             tag=${ref##*:}
             if [ "$tag" = "$current" ] || [ "$tag" = "$previous" ] || [ "$tag" = "<none>" ]; then
