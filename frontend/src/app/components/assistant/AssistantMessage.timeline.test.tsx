@@ -471,8 +471,8 @@ describe("AssistantMessage timeline", () => {
                 <AssistantMessage events={[delegation({ status: "failed" }), { type: "content", text: "Done." }]} />,
             );
             openTimeline();
-            const mark = container.querySelector('[data-slot="subagent-icon"] path');
-            expect(mark?.getAttribute("stroke")).toBe("#ef4444");
+            const fill = container.querySelector('[data-slot="subagent-icon"] linearGradient[id$="-m-glassFill"] stop');
+            expect((fill as SVGStopElement).style.stopColor.replace(/\s/g, "")).toBe("rgb(248,113,113)");
         });
 
         it("keeps a subagent's colour when LinkMai resumes it later in the answer", () => {
