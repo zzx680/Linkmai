@@ -132,6 +132,15 @@ jobs:
             -e "ssh -p $PROD_SSH_PORT -i $HOME/.ssh/id_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
             ./ "$PROD_SSH_USER@$PROD_SSH_HOST:/opt/linkmai/"
 
+      - name: Reclaim disk space on the host
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+        run: |
+          ssh -p "$PROD_SSH_PORT" -i $HOME/.ssh/id_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$PROD_SSH_USER@$PROD_SSH_HOST" "cd /opt/linkmai && ./deploy/scripts/prune-host.sh"
+
       - name: Pull images and restart
         env:
           PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
