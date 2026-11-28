@@ -10,6 +10,7 @@ const resources = [
     { label: "产品", href: "/linkmai/product" },
     { label: "工作流", href: "/linkmai/workflows" },
     { label: "部署方式", href: "/linkmai/deploy" },
+    { label: "定价", href: "/linkmai/pricing" },
     { label: "内容动态", href: "/linkmai/blog" },
     { label: "关于灵迈", href: "/linkmai/about" },
 ];
@@ -80,6 +81,7 @@ export function SiteFooter() {
             <nav aria-label="页脚导航" className={styles.footerLinks}>
                 <Link href="/linkmai/product">产品</Link>
                 <Link href="/linkmai/workflows">工作流</Link>
+                <Link href="/linkmai/pricing">定价</Link>
                 <Link href="/linkmai/blog">内容动态</Link>
                 <Link href="/linkmai/contact">联系</Link>
                 <Link href="/linkmai/privacy">隐私</Link>

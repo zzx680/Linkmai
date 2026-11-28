@@ -1,57 +1,51 @@
+import Image from "next/image";
 import Link from "next/link";
-import { LinkMaiIcon } from "@linkmai/ui";
-import { PRODUCT_NAME, PRODUCT_SITE_URL } from "@/app/lib/productConfig";
+import { PRODUCT_SITE_URL } from "@/app/lib/productConfig";
 
 interface SiteLogoProps {
     size?: "sm" | "md" | "lg" | "xl";
     className?: string;
-    iconClassName?: string;
     animate?: boolean;
     asLink?: boolean;
 }
 
+const HEIGHT_CLASS = {
+    sm: "h-5",
+    md: "h-6",
+    lg: "h-9",
+    xl: "h-14",
+} as const;
+
 export function SiteLogo({
     size = "md",
     className = "",
-    iconClassName = "",
     animate = false,
     asLink = false,
 }: SiteLogoProps) {
     const landingHref = PRODUCT_SITE_URL ?? "/";
-    const sizeClasses = {
-        sm: "text-xl",
-        md: "text-2xl",
-        lg: "text-4xl",
-        xl: "text-6xl",
-    };
-
-    const iconSizes = {
-        sm: 20,
-        md: 22,
-        lg: 30,
-        xl: 48,
-    };
 
     const logo = (
-        <h1
-            className={`flex items-center gap-1.5 ${sizeClasses[size]} font-light font-serif ${
+        <span
+            className={`inline-flex shrink-0 items-center leading-none ${
                 animate ? "sidebar-fade-in" : ""
             } ${className}`}
         >
-            <span
-                className={`inline-flex shrink-0 items-center leading-none ${iconClassName}`}
-            >
-                <LinkMaiIcon size={iconSizes[size]} />
-            </span>
-            <span>{PRODUCT_NAME}</span>
-        </h1>
+            <Image
+                src="/brand/linkmai-logo.png"
+                alt="灵迈 LinkMai"
+                width={778}
+                height={193}
+                priority={size === "lg" || size === "xl"}
+                className={`${HEIGHT_CLASS[size]} w-auto`}
+            />
+        </span>
     );
 
     if (asLink) {
         return (
             <Link
                 href={landingHref}
-                className="cursor-pointer hover:opacity-80 transition-opacity"
+                className="cursor-pointer transition-opacity hover:opacity-80"
             >
                 {logo}
             </Link>

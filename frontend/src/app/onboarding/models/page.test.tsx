@@ -99,11 +99,16 @@ describe("OnboardingModelsPage", () => {
         ).toBeChecked();
     });
 
-    it("says when the deployment already provides models", () => {
+    it("offers the hosted model without requiring a key", async () => {
+        const user = userEvent.setup();
         mocks.apiKeys.claude = { configured: true, enabled: true, source: "env" };
         render(<OnboardingModelsPage />);
         expect(screen.getByText(/This deployment already provides models/)).toBeVisible();
-        // An environment key is not the person's own: nothing is Saved yet.
+        expect(screen.getByText("灵迈内置模型")).toBeVisible();
+        expect(screen.getByText("内测免费")).toBeVisible();
+        // The BYOK grid is optional and stays folded for hosted users.
+        expect(screen.getByText(/No saved providers yet/)).not.toBeVisible();
+        await user.click(screen.getByText("使用自己的 API Key（可选）"));
         expect(screen.getByText(/No saved providers yet/)).toBeVisible();
     });
 

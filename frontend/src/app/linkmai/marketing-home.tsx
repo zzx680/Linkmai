@@ -6,6 +6,7 @@ const navItems = [
     { label: "产品", href: "/linkmai/product" },
     { label: "工作流", href: "/linkmai/workflows" },
     { label: "部署", href: "/linkmai/deploy" },
+    { label: "定价", href: "/linkmai/pricing" },
     { label: "关于", href: "/linkmai/about" },
 ];
 
