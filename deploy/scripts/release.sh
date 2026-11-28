@@ -61,4 +61,19 @@ echo "Releasing tag $TAG"
 "$SCRIPT_DIR/compose.sh" ps
 
 # Keep one host from filling its disk with superseded tags and build cache.
+# `image prune -f` only drops dangling layers; the tags pulled by earlier
+# releases stay on disk and each release adds ~6 GB (frontend alone is ~4 GB),
+# which filled the 49 GB disk after a handful of releases and took the database
+# down with it. Keep the tag that just started and the one a rollback needs.
+PREVIOUS="$(cat "$PREV_FILE" 2>/dev/null || true)"
+REPO="$(sed -n 's/^LINKMAI_IMAGE_REPO=//p' "$ENV_FILE" | tail -1)"
+if [[ -n "$REPO" ]]; then
+  while read -r ref; do
+    [[ -z "$ref" ]] && continue
+    tag="${ref##*:}"
+    [[ "$tag" == "$TAG" || "$tag" == "$PREVIOUS" ]] && continue
+    docker rmi "$ref" >/dev/null 2>&1 || true
+  done < <(docker images --format '{{.Repository}}:{{.Tag}}' \
+    | grep -E "^${REPO}/linkmai-(backend|frontend|word-addin):" || true)
+fi
 docker image prune -f >/dev/null 2>&1 || true
