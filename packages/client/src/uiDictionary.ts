@@ -659,7 +659,7 @@ export const UI_DICTIONARY: Readonly<Record<string, string>> = {
   "Add to message": "添加附件或工作流",
   "Upload Documents": "上传文档",
   "Saved Documents": "已有文档",
-  "AI can make mistakes. Answers are not legal advice.": "AI 可能出错，回答不构成法律意见。",
+  "AI can make mistakes. Answers are not legal advice.": "AI 可能出错，请核查重要信息。",
   "Configure quick actions": "设置快捷操作",
   "Loading this chat…": "正在加载对话…",
   "A response is still arriving…": "正在接收回复…",
