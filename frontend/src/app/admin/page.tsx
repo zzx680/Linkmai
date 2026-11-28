@@ -13,6 +13,7 @@ import {
     type AdminContactMessage,
     type AdminInviteCode,
 } from "@/app/lib/adminApi";
+import { SiteLogo } from "@/app/components/site-logo";
 
 function formatDate(value: string | null) {
     if (!value) return "—";
@@ -117,8 +118,8 @@ export default function AdminPage() {
         <main className="mx-auto max-w-6xl px-6 py-10">
             <header className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <p className="text-xs tracking-[0.18em] text-stone-500">LINKMAI / ADMIN</p>
-                    <h1 className="mt-2 text-3xl font-medium">管理后台</h1>
+                    <SiteLogo size="md" />
+                    <h1 className="mt-4 text-3xl font-medium">管理后台</h1>
                     <p className="mt-2 text-sm text-stone-500">邀请码与官网联系表单</p>
                 </div>
                 <button

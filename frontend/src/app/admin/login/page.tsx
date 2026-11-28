@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { adminLogin, AdminApiError } from "@/app/lib/adminApi";
+import { SiteLogo } from "@/app/components/site-logo";
 
 export default function AdminLoginPage() {
     const router = useRouter();
@@ -31,8 +32,8 @@ export default function AdminLoginPage() {
     return (
         <main className="flex min-h-dvh items-center justify-center px-6 py-16">
             <form onSubmit={submit} className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-sm ring-1 ring-stone-200">
-                <p className="text-xs tracking-[0.18em] text-stone-500">LINKMAI / ADMIN</p>
-                <h1 className="mt-3 text-2xl font-medium">管理后台</h1>
+                <SiteLogo size="md" />
+                <h1 className="mt-4 text-2xl font-medium">管理后台</h1>
                 <p className="mt-2 text-sm text-stone-500">管理邀请码并查看官网联系表单。</p>
                 <label className="mt-7 block text-sm text-stone-700">
                     管理员密码
