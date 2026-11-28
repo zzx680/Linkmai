@@ -2,12 +2,8 @@ import { render, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { LinkMaiIcon } from "./LinkMaiIconUI";
 
-function firstBladeFill(container: HTMLElement) {
-    const gradient = container.querySelector(
-        'linearGradient[id$="-m-glassFill"]',
-    );
-    const stop = gradient?.querySelector("stop");
-    return (stop as SVGStopElement | null)?.style.stopColor.replace(/\s/g, "");
+function markStroke(container: HTMLElement) {
+    return container.querySelector("path")?.getAttribute("stroke");
 }
 
 afterEach(() => {
@@ -15,46 +11,52 @@ afterEach(() => {
 });
 
 describe("LinkMaiIcon", () => {
-    it("renders the dark mark on the light theme", () => {
+    it("renders the mark black on the light theme", () => {
         const { container } = render(<LinkMaiIcon />);
 
-        expect(firstBladeFill(container)).toBe("rgb(10,10,10)");
+        expect(markStroke(container)).toBe("#0a0a0a");
     });
 
-    it("renders the white mark when the document is in dark mode", () => {
+    it("renders the mark white when the document is in dark mode", () => {
         document.documentElement.classList.add("dark");
         const { container } = render(<LinkMaiIcon />);
 
-        expect(firstBladeFill(container)).toBe("rgb(255,255,255)");
+        expect(markStroke(container)).toBe("#ffffff");
     });
 
-    it("swaps palettes when the theme class changes while mounted", async () => {
+    it("swaps colours when the theme class changes while mounted", async () => {
         const { container } = render(<LinkMaiIcon />);
-        expect(firstBladeFill(container)).toBe("rgb(10,10,10)");
+        expect(markStroke(container)).toBe("#0a0a0a");
 
         document.documentElement.classList.add("dark");
 
-        await waitFor(() =>
-            expect(firstBladeFill(container)).toBe("rgb(255,255,255)"),
-        );
+        await waitFor(() => expect(markStroke(container)).toBe("#ffffff"));
     });
 
     it("colours a tinted mark in both themes, under the status palettes", () => {
         const { container, rerender } = render(<LinkMaiIcon tint="violet" />);
-        expect(firstBladeFill(container)).toBe("rgb(139,92,246)");
+        expect(markStroke(container)).toBe("#8b5cf6");
 
         document.documentElement.classList.add("dark");
         rerender(<LinkMaiIcon tint="violet" />);
-        expect(firstBladeFill(container)).toBe("rgb(139,92,246)");
+        expect(markStroke(container)).toBe("#8b5cf6");
 
         rerender(<LinkMaiIcon tint="violet" error />);
-        expect(firstBladeFill(container)).toBe("rgb(248,113,113)");
+        expect(markStroke(container)).toBe("#ef4444");
     });
 
-    it("keeps the status palettes in dark mode", () => {
+    it("keeps the status colours in dark mode", () => {
         document.documentElement.classList.add("dark");
         const { container } = render(<LinkMaiIcon done />);
 
-        expect(firstBladeFill(container)).toBe("rgb(74,222,128)");
+        expect(markStroke(container)).toBe("#22c55e");
+    });
+
+    it("sizes the mark in square pixels", () => {
+        const { container } = render(<LinkMaiIcon size={14} />);
+        const svg = container.querySelector("svg");
+
+        expect(svg?.getAttribute("width")).toBe("14");
+        expect(svg?.getAttribute("height")).toBe("14");
     });
 });
