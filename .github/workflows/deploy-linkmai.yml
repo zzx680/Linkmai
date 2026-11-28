@@ -56,6 +56,11 @@ jobs:
           file: backend/Dockerfile
           platforms: linux/amd64
           push: true
+          # Plain image manifests, not buildx's OCI index + attestations: the
+          # registry's garbage collector does not follow index children and
+          # would delete their layers (see deploy/README.md).
+          provenance: false
+          sbom: false
           build-args: |
             NPM_REGISTRY=https://registry.npmjs.org
           tags: ${{ env.IMAGE_PREFIX }}/linkmai-backend:${{ steps.tag.outputs.value }}
@@ -69,6 +74,11 @@ jobs:
           file: frontend/Dockerfile
           platforms: linux/amd64
           push: true
+          # Plain image manifests, not buildx's OCI index + attestations: the
+          # registry's garbage collector does not follow index children and
+          # would delete their layers (see deploy/README.md).
+          provenance: false
+          sbom: false
           build-args: |
             NPM_REGISTRY=https://registry.npmjs.org
           tags: ${{ env.IMAGE_PREFIX }}/linkmai-frontend:${{ steps.tag.outputs.value }}
@@ -82,6 +92,11 @@ jobs:
           file: word-addin/Dockerfile
           platforms: linux/amd64
           push: true
+          # Plain image manifests, not buildx's OCI index + attestations: the
+          # registry's garbage collector does not follow index children and
+          # would delete their layers (see deploy/README.md).
+          provenance: false
+          sbom: false
           build-args: |
             NPM_REGISTRY=https://registry.npmjs.org
             REACT_APP_WEB_APP_URL=https://linkmai.com

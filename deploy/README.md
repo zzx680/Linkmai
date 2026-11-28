@@ -395,6 +395,33 @@ docker exec -i linkmai-db-1 pg_restore -U postgres -d postgres --clean --if-exis
 `pm2 start`；如果确实要恢复旧小程序，需要从 `source.tgz` 单独解包、另找端口/域名部署，
 不能和当前 LinkMai 栈抢 80/443。
 
+### 镜像保留与仓库清理
+
+`release.sh` 每次发布只保留当前和上一版两个 tag 的镜像，更早的立即 `docker rmi`，
+服务器磁盘不会再被历史版本堆满。
+
+镜像仓库（`registry` 服务）里的历史 manifest 需要偶尔清理，否则 `<repo>/registry_data`
+会持续变大：
+
+```bash
+# 1) 用 registry API 删除旧 tag 的 manifest（保留当前与上一版），
+#    先 GET 拿 Docker-Content-Digest，再 DELETE 该 digest；
+#    注意必须带 application/vnd.oci.image.index.v1+json 这个 Accept 头，
+#    否则 registry 对 index 返回 404。
+# 2) 停掉 registry，用同一卷跑 GC，再启动：
+./deploy/scripts/compose.sh stop registry
+docker run --rm --entrypoint /bin/registry \
+  -v linkmai_registry_data:/var/lib/registry -v /tmp/gc.yml:/gc.yml:ro \
+  registry:2.8.3 garbage-collect --delete-untagged /gc.yml
+./deploy/scripts/compose.sh up -d --no-deps registry
+```
+
+`/tmp/gc.yml` 只需声明 `storage.filesystem.rootdirectory: /var/lib/registry` 和
+`storage.delete.enabled: true`。**GC 只对普通 manifest 安全**：distribution 2.x 的
+GC 不跟随 OCI index 的子 manifest，会把它们的层一起删掉。因此构建步骤固定带
+`provenance: false` 和 `sbom: false`，让 push 出来的都是普通 manifest。清理后务必
+抽查每个保留 tag 的层是否还在（HEAD `/v2/<repo>/blobs/<digest>` 应返回 200）。
+
 ## 10. Word 与 WPS 加载项
 
 Word 和 WPS 是两套不同的加载项 API，不能共用同一个 manifest：
