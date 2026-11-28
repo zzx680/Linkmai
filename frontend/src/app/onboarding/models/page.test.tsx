@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
     listOrgs: vi.fn(),
     getOrgApiKeys: vi.fn(),
     apiKeys: {} as Record<string, { configured: boolean; enabled?: boolean; source: string | null }>,
+    models: [] as { id: string; label: string; group: "Configured"; location: "cloud" | "local"; source: "Configured" }[],
 }));
 
 vi.mock("next/navigation", () => ({ useRouter: () => mocks }));
@@ -41,6 +42,7 @@ vi.mock("@/app/components/settings/RouterSettingsSection", () => ({
     RouterSettingsSection: () => null,
 }));
 vi.mock("@/app/components/site-logo", () => ({ SiteLogo: () => <div>LinkMai</div> }));
+vi.mock("@/app/hooks/useConfiguredModels", () => ({ useConfiguredModels: () => mocks.models }));
 
 function noKeys() {
     return Object.fromEntries(
@@ -55,6 +57,7 @@ describe("OnboardingModelsPage", () => {
         vi.clearAllMocks();
         window.localStorage.clear();
         mocks.apiKeys = noKeys();
+        mocks.models = [];
         mocks.completeOnboarding.mockResolvedValue(true);
         mocks.updateApiKey.mockResolvedValue(true);
         mocks.listOrgs.mockResolvedValue([]);
@@ -102,6 +105,7 @@ describe("OnboardingModelsPage", () => {
     it("offers the hosted model without requiring a key", async () => {
         const user = userEvent.setup();
         mocks.apiKeys.claude = { configured: true, enabled: true, source: "env" };
+        mocks.models = [{ id: "deepseek-v4-pro", label: "DeepSeek V4 Pro", group: "Configured", location: "cloud", source: "Configured" }];
         render(<OnboardingModelsPage />);
         expect(screen.getByText(/This deployment already provides models/)).toBeVisible();
         expect(screen.getByText("灵迈内置模型")).toBeVisible();

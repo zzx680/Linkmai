@@ -11,6 +11,7 @@ import { PersonalProviderKeys } from "@/app/components/settings/PersonalProvider
 import { FullScreenLoader } from "@/app/components/shared/FullScreenLoader";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useUserProfile } from "@/app/contexts/UserProfileContext";
+import { useConfiguredModels } from "@/app/hooks/useConfiguredModels";
 import {
     PERSONAL_WORKSPACE,
     readStoredWorkspace,
@@ -130,7 +131,9 @@ function ModelStep({ userId }: { userId: string }) {
         }
     }
 
-    const hasHostedModels = hasUsableProvider(profile?.apiKeys, "env");
+    const configuredModels = useConfiguredModels();
+    const hasHostedModels =
+        configuredModels.length > 0 && !hasUsableProvider(profile?.apiKeys, "user");
 
     return (
         <OnboardingShell
