@@ -82,8 +82,18 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
          fi ;; \
       *) echo "SENTRY_UPLOAD_ENABLED must be 0 or 1" >&2; exit 1 ;; \
     esac; \
-    npm run build
+    NEXT_OUTPUT_STANDALONE=1 npm run build
 
-ENV NODE_ENV=production
+# Runtime image: only the standalone server Next traced, plus the static
+# assets and public/ it expects beside it. This drops the toolchain,
+# devDependencies and the build cache from the shipped image.
+FROM node:22-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+COPY --from=app /app/frontend/.next/standalone /app
+COPY --from=app /app/frontend/.next/static /app/frontend/.next/static
+COPY --from=app /app/frontend/public /app/frontend/public
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "frontend/server.js"]
