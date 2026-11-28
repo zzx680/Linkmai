@@ -28,6 +28,7 @@ import {
     useWorkspace,
 } from "@/app/contexts/WorkspaceContext";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { SidebarChatItem } from "@/app/components/shared/SidebarChatItem";
 import {
@@ -513,26 +514,39 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                                 href="/assistant"
                                 className="flex min-w-0 items-center gap-1.5 hover:opacity-80 transition-opacity"
                             >
-                                <span className="flex shrink-0 px-px">
-                                    <SidebarLogo
-                                        organization={activeOrganization}
-                                    />
-                                </span>
-                                {sidebarHeading === null ? (
-                                    <span
-                                        data-slot="sidebar-heading-loading"
-                                        role="status"
-                                        aria-label={zhCN.navigation.loadingWorkspace}
-                                        className={cn("h-5 w-28 rounded bg-gray-200", shouldAnimate ? "sidebar-heading-enter" : "animate-pulse")}
-                                    />
+                                {activeOrganization ? (
+                                    <>
+                                        <span className="flex shrink-0 px-px">
+                                            <SidebarLogo
+                                                organization={activeOrganization}
+                                            />
+                                        </span>
+                                        {sidebarHeading === null ? (
+                                            <span
+                                                data-slot="sidebar-heading-loading"
+                                                role="status"
+                                                aria-label={zhCN.navigation.loadingWorkspace}
+                                                className={cn("h-5 w-28 rounded bg-gray-200", shouldAnimate ? "sidebar-heading-enter" : "animate-pulse")}
+                                            />
+                                        ) : (
+                                            <SidebarHeading
+                                                name={sidebarHeading}
+                                                className={
+                                                    shouldAnimate
+                                                        ? "sidebar-heading-enter"
+                                                        : undefined
+                                                }
+                                            />
+                                        )}
+                                    </>
                                 ) : (
-                                    <SidebarHeading
-                                        name={sidebarHeading}
-                                        className={
-                                            shouldAnimate
-                                                ? "sidebar-heading-enter"
-                                                : undefined
-                                        }
+                                    <Image
+                                        src="/brand/linkmai-logo.png"
+                                        alt="灵迈 LinkMai"
+                                        width={130}
+                                        height={32}
+                                        priority
+                                        className={cn("h-7 w-auto", shouldAnimate ? "sidebar-heading-enter" : undefined)}
                                     />
                                 )}
                             </Link>
@@ -559,9 +573,17 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                         ) : (
                             <span aria-hidden="true" className="relative flex h-[18px] w-[18px] items-center justify-center">
                                 <span className="absolute inset-0 flex items-center justify-center group-hover:invisible group-focus-visible:invisible">
-                                    <SidebarLogo
-                                        organization={activeOrganization}
-                                    />
+                                    {activeOrganization ? (
+                                        <SidebarLogo organization={activeOrganization} />
+                                    ) : (
+                                        <Image
+                                            src="/brand/linkmai-mark.png"
+                                            alt=""
+                                            width={18}
+                                            height={18}
+                                            className="h-[18px] w-[18px]"
+                                        />
+                                    )}
                                 </span>
                                 <PanelLeft className="invisible h-4 w-4 shrink-0 group-hover:visible group-focus-visible:visible" />
                             </span>
